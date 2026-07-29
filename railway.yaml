@@ -1,0 +1,56 @@
+# Template railway.yaml para ansvisor/ansvisor
+# Coloque na raiz do repositório. Ajuste conforme necessário para a sua versão do Railway CLI.
+#
+# NOTA: NÃO coloque valores sensíveis aqui. Use o painel Railway ou CLI para adicionar secrets.
+#
+services:
+  - name: ansvisor-server
+    # Diretório do serviço no monorepo
+    path: server
+    # Comandos recomendados (Railway pode executar automaticamente npm install)
+    build:
+      - npm install --prefix server
+    start: npm run start --prefix server
+    # Variáveis de ambiente necessárias (referências a secrets no Railway)
+    env:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_STARTER_MONTHLY_PRICE_ID: ${STRIPE_STARTER_MONTHLY_PRICE_ID}
+      STRIPE_GROWTH_MONTHLY_PRICE_ID: ${STRIPE_GROWTH_MONTHLY_PRICE_ID}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY}
+      DATAFORSEO_LOGIN: ${DATAFORSEO_LOGIN}
+      DATAFORSEO_PASSWORD: ${DATAFORSEO_PASSWORD}
+      DEFAULT_SUGGESTION_MODEL: ${DEFAULT_SUGGESTION_MODEL}
+      NODE_ENV: production
+      # Opcional: cron schedule override
+      DAILY_CRON_SCHEDULE: ${DAILY_CRON_SCHEDULE}
+
+  - name: ansvisor-web
+    path: web
+    build:
+      - npm install --prefix web
+      - npm run build --prefix web
+    start: npm run start --prefix web
+    env:
+      # Aponte para a URL pública do serviço server após deploy (ex.: https://xxxx.up.railway.app)
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_IS_CLOUD: ${NEXT_PUBLIC_IS_CLOUD}
+      # Variáveis privadas usadas apenas no servidor web (ex.: Stripe client keys não devem ser NEXT_PUBLIC_)
+      NEXT_PUBLIC_ANALYTICS_KEY: ${NEXT_PUBLIC_ANALYTICS_KEY}
+
+# Recomendações de uso:
+# 1) Adicione este arquivo na raiz do repositório.
+# 2) No Railway UI ou CLI, crie um novo Project e importe este repositório.
+# 3) Para cada service, adicione os secrets/variables correspondentes (não commitá-los).
+# 4) Deploy: Railway deve detectar os serviços pelo caminho 'path' e executar os comandos de build/start.
+#
+# Se você usa Railway CLI, pode precisar adaptar o arquivo ao formato aceito pela sua versão do CLI.
+# Posso gerar também um railway-specific CLI config se você informar se usa railway up / railway init.

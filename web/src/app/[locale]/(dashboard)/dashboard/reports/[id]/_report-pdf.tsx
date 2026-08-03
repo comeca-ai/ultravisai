@@ -307,7 +307,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
   );
 
   return (
-    <Document title={report.title} author="Ansvisor" creator="Ansvisor">
+    <Document title={report.title} author="Ultravis" creator="Ultravis">
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <Text style={styles.title}>{report.title}</Text>
@@ -686,7 +686,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
 
         {/* Footer */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>Generated with Ansvisor · www.ansvisor.com</Text>
+          <Text style={styles.footerText}>Generated with Ultravis · www.ultravis.ai</Text>
           <Text
             style={styles.footerText}
             render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}

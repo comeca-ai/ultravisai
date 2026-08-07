@@ -487,7 +487,13 @@
       "d1Title": "01 · Site Readability",
       "d1Hint": "Latest Site Audit score for the primary domain.",
       "d2Title": "02 · Content",
-      "d2Hint": "% of AI answers citing your domain (all time)."
+      "d2Hint": "% of AI answers citing your domain (all time).",
+      "icNoData": "Run a Site Audit and a tracking run to start measuring.",
+      "icCoverage": "{coverage}% of the index measured",
+      "icRecalc": "The score recalculates as more dimensions are measured.",
+      "coverageBarAria": "Index coverage: measured and unmeasured dimensions, sized by weight",
+      "runTrackingCta": "Run tracking",
+      "d2Zero": "No AI answer cites your domain yet — this zero is real, not missing data."
     },
     "matrix": {
       "title": "Citability Matrix",
@@ -523,38 +529,42 @@
       "dim1": {
         "name": "Site Readability",
         "action": "Make your site readable for AIs",
-        "desc": "Technical and entity readiness — schema/JSON-LD, llms.txt, Wikidata. Measured by your latest Site Audit."
+        "desc": "Technical and entity readiness — schema/JSON-LD, llms.txt, Wikidata. Measured by your latest Site Audit.",
+        "cta": "Run Site Audit"
       },
       "dim2": {
         "name": "Content",
         "action": "Answer every question on your site",
-        "desc": "GEO coverage and quality per topic — an own, extractable page. Measured by the share of AI answers citing your domain."
+        "desc": "GEO coverage and quality per topic — an own, extractable page. Measured by the share of AI answers citing your domain.",
+        "cta": "See content opportunities"
       },
       "dim3": {
         "name": "Social Presence",
         "action": "Occupy the channels and publish recently",
-        "desc": "Multi-platform footprint and freshness — 4+ platforms, YouTube first."
+        "desc": "Multi-platform footprint and freshness — 4+ platforms, YouTube first.",
+        "cta": "Map social channels"
       },
       "dim4": {
         "name": "Customer Reviews",
         "action": "Own the review platforms",
-        "desc": "Social proof and customer voice — G2, Trustpilot, Reclame Aqui, Reddit."
+        "desc": "Social proof and customer voice — G2, Trustpilot, Reclame Aqui, Reddit.",
+        "cta": "Map review platforms"
       },
       "dim5": {
         "name": "Open Media & AI Sources",
         "action": "Show up in the sources AIs cite",
-        "desc": "Earned media, editorial, directories and sector listings — the CI's biggest single lever."
+        "desc": "Earned media, editorial, directories and sector listings — the CI's biggest single lever.",
+        "cta": "See the sources AIs cite"
       },
       "dim6": {
         "name": "Verticals & Regulators",
         "action": "Become the reference in your vertical",
-        "desc": "Segment authority — regulators, associations and brand demand."
-      }
+        "desc": "Segment authority — regulators, associations and brand demand.",
+        "cta": "Map sector associations and regulators"
+      },
+      "comingSoon": "Coming soon"
     },
-    "plan": {
-      "title": "Action plan by zone",
-      "subtitle": "Recommended execution order: A → B → C. Zone A unlocks the rest; zone C carries the biggest weight but only pays off once A and B stand."
-    }
+    "notMeasured": "Not measured"
   },
   "shopping": {
     "title": "Shopping",

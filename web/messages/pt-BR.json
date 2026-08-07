@@ -487,7 +487,13 @@
       "d1Title": "01 · Legibilidade do Site",
       "d1Hint": "Score da última Auditoria de Site do domínio principal.",
       "d2Title": "02 · Conteúdo",
-      "d2Hint": "% das respostas de IA que citam o seu domínio (todo o período)."
+      "d2Hint": "% das respostas de IA que citam o seu domínio (todo o período).",
+      "icNoData": "Rode uma Auditoria de Site e um rastreamento para começar a medir.",
+      "icCoverage": "{coverage}% do índice medido",
+      "icRecalc": "A nota se recalcula conforme novas dimensões forem medidas.",
+      "coverageBarAria": "Cobertura do índice: dimensões medidas e não medidas, proporcionais ao peso",
+      "runTrackingCta": "Rodar rastreamento",
+      "d2Zero": "Nenhuma resposta de IA cita o seu domínio ainda — esse zero é real, não falta de dado."
     },
     "matrix": {
       "title": "Matriz de Citabilidade",
@@ -523,38 +529,42 @@
       "dim1": {
         "name": "Legibilidade do Site",
         "action": "Deixe o site legível para as IAs",
-        "desc": "Prontidão técnica e entidade — schema/JSON-LD, llms.txt, Wikidata. Medida pela sua Auditoria de Site mais recente."
+        "desc": "Prontidão técnica e entidade — schema/JSON-LD, llms.txt, Wikidata. Medida pela sua Auditoria de Site mais recente.",
+        "cta": "Rodar Auditoria de Site"
       },
       "dim2": {
         "name": "Conteúdo",
         "action": "Responda cada pergunta no seu site",
-        "desc": "Cobertura e qualidade GEO por tópico — página própria e extraível. Medida pela fração das respostas de IA que citam o seu domínio."
+        "desc": "Cobertura e qualidade GEO por tópico — página própria e extraível. Medida pela fração das respostas de IA que citam o seu domínio.",
+        "cta": "Ver oportunidades de conteúdo"
       },
       "dim3": {
         "name": "Social Presence",
         "action": "Ocupe os canais e publique recente",
-        "desc": "Pegada multiplataforma e frescor — 4+ plataformas, YouTube em destaque."
+        "desc": "Pegada multiplataforma e frescor — 4+ plataformas, YouTube em destaque.",
+        "cta": "Mapear canais sociais"
       },
       "dim4": {
         "name": "Customer Reviews",
         "action": "Domine as plataformas de review",
-        "desc": "Prova social e voz do cliente — G2, Trustpilot, Reclame Aqui, Reddit."
+        "desc": "Prova social e voz do cliente — G2, Trustpilot, Reclame Aqui, Reddit.",
+        "cta": "Mapear plataformas de review"
       },
       "dim5": {
         "name": "Open Media & Fontes de IA",
         "action": "Apareça nas fontes que as IAs citam",
-        "desc": "Mídia earned, editorial, diretórios e listagens do setor — a maior alavanca isolada do IC."
+        "desc": "Mídia earned, editorial, diretórios e listagens do setor — a maior alavanca isolada do IC.",
+        "cta": "Ver fontes que as IAs citam"
       },
       "dim6": {
         "name": "Verticais e Reguladores",
         "action": "Seja referência na sua vertical",
-        "desc": "Autoridade de segmento — reguladores, associações e demanda de marca."
-      }
+        "desc": "Autoridade de segmento — reguladores, associações e demanda de marca.",
+        "cta": "Mapear associações e reguladores"
+      },
+      "comingSoon": "Em breve"
     },
-    "plan": {
-      "title": "Plano de ação por zona",
-      "subtitle": "Ordem de execução recomendada: A → B → C. A zona A destrava as demais; a C é onde está o maior peso, mas colher exige A e B de pé."
-    }
+    "notMeasured": "Não medido"
   },
   "shopping": {
     "title": "Shopping",

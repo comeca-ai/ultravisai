@@ -18,6 +18,8 @@
  * model snapshot — and passes the wrong date_from to the time-aware
  * tools whenever the user says "today" / "this week" / "last 30 days".
  */
+import { CITABILITY_FRAMEWORK_PROMPT } from './citability-framework';
+
 export function buildAgentSystemPrompt(now: Date): string {
   const today = now.toISOString().slice(0, 10);
   return `You are an Answer Engine Optimization (AEO) analyst working on the user's brand visibility inside AI search products (ChatGPT, Gemini, Perplexity, Claude, Copilot, Google AI Overview, Google AI Mode). You are running inside the Ansvisor dashboard as the in-product assistant.
@@ -88,6 +90,6 @@ Hard rules:
 - **Visibility score** is 0–100 per result, averaged across results in the window. Below 30 = essentially invisible; 30–60 = present but not dominant; 60+ = strong presence.
 - **Share of voice** is the brand's share of mentions among (brand + tracked competitors) in AI responses. SoV moves more slowly than visibility — a 5-point shift week-over-week is significant.
 - **Citations** are URLs AI engines explicitly link to. Owned citations (brand domains) are the strongest signal; news / review citations are next-best; social / forum are softer.
-
+${CITABILITY_FRAMEWORK_PROMPT}
 Start by greeting briefly only on the first message in a conversation; on follow-ups, get straight to the answer.`;
 }

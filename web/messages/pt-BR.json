@@ -804,5 +804,398 @@
         "description": "Entenda as tendências de volume de consultas nas plataformas e identifique oportunidades."
       }
     }
+  },
+  "landing": {
+    "meta": {
+      "title": "Ultravis — Visão além do alcance",
+      "description": "A decisão de compra começa dentro de uma conversa com a IA. A Ultravis mostra o que ChatGPT, Claude, Gemini e Perplexity respondem sobre a sua marca — e o que fazer para virar a resposta."
+    },
+    "nav": {
+      "platform": "Plataforma",
+      "solutions": "Soluções",
+      "market": "Mercado",
+      "pricing": "Preços",
+      "faq": "FAQ",
+      "signIn": "Entrar",
+      "createAccount": "Criar conta"
+    },
+    "hero": {
+      "badge": "Medir → Entender → Aparecer",
+      "titleStart": "Temos a visão ",
+      "titleHighlight": "além do alcance",
+      "subtitle": "A decisão de compra hoje começa dentro de uma conversa com a IA — e você não está na sala. A Ultravis mostra o que ChatGPT, Claude, Gemini e Perplexity respondem sobre a sua marca, onde você some, e o que fazer para virar a resposta.",
+      "ctaPrimary": "Criar conta",
+      "ctaSecondary": "Ver demonstração",
+      "ctaNote": "14 dias grátis · sem cartão · seu primeiro diagnóstico em 4 minutos",
+      "tickerLabel": "Perguntas rodando agora",
+      "ticker": [
+        {
+          "src": "ChatGPT",
+          "q": "qual a melhor plataforma para monitorar marca em IA?"
+        },
+        {
+          "src": "Perplexity",
+          "q": "ferramentas de AEO para e-commerce brasileiro"
+        },
+        {
+          "src": "Gemini",
+          "q": "como aparecer nas respostas do Google AI Overviews"
+        },
+        {
+          "src": "Claude",
+          "q": "alternativas ao Semrush para busca generativa"
+        },
+        {
+          "src": "Copilot",
+          "q": "vale a pena investir em GEO em 2026?"
+        },
+        {
+          "src": "Grok",
+          "q": "quem lidera visibilidade em IA no varejo"
+        }
+      ]
+    },
+    "platform": {
+      "browserPath": "ultravis.app / visibilidade",
+      "live": "ao vivo",
+      "scoreLabel": "Índice de visibilidade",
+      "scoreDelta": "+18,4% / 30d",
+      "scoreValue": "62,7",
+      "scoreOf": "de 100",
+      "bars": [
+        {
+          "label": "ChatGPT",
+          "value": "71%"
+        },
+        {
+          "label": "Gemini",
+          "value": "64%"
+        },
+        {
+          "label": "Claude",
+          "value": "58%"
+        },
+        {
+          "label": "Perplexity",
+          "value": "49%"
+        },
+        {
+          "label": "Copilot",
+          "value": "31%"
+        }
+      ],
+      "promptsLabel": "Onde você aparece",
+      "prompts": [
+        {
+          "rank": "01",
+          "text": "melhor plataforma de visibilidade em IA",
+          "delta": "▲ 4",
+          "up": true
+        },
+        {
+          "rank": "02",
+          "text": "como aparecer nas respostas do ChatGPT",
+          "delta": "▲ 2",
+          "up": true
+        },
+        {
+          "rank": "07",
+          "text": "ferramentas de AEO para e-commerce",
+          "delta": "▼ 1",
+          "up": false
+        },
+        {
+          "rank": "12",
+          "text": "monitorar marca em modelos de linguagem",
+          "delta": "— 0",
+          "up": false
+        }
+      ],
+      "citationsLabel": "Citações ganhas",
+      "citationsValue": "1.940",
+      "citationsNote": "em 7 motores de resposta, últimos 30 dias",
+      "coverageLabel": "Cobertura",
+      "engines": [
+        "ChatGPT",
+        "Claude",
+        "Gemini",
+        "Perplexity",
+        "Copilot",
+        "Google AI Overviews",
+        "Grok"
+      ]
+    },
+    "market": {
+      "kicker": "A virada",
+      "title": "O cliente já chegou perguntando. Você já foi respondido — sem saber.",
+      "subtitle": "Mais de um bilhão de pessoas consultam modelos de linguagem antes de decidir. Cada resposta gerada é uma recomendação silenciosa, e a maioria das marcas nunca lê nenhuma delas.",
+      "stats": [
+        {
+          "num": "35%",
+          "title": "do tráfego já nasce em IA",
+          "body": "A busca generativa saiu do zero e virou o primeiro contato de boa parte das marcas."
+        },
+        {
+          "num": "22%",
+          "title": "têm estratégia definida",
+          "body": "O resto descobre por acaso se aparece — ou se o concorrente aparece no lugar."
+        },
+        {
+          "num": "96%",
+          "title": "seguem sem visibilidade real",
+          "body": "A janela para virar a resposta padrão da sua categoria ainda está aberta."
+        }
+      ]
+    },
+    "features": {
+      "kicker": "O alcance",
+      "title": "Quatro camadas entre a pergunta e a sua marca",
+      "subtitle": "Observar a resposta, achar a brecha, produzir a prova, medir de novo. O ciclo inteiro numa plataforma só.",
+      "items": [
+        {
+          "num": "01",
+          "title": "Respostas monitoradas",
+          "body": "O que cada modelo diz da sua marca, com que tom e ao lado de quais concorrentes — atualizado todo dia.",
+          "tags": [
+            "sentimento",
+            "share of answer",
+            "concorrentes"
+          ]
+        },
+        {
+          "num": "02",
+          "title": "Perguntas que importam",
+          "body": "As perguntas reais que levam à sua categoria, com volume estimado e o custo de você não estar nelas.",
+          "tags": [
+            "volume de prompts",
+            "intenção",
+            "priorização"
+          ]
+        },
+        {
+          "num": "03",
+          "title": "Citações e fontes",
+          "body": "Quais páginas e veículos os modelos citam, e o que precisa existir para que citem você.",
+          "tags": [
+            "fontes",
+            "autoridade",
+            "cobertura"
+          ]
+        },
+        {
+          "num": "04",
+          "title": "Da leitura à ação",
+          "body": "Cada lacuna vira um briefing pronto: o que escrever, onde publicar, o que corrigir no site.",
+          "tags": [
+            "briefings",
+            "site audit",
+            "MCP"
+          ]
+        }
+      ]
+    },
+    "beyond": {
+      "kicker": "Além do alcance",
+      "title": "O que o seu analytics nunca vai te contar",
+      "subtitle": "A conversa acontece fora do seu domínio, sem clique e sem log. É exatamente aí que a Ultravis enxerga.",
+      "blind": [
+        {
+          "label": "Ponto cego 01",
+          "title": "Zero clique, zero registro",
+          "body": "A recomendação acontece e some. Sem página visitada, não há linha no seu relatório."
+        },
+        {
+          "label": "Ponto cego 02",
+          "title": "Cada usuário, outra resposta",
+          "body": "Não existe uma posição única. Só medindo em escala dá para saber o que é padrão e o que é ruído."
+        },
+        {
+          "label": "Ponto cego 03",
+          "title": "O concorrente citado no seu lugar",
+          "body": "Você não perde posição: some da lista. E alguém aparece como a escolha óbvia."
+        }
+      ],
+      "fanoutLabel": "Query Fan-Out",
+      "fanoutTitle": "Uma pergunta do cliente vira seis buscas invisíveis. Nós lemos todas.",
+      "fanoutBody": "Antes de responder, o modelo reformula, pesquisa e escolhe fontes. Ver esse caminho é ver exatamente onde a sua marca deixou de ser considerada.",
+      "fanout": [
+        {
+          "n": "01",
+          "q": "melhores plataformas de visibilidade em IA",
+          "state": "citado",
+          "cited": true
+        },
+        {
+          "n": "02",
+          "q": "comparativo de ferramentas AEO 2026",
+          "state": "citado",
+          "cited": true
+        },
+        {
+          "n": "03",
+          "q": "preço de ferramentas de monitoramento",
+          "state": "ausente",
+          "cited": false
+        },
+        {
+          "n": "04",
+          "q": "avaliações de usuários e reclamações",
+          "state": "ausente",
+          "cited": false
+        },
+        {
+          "n": "05",
+          "q": "integrações com stack de marketing",
+          "state": "citado",
+          "cited": true
+        }
+      ]
+    },
+    "teams": {
+      "kicker": "Times",
+      "title": "Visibilidade em IA não é problema de uma pessoa só",
+      "items": [
+        {
+          "title": "SEO & AEO",
+          "body": "Acompanhe prompts, ranking e concorrência no novo campo de disputa."
+        },
+        {
+          "title": "Conteúdo",
+          "body": "Descubra lacunas e produza a página que o modelo vai querer citar."
+        },
+        {
+          "title": "PR & Marca",
+          "body": "Monitore sentimento, fontes e como a IA descreve a sua reputação."
+        },
+        {
+          "title": "Growth & Agências",
+          "body": "Compare carteiras de clientes e prove o ganho de visibilidade com dado."
+        }
+      ]
+    },
+    "pricing": {
+      "kicker": "Planos",
+      "title": "Comece a enxergar em 14 dias grátis",
+      "plans": [
+        {
+          "name": "Starter",
+          "tag": "1 marca",
+          "price": "R$ 390",
+          "per": "/mês",
+          "body": "Para começar a medir e entender o retrato atual.",
+          "items": [
+            "150 prompts monitorados",
+            "4 motores de resposta",
+            "Relatório semanal",
+            "1 usuário"
+          ],
+          "cta": "Criar conta",
+          "featured": false
+        },
+        {
+          "name": "Growth",
+          "tag": "mais escolhido",
+          "price": "R$ 1.290",
+          "per": "/mês",
+          "body": "Para times que já disputam a resposta todo dia.",
+          "items": [
+            "1.000 prompts monitorados",
+            "7 motores + Query Fan-Out",
+            "Briefings de conteúdo com IA",
+            "Benchmark de 10 concorrentes",
+            "Usuários ilimitados"
+          ],
+          "cta": "Criar conta",
+          "featured": true
+        },
+        {
+          "name": "Enterprise",
+          "tag": "sob medida",
+          "price": "Sob consulta",
+          "per": "",
+          "body": "Para múltiplas marcas, mercados e idiomas.",
+          "items": [
+            "Prompts e domínios ilimitados",
+            "API e MCP Server",
+            "SSO e controles de acesso",
+            "Suporte dedicado"
+          ],
+          "cta": "Falar com o time",
+          "featured": false
+        }
+      ]
+    },
+    "faq": {
+      "title": "Perguntas frequentes",
+      "items": [
+        {
+          "q": "O que é a Ultravis?",
+          "a": "Uma plataforma de visibilidade em IA: monitora, mede e ajuda a melhorar como a sua marca aparece nas respostas de ChatGPT, Claude, Gemini, Google AI Overviews, Perplexity, Copilot e Grok."
+        },
+        {
+          "q": "Como vocês medem a visibilidade?",
+          "a": "Rodamos continuamente as perguntas relevantes da sua categoria nos principais modelos e analisamos as respostas geradas — menções, citações, posição na lista, sentimento e presença dos concorrentes."
+        },
+        {
+          "q": "Isso é o mesmo que SEO?",
+          "a": "É o passo seguinte. O SEO disputa uma lista de links; AEO e GEO disputam o texto da resposta. Os sinais se sobrepõem, mas a medição e as ações são diferentes."
+        },
+        {
+          "q": "Quanto tempo até ver resultado?",
+          "a": "O diagnóstico inicial fica pronto em minutos. Mudanças de conteúdo e autoridade costumam aparecer nas respostas dos modelos entre duas e seis semanas."
+        },
+        {
+          "q": "Preciso instalar algo no meu site?",
+          "a": "Não para monitorar. A análise de tráfego vindo de IA é opcional e usa um script leve ou a integração com o seu analytics atual."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Quando perguntarem, que a resposta seja você.",
+      "subtitle": "Crie sua conta e veja o primeiro retrato da sua visibilidade em IA ainda hoje.",
+      "primary": "Criar conta",
+      "secondary": "Falar com o time",
+      "note": "14 dias grátis · sem cartão · cancele quando quiser"
+    },
+    "footer": {
+      "tagline": "Vision beyond reach. Plataforma de visibilidade de marcas dentro dos modelos de linguagem.",
+      "columns": [
+        {
+          "title": "Plataforma",
+          "links": [
+            "Respostas monitoradas",
+            "Prompts e volumes",
+            "Query Fan-Out",
+            "Citações",
+            "Site Audit",
+            "MCP Server"
+          ]
+        },
+        {
+          "title": "Soluções",
+          "links": [
+            "SEO & AEO",
+            "Conteúdo",
+            "PR & Marca",
+            "Agências",
+            "Desenvolvedores"
+          ]
+        },
+        {
+          "title": "Empresa",
+          "links": [
+            "Sobre",
+            "Preços",
+            "Blog",
+            "Contato",
+            "Carreiras"
+          ]
+        }
+      ],
+      "rights": "Todos os direitos reservados.",
+      "terms": "Termos",
+      "privacy": "Privacidade",
+      "aiPolicy": "Política de IA"
+    }
   }
 }

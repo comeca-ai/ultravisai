@@ -169,7 +169,22 @@
     "positiveSentiment": "Sentimento Positivo",
     "neutral": "Neutro",
     "negative": "Negativo",
-    "sovByPlatform": "Share of Voice por Plataforma"
+    "sovByPlatform": "Share of Voice por Plataforma",
+    "emptyTitle": "Ainda sem dados de rastreamento",
+    "emptyBody": "Rode seus prompts nas plataformas de IA para ver como sua marca aparece nas respostas geradas.",
+    "testSinglePrompt": "Ou teste um único prompt",
+    "analyzing": "Analisando prompts...",
+    "queued": "Na fila — começa automaticamente",
+    "queuedExplain": "Outra análise está rodando agora. A sua começa assim que abrir uma vaga — não precisa esperar aqui, ela continua em segundo plano.",
+    "stop": "Parar",
+    "period24h": "últimas 24 horas",
+    "period7d": "últimos 7 dias",
+    "period30d": "últimos 30 dias",
+    "period90d": "últimos 90 dias",
+    "periodSelected": "período selecionado",
+    "noPeriodTitle": "Sem resultados para: {period}",
+    "noPeriodBody": "Há dados de rastreamento em outros períodos. Tente um intervalo maior ou mude para “Todo o período”.",
+    "showAllData": "Mostrar todos os dados"
   },
   "topics": {
     "addTopic": "Adicionar Tópico",

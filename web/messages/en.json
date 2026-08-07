@@ -169,7 +169,22 @@
     "positiveSentiment": "Positive Sentiment",
     "neutral": "Neutral",
     "negative": "Negative",
-    "sovByPlatform": "Share of Voice by Platform"
+    "sovByPlatform": "Share of Voice by Platform",
+    "emptyTitle": "No tracking data yet",
+    "emptyBody": "Run your prompts through AI platforms to see how your brand appears in AI-generated responses.",
+    "testSinglePrompt": "Or test a single prompt",
+    "analyzing": "Analyzing prompts...",
+    "queued": "Queued — starting automatically",
+    "queuedExplain": "Another analysis is running right now. Yours will begin the moment a slot opens up — no need to wait here, it'll keep going in the background.",
+    "stop": "Stop",
+    "period24h": "last 24 hours",
+    "period7d": "last 7 days",
+    "period30d": "last 30 days",
+    "period90d": "last 90 days",
+    "periodSelected": "selected period",
+    "noPeriodTitle": "No results for the {period}",
+    "noPeriodBody": "There is tracking data available in other time periods. Try a wider range or switch to “All time”.",
+    "showAllData": "Show all data"
   },
   "topics": {
     "addTopic": "Add Topic",

@@ -25,7 +25,6 @@ export const intentKeywordSchema = z.object({
           'A short Google head term — 1 to 3 words, category-level, measurable Google Ads volume',
         ),
     )
-    .length(5)
     .describe(
       'Five broad, high-volume Google head terms that capture the category the prompt belongs to',
     ),

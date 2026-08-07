@@ -11,16 +11,13 @@ import { getLanguageName } from '../lib/languages.js';
 const router = Router();
 
 const topicSchema = z.object({
-  topics: z
-    .array(
-      z.object({
-        name: z
-          .string()
-          .describe('A concise topic name (3-8 words) relevant to the brand for AEO tracking'),
-      }),
-    )
-    .min(6)
-    .max(12),
+  topics: z.array(
+    z.object({
+      name: z
+        .string()
+        .describe('A concise topic name (3-8 words) relevant to the brand for AEO tracking'),
+    }),
+  ),
 });
 
 /**
@@ -186,17 +183,23 @@ IMPORTANT: Generate all topic names in ${langName}.`;
         prompt: researchPrompt,
       });
 
-      return generateObject({
+      const result = await generateObject({
         model: resolveModel(topicModel),
         schema: topicSchema,
         system: `Extract AEO tracking topics from the research below. Each topic should be concise (3-8 words) and represent an area where AI assistants might mention or discuss "${brandName}". Do NOT include the brand name "${brandName}" in any topic — keep them generic. Include a mix of: competitive comparisons, product/service features, industry trends, use cases, and problem-solving topics. Each topic MUST focus on a single concept — never combine two ideas with "and" or "&". IMPORTANT: All topic names MUST be written in ${langName}.`,
         prompt: research,
       });
+      // Anthropic structured outputs reject array minItems/maxItems, so the
+      // schema can't demand a count — enforce here so a sparse batch retries.
+      if (result.object.topics.length < 3) {
+        throw new Error(`only ${result.object.topics.length} topics generated`);
+      }
+      return result;
     },
     { attempts: 3, baseDelayMs: 500, label: 'topic-suggest' },
   );
 
-  return object.topics;
+  return object.topics.slice(0, 12);
 }
 
 /**

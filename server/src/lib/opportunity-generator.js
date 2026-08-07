@@ -28,8 +28,7 @@ const opportunitySchema = z.object({
         relatedPromptIndex: z.number(),
       }),
     )
-    .min(1)
-    .max(20),
+    .min(1),
 });
 
 const SYSTEM_PROMPT = `You are an AEO content strategist. Given a brand's AI visibility data, generate specific, actionable content recommendations.

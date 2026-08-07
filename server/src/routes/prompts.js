@@ -120,39 +120,36 @@ async function loadSuggestionContext(brandId) {
 }
 
 const newSuggestionSchema = z.object({
-  suggestions: z
-    .array(
-      z.object({
-        text: z
-          .string()
-          .min(20)
-          .max(120)
-          .describe('A short, generic search query without any brand names'),
-        topic: z
-          .string()
-          .min(3)
-          .max(60)
-          .describe(
-            'A 2-4 word topic label that groups this prompt (e.g. "EV Range", "Reliability", "Pricing")',
-          ),
-        reason: z
-          .string()
-          .min(20)
-          .max(220)
-          .describe(
-            'One sentence explaining why this prompt matters for the brand (gap, trend, competitor coverage)',
-          ),
-        // No .max() ceiling: the prompt tells the model to calibrate volumes
-        // against the brand's real tracked volumes, so on high-volume brands
-        // it legitimately estimates six figures — a hard schema cap then
-        // rejects the WHOLE batch deterministically ("No object generated"),
-        // and retrying can't help. Out-of-range protection is a clamp at the
-        // insert site instead.
-        estVolume: z.number().int().min(0).describe('Estimated monthly AI search volume (rough)'),
-      }),
-    )
-    .min(6)
-    .max(12),
+  suggestions: z.array(
+    z.object({
+      text: z
+        .string()
+        .min(20)
+        .max(120)
+        .describe('A short, generic search query without any brand names'),
+      topic: z
+        .string()
+        .min(3)
+        .max(60)
+        .describe(
+          'A 2-4 word topic label that groups this prompt (e.g. "EV Range", "Reliability", "Pricing")',
+        ),
+      reason: z
+        .string()
+        .min(20)
+        .max(220)
+        .describe(
+          'One sentence explaining why this prompt matters for the brand (gap, trend, competitor coverage)',
+        ),
+      // No .max() ceiling: the prompt tells the model to calibrate volumes
+      // against the brand's real tracked volumes, so on high-volume brands
+      // it legitimately estimates six figures — a hard schema cap then
+      // rejects the WHOLE batch deterministically ("No object generated"),
+      // and retrying can't help. Out-of-range protection is a clamp at the
+      // insert site instead.
+      estVolume: z.number().int().describe('Estimated monthly AI search volume (rough)'),
+    }),
+  ),
 });
 
 const SUGGESTION_TTL_HOURS = 48;
@@ -211,17 +208,24 @@ Suggest the next 8 prompts this brand should start tracking, with topic, reason 
   // reason, <6 items, non-integer estVolume, …); a fresh sample usually
   // passes, so one miss must not fail the whole refresh.
   const { object } = await withRetry(
-    () =>
-      generateObject({
+    async () => {
+      const result = await generateObject({
         model: aiModel,
         schema: newSuggestionSchema,
         system,
         prompt: userPrompt,
-      }),
+      });
+      // Anthropic structured outputs reject array minItems — enforce the
+      // count in code so a sparse batch retries.
+      if (result.object.suggestions.length < 6) {
+        throw new Error(`only ${result.object.suggestions.length} suggestions generated`);
+      }
+      return result;
+    },
     { attempts: 3, baseDelayMs: 500, label: 'suggestion-refresh' },
   );
 
-  return object.suggestions;
+  return object.suggestions.slice(0, 12);
 }
 
 async function findOrCreateTopic(brandId, topicName) {
@@ -270,7 +274,7 @@ router.post(
           reason: s.reason,
           // Sanity clamp replacing the removed schema ceiling — one absurd
           // estimate must cap out, not reject the whole generated batch.
-          est_volume: Math.min(s.estVolume, 10_000_000),
+          est_volume: Math.max(0, Math.min(s.estVolume, 10_000_000)),
           source: 'llm',
           status: 'new',
           expires_at: expiresAt,
@@ -370,26 +374,24 @@ router.post('/suggestions/:id/accept', async (req, res) => {
 });
 
 const promptSuggestionSchema = z.object({
-  prompts: z
-    .array(
-      z.object({
-        text: z
-          .string()
-          .describe('A short, generic search query (30-100 characters) WITHOUT any brand names'),
-        category: z
-          .enum([
-            'industry',
-            'comparison',
-            'how-to',
-            'use-case',
-            'recommendation',
-            'alternative',
-            'problem-solving',
-          ])
-          .describe('Category of the prompt'),
-      }),
-    )
-    .length(10),
+  prompts: z.array(
+    z.object({
+      text: z
+        .string()
+        .describe('A short, generic search query (30-100 characters) WITHOUT any brand names'),
+      category: z
+        .enum([
+          'industry',
+          'comparison',
+          'how-to',
+          'use-case',
+          'recommendation',
+          'alternative',
+          'problem-solving',
+        ])
+        .describe('Category of the prompt'),
+    }),
+  ),
 });
 
 function getSystemPrompt(langName) {
@@ -457,17 +459,22 @@ Based on this brand's industry and context, generate 10 short, generic search pr
     // #379 — bounded retry so one transient failure or schema miss doesn't
     // drop the whole suggestion step.
     const { object } = await withRetry(
-      () =>
-        generateObject({
+      async () => {
+        const result = await generateObject({
           model: aiModel,
           schema: promptSuggestionSchema,
           system: getSystemPrompt(langName),
           prompt: userPrompt,
-        }),
+        });
+        if (result.object.prompts.length < 5) {
+          throw new Error(`only ${result.object.prompts.length} prompts generated`);
+        }
+        return result;
+      },
       { attempts: 3, baseDelayMs: 500, label: 'prompt-suggest' },
     );
 
-    return res.json({ prompts: object.prompts });
+    return res.json({ prompts: object.prompts.slice(0, 10) });
   } catch (error) {
     req.log.error({ err: error }, 'prompt suggestion error');
     return res.status(500).json({
@@ -481,7 +488,7 @@ const topicPromptSchema = z.object({
   topicPrompts: z.array(
     z.object({
       topic: z.string(),
-      prompts: z.array(z.string().min(30).max(100)).length(5),
+      prompts: z.array(z.string().min(30).max(100)),
     }),
   ),
 });
@@ -535,7 +542,10 @@ Return the exact topic names as provided above.`,
       { attempts: 3, baseDelayMs: 500, label: 'prompts-from-topics' },
     );
 
-    return res.json({ topicPrompts: object.topicPrompts });
+    const topicPrompts = (object.topicPrompts || [])
+      .map((tp) => ({ ...tp, prompts: tp.prompts.slice(0, 5) }))
+      .filter((tp) => tp.prompts.length > 0);
+    return res.json({ topicPrompts });
   } catch (error) {
     req.log.error({ err: error }, 'topic prompt generation error');
     return res.status(500).json({

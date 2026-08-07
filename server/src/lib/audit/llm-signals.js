@@ -39,7 +39,7 @@ export const LLM_SIGNAL_KEYS = [
 
 const verdictSchema = z.object({
   status: z.enum(['pass', 'warn', 'fail', 'na']),
-  score: z.number().min(0).max(1).nullable(),
+  score: z.number().nullable(),
   reason: z.string().max(300),
 });
 

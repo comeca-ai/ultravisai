@@ -1250,12 +1250,12 @@
       "generating": "Gerando prompts...",
       "looksGood": "Está bom assim",
       "tipsTitle": "Dicas para escolher tópicos",
-      "tip1Title": "5 prompts são criados por tópico",
-      "tip1Body": "Você pode selecionar até 10 tópicos, totalizando 50 prompts. Dá para adicionar mais a qualquer momento pelo dashboard.",
-      "tip2Title": "Pense como seus clientes",
-      "tip2Body": "Use termos que o seu público buscaria ao procurar produtos ou serviços como os seus.",
-      "tip3Title": "Seja breve",
-      "tip3Body": "Tópicos devem ser curtos — nós os transformamos em prompts detalhados no próximo passo."
+      "tip1Title": "Pense como seus clientes",
+      "tip1Body": "Use os termos que o seu público realmente digitaria ao perguntar a uma IA sobre produtos ou serviços como os seus — não o jargão interno da empresa.",
+      "tip2Title": "Varie os ângulos",
+      "tip2Body": "Misture comparações (“melhores ferramentas de X”), problemas que você resolve, casos de uso e temas do seu setor. Tópicos genéricos, sem citar sua marca — é aí que a disputa acontece.",
+      "tip3Title": "Seja breve — cada tópico vira 5 prompts",
+      "tip3Body": "Tópicos curtos, com um conceito só. Nós os transformamos em perguntas detalhadas no próximo passo, e dá para adicionar mais a qualquer momento pelo dashboard."
     },
     "promptsReview": {
       "title": "Revise seus prompts",

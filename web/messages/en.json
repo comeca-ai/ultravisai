@@ -1237,12 +1237,12 @@
       "generating": "Generating prompts...",
       "looksGood": "Looks good",
       "tipsTitle": "Topic Selection Tips",
-      "tip1Title": "5 prompts are created per topic",
-      "tip1Body": "You can select up to 10 topics for a total of 50 prompts. More can be added anytime from the dashboard.",
-      "tip2Title": "Think like your customers",
-      "tip2Body": "Use terms your audience would search for when looking for products or services like yours.",
-      "tip3Title": "Keep it short",
-      "tip3Body": "Topics should be concise — we'll turn them into detailed prompts in the next step."
+      "tip1Title": "Think like your customers",
+      "tip1Body": "Use the words your audience would actually type when asking an AI about products or services like yours — not your internal jargon.",
+      "tip2Title": "Cover different angles",
+      "tip2Body": "Mix comparisons (“best X tools”), problems you solve, use cases and industry themes. Keep topics generic, without your brand name — that's where the competition happens.",
+      "tip3Title": "Keep it short — each topic becomes 5 prompts",
+      "tip3Body": "Short topics, one concept each. We turn them into detailed questions in the next step, and you can add more anytime from the dashboard."
     },
     "promptsReview": {
       "title": "Review your prompts",

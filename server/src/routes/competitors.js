@@ -8,15 +8,12 @@ import { withRetry } from '../lib/retry.js';
 const router = Router();
 
 const competitorSchema = z.object({
-  competitors: z
-    .array(
-      z.object({
-        name: z.string().describe('Company/brand display name'),
-        domain: z.string().describe('Root domain without protocol, e.g. "asana.com"'),
-      }),
-    )
-    .min(3)
-    .max(10),
+  competitors: z.array(
+    z.object({
+      name: z.string().describe('Company/brand display name'),
+      domain: z.string().describe('Root domain without protocol, e.g. "asana.com"'),
+    }),
+  ),
 });
 
 /**
@@ -46,9 +43,10 @@ Description: ${description || 'Not specified'}
 
 Find REAL companies that compete directly with "${brandName}" — selling similar products/services to similar audiences, especially in the ${langName}-speaking market. For each competitor, provide the company name and their actual website domain.`;
 
-    // #379 — retry the WHOLE two-phase flow: the schema's .min(3) means a
-    // Phase-2 under-count throws NoObjectGeneratedError, and re-running the
-    // research gives the structuring phase fresh material to work with.
+    // #379 — retry the WHOLE two-phase flow: a Phase-2 under-count throws
+    // below (Anthropic structured outputs reject array minItems, so the
+    // count check lives in code), and re-running the research gives the
+    // structuring phase fresh material to work with.
     const { object } = await withRetry(
       async () => {
         const { text: research } = await generateText({
@@ -57,17 +55,21 @@ Find REAL companies that compete directly with "${brandName}" — selling simila
         });
 
         // Phase 2: structure the research into the schema
-        return generateObject({
+        const result = await generateObject({
           model: resolveModel(competitorModel),
           schema: competitorSchema,
           system: `Extract competitor information from the research below. Only include companies with REAL, verified domains. Return the root domain (e.g. "monday.com"), not full URLs. Do NOT include "${brandName}" itself.`,
           prompt: research,
         });
+        if (result.object.competitors.length < 3) {
+          throw new Error(`only ${result.object.competitors.length} competitors generated`);
+        }
+        return result;
       },
       { attempts: 3, baseDelayMs: 500, label: 'competitor-suggest' },
     );
 
-    return res.json({ competitors: object.competitors });
+    return res.json({ competitors: object.competitors.slice(0, 10) });
   } catch (error) {
     req.log.error({ err: error }, 'competitor suggestion error');
     return res.status(500).json({

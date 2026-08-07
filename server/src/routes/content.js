@@ -538,16 +538,13 @@ const briefSchema = z.object({
     'case-study',
   ]),
   targetWordCount: z.number(),
-  outline: z
-    .array(
-      z.object({
-        heading: z.string(),
-        keyPoints: z.array(z.string()),
-      }),
-    )
-    .min(3)
-    .max(8),
-  targetKeywords: z.array(z.string()).min(3).max(10),
+  outline: z.array(
+    z.object({
+      heading: z.string(),
+      keyPoints: z.array(z.string()),
+    }),
+  ),
+  targetKeywords: z.array(z.string()),
   competitorInsights: z.string(),
   callToAction: z.string(),
 });

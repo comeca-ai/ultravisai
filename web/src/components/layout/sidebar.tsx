@@ -57,6 +57,7 @@ export function Sidebar() {
     Brands: () => tBrands('title'),
     Agent: () => t('agent'),
     'Answer Engine Insights': () => t('insights'),
+    Citability: () => t('citability'),
     'AI Traffic Analytics': () => t('traffic'),
     Prompts: () => t('prompts'),
     Topics: () => t('topics'),
@@ -125,8 +126,10 @@ export function Sidebar() {
 
                 // Dynamic badge override: show "Set up" on the Agent item
                 // when the org has no Anthropic key saved (cloud only).
-                const effectiveBadge =
+                const rawBadge =
                   item.href === '/dashboard/agent' && agentKeyMissing ? 'Set up' : item.badge;
+                // Config stores badge text in English; translate the ones we own.
+                const effectiveBadge = rawBadge === 'New' ? t('badgeNew') : rawBadge;
 
                 const isLocked =
                   isCloud && item.requiredFeature != null && !canUse(item.requiredFeature);

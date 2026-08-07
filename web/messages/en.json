@@ -28,7 +28,9 @@
     "citations": "Citations",
     "shopping": "Shopping",
     "reports": "Reports",
-    "settings": "Settings"
+    "settings": "Settings",
+    "citability": "Citability",
+    "badgeNew": "New"
   },
   "agent": {
     "newChat": "New chat",
@@ -475,6 +477,81 @@
     "competitorsOnly": "Competitors only",
     "noBrandTitle": "No brand selected",
     "noBrandDescription": "Select or create a brand to see the citations AI platforms use when answering about it."
+  },
+  "citability": {
+    "title": "Citability",
+    "subtitle": "The Citability Index (CI) organizes the 6 levers that make a brand citable by AI engines — with weight, action zone, and the real answer key of sources AIs cite for your prompts.",
+    "score": {
+      "title": "Partial CI",
+      "partialNote": "Partial score: computed only from the dimensions the platform already measures (01 via Site Audit, 02 via citations of your domain). The others join as the diagnosis evolves.",
+      "noData": "No data yet — run a Site Audit and a tracking run to start measuring."
+    },
+    "matrix": {
+      "title": "Citability Matrix",
+      "subtitle": "Position = where the lever lives and how much it depends on third parties · Bubble = CI weight · Color = action zone",
+      "ariaLabel": "Matrix of the 6 Citability Index dimensions",
+      "xAxis": "Internal ← lever → External",
+      "yAxis": "Third-party dependency",
+      "zoneA": "Act now — you control it, it's fast",
+      "zoneB": "Claim — third-party, but you activate it",
+      "zoneC": "Earn — depends on third parties, it's slow",
+      "emptyZone": "— empty zone: if it's yours, you control it —"
+    },
+    "zones": {
+      "A": {
+        "name": "Act now",
+        "desc": "You control it and it's fast — your own site and content. It unlocks everything else: AIs only cite what they can read."
+      },
+      "B": {
+        "name": "Claim",
+        "desc": "Third-party surfaces you can activate — claim profiles, request reviews, publish. Medium return, low effort."
+      },
+      "C": {
+        "name": "Earn",
+        "desc": "Depends on third parties and is slow — earned media and vertical authority. The CI's biggest single weight; pays off once A and B stand."
+      }
+    },
+    "dims": {
+      "weight": "{weight}% of CI",
+      "answerKey": "Answer key — sources AIs cite in your sector:",
+      "citationCount": "{count, plural, one {# citation} other {# citations}}",
+      "noCitations": "No citations in this category from your tracking runs yet.",
+      "runAuditCta": "Run Site Audit",
+      "dim1": {
+        "name": "Site Readability",
+        "action": "Make your site readable for AIs",
+        "desc": "Technical and entity readiness — schema/JSON-LD, llms.txt, Wikidata. Measured by your latest Site Audit."
+      },
+      "dim2": {
+        "name": "Content",
+        "action": "Answer every question on your site",
+        "desc": "GEO coverage and quality per topic — an own, extractable page. Measured by the share of AI answers citing your domain."
+      },
+      "dim3": {
+        "name": "Social Presence",
+        "action": "Occupy the channels and publish recently",
+        "desc": "Multi-platform footprint and freshness — 4+ platforms, YouTube first."
+      },
+      "dim4": {
+        "name": "Customer Reviews",
+        "action": "Own the review platforms",
+        "desc": "Social proof and customer voice — G2, Trustpilot, Reclame Aqui, Reddit."
+      },
+      "dim5": {
+        "name": "Open Media & AI Sources",
+        "action": "Show up in the sources AIs cite",
+        "desc": "Earned media, editorial, directories and sector listings — the CI's biggest single lever."
+      },
+      "dim6": {
+        "name": "Verticals & Regulators",
+        "action": "Become the reference in your vertical",
+        "desc": "Segment authority — regulators, associations and brand demand."
+      }
+    },
+    "plan": {
+      "title": "Action plan by zone",
+      "subtitle": "Recommended execution order: A → B → C. Zone A unlocks the rest; zone C carries the biggest weight but only pays off once A and B stand."
+    }
   },
   "shopping": {
     "title": "Shopping",

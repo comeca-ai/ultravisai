@@ -481,10 +481,13 @@
   "citability": {
     "title": "Citabilidade",
     "subtitle": "O Índice de Citabilidade (IC) organiza as 6 frentes que fazem uma marca ser citada pelas IAs — com peso, zona de ação e o gabarito real das fontes que as IAs citam nos seus prompts.",
-    "score": {
-      "title": "IC parcial",
-      "partialNote": "Score parcial: calculado só com as dimensões que a plataforma já mede (01 via Auditoria de Site, 02 via citações do seu domínio). As demais entram conforme o diagnóstico evolui.",
-      "noData": "Sem dados ainda — rode uma Auditoria de Site e um rastreamento para começar a medir."
+    "kpis": {
+      "icTitle": "IC parcial",
+      "icHint": "Média ponderada das dimensões já medidas (01 e 02), de 0 a 100.",
+      "d1Title": "01 · Legibilidade do Site",
+      "d1Hint": "Score da última Auditoria de Site.",
+      "d2Title": "02 · Conteúdo",
+      "d2Hint": "% das respostas de IA que citam o seu domínio."
     },
     "matrix": {
       "title": "Matriz de Citabilidade",

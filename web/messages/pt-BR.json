@@ -1197,5 +1197,119 @@
       "privacy": "Privacidade",
       "aiPolicy": "Política de IA"
     }
+  },
+  "onboarding": {
+    "topicLoadingMessages": [
+      "Pesquisando tópicos para a sua marca...",
+      "Analisando o cenário do seu setor...",
+      "Identificando temas e tendências...",
+      "Descobrindo o que importa para o seu público...",
+      "Avaliando tópicos competitivos...",
+      "Quase lá, finalizando as sugestões..."
+    ],
+    "competitorLoadingMessages": [
+      "Buscando concorrentes...",
+      "Analisando o seu mercado...",
+      "Identificando os principais players...",
+      "Verificando dados das empresas...",
+      "Finalizando recomendações..."
+    ],
+    "back": "Voltar",
+    "continue": "Continuar",
+    "tryAgain": "Tentar de novo",
+    "removeTopic": "Remover tópico",
+    "enterNewPrompt": "Digite um novo prompt...",
+    "promptCount": "{count} prompts",
+    "step1": {
+      "title": "Configure sua marca",
+      "subtitle": "Veja como as plataformas de IA falam de você. Adicione sua primeira marca para começar.",
+      "brandName": "Nome da marca",
+      "brandNamePlaceholder": "ex.: Acme Corp",
+      "website": "Site",
+      "websitePlaceholder": "exemplo.com",
+      "describeBrand": "Descreva sua marca",
+      "optional": "(opcional)",
+      "descriptionPlaceholder": "Uma breve descrição nos ajuda a gerar sugestões melhores.",
+      "tipIndustry": "Em que setor você atua?",
+      "tipAudience": "Quem é o seu público-alvo?"
+    },
+    "step2": {
+      "title": "Selecione seu mercado-alvo",
+      "subtitle": "Escolha a região e o idioma do seu público. Isso nos ajuda a entregar dados de visibilidade em IA mais precisos.",
+      "region": "Região",
+      "language": "Idioma",
+      "settingUp": "Configurando..."
+    },
+    "topics": {
+      "title": "Escolha os tópicos para monitorar",
+      "selectUpTo": "Selecione até 10 tópicos",
+      "fetchError": "Não conseguimos buscar sugestões de tópicos agora — adicione os seus abaixo.",
+      "addCustomPlaceholder": "Adicionar tópico próprio...",
+      "generating": "Gerando prompts...",
+      "looksGood": "Está bom assim",
+      "tipsTitle": "Dicas para escolher tópicos",
+      "tip1Title": "5 prompts são criados por tópico",
+      "tip1Body": "Você pode selecionar até 10 tópicos, totalizando 50 prompts. Dá para adicionar mais a qualquer momento pelo dashboard.",
+      "tip2Title": "Pense como seus clientes",
+      "tip2Body": "Use termos que o seu público buscaria ao procurar produtos ou serviços como os seus.",
+      "tip3Title": "Seja breve",
+      "tip3Body": "Tópicos devem ser curtos — nós os transformamos em prompts detalhados no próximo passo."
+    },
+    "promptsReview": {
+      "title": "Revise seus prompts",
+      "subtitle": "Estes prompts serão enviados às plataformas de IA diariamente. Edite, adicione ou remova antes de começar.",
+      "saving": "Salvando prompts...",
+      "genError": "Não conseguimos gerar sugestões de prompts agora — adicione os seus em cada tópico abaixo para continuar.",
+      "listTitle": "Sua lista de prompts",
+      "totalCount": "{count} prompts no total",
+      "tableTopic": "Tópico",
+      "empty": "Nenhum prompt gerado ainda."
+    },
+    "competitors": {
+      "title": "Adicione seus concorrentes",
+      "subtitle": "Vamos acompanhar com que frequência os concorrentes aparecem junto da sua marca nas respostas de IA.",
+      "fetchError": "Não conseguimos buscar sugestões de concorrentes agora — adicione os seus abaixo.",
+      "suggested": "Concorrentes sugeridos",
+      "addManually": "Adicionar manualmente",
+      "companyName": "Nome da empresa",
+      "domainPlaceholder": "dominio.com",
+      "finishing": "Finalizando configuração...",
+      "startTracking": "{count, plural, one {Começar a rastrear com # concorrente} other {Começar a rastrear com # concorrentes}}",
+      "addToContinue": "Adicione um concorrente para continuar"
+    },
+    "plan": {
+      "title": "Escolha seu plano",
+      "subtitle": "Comece seu teste grátis de 14 dias — seu cartão só é cobrado quando o teste termina. Cancele quando quiser em Configurações → Cobrança.",
+      "mostPopular": "Mais escolhido",
+      "perMonth": "/mês",
+      "redirecting": "Redirecionando...",
+      "startTrial": "Iniciar teste grátis",
+      "unlimited": "Ilimitados",
+      "brand": "marca",
+      "brands": "marcas",
+      "promptsTracked": "prompts monitorados",
+      "answerEngines": "motores de resposta",
+      "teamMembers": "membros de equipe",
+      "dailyMonitoring": "Monitoramento diário",
+      "weeklyMonitoring": "Monitoramento semanal",
+      "competitorTracking": "Rastreio de concorrentes",
+      "contentOptimization": "Otimização de conteúdo",
+      "advancedAnalytics": "Analytics avançado",
+      "emailSupport": "Suporte por e-mail",
+      "needMore": "Precisa de mais?",
+      "contactSales": "Fale com vendas",
+      "forEnterprise": "para preços Enterprise.",
+      "securePayments": "Pagamentos seguros processados pela Stripe."
+    },
+    "toasts": {
+      "createBrandFailed": "Falha ao criar a marca",
+      "savePromptsFailed": "Falha ao salvar os prompts",
+      "saveCompetitorsFailed": "Falha ao salvar os concorrentes",
+      "addOnePrompt": "Adicione pelo menos um prompt antes de continuar",
+      "addOneCompetitor": "Adicione pelo menos um concorrente para continuar.",
+      "setupComplete": "Configuração concluída! Seu primeiro rastreamento está começando.",
+      "almostDone": "Quase lá! Escolha um plano para iniciar seu teste grátis.",
+      "checkoutFailed": "Falha no checkout"
+    }
   }
 }

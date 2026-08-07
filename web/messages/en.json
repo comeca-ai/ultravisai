@@ -1184,5 +1184,119 @@
       "privacy": "Privacy",
       "aiPolicy": "AI Policy"
     }
+  },
+  "onboarding": {
+    "topicLoadingMessages": [
+      "Researching topics for your brand...",
+      "Analyzing your industry landscape...",
+      "Identifying key themes and trends...",
+      "Finding what your audience cares about...",
+      "Evaluating competitive topics...",
+      "Almost there, finalizing suggestions..."
+    ],
+    "competitorLoadingMessages": [
+      "Searching for competitors...",
+      "Analyzing your market...",
+      "Identifying key players...",
+      "Verifying company details...",
+      "Finalizing recommendations..."
+    ],
+    "back": "Back",
+    "continue": "Continue",
+    "tryAgain": "Try again",
+    "removeTopic": "Remove topic",
+    "enterNewPrompt": "Enter new prompt...",
+    "promptCount": "{count} prompts",
+    "step1": {
+      "title": "Set up your brand",
+      "subtitle": "See how AI platforms talk about you. Add your first brand to get started.",
+      "brandName": "Brand name",
+      "brandNamePlaceholder": "e.g. Acme Corp",
+      "website": "Website",
+      "websitePlaceholder": "example.com",
+      "describeBrand": "Describe your brand",
+      "optional": "(optional)",
+      "descriptionPlaceholder": "A brief description helps us generate better suggestions.",
+      "tipIndustry": "What industry are you in?",
+      "tipAudience": "Who is your target audience?"
+    },
+    "step2": {
+      "title": "Select your target market",
+      "subtitle": "Pick the region and language your audience uses. This helps us deliver more accurate AI visibility data.",
+      "region": "Region",
+      "language": "Language",
+      "settingUp": "Setting up..."
+    },
+    "topics": {
+      "title": "Choose topics to monitor",
+      "selectUpTo": "Select up to 10 topics",
+      "fetchError": "Couldn't fetch topic suggestions right now — add your own below.",
+      "addCustomPlaceholder": "Add custom topic...",
+      "generating": "Generating prompts...",
+      "looksGood": "Looks good",
+      "tipsTitle": "Topic Selection Tips",
+      "tip1Title": "5 prompts are created per topic",
+      "tip1Body": "You can select up to 10 topics for a total of 50 prompts. More can be added anytime from the dashboard.",
+      "tip2Title": "Think like your customers",
+      "tip2Body": "Use terms your audience would search for when looking for products or services like yours.",
+      "tip3Title": "Keep it short",
+      "tip3Body": "Topics should be concise — we'll turn them into detailed prompts in the next step."
+    },
+    "promptsReview": {
+      "title": "Review your prompts",
+      "subtitle": "These prompts will be sent to AI platforms daily. Feel free to edit, add, or remove any before starting.",
+      "saving": "Saving prompts...",
+      "genError": "Couldn't generate prompt suggestions right now — add your own to each topic below to continue.",
+      "listTitle": "Your Prompt List",
+      "totalCount": "{count} prompts total",
+      "tableTopic": "Topic",
+      "empty": "No prompts generated yet."
+    },
+    "competitors": {
+      "title": "Add your competitors",
+      "subtitle": "We'll track how often competitors appear alongside your brand in AI responses.",
+      "fetchError": "Couldn't fetch competitor suggestions right now — add your own below.",
+      "suggested": "Suggested competitors",
+      "addManually": "Add manually",
+      "companyName": "Company name",
+      "domainPlaceholder": "domain.com",
+      "finishing": "Finishing setup...",
+      "startTracking": "{count, plural, one {Start tracking with # competitor} other {Start tracking with # competitors}}",
+      "addToContinue": "Add a competitor to continue"
+    },
+    "plan": {
+      "title": "Choose your plan",
+      "subtitle": "Start your 14-day free trial — your card won't be charged until the trial ends. Cancel anytime in Settings → Billing.",
+      "mostPopular": "Most Popular",
+      "perMonth": "/month",
+      "redirecting": "Redirecting...",
+      "startTrial": "Start Free Trial",
+      "unlimited": "Unlimited",
+      "brand": "brand",
+      "brands": "brands",
+      "promptsTracked": "prompts tracked",
+      "answerEngines": "answer engines",
+      "teamMembers": "team members",
+      "dailyMonitoring": "Daily monitoring",
+      "weeklyMonitoring": "Weekly monitoring",
+      "competitorTracking": "Competitor tracking",
+      "contentOptimization": "Content optimization",
+      "advancedAnalytics": "Advanced analytics",
+      "emailSupport": "Email support",
+      "needMore": "Need more?",
+      "contactSales": "Contact sales",
+      "forEnterprise": "for Enterprise pricing.",
+      "securePayments": "Secure payments powered by Stripe."
+    },
+    "toasts": {
+      "createBrandFailed": "Failed to create brand",
+      "savePromptsFailed": "Failed to save prompts",
+      "saveCompetitorsFailed": "Failed to save competitors",
+      "addOnePrompt": "Add at least one prompt before continuing",
+      "addOneCompetitor": "Add at least one competitor to continue.",
+      "setupComplete": "Setup complete! Your first tracking is starting.",
+      "almostDone": "Almost done! Choose a plan to start your free trial.",
+      "checkoutFailed": "Checkout failed"
+    }
   }
 }

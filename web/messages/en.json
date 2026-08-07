@@ -1218,7 +1218,9 @@
       "optional": "(optional)",
       "descriptionPlaceholder": "A brief description helps us generate better suggestions.",
       "tipIndustry": "What industry are you in?",
-      "tipAudience": "Who is your target audience?"
+      "tipAudience": "Who is your target audience?",
+      "aiFill": "Fill with AI from your website",
+      "aiFilling": "Reading your site..."
     },
     "step2": {
       "title": "Select your target market",
@@ -1296,7 +1298,8 @@
       "addOneCompetitor": "Add at least one competitor to continue.",
       "setupComplete": "Setup complete! Your first tracking is starting.",
       "almostDone": "Almost done! Choose a plan to start your free trial.",
-      "checkoutFailed": "Checkout failed"
+      "checkoutFailed": "Checkout failed",
+      "describeFailed": "Couldn't read the site right now — write a brief description manually."
     }
   }
 }

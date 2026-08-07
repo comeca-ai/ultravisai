@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { createBrand } from '@/lib/actions/brand';
 import { createTopics, getTopics } from '@/lib/actions/topic';
@@ -231,6 +231,8 @@ export default function OnboardingPage() {
   const [brandName, setBrandName] = useState('');
   const [website, setWebsite] = useState('');
   const [description, setDescription] = useState('');
+  const [generatingDescription, setGeneratingDescription] = useState(false);
+  const locale = useLocale();
 
   // Step 2
   const [region, setRegion] = useState('US');
@@ -467,6 +469,42 @@ export default function OnboardingPage() {
     .replace(/^https?:\/\//, '')
     .replace(/\/.*$/, '')
     .trim();
+
+  // ── Step 1: draft the description from the brand's own homepage ──
+
+  const handleDescribeFromSite = async () => {
+    if (!domain) return;
+    setGeneratingDescription(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const res = await fetch(`${AEO_SERVER_URL}/api/brands/describe-from-site`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          website: domain,
+          brandName: brandName.trim(),
+          language: locale.startsWith('pt') ? 'pt' : 'en',
+        }),
+      });
+
+      if (!res.ok) throw new Error('describe-from-site failed');
+      const data = await res.json();
+      if (!data.description) throw new Error('empty description');
+      setDescription(data.description);
+    } catch (err) {
+      console.error('Describe from site error:', err);
+      toast.error(t('toasts.describeFailed'));
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
 
   // ── Step 2 → Step 3 transition: create org + brand ──
 
@@ -989,6 +1027,26 @@ export default function OnboardingPage() {
                 {t('step1.describeBrand')}{' '}
                 <span className="text-muted-foreground">{t('step1.optional')}</span>
               </Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={handleDescribeFromSite}
+                disabled={!website.trim() || generatingDescription}
+              >
+                {generatingDescription ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('step1.aiFilling')}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {t('step1.aiFill')}
+                  </>
+                )}
+              </Button>
               <Textarea
                 id="description"
                 placeholder={t('step1.descriptionPlaceholder')}

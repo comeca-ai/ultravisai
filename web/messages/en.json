@@ -1374,7 +1374,8 @@
       "tipIndustry": "What industry are you in?",
       "tipAudience": "Who is your target audience?",
       "aiFill": "Fill with AI from your website",
-      "aiFilling": "Reading your site..."
+      "aiFilling": "Reading your site...",
+      "titleNewBrand": "Add a new brand"
     },
     "step2": {
       "title": "Select your target market",
@@ -1418,7 +1419,8 @@
       "domainPlaceholder": "domain.com",
       "finishing": "Finishing setup...",
       "startTracking": "{count, plural, one {Start tracking with # competitor} other {Start tracking with # competitors}}",
-      "addToContinue": "Add a competitor to continue"
+      "addToContinue": "Add a competitor to continue",
+      "skipStart": "Skip & start tracking"
     },
     "plan": {
       "title": "Choose your plan",
@@ -1453,7 +1455,8 @@
       "setupComplete": "Setup complete! Your first tracking is starting.",
       "almostDone": "Almost done! Choose a plan to start your free trial.",
       "checkoutFailed": "Checkout failed",
-      "describeFailed": "Couldn't read the site right now — write a brief description manually."
+      "describeFailed": "Couldn't read the site right now — write a brief description manually.",
+      "generatePromptsFailed": "Failed to generate prompts from topics"
     }
   }
 }

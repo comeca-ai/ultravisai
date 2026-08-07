@@ -483,11 +483,11 @@
     "subtitle": "The Citability Index (CI) organizes the 6 levers that make a brand citable by AI engines — with weight, action zone, and the real answer key of sources AIs cite for your prompts.",
     "kpis": {
       "icTitle": "Partial CI",
-      "icHint": "Weighted average of the dimensions already measured (01 and 02), from 0 to 100.",
+      "icHint": "Weighted average of the dimensions already measured (01 and 02), 0 to 100 — all tracked time.",
       "d1Title": "01 · Site Readability",
-      "d1Hint": "Latest Site Audit score.",
+      "d1Hint": "Latest Site Audit score for the primary domain.",
       "d2Title": "02 · Content",
-      "d2Hint": "% of AI answers citing your domain."
+      "d2Hint": "% of AI answers citing your domain (all time)."
     },
     "matrix": {
       "title": "Citability Matrix",
@@ -516,7 +516,7 @@
     },
     "dims": {
       "weight": "{weight}% of CI",
-      "answerKey": "Answer key — sources AIs cite in your sector:",
+      "answerKey": "Answer key — sources AIs cite in your sector (all time):",
       "citationCount": "{count, plural, one {# citation} other {# citations}}",
       "noCitations": "No citations in this category from your tracking runs yet.",
       "runAuditCta": "Run Site Audit",

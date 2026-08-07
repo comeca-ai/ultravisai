@@ -29,11 +29,14 @@ Zones (always use these exact action verbs — pt-BR "Faça agora / Reivindique 
 - **Zone B — "Reivindique" / "Claim"** (dims 03+04, 30%): third-party surfaces the brand can activate — claim profiles, request reviews, publish. Medium return, low effort.
 - **Zone C — "Conquiste" / "Earn"** (dims 05+06, 35%): depends on third parties and is slow — earned media, vertical authority. Highest single weight (dim 05, 22%) but only pays off once A and B stand.
 
-How to ground the IC in real data (never invent scores):
+How to ground the IC in real data (never invent scores). Use the SAME mapping the Citability dashboard page uses, so your numbers and the page always agree:
 
-- Dims 01–02 → \`run_site_audit\` / \`get_site_audit\` results (technical + content categories).
-- Dims 03–05 → \`list_citations\`: the domains AIs actually cite for this brand's prompts are the sector's "answer key". Compare the brand against the top cited domains by source type (social → dim 03, review/forum → dim 04, news/external → dim 05). A brand absent from the top cited domains scores low on dim 05.
-- Dim 06 → topic/prompt visibility on category prompts ("best X companies") via \`get_prompt_performance\` and \`get_visibility_summary\`.
+- Dim 01 → the latest Site Audit of the brand's primary domain (\`list_site_audits\` / \`get_site_audit\`; run one via \`run_site_audit\` only on explicit request).
+- Dim 02 → owned-citation coverage from \`list_citations\` with \`source_filter: "owned"\`: the share of AI answers citing the brand's own domain.
+- Dims 03–06 → \`list_citations\` source-type breakdown; the domains AIs actually cite for this brand's prompts are the sector's "answer key". Category mapping: \`social\` → dim 03; \`review\` + \`forum\` → dim 04; \`editorial\` + \`other\` → dim 05; \`institutional\` → dim 06. A brand absent from the top cited domains scores low on dim 05.
+- Dim 06 can also be cross-checked with visibility on category prompts ("best X companies") via \`get_prompt_performance\` and \`get_visibility_summary\`.
+
+The dashboard has a **Citability page** at /dashboard/citability showing a partial IC (dims 01–02 only, weights renormalized, all-time window) plus the per-category answer key — point users there for the visual overview.
 
 Recommended execution order is A → B → C. When prioritizing actions for the user, name the dimension and its zone verb (e.g. "Faça agora: publicar uma página própria respondendo o prompt X — dimensão 02, Conteúdo"). Do not present a numeric IC score unless you computed each part from tool data in the conversation.
 `;

@@ -22,7 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBrandStore } from '@/stores/use-brand-store';
-import { getAudits, type AuditSummary } from '@/lib/actions/audits';
+import { getAuditTrend, type AuditTrend } from '@/lib/actions/audits';
 import { getCitationsOverview, type CitationsOverview } from '@/lib/actions/citations';
 import { pct } from '@/components/audit/audit-report';
 import type { SourceCategory } from '@/lib/citations/classify';
@@ -172,7 +172,7 @@ function CitabilityMatrix({ dimLabel }: { dimLabel: (key: Dimension['key']) => s
 export default function CitabilityPage() {
   const t = useTranslations('citability');
   const activeBrandId = useBrandStore((s) => s.activeBrandId);
-  const [audits, setAudits] = useState<AuditSummary[] | null>(null);
+  const [auditTrend, setAuditTrend] = useState<AuditTrend | null>(null);
   const [overview, setOverview] = useState<CitationsOverview | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -182,12 +182,12 @@ export default function CitabilityPage() {
     setLoading(true);
     (async () => {
       try {
-        const [auditData, citationData] = await Promise.all([
-          getAudits(activeBrandId),
+        const [trendData, citationData] = await Promise.all([
+          getAuditTrend(activeBrandId),
           getCitationsOverview(activeBrandId, { datePreset: 'all' }),
         ]);
         if (!cancelled) {
-          setAudits(auditData);
+          setAuditTrend(trendData);
           setOverview(citationData);
         }
       } catch (err) {
@@ -201,15 +201,23 @@ export default function CitabilityPage() {
     };
   }, [activeBrandId]);
 
-  // D1 — latest completed Site Audit score (0–100).
+  // D1 — latest Site Audit score for the brand's PRIMARY domain (0–100).
+  // Same source as the Site Audit page's headline (getAuditTrend), so both
+  // pages always show the same number; getAudits would mix in audits of
+  // arbitrary URLs.
   const d1Score = useMemo(() => {
-    const latest = (audits ?? []).find((a) => a.status === 'completed' && a.total_score !== null);
-    return latest ? pct(latest.total_score) : null;
-  }, [audits]);
+    const points = auditTrend?.points ?? [];
+    for (let i = points.length - 1; i >= 0; i--) {
+      if (points[i].totalScore !== null) return pct(points[i].totalScore);
+    }
+    return null;
+  }, [auditTrend]);
 
   // D2 — owned-citation coverage: share of tracked AI answers citing the
   // brand's own domain. A proxy for "each question has an own, extractable
   // page" — if the pages existed and ranked, the AIs would cite them.
+  // resultsCiting is per-domain, so a result citing two owned subdomains
+  // counts twice in the sum; Math.min caps the ratio at 100.
   const d2Score = useMemo(() => {
     if (!overview || overview.totals.results === 0) return null;
     const ownedResults = overview.rows

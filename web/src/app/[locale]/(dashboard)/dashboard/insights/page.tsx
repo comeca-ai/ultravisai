@@ -629,11 +629,8 @@ function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <BarChart3 className="h-12 w-12 text-muted-foreground/40 mb-4" />
-      <h2 className="text-lg font-semibold">No tracking data yet</h2>
-      <p className="text-muted-foreground text-sm mt-1 max-w-md">
-        Run your prompts through AI platforms to see how your brand appears in AI-generated
-        responses.
-      </p>
+      <h2 className="text-lg font-semibold">{t('emptyTitle')}</h2>
+      <p className="text-muted-foreground text-sm mt-1 max-w-md">{t('emptyBody')}</p>
       {!isCloud && (
         <Button onClick={onRunPrompts} disabled={isRunning} className="mt-6 gap-2">
           {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
@@ -645,24 +642,24 @@ function EmptyState({
 }
 
 function NoDataForPeriod({ datePreset, onReset }: { datePreset: DatePreset; onReset: () => void }) {
+  const t = useTranslations('insights');
   const labels: Record<DatePreset, string> = {
-    '24h': 'last 24 hours',
-    '7d': 'last 7 days',
-    '30d': 'last 30 days',
-    '90d': 'last 90 days',
-    all: 'selected period',
-    custom: 'selected period',
+    '24h': t('period24h'),
+    '7d': t('period7d'),
+    '30d': t('period30d'),
+    '90d': t('period90d'),
+    all: t('periodSelected'),
+    custom: t('periodSelected'),
   };
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <CalendarX2 className="h-10 w-10 text-muted-foreground/40 mb-3" />
-      <h3 className="text-base font-semibold">No results for the {labels[datePreset]}</h3>
-      <p className="text-muted-foreground text-sm mt-1 max-w-sm">
-        There is tracking data available in other time periods. Try a wider range or switch to
-        &quot;All time&quot;.
-      </p>
+      <h3 className="text-base font-semibold">
+        {t('noPeriodTitle', { period: labels[datePreset] })}
+      </h3>
+      <p className="text-muted-foreground text-sm mt-1 max-w-sm">{t('noPeriodBody')}</p>
       <Button variant="outline" size="sm" className="mt-4" onClick={onReset}>
-        Show all data
+        {t('showAllData')}
       </Button>
     </div>
   );
@@ -812,6 +809,8 @@ function TrackingProgressBanner({
   jobStatus: TrackingJobStatus | null;
   onStop: () => void;
 }) {
+  const t = useTranslations('insights');
+
   if (!jobStatus) return null;
 
   const isActive = jobStatus.status === 'active' || jobStatus.status === 'waiting';
@@ -826,9 +825,7 @@ function TrackingProgressBanner({
         <div className="flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
           <span className="text-sm font-medium">
-            {jobStatus.status === 'waiting'
-              ? 'Queued — starting automatically'
-              : 'Analyzing prompts...'}
+            {jobStatus.status === 'waiting' ? t('queued') : t('analyzing')}
           </span>
           {progress && (
             <span className="text-xs text-muted-foreground tabular-nums">
@@ -843,15 +840,12 @@ function TrackingProgressBanner({
           onClick={onStop}
         >
           <StopCircle className="h-3.5 w-3.5" />
-          Stop
+          {t('stop')}
         </Button>
       </div>
 
       {jobStatus.status === 'waiting' && (
-        <p className="text-xs text-muted-foreground">
-          Another analysis is running right now. Yours will begin the moment a slot opens up — no
-          need to wait here, it&apos;ll keep going in the background.
-        </p>
+        <p className="text-xs text-muted-foreground">{t('queuedExplain')}</p>
       )}
 
       {progress && progress.total > 0 && (
@@ -1266,7 +1260,7 @@ export default function InsightsPage() {
           <div className="flex justify-center">
             <Button variant="outline" onClick={() => setShowSinglePrompt(true)} className="gap-2">
               <FlaskConical className="h-4 w-4" />
-              Or test a single prompt
+              {t('testSinglePrompt')}
             </Button>
           </div>
         )}

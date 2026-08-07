@@ -483,11 +483,10 @@
     "subtitle": "The Citability Index (CI) organizes the 6 levers that make a brand citable by AI engines — with weight, action zone, and the real answer key of sources AIs cite for your prompts.",
     "kpis": {
       "icTitle": "Partial CI",
-      "icHint": "Weighted average of the dimensions already measured (01 and 02), 0 to 100 — all tracked time.",
-      "d1Title": "01 · Site Readability",
+      "d1Title": "01 · AI Readability",
       "d1Hint": "Latest Site Audit score for the primary domain.",
-      "d2Title": "02 · Content",
-      "d2Hint": "% of AI answers citing your domain (all time).",
+      "d2Title": "02 · Content Coverage",
+      "d2Hint": "% of AI answers citing your domain.",
       "icNoData": "Run a Site Audit and a tracking run to start measuring.",
       "icCoverage": "{coverage}% of the index measured",
       "icRecalc": "The score recalculates as more dimensions are measured.",
@@ -503,8 +502,7 @@
       "yAxis": "Third-party dependency",
       "zoneA": "Act now — you control it, it's fast",
       "zoneB": "Claim — third-party, but you activate it",
-      "zoneC": "Earn — depends on third parties, it's slow",
-      "emptyZone": "— empty zone: if it's yours, you control it —"
+      "zoneC": "Earn — depends on third parties, it's slow"
     },
     "zones": {
       "A": {
@@ -517,25 +515,25 @@
       },
       "C": {
         "name": "Earn",
-        "desc": "Depends on third parties and is slow — earned media and vertical authority. The CI's biggest single weight; pays off once A and B stand."
+        "desc": "Depends on third parties and is slow — earned media and vertical authority. The CI's biggest single weight; pays off once the \"Act now\" and \"Claim\" zones are done."
       }
     },
     "dims": {
       "weight": "{weight}% of CI",
-      "answerKey": "Answer key — sources AIs cite in your sector (all time):",
+      "answerKey": "Answer key — sources AIs cite in your sector:",
       "citationCount": "{count, plural, one {# citation} other {# citations}}",
       "noCitations": "No citations in this category from your tracking runs yet.",
       "runAuditCta": "Run Site Audit",
       "dim1": {
-        "name": "Site Readability",
+        "name": "AI Readability",
         "action": "Make your site readable for AIs",
-        "desc": "Technical and entity readiness — schema/JSON-LD, llms.txt, Wikidata. Measured by your latest Site Audit.",
+        "desc": "Technical and <entity>entity</entity> readiness — schema/JSON-LD, <llms>llms.txt</llms>, <wikidata>Wikidata</wikidata>. Measured by the latest Site Audit of the primary domain.",
         "cta": "Run Site Audit"
       },
       "dim2": {
-        "name": "Content",
+        "name": "Content Coverage",
         "action": "Answer every question on your site",
-        "desc": "GEO coverage and quality per topic — an own, extractable page. Measured by the share of AI answers citing your domain.",
+        "desc": "<geo>GEO</geo> coverage and quality per topic — an own, <ext>extractable</ext> page. Measured by the share of AI answers citing your domain.",
         "cta": "See content opportunities"
       },
       "dim3": {
@@ -562,9 +560,20 @@
         "desc": "Segment authority — regulators, associations and brand demand.",
         "cta": "Map sector associations and regulators"
       },
-      "comingSoon": "Coming soon"
+      "comingSoon": "Coming soon",
+      "presenceUnknown": "no data",
+      "lowSample": "Small sample ({count, plural, one {# citation} other {# citations}} in this category) — treat as direction, not decision."
     },
-    "notMeasured": "Not measured"
+    "notMeasured": "Not measured",
+    "howItWorks": "How the CI works",
+    "windowNote": "Considers all tracked time",
+    "glossary": {
+      "geo": "GEO (Generative Engine Optimization): optimizing content to be cited by AI answer engines.",
+      "llms": "llms.txt: a file on your site that tells AIs which pages to read and how to interpret them.",
+      "wikidata": "Wikidata: the public entity database AIs use to confirm who your brand is.",
+      "entity": "Entity: the brand identity AIs recognize — consistent name, site and data across sources.",
+      "extractable": "Extractable page: structured so an AI can lift the answer from it (clear headings, lists, a direct answer)."
+    }
   },
   "shopping": {
     "title": "Shopping",

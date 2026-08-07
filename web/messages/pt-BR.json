@@ -483,11 +483,10 @@
     "subtitle": "O Índice de Citabilidade (IC) organiza as 6 frentes que fazem uma marca ser citada pelas IAs — com peso, zona de ação e o gabarito real das fontes que as IAs citam nos seus prompts.",
     "kpis": {
       "icTitle": "IC parcial",
-      "icHint": "Média ponderada das dimensões já medidas (01 e 02), de 0 a 100 — todo o período rastreado.",
-      "d1Title": "01 · Legibilidade do Site",
+      "d1Title": "01 · Legibilidade para IAs",
       "d1Hint": "Score da última Auditoria de Site do domínio principal.",
-      "d2Title": "02 · Conteúdo",
-      "d2Hint": "% das respostas de IA que citam o seu domínio (todo o período).",
+      "d2Title": "02 · Cobertura de Conteúdo",
+      "d2Hint": "% das respostas de IA que citam o seu domínio.",
       "icNoData": "Rode uma Auditoria de Site e um rastreamento para começar a medir.",
       "icCoverage": "{coverage}% do índice medido",
       "icRecalc": "A nota se recalcula conforme novas dimensões forem medidas.",
@@ -503,8 +502,7 @@
       "yAxis": "Dependência de terceiros",
       "zoneA": "Faça agora — você controla, é rápido",
       "zoneB": "Reivindique — de terceiros, mas você ativa",
-      "zoneC": "Conquiste — depende de terceiros, é lento",
-      "emptyZone": "— zona vazia: se é seu, você controla —"
+      "zoneC": "Conquiste — depende de terceiros, é lento"
     },
     "zones": {
       "A": {
@@ -517,25 +515,25 @@
       },
       "C": {
         "name": "Conquiste",
-        "desc": "Depende de terceiros e é lento — mídia earned e autoridade de vertical. Maior peso isolado do IC; colhe quem já fez A e B."
+        "desc": "Depende de terceiros e é lento — mídia earned e autoridade de vertical. Maior peso isolado do IC; colhe quem já fez as zonas \"Faça agora\" e \"Reivindique\"."
       }
     },
     "dims": {
       "weight": "{weight}% do IC",
-      "answerKey": "Gabarito — fontes que as IAs citam no seu setor (todo o período):",
+      "answerKey": "Gabarito — fontes que as IAs citam no seu setor:",
       "citationCount": "{count, plural, one {# citação} other {# citações}}",
       "noCitations": "Nenhuma citação dessa categoria nos seus rastreamentos ainda.",
       "runAuditCta": "Rodar Auditoria de Site",
       "dim1": {
-        "name": "Legibilidade do Site",
+        "name": "Legibilidade para IAs",
         "action": "Deixe o site legível para as IAs",
-        "desc": "Prontidão técnica e entidade — schema/JSON-LD, llms.txt, Wikidata. Medida pela sua Auditoria de Site mais recente.",
+        "desc": "Prontidão técnica e <entity>entidade</entity> — schema/JSON-LD, <llms>llms.txt</llms>, <wikidata>Wikidata</wikidata>. Medida pela Auditoria de Site mais recente do domínio principal.",
         "cta": "Rodar Auditoria de Site"
       },
       "dim2": {
-        "name": "Conteúdo",
+        "name": "Cobertura de Conteúdo",
         "action": "Responda cada pergunta no seu site",
-        "desc": "Cobertura e qualidade GEO por tópico — página própria e extraível. Medida pela fração das respostas de IA que citam o seu domínio.",
+        "desc": "Cobertura e qualidade <geo>GEO</geo> por tópico — página própria e <ext>extraível</ext>. Medida pela fração das respostas de IA que citam o seu domínio.",
         "cta": "Ver oportunidades de conteúdo"
       },
       "dim3": {
@@ -562,9 +560,20 @@
         "desc": "Autoridade de segmento — reguladores, associações e demanda de marca.",
         "cta": "Mapear associações e reguladores"
       },
-      "comingSoon": "Em breve"
+      "comingSoon": "Em breve",
+      "presenceUnknown": "sem dado",
+      "lowSample": "Amostra pequena ({count, plural, one {# citação} other {# citações}} na categoria) — use como direção, não como decisão."
     },
-    "notMeasured": "Não medido"
+    "notMeasured": "Não medido",
+    "howItWorks": "Como funciona o IC",
+    "windowNote": "Considera todo o período rastreado",
+    "glossary": {
+      "geo": "GEO (Generative Engine Optimization): otimizar conteúdo para ser citado por motores de resposta de IA.",
+      "llms": "llms.txt: arquivo no seu site que orienta as IAs sobre quais páginas ler e como interpretá-las.",
+      "wikidata": "Wikidata: base pública de entidades que as IAs usam para confirmar quem é a sua marca.",
+      "entity": "Entidade: a identidade da marca reconhecida pelas IAs — nome, site e dados consistentes entre fontes.",
+      "extractable": "Página extraível: estruturada de forma que a IA consiga recortar a resposta dela (títulos claros, listas, resposta direta)."
+    }
   },
   "shopping": {
     "title": "Shopping",

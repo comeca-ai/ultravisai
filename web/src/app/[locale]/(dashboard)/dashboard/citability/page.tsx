@@ -13,11 +13,15 @@
  * dimension renders an explicit "not measured" state — never a bare 0 or
  * "—" that could be confused with a real bad score. The partial IC card
  * declares how much of the index is actually covered.
+ *
+ * The bubble matrix is a CONCEPTUAL diagram of the framework (positions are
+ * fixed by the methodology, not driven by the brand's data), so it lives
+ * inside a collapsible "how it works" section without chart framing.
  */
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Eye, FileText, Gauge } from 'lucide-react';
+import { ArrowRight, ChevronDown, Eye, FileText, Gauge } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +31,7 @@ import { useBrandStore } from '@/stores/use-brand-store';
 import { getAuditTrend, type AuditTrend } from '@/lib/actions/audits';
 import { getCitationsOverview, type CitationsOverview } from '@/lib/actions/citations';
 import { pct } from '@/components/audit/audit-report';
+import { DomainFavicon } from '@/components/citations/source-cells';
 import type { SourceCategory } from '@/lib/citations/classify';
 import { cn } from '@/lib/utils';
 
@@ -47,7 +52,7 @@ interface Dimension {
   key: DimKey;
   weight: number;
   zone: Zone;
-  /** Matrix position: x = internal↔external, y = third-party dependency. */
+  /** Conceptual diagram position: x = internal↔external, y = dependency. */
   x: number;
   y: number;
   /** Citation source categories that feed this dimension's "answer key". */
@@ -79,13 +84,26 @@ const ZONES: Zone[] = ['A', 'B', 'C'];
 /** A dimension is either measured (score 0–100, zero included) or not. */
 type DimStatus = { measured: true; score: number } | { measured: false };
 
-// ─── Matrix (SVG) ────────────────────────────────────────────────────────────
+/** Below this many citations, a category's answer key is directional only. */
+const LOW_SAMPLE_THRESHOLD = 10;
 
-function CitabilityMatrix({ dimLabel }: { dimLabel: (key: DimKey) => string }) {
+// ─── Glossary term (dotted underline + native tooltip) ──────────────────────
+
+function Term({ def, children }: { def: string; children: React.ReactNode }) {
+  return (
+    <span className="cursor-help underline decoration-dotted underline-offset-2" title={def}>
+      {children}
+    </span>
+  );
+}
+
+// ─── Conceptual diagram (no chart framing — it is not data-driven) ──────────
+
+function CitabilityDiagram({ dimLabel }: { dimLabel: (key: DimKey) => string }) {
   const t = useTranslations('citability');
-  const W = 640;
-  const H = 340;
-  const M = { l: 48, r: 20, t: 20, b: 44 };
+  const W = 560;
+  const H = 280;
+  const M = { l: 40, r: 16, t: 12, b: 36 };
   const PW = W - M.l - M.r;
   const PH = H - M.t - M.b;
   const px = (x: number) => M.l + (x / 100) * PW;
@@ -93,43 +111,30 @@ function CitabilityMatrix({ dimLabel }: { dimLabel: (key: DimKey) => string }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t('matrix.ariaLabel')}>
-      <rect
-        x={M.l}
-        y={M.t}
-        width={PW}
-        height={PH}
-        rx={8}
-        className="fill-muted/30 stroke-border"
-        strokeWidth={1}
-      />
-      <text x={M.l + 12} y={M.t + PH - 14} className="fill-muted-foreground/60 text-[10px] italic">
-        {t('matrix.emptyZone')}
-      </text>
-      {/* Axes labels */}
+      {/* Directional captions only — no plot frame, this is a concept map */}
       <text
         x={M.l + PW / 2}
-        y={H - 10}
+        y={H - 6}
         textAnchor="middle"
         className="fill-muted-foreground text-[11px]"
       >
         {t('matrix.xAxis')}
       </text>
       <text
-        x={14}
+        x={12}
         y={M.t + PH / 2}
         textAnchor="middle"
-        transform={`rotate(-90 14 ${M.t + PH / 2})`}
+        transform={`rotate(-90 12 ${M.t + PH / 2})`}
         className="fill-muted-foreground text-[11px]"
       >
         {t('matrix.yAxis')}
       </text>
-      {/* Bubbles: radius encodes IC weight */}
       {DIMENSIONS.map((d) => (
         <g key={d.n}>
           <circle
             cx={px(d.x)}
             cy={py(d.y)}
-            r={d.weight * 1.1}
+            r={d.weight * 1.0}
             fill={ZONE_COLORS[d.zone]}
             fillOpacity={0.9}
             className="stroke-background"
@@ -206,6 +211,58 @@ function CoverageBar({ statuses }: { statuses: Record<DimKey, DimStatus> }) {
   );
 }
 
+// ─── Answer-key table (favicon, clickable domain, citations, presence) ──────
+
+interface AnswerKeyRow {
+  domain: string;
+  totalCitations: number;
+}
+
+function AnswerKeyTable({ rows, categoryTotal }: { rows: AnswerKeyRow[]; categoryTotal: number }) {
+  const t = useTranslations('citability');
+  return (
+    <div className="rounded-md border bg-muted/30 p-2.5">
+      <p className="mb-1.5 text-xs font-medium text-foreground">{t('dims.answerKey')}</p>
+      <table className="w-full text-xs">
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.domain} className="border-t border-border/50 first:border-t-0">
+              <td className="py-1.5 pr-2">
+                <a
+                  href={`https://${row.domain}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex max-w-full items-center gap-1.5 hover:underline"
+                >
+                  <span className="shrink-0 [&>*]:h-4 [&>*]:w-4">
+                    <DomainFavicon domain={row.domain} />
+                  </span>
+                  <span className="truncate text-foreground">{row.domain}</span>
+                </a>
+              </td>
+              <td className="whitespace-nowrap py-1.5 pr-2 text-right tabular-nums text-muted-foreground">
+                {t('dims.citationCount', { count: row.totalCitations })}
+              </td>
+              <td className="py-1.5 text-right">
+                {/* The platform has no brand-presence data for third-party
+                    domains yet — say so instead of guessing. */}
+                <Badge variant="outline" className="text-[10px] font-normal text-muted-foreground">
+                  {t('dims.presenceUnknown')}
+                </Badge>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {categoryTotal < LOW_SAMPLE_THRESHOLD && (
+        <p className="mt-2 border-t border-border/50 pt-2 text-[11px] italic text-muted-foreground">
+          {t('dims.lowSample', { count: categoryTotal })}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function CitabilityPage() {
@@ -214,6 +271,7 @@ export default function CitabilityPage() {
   const [auditTrend, setAuditTrend] = useState<AuditTrend | null>(null);
   const [overview, setOverview] = useState<CitationsOverview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showHow, setShowHow] = useState(false);
 
   useEffect(() => {
     if (!activeBrandId) return;
@@ -300,68 +358,80 @@ export default function CitabilityPage() {
   }, [statuses]);
 
   // "Answer key" per dimension: top cited domains in that dimension's
-  // source categories — the real list of sources AI engines cite for this
-  // brand's prompts.
+  // source categories, plus the category's citation total (for the
+  // low-sample warning).
   const answerKey = useMemo(() => {
-    const map = new Map<DimKey, { domain: string; totalCitations: number }[]>();
+    const map = new Map<DimKey, { rows: AnswerKeyRow[]; categoryTotal: number }>();
     if (!overview) return map;
     for (const dim of DIMENSIONS) {
       if (!dim.categories) continue;
-      const rows = overview.rows
-        .filter((r) => dim.categories!.includes(r.category))
+      const inCategory = overview.rows.filter((r) => dim.categories!.includes(r.category));
+      const rows = [...inCategory]
         .sort((a, b) => b.totalCitations - a.totalCitations)
         .slice(0, 4)
         .map((r) => ({ domain: r.domain, totalCitations: r.totalCitations }));
-      map.set(dim.key, rows);
+      const categoryTotal = inCategory.reduce((sum, r) => sum + r.totalCitations, 0);
+      map.set(dim.key, { rows, categoryTotal });
     }
     return map;
   }, [overview]);
 
-  const ctaLabel = (key: DimKey) => t(`dims.${key}.cta`);
+  // Rich-text renderer for dimension descriptions: glossary terms get a
+  // dotted underline + one-sentence tooltip. The tag map is shared — a
+  // message that doesn't use a tag simply ignores it.
+  const richDesc = (key: DimKey) =>
+    t.rich(`dims.${key}.desc`, {
+      geo: (chunks) => <Term def={t('glossary.geo')}>{chunks}</Term>,
+      llms: (chunks) => <Term def={t('glossary.llms')}>{chunks}</Term>,
+      wikidata: (chunks) => <Term def={t('glossary.wikidata')}>{chunks}</Term>,
+      entity: (chunks) => <Term def={t('glossary.entity')}>{chunks}</Term>,
+      ext: (chunks) => <Term def={t('glossary.extractable')}>{chunks}</Term>,
+    });
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground text-sm mt-1 max-w-2xl">{t('subtitle')}</p>
         </div>
+        {/* Single mention of the data window, instead of repeating it per card */}
+        <p className="text-xs text-muted-foreground">{t('windowNote')}</p>
       </div>
 
-      {/* KPI row */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {/* Partial IC — declares its own coverage instead of posing as a full score */}
-        <Card>
+      {/* KPI row — the partial IC is the headline card (double width) */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="sm:col-span-2 border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
             <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t('kpis.icTitle')}
             </CardTitle>
             <Eye className="h-3.5 w-3.5 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2.5">
             {loading ? (
-              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-10 w-32" />
             ) : partialScore === null ? (
               <div>
-                <NotMeasured className="text-lg" />
+                <NotMeasured className="text-xl" />
                 <p className="text-xs mt-1 text-muted-foreground">{t('kpis.icNoData')}</p>
               </div>
             ) : (
               <>
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline gap-3">
                   {/* Attenuated while coverage < 50%: the coverage line is the
                       headline, the score is the secondary figure. */}
                   <span
                     className={cn(
                       'font-bold tabular-nums',
-                      coverage < 50 ? 'text-xl text-muted-foreground' : 'text-3xl',
+                      coverage < 50 ? 'text-2xl text-muted-foreground' : 'text-4xl',
                     )}
                   >
                     {partialScore}
-                    <span className="text-xs font-normal text-muted-foreground">/100</span>
+                    <span className="text-sm font-normal text-muted-foreground">/100</span>
                   </span>
-                  <span className="text-sm font-semibold">
+                  <span className="text-base font-semibold">
                     {t('kpis.icCoverage', { coverage })}
                   </span>
                 </div>
@@ -439,28 +509,40 @@ export default function CitabilityPage() {
         </Card>
       </div>
 
-      {/* Matrix */}
+      {/* How the IC works — collapsible, holds the conceptual diagram */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('matrix.title')}</CardTitle>
-          <p className="text-xs text-muted-foreground">{t('matrix.subtitle')}</p>
-        </CardHeader>
-        <CardContent>
-          <div className="mx-auto max-w-3xl">
-            <CitabilityMatrix dimLabel={(key) => t(`dims.${key}.name`)} />
-          </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-            {ZONES.map((zone) => (
-              <span key={zone} className="inline-flex items-center gap-1.5">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: ZONE_COLORS[zone] }}
-                />
-                {t(`matrix.zone${zone}`)}
-              </span>
-            ))}
-          </div>
-        </CardContent>
+        <button
+          type="button"
+          onClick={() => setShowHow((v) => !v)}
+          aria-expanded={showHow}
+          className="flex w-full items-center justify-between rounded-xl px-6 py-4 text-left text-sm font-semibold transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {t('howItWorks')}
+          <ChevronDown
+            className={cn('h-4 w-4 text-muted-foreground transition-transform', {
+              'rotate-180': showHow,
+            })}
+          />
+        </button>
+        {showHow && (
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">{t('matrix.subtitle')}</p>
+            <div className="mx-auto max-w-xl">
+              <CitabilityDiagram dimLabel={(key) => t(`dims.${key}.name`)} />
+            </div>
+            <div className="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              {ZONES.map((zone) => (
+                <span key={zone} className="inline-flex items-center gap-1.5">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: ZONE_COLORS[zone] }}
+                  />
+                  {t(`matrix.zone${zone}`)}
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       {/* Dimension cards, grouped by zone — the zone description lives here,
@@ -480,7 +562,7 @@ export default function CitabilityPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {DIMENSIONS.filter((d) => d.zone === zone).map((dim) => {
               const status = statuses[dim.key];
-              const domains = answerKey.get(dim.key) ?? [];
+              const key = answerKey.get(dim.key);
               return (
                 <Card key={dim.n} className="flex flex-col">
                   <CardHeader className="pb-2">
@@ -501,27 +583,13 @@ export default function CitabilityPage() {
                     </p>
                   </CardHeader>
                   <CardContent className="flex flex-1 flex-col gap-2 text-xs text-muted-foreground">
-                    <p>{t(`dims.${dim.key}.desc`)}</p>
+                    <p>{richDesc(dim.key)}</p>
                     <div className="flex-1">
                       {loading ? (
                         <Skeleton className="h-8 w-full" />
                       ) : dim.categories ? (
-                        domains.length > 0 ? (
-                          <div className="rounded-md border bg-muted/30 p-2.5">
-                            <p className="mb-1.5 font-medium text-foreground">
-                              {t('dims.answerKey')}
-                            </p>
-                            <ul className="space-y-1">
-                              {domains.map((row) => (
-                                <li key={row.domain} className="flex justify-between gap-2">
-                                  <span className="truncate">{row.domain}</span>
-                                  <span className="shrink-0 tabular-nums">
-                                    {t('dims.citationCount', { count: row.totalCitations })}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                        key && key.rows.length > 0 ? (
+                          <AnswerKeyTable rows={key.rows} categoryTotal={key.categoryTotal} />
                         ) : (
                           <p className="italic">{t('dims.noCitations')}</p>
                         )
@@ -538,7 +606,7 @@ export default function CitabilityPage() {
                         <NotMeasured />
                       )}
                     </div>
-                    <DimensionCta href={dim.ctaHref} label={ctaLabel(dim.key)} />
+                    <DimensionCta href={dim.ctaHref} label={t(`dims.${dim.key}.cta`)} />
                   </CardContent>
                 </Card>
               );

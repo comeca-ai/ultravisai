@@ -1231,7 +1231,9 @@
       "optional": "(opcional)",
       "descriptionPlaceholder": "Uma breve descrição nos ajuda a gerar sugestões melhores.",
       "tipIndustry": "Em que setor você atua?",
-      "tipAudience": "Quem é o seu público-alvo?"
+      "tipAudience": "Quem é o seu público-alvo?",
+      "aiFill": "Preencher com IA a partir do site",
+      "aiFilling": "Lendo seu site..."
     },
     "step2": {
       "title": "Selecione seu mercado-alvo",
@@ -1309,7 +1311,8 @@
       "addOneCompetitor": "Adicione pelo menos um concorrente para continuar.",
       "setupComplete": "Configuração concluída! Seu primeiro rastreamento está começando.",
       "almostDone": "Quase lá! Escolha um plano para iniciar seu teste grátis.",
-      "checkoutFailed": "Falha no checkout"
+      "checkoutFailed": "Falha no checkout",
+      "describeFailed": "Não conseguimos ler o site agora — escreva uma breve descrição manualmente."
     }
   }
 }

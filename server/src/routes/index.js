@@ -5,6 +5,7 @@ import volumeRoutes from './volumes.js';
 import contentRoutes from './content.js';
 import competitorRoutes from './competitors.js';
 import topicRoutes from './topics.js';
+import brandRoutes from './brands.js';
 import auditRoutes from './audits.js';
 import reportRoutes from './reports.js';
 
@@ -16,6 +17,7 @@ router.use('/volumes', volumeRoutes);
 router.use('/content', contentRoutes);
 router.use('/competitors', competitorRoutes);
 router.use('/topics', topicRoutes);
+router.use('/brands', brandRoutes);
 router.use('/audits', auditRoutes);
 router.use('/reports', reportRoutes);
 

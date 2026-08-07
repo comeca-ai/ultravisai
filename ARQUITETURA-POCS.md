@@ -234,6 +234,7 @@ Em ordem de valor, quando alguma POC pedir:
 2. **Adapter de scraper plugável** — `PLATFORM_PROVIDER` já existe no env, mas só `cloro` é implementado. Formalizar a interface (submit/poll/parse) destravaria ScrapeLLM (item do roadmap upstream) e um **provider mock** para demo do fluxo completo offline.
 3. **Tema por env** — mover os ~6 tokens principais de `globals.css` para `NEXT_PUBLIC_THEME_*`, zerando o diff de CSS por POC.
 4. **BYO keys por organização** — item do roadmap upstream; permitiria multi-POC numa instância só com custo por cliente. Só vale se o volume de POCs simultâneas crescer.
+5. **Descrição da marca a partir de apresentação (PDF)** — Fase 2 do "Preencher com IA": além de ler o site (já implementado em `POST /api/brands/describe-from-site`), aceitar upload de um deck/apresentação no onboarding e resumir via LLM (OpenAI e Anthropic aceitam PDF direto na API). Envolve upload, storage e limites de tamanho — fazer quando alguma POC pedir.
 
 Anti-objetivos (overengineering para o estágio atual): sistema de plugins, k8s/filas gerenciadas, multi-tenancy white-label por org, painel de administração de POCs.
 

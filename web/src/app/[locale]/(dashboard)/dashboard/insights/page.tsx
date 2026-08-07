@@ -251,6 +251,7 @@ function KpiCard({
   subVariant?: 'muted' | 'positive';
   onClick?: () => void;
 }) {
+  const t = useTranslations('insights');
   const clickable = typeof onClick === 'function';
   return (
     <Card
@@ -258,7 +259,7 @@ function KpiCard({
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
       aria-label={clickable ? `${title} — view breakdown` : undefined}
-      title={clickable ? 'Click to see breakdown' : undefined}
+      title={clickable ? t('clickBreakdown') : undefined}
       onKeyDown={
         clickable
           ? (e) => {
@@ -309,7 +310,7 @@ function KpiCard({
         </p>
         {clickable && (
           <p className="mt-2 flex items-center gap-1 text-[10px] font-medium text-muted-foreground/70 opacity-0 transition-opacity group-hover:opacity-100">
-            View breakdown
+            {t('viewBreakdown')}
             <ArrowUpRight className="h-2.5 w-2.5" />
           </p>
         )}
@@ -331,6 +332,7 @@ function RunSinglePromptDialog({
   onClose: () => void;
   onJobStarted: (jobId: string) => void;
 }) {
+  const t = useTranslations('insights');
   const [prompts, setPrompts] = useState<
     { id: string; text: string; category?: string; platforms: string[] }[]
   >([]);
@@ -342,9 +344,9 @@ function RunSinglePromptDialog({
     setLoading(true);
     getBrandPrompts(brandId)
       .then(setPrompts)
-      .catch(() => toast.error('Failed to load prompts'))
+      .catch(() => toast.error(t('loadPromptsFailed')))
       .finally(() => setLoading(false));
-  }, [open, brandId]);
+  }, [open, brandId, t]);
 
   const handleRun = async (promptId: string) => {
     setRunningId(promptId);
@@ -353,7 +355,7 @@ function RunSinglePromptDialog({
       onClose();
       onJobStarted(jobId);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to run prompt');
+      toast.error(err instanceof Error ? err.message : t('runPromptFailed'));
     } finally {
       setRunningId(null);
     }
@@ -365,11 +367,9 @@ function RunSinglePromptDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <FlaskConical className="h-4 w-4" />
-            Run Single Prompt
+            {t('runSingleTitle')}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            Pick a prompt to test. Only that prompt will run across your enabled platforms.
-          </p>
+          <p className="text-sm text-muted-foreground">{t('runSingleDesc')}</p>
         </DialogHeader>
 
         <div className="space-y-2 pt-2">
@@ -382,9 +382,7 @@ function RunSinglePromptDialog({
           )}
 
           {!loading && prompts.length === 0 && (
-            <p className="text-sm text-muted-foreground py-6 text-center">
-              No active prompts found. Add prompts in brand settings first.
-            </p>
+            <p className="text-sm text-muted-foreground py-6 text-center">{t('noActivePrompts')}</p>
           )}
 
           {!loading &&
@@ -413,7 +411,7 @@ function RunSinglePromptDialog({
                   ) : (
                     <Play className="h-3.5 w-3.5" />
                   )}
-                  Run
+                  {t('run')}
                 </Button>
               </div>
             ))}
@@ -438,13 +436,16 @@ function FilterBar({
   availableModels: string[];
   availableTopics: Topic[];
 }) {
+  const t = useTranslations('insights');
   const set = (patch: Partial<InsightsFilters>) => onChange({ ...filters, ...patch });
 
   return (
     <div className="flex flex-wrap items-end gap-3">
       {/* Date presets */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Date Range</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('dateRange')}
+        </label>
         <div className="flex rounded-md border overflow-hidden">
           {(['24h', '7d', '30d', '90d', 'all', 'custom'] as DatePreset[]).map((p) => (
             <button
@@ -458,7 +459,7 @@ function FilterBar({
                   : 'bg-card hover:bg-muted text-foreground',
               )}
             >
-              {p === 'custom' ? 'Custom' : p === 'all' ? 'All' : p}
+              {p === 'custom' ? t('presetCustom') : p === 'all' ? t('presetAll') : p}
             </button>
           ))}
         </div>
@@ -491,22 +492,24 @@ function FilterBar({
       {/* Topic filter */}
       {availableTopics.length > 0 && (
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Topic</label>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            {t('topicFilter')}
+          </label>
           <Select
             value={filters.topic || null}
             onValueChange={(v) => set({ topic: !v || v === '__all__' ? '' : v })}
           >
             <SelectTrigger className="h-8 w-40 text-xs">
-              <SelectValue placeholder="All Topics">
+              <SelectValue placeholder={t('allTopics')}>
                 {(value) =>
                   value && value !== '__all__'
-                    ? (availableTopics.find((t) => t.id === value)?.name ?? 'All Topics')
-                    : 'All Topics'
+                    ? (availableTopics.find((t) => t.id === value)?.name ?? t('allTopics'))
+                    : t('allTopics')
                 }
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all__">All Topics</SelectItem>
+              <SelectItem value="__all__">{t('allTopics')}</SelectItem>
               {availableTopics.map((t) => (
                 <SelectItem key={t.id} value={t.id}>
                   {t.name}
@@ -519,20 +522,22 @@ function FilterBar({
 
       {/* Region filter */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Region</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('regionFilter')}
+        </label>
         <Select
           value={filters.region || null}
           onValueChange={(v) => set({ region: !v || v === '__all__' ? '' : v })}
         >
           <SelectTrigger className="h-8 w-48 text-xs">
-            <SelectValue placeholder="All Regions">
+            <SelectValue placeholder={t('allRegions')}>
               {(value) =>
-                value && value !== '__all__' ? formatRegionDisplay(String(value)) : 'All Regions'
+                value && value !== '__all__' ? formatRegionDisplay(String(value)) : t('allRegions')
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All Regions</SelectItem>
+            <SelectItem value="__all__">{t('allRegions')}</SelectItem>
             {availableRegions.map((r) => (
               <SelectItem key={r} value={r}>
                 {formatRegionDisplay(r)}
@@ -544,15 +549,17 @@ function FilterBar({
 
       {/* Model filter */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">AI Model</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('aiModel')}
+        </label>
         <Select
           value={filters.model || null}
           onValueChange={(v) => set({ model: !v || v === '__all__' ? '' : v })}
         >
           <SelectTrigger className="h-8 w-44 text-xs">
-            <SelectValue placeholder="All Platforms">
+            <SelectValue placeholder={t('allPlatforms')}>
               {(value) => {
-                if (!value || value === '__all__') return 'All Platforms';
+                if (!value || value === '__all__') return t('allPlatforms');
                 const firstSlug = String(value).split(',')[0];
                 return (
                   MODEL_PROVIDER_LABELS[firstSlug] ??
@@ -563,7 +570,7 @@ function FilterBar({
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All Platforms</SelectItem>
+            <SelectItem value="__all__">{t('allPlatforms')}</SelectItem>
             {availableModels.map((m) => {
               // m is a comma-separated slug list representing a provider family
               const firstSlug = m.split(',')[0];
@@ -733,24 +740,23 @@ function RecommendationCard({
  * (see #457 for why period-scoped and account-scoped numbers must not mix).
  */
 function RecommendationsSection({ data }: { data: InsightsRecommendations }) {
+  const t = useTranslations('insights');
   return (
     <div className="space-y-3">
       <div>
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <Lightbulb className="h-4 w-4 text-primary" />
-          Recommendations
+          {t('recommendations')}
         </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Ideas from your stored analyses — independent of the date filters above.
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">{t('recommendationsSub')}</p>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <RecommendationCard
-          title="Topic Opportunities"
+          title={t('topicOpportunities')}
           icon={Tag}
           href={TOPIC_OPPORTUNITIES_HREF}
           isEmpty={data.topics.length === 0}
-          emptyText="No topic clusters yet. Analyze your prompt volumes to surface the themes with the most AI search demand."
+          emptyText={t('topicOppEmpty')}
         >
           <ul className="divide-y">
             {data.topics.map((t) => (
@@ -767,11 +773,11 @@ function RecommendationsSection({ data }: { data: InsightsRecommendations }) {
           </ul>
         </RecommendationCard>
         <RecommendationCard
-          title="Prompt Opportunities"
+          title={t('promptOpportunities')}
           icon={Sparkles}
           href={PROMPT_OPPORTUNITIES_HREF}
           isEmpty={data.prompts.length === 0}
-          emptyText="No prompt suggestions stored yet. Generate AI prompt ideas based on your brand and competitor citations."
+          emptyText={t('promptOppEmpty')}
         >
           <ul className="divide-y">
             {data.prompts.map((p) => (
@@ -883,20 +889,19 @@ function TrackingProgressBanner({
  * before any competitors are added.
  */
 function NoCompetitorsTeaser() {
+  const t = useTranslations('insights');
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-muted-foreground/30 p-8 text-center">
       <Users className="h-8 w-8 text-muted-foreground/40" />
       <div>
-        <p className="text-sm font-medium text-foreground">No competitors tracked yet</p>
-        <p className="mt-0.5 max-w-xs text-xs text-muted-foreground">
-          Add competitors to see how you compare in AI answers.
-        </p>
+        <p className="text-sm font-medium text-foreground">{t('noCompetitorsTitle')}</p>
+        <p className="mt-0.5 max-w-xs text-xs text-muted-foreground">{t('noCompetitorsBody')}</p>
       </div>
       <Link
         href="/dashboard/competitors"
         className="inline-flex items-center gap-1.5 text-xs font-medium text-primary underline-offset-2 hover:underline"
       >
-        Head-to-Head Comparison
+        {t('headToHead')}
         <ArrowRight className="h-3.5 w-3.5" />
       </Link>
     </div>
@@ -1002,7 +1007,7 @@ export default function InsightsPage() {
         if (/unexpected response/i.test(message)) {
           console.debug('[insights] load aborted by navigation', err);
         } else if (!silent) {
-          toast.error(message || 'Failed to load insights');
+          toast.error(message || t('loadInsightsFailed'));
         } else {
           // Silent refreshes fire every ~10s while a tracking job runs; a
           // transient 5xx or network blip there shouldn't pop a red toast —
@@ -1013,7 +1018,7 @@ export default function InsightsPage() {
         setIsLoading(false);
       }
     },
-    [brand],
+    [brand, t],
   );
 
   useEffect(() => {
@@ -1090,7 +1095,7 @@ export default function InsightsPage() {
             setIsRunning(false);
             setJobStatus(null);
             if (status.status === 'failed') {
-              toast.error(`Job failed: ${status.failedReason ?? 'Unknown error'}`);
+              toast.error(t('jobFailed', { reason: status.failedReason ?? t('unknownError') }));
             }
             break;
           }
@@ -1105,7 +1110,7 @@ export default function InsightsPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeJobId, loadData]);
+  }, [activeJobId, loadData, t]);
 
   const handleFilterChange = (newFilters: InsightsFilters) => {
     setFilters(newFilters);
@@ -1127,7 +1132,7 @@ export default function InsightsPage() {
       });
     } catch (err) {
       setIsRunning(false);
-      toast.error(err instanceof Error ? err.message : 'Failed to trigger tracking');
+      toast.error(err instanceof Error ? err.message : t('triggerFailed'));
     }
   };
 
@@ -1140,7 +1145,7 @@ export default function InsightsPage() {
     setActiveJobId(null);
     setIsRunning(false);
     setJobStatus(null);
-    toast.success('Tracking stopped');
+    toast.success(t('trackingStopped'));
     loadData(undefined, { silent: true });
   };
 
@@ -1207,7 +1212,7 @@ export default function InsightsPage() {
           citation_urls: '',
           competitor_mentions: '',
         });
-        toast.warning('Export capped at 50,000 rows to prevent memory issues');
+        toast.warning(t('exportCapped'));
       }
 
       const csv = toCsv(rows, INSIGHT_EXPORT_HEADERS);
@@ -1223,11 +1228,11 @@ export default function InsightsPage() {
 
       URL.revokeObjectURL(url);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to export CSV');
+      toast.error(err instanceof Error ? err.message : t('exportFailed'));
     } finally {
       setIsExporting(false);
     }
-  }, [brand]);
+  }, [brand, t]);
 
   if (!brand || (isLoading && !summary)) return <InsightsSkeleton />;
 
@@ -1275,8 +1280,8 @@ export default function InsightsPage() {
   }
 
   const lastCheckedLabel = summary?.lastCheckedAt
-    ? formatTimeAgo(new Date(summary.lastCheckedAt))
-    : 'Never';
+    ? formatTimeAgo(new Date(summary.lastCheckedAt), t)
+    : t('never');
 
   const handleResetFilters = () => {
     const resetFilters = { ...DEFAULT_FILTERS };
@@ -1292,7 +1297,7 @@ export default function InsightsPage() {
           <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
 
           <p className="text-muted-foreground text-sm">
-            {brand.name} · Last run: {lastCheckedLabel}
+            {brand.name} · {t('lastRun', { when: lastCheckedLabel })}
           </p>
         </div>
 
@@ -1309,7 +1314,7 @@ export default function InsightsPage() {
             ) : (
               <Download className="h-4 w-4" />
             )}
-            {isExporting ? 'Exporting...' : 'Export CSV'}
+            {isExporting ? t('exporting') : t('exportCsv')}
           </Button>
 
           {/* Self-host only */}
@@ -1317,7 +1322,7 @@ export default function InsightsPage() {
             <>
               <Button variant="outline" onClick={() => setShowSinglePrompt(true)} className="gap-2">
                 <FlaskConical className="h-4 w-4" />
-                Test Single Prompt
+                {t('testSingle')}
               </Button>
 
               <Button onClick={handleRunPrompts} disabled={isRunning} className="gap-2">
@@ -1326,7 +1331,7 @@ export default function InsightsPage() {
                 ) : (
                   <Play className="h-4 w-4" />
                 )}
-                Run All
+                {t('runAll')}
               </Button>
             </>
           )}
@@ -1371,16 +1376,16 @@ export default function InsightsPage() {
               own chart section below. */}
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
                 <KpiCard
-                  title="Visibility Rate"
-                  tooltip="Share of tracked prompts where your brand appeared in at least one AI answer under the current filters."
+                  title={t('visibilityRateTitle')}
+                  tooltip={t('visibilityTooltip')}
                   icon={Eye}
                   value={`${visibilityRatePct}%`}
                   sub={null}
                   onClick={() => setBreakdownMetric('visibility')}
                 />
                 <KpiCard
-                  title="Tracked Prompts"
-                  tooltip="Distinct prompts that produced tracked results in the selected period and filters. The quota below is current usage across your organization — it does not change with the date range."
+                  title={t('trackedPromptsTitle')}
+                  tooltip={t('trackedTooltip')}
                   icon={Layers}
                   value={trackedPrompts?.activeInPeriod ?? 0}
                   sub={
@@ -1403,14 +1408,14 @@ export default function InsightsPage() {
                         )}
                       </>
                     ) : (
-                      `${trackedPrompts?.quotaUsed ?? 0} prompts tracked`
+                      t('promptsTracked', { count: trackedPrompts?.quotaUsed ?? 0 })
                     )
                   }
                   onClick={() => router.push('/dashboard/prompts')}
                 />
                 <KpiCard
                   title={t('mentions')}
-                  tooltip="How many times your brand was referenced by name in AI-generated responses."
+                  tooltip={t('mentionsTooltip')}
                   icon={Zap}
                   value={summary!.totalMentions}
                   sub={
@@ -1429,7 +1434,7 @@ export default function InsightsPage() {
                 />
                 <KpiCard
                   title={t('citations')}
-                  tooltip="Times your brand's domain was cited as a source with a direct link in AI responses."
+                  tooltip={t('citationsTooltip')}
                   icon={Quote}
                   value={summary!.totalCitations}
                   sub={
@@ -1448,7 +1453,7 @@ export default function InsightsPage() {
                 />
                 <KpiCard
                   title={t('positiveSentiment')}
-                  tooltip="Percentage of answers that mention your brand and describe it in a positive context."
+                  tooltip={t('sentimentTooltip')}
                   icon={AlertCircle}
                   value={`${summary!.positiveSentimentPct}%`}
                   sub={<DeltaBadge delta={summary!.sentimentChange} suffix=" pts" />}
@@ -1467,7 +1472,7 @@ export default function InsightsPage() {
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center gap-2 text-sm font-medium">
                         <Users className="h-4 w-4" />
-                        AI Visibility — Brand vs Competitors
+                        {t('brandVsCompetitors')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -1481,12 +1486,12 @@ export default function InsightsPage() {
                   <Card className="lg:col-span-2">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between gap-3">
-                        <CardTitle className="text-sm font-medium">Leaderboard</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('leaderboard')}</CardTitle>
                         <Link
                           href="/dashboard/competitors"
                           className="flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                         >
-                          Head-to-Head Comparison
+                          {t('headToHead')}
                           <ArrowRight className="h-3 w-3" />
                         </Link>
                       </div>
@@ -1577,13 +1582,13 @@ export default function InsightsPage() {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatTimeAgo(date: Date): string {
+function formatTimeAgo(date: Date, t: ReturnType<typeof useTranslations>): string {
   const diff = Date.now() - date.getTime();
   const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return t('justNow');
+  if (minutes < 60) return t('minutesAgo', { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t('daysAgo', { count: days });
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { PLATFORM_LABELS } from '@/config/platform-labels';
 import {
   AreaChart,
@@ -192,6 +193,7 @@ function BarList({ data }: { data: { name: string; value: number; color: string 
 // ─── Exported Charts ──────────────────────────────────────────────────────────
 
 export function TrendChart({ data }: { data: VisibilityTrendPoint[] }) {
+  const t = useTranslations('insights');
   const hasCompetitors = data.some((d) => d.competitors !== null);
   // Adaptive Y ceiling (see niceVisibilityYMax): a fixed 0–100 axis flattens
   // realistic low-single-digit visibility averages into a floor-hugging line.
@@ -246,7 +248,7 @@ export function TrendChart({ data }: { data: VisibilityTrendPoint[] }) {
           <Area
             type="monotone"
             dataKey="score"
-            name="Your Brand"
+            name={t('yourBrand')}
             stroke="#6366f1"
             strokeWidth={2}
             fill="url(#gradScore)"
@@ -257,7 +259,7 @@ export function TrendChart({ data }: { data: VisibilityTrendPoint[] }) {
             <Area
               type="monotone"
               dataKey="competitors"
-              name="Avg. Competitor"
+              name={t('avgCompetitor')}
               stroke="#94a3b8"
               strokeWidth={2}
               fill="url(#gradCompetitors)"
@@ -449,6 +451,7 @@ export function CompetitorChart({
 const MAX_VISIBLE = 5;
 
 function LeaderboardEntry({ entry, rank }: { entry: CompetitorComparisonEntry; rank: number }) {
+  const t = useTranslations('insights');
   return (
     <div
       className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${
@@ -464,12 +467,12 @@ function LeaderboardEntry({ entry, rank }: { entry: CompetitorComparisonEntry; r
           {entry.isOwnBrand && <span className="text-[10px] font-medium text-primary">YOU</span>}
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-          <span>{entry.totalMentions} mentions</span>
-          <span>{entry.totalCitations} citations</span>
+          <span>{t('countMentions', { count: entry.totalMentions })}</span>
+          <span>{t('countCitations', { count: entry.totalCitations })}</span>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
           <span className="tabular-nums">
-            appeared in {entry.visiblePrompts}/{entry.promptCount} prompts
+            {t('appearedIn', { visible: entry.visiblePrompts, total: entry.promptCount })}
           </span>
         </div>
       </div>
@@ -675,6 +678,7 @@ function SoVTrendTooltip({
 }
 
 export function ShareOfVoiceTrendChart({ data }: { data: SoVTrendPoint[] }) {
+  const t = useTranslations('insights');
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[280px] text-sm text-muted-foreground">
@@ -725,7 +729,7 @@ export function ShareOfVoiceTrendChart({ data }: { data: SoVTrendPoint[] }) {
           <Area
             type="monotone"
             dataKey="brandSov"
-            name="Your Brand"
+            name={t('yourBrand')}
             stroke="#6366f1"
             strokeWidth={2}
             fill="url(#gradSovBrand)"
@@ -736,7 +740,7 @@ export function ShareOfVoiceTrendChart({ data }: { data: SoVTrendPoint[] }) {
             <Area
               type="monotone"
               dataKey="competitorSov"
-              name="Competitors"
+              name={t('competitorsLabel')}
               stroke="#94a3b8"
               strokeWidth={2}
               fill="url(#gradSovComp)"

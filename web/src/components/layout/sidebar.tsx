@@ -11,6 +11,7 @@ import { useBrandStore } from '@/stores/use-brand-store';
 import { useFeatureGate } from '@/hooks/use-feature-gate';
 import { useAgentKeyStatus } from '@/hooks/use-agent-key-status';
 import { siteConfig } from '@/config/site';
+import { LocaleSwitcher } from '@/components/marketing/locale-switcher';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -223,6 +224,11 @@ export function Sidebar() {
       </div>
 
       <div className="border-t p-2">
+        {!isCollapsed && (
+          <div className="flex justify-center pb-2">
+            <LocaleSwitcher />
+          </div>
+        )}
         <UserProfileNavItem collapsed={isCollapsed} />
       </div>
     </aside>

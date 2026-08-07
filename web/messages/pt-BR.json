@@ -1387,7 +1387,8 @@
       "tipIndustry": "Em que setor você atua?",
       "tipAudience": "Quem é o seu público-alvo?",
       "aiFill": "Preencher com IA a partir do site",
-      "aiFilling": "Lendo seu site..."
+      "aiFilling": "Lendo seu site...",
+      "titleNewBrand": "Adicionar nova marca"
     },
     "step2": {
       "title": "Selecione seu mercado-alvo",
@@ -1431,7 +1432,8 @@
       "domainPlaceholder": "dominio.com",
       "finishing": "Finalizando configuração...",
       "startTracking": "{count, plural, one {Começar a rastrear com # concorrente} other {Começar a rastrear com # concorrentes}}",
-      "addToContinue": "Adicione um concorrente para continuar"
+      "addToContinue": "Adicione um concorrente para continuar",
+      "skipStart": "Pular e começar a rastrear"
     },
     "plan": {
       "title": "Escolha seu plano",
@@ -1466,7 +1468,8 @@
       "setupComplete": "Configuração concluída! Seu primeiro rastreamento está começando.",
       "almostDone": "Quase lá! Escolha um plano para iniciar seu teste grátis.",
       "checkoutFailed": "Falha no checkout",
-      "describeFailed": "Não conseguimos ler o site agora — escreva uma breve descrição manualmente."
+      "describeFailed": "Não conseguimos ler o site agora — escreva uma breve descrição manualmente.",
+      "generatePromptsFailed": "Falha ao gerar prompts a partir dos tópicos"
     }
   }
 }

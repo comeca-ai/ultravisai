@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Building2,
+  Eye,
   FileText,
   Gauge,
   Globe,
@@ -61,6 +62,15 @@ export const dashboardNav: NavGroup[] = [
         href: '/dashboard/insights',
         icon: BarChart3,
         requiredFeature: 'basic_insights',
+      },
+      // Ultravis addition (fork layer): Citability Index page — the
+      // prescriptive counterpart to Insights. Framework source of truth:
+      // estrategia/indice-citabilidade.md.
+      {
+        title: 'Citability',
+        href: '/dashboard/citability',
+        icon: Eye,
+        badge: 'New',
       },
       {
         title: 'Prompts',

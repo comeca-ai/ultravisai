@@ -19,7 +19,7 @@ function isAuthRoute(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const pathnameWithoutLocale = pathname.replace(/^\/(en)/, '') || '/';
+  const pathnameWithoutLocale = pathname.replace(/^\/(en|pt-BR)(?=\/|$)/, '') || '/';
 
   let supabaseResponse: NextResponse | undefined;
   let user: { id: string } | null = null;
@@ -33,9 +33,10 @@ export async function proxy(request: NextRequest) {
     // so next-intl locale routing still works
   }
 
-  if (pathnameWithoutLocale === '/') {
-    const target = user ? '/dashboard' : '/sign-in';
-    return NextResponse.redirect(new URL(target, request.url));
+  // `/` is the public landing page. Signed-in users skip it and go straight
+  // to the dashboard; anonymous visitors fall through and get the landing.
+  if (pathnameWithoutLocale === '/' && user) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // The pricing page lives on the marketing site (ansvisor.com/pricing) now,
@@ -60,16 +61,21 @@ export async function proxy(request: NextRequest) {
   // next-intl's middleware intermittently die server-side with "The router
   // state header was sent but could not be parsed" — and the client then
   // holds its whole server-action queue behind the failed transition, which
-  // froze the Prompts page. With a single 'en' locale the only thing the
-  // intl middleware does for these requests is the /en rewrite, so do that
-  // by hand and skip the intl machinery entirely.
+  // froze the Prompts page. For these requests the intl middleware only does
+  // the locale rewrite, so do that by hand and skip the intl machinery
+  // entirely: paths already carrying a locale prefix pass through, and
+  // unprefixed paths get the default locale (pt-BR, per routing.ts —
+  // 'as-needed' means the default locale is the unprefixed one).
   const isRscOrAction = request.headers.has('rsc') || request.headers.has('next-action');
   if (isRscOrAction) {
-    const needsLocalePrefix = !(pathname === '/en' || pathname.startsWith('/en/'));
-    const response = needsLocalePrefix
-      ? NextResponse.rewrite(new URL(`/en${pathname}${request.nextUrl.search}`, request.url), {
-          request,
-        })
+    const hasLocalePrefix = routing.locales.some(
+      (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`),
+    );
+    const response = !hasLocalePrefix
+      ? NextResponse.rewrite(
+          new URL(`/${routing.defaultLocale}${pathname}${request.nextUrl.search}`, request.url),
+          { request },
+        )
       : NextResponse.next({ request });
     if (supabaseResponse) {
       supabaseResponse.cookies.getAll().forEach((cookie) => {

@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
+import { LocaleSwitcher } from '@/components/marketing/locale-switcher';
 import { siteConfig } from '@/config/site';
 
 export function MarketingHeader() {
@@ -10,7 +11,7 @@ export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <a href={siteConfig.url} className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <Image
             src="/logo_light.svg"
             alt=""
@@ -28,9 +29,10 @@ export function MarketingHeader() {
             priority
           />
           <span className="text-xl font-bold tracking-tight">{siteConfig.name}</span>
-        </a>
+        </Link>
 
         <div className="flex items-center gap-3">
+          <LocaleSwitcher />
           <Link href="/sign-in">
             <Button variant="ghost" size="sm">
               {t('signIn')}

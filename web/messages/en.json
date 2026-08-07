@@ -791,5 +791,398 @@
         "description": "Understand query volume trends across platforms and identify opportunities."
       }
     }
+  },
+  "landing": {
+    "meta": {
+      "title": "Ultravis — Vision beyond reach",
+      "description": "Buying decisions now start inside an AI conversation. Ultravis shows what ChatGPT, Claude, Gemini, and Perplexity say about your brand — and what to do to become the answer."
+    },
+    "nav": {
+      "platform": "Platform",
+      "solutions": "Solutions",
+      "market": "Market",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "signIn": "Sign in",
+      "createAccount": "Create account"
+    },
+    "hero": {
+      "badge": "Measure → Understand → Show up",
+      "titleStart": "We have vision ",
+      "titleHighlight": "beyond reach",
+      "subtitle": "Buying decisions now start inside a conversation with AI — and you're not in the room. Ultravis shows what ChatGPT, Claude, Gemini, and Perplexity answer about your brand, where you disappear, and what to do to become the answer.",
+      "ctaPrimary": "Create account",
+      "ctaSecondary": "See a demo",
+      "ctaNote": "14-day free trial · no card required · your first diagnosis in 4 minutes",
+      "tickerLabel": "Questions running right now",
+      "ticker": [
+        {
+          "src": "ChatGPT",
+          "q": "what's the best platform to monitor a brand in AI?"
+        },
+        {
+          "src": "Perplexity",
+          "q": "AEO tools for e-commerce"
+        },
+        {
+          "src": "Gemini",
+          "q": "how to show up in Google AI Overviews answers"
+        },
+        {
+          "src": "Claude",
+          "q": "alternatives to Semrush for generative search"
+        },
+        {
+          "src": "Copilot",
+          "q": "is GEO worth investing in for 2026?"
+        },
+        {
+          "src": "Grok",
+          "q": "who leads AI visibility in retail"
+        }
+      ]
+    },
+    "platform": {
+      "browserPath": "ultravis.app / visibility",
+      "live": "live",
+      "scoreLabel": "Visibility index",
+      "scoreDelta": "+18.4% / 30d",
+      "scoreValue": "62.7",
+      "scoreOf": "of 100",
+      "bars": [
+        {
+          "label": "ChatGPT",
+          "value": "71%"
+        },
+        {
+          "label": "Gemini",
+          "value": "64%"
+        },
+        {
+          "label": "Claude",
+          "value": "58%"
+        },
+        {
+          "label": "Perplexity",
+          "value": "49%"
+        },
+        {
+          "label": "Copilot",
+          "value": "31%"
+        }
+      ],
+      "promptsLabel": "Where you show up",
+      "prompts": [
+        {
+          "rank": "01",
+          "text": "best AI visibility platform",
+          "delta": "▲ 4",
+          "up": true
+        },
+        {
+          "rank": "02",
+          "text": "how to show up in ChatGPT answers",
+          "delta": "▲ 2",
+          "up": true
+        },
+        {
+          "rank": "07",
+          "text": "AEO tools for e-commerce",
+          "delta": "▼ 1",
+          "up": false
+        },
+        {
+          "rank": "12",
+          "text": "monitor a brand across language models",
+          "delta": "— 0",
+          "up": false
+        }
+      ],
+      "citationsLabel": "Citations earned",
+      "citationsValue": "1,940",
+      "citationsNote": "across 7 answer engines, last 30 days",
+      "coverageLabel": "Coverage",
+      "engines": [
+        "ChatGPT",
+        "Claude",
+        "Gemini",
+        "Perplexity",
+        "Copilot",
+        "Google AI Overviews",
+        "Grok"
+      ]
+    },
+    "market": {
+      "kicker": "The shift",
+      "title": "Your customer already asked. You've already been answered — without knowing.",
+      "subtitle": "Over a billion people consult language models before deciding. Every generated answer is a silent recommendation, and most brands never read a single one.",
+      "stats": [
+        {
+          "num": "35%",
+          "title": "of traffic already starts in AI",
+          "body": "Generative search went from zero to the first touchpoint for a large share of brands."
+        },
+        {
+          "num": "22%",
+          "title": "have a defined strategy",
+          "body": "The rest find out by accident whether they show up — or whether a competitor shows up instead."
+        },
+        {
+          "num": "96%",
+          "title": "still lack real visibility",
+          "body": "The window to become your category's default answer is still open."
+        }
+      ]
+    },
+    "features": {
+      "kicker": "The reach",
+      "title": "Four layers between the question and your brand",
+      "subtitle": "Observe the answer, find the gap, produce the proof, measure again. The whole cycle in one platform.",
+      "items": [
+        {
+          "num": "01",
+          "title": "Monitored answers",
+          "body": "What each model says about your brand, in what tone, and next to which competitors — refreshed daily.",
+          "tags": [
+            "sentiment",
+            "share of answer",
+            "competitors"
+          ]
+        },
+        {
+          "num": "02",
+          "title": "Questions that matter",
+          "body": "The real questions that lead to your category, with estimated volume and the cost of not being in them.",
+          "tags": [
+            "prompt volume",
+            "intent",
+            "prioritization"
+          ]
+        },
+        {
+          "num": "03",
+          "title": "Citations and sources",
+          "body": "Which pages and outlets the models cite, and what needs to exist for them to cite you.",
+          "tags": [
+            "sources",
+            "authority",
+            "coverage"
+          ]
+        },
+        {
+          "num": "04",
+          "title": "From reading to action",
+          "body": "Every gap becomes a ready brief: what to write, where to publish, what to fix on your site.",
+          "tags": [
+            "briefs",
+            "site audit",
+            "MCP"
+          ]
+        }
+      ]
+    },
+    "beyond": {
+      "kicker": "Beyond reach",
+      "title": "What your analytics will never tell you",
+      "subtitle": "The conversation happens outside your domain, with no click and no log. That's exactly where Ultravis sees.",
+      "blind": [
+        {
+          "label": "Blind spot 01",
+          "title": "Zero clicks, zero records",
+          "body": "The recommendation happens and vanishes. With no page visit, there's no line in your report."
+        },
+        {
+          "label": "Blind spot 02",
+          "title": "Every user, a different answer",
+          "body": "There is no single position. Only measuring at scale tells you what's pattern and what's noise."
+        },
+        {
+          "label": "Blind spot 03",
+          "title": "The competitor cited in your place",
+          "body": "You don't lose a ranking: you vanish from the list. And someone else appears as the obvious choice."
+        }
+      ],
+      "fanoutLabel": "Query Fan-Out",
+      "fanoutTitle": "One customer question becomes six invisible searches. We read them all.",
+      "fanoutBody": "Before answering, the model reformulates, searches, and picks sources. Seeing that path means seeing exactly where your brand stopped being considered.",
+      "fanout": [
+        {
+          "n": "01",
+          "q": "best AI visibility platforms",
+          "state": "cited",
+          "cited": true
+        },
+        {
+          "n": "02",
+          "q": "AEO tools comparison 2026",
+          "state": "cited",
+          "cited": true
+        },
+        {
+          "n": "03",
+          "q": "monitoring tools pricing",
+          "state": "absent",
+          "cited": false
+        },
+        {
+          "n": "04",
+          "q": "user reviews and complaints",
+          "state": "absent",
+          "cited": false
+        },
+        {
+          "n": "05",
+          "q": "marketing stack integrations",
+          "state": "cited",
+          "cited": true
+        }
+      ]
+    },
+    "teams": {
+      "kicker": "Teams",
+      "title": "AI visibility is not a one-person problem",
+      "items": [
+        {
+          "title": "SEO & AEO",
+          "body": "Track prompts, rankings, and competition on the new playing field."
+        },
+        {
+          "title": "Content",
+          "body": "Find the gaps and produce the page the model will want to cite."
+        },
+        {
+          "title": "PR & Brand",
+          "body": "Monitor sentiment, sources, and how AI describes your reputation."
+        },
+        {
+          "title": "Growth & Agencies",
+          "body": "Compare client portfolios and prove visibility gains with data."
+        }
+      ]
+    },
+    "pricing": {
+      "kicker": "Plans",
+      "title": "Start seeing in a 14-day free trial",
+      "plans": [
+        {
+          "name": "Starter",
+          "tag": "1 brand",
+          "price": "R$ 390",
+          "per": "/mo",
+          "body": "To start measuring and understanding the current picture.",
+          "items": [
+            "150 monitored prompts",
+            "4 answer engines",
+            "Weekly report",
+            "1 user"
+          ],
+          "cta": "Create account",
+          "featured": false
+        },
+        {
+          "name": "Growth",
+          "tag": "most popular",
+          "price": "R$ 1,290",
+          "per": "/mo",
+          "body": "For teams already fighting for the answer every day.",
+          "items": [
+            "1,000 monitored prompts",
+            "7 engines + Query Fan-Out",
+            "AI content briefs",
+            "10-competitor benchmark",
+            "Unlimited users"
+          ],
+          "cta": "Create account",
+          "featured": true
+        },
+        {
+          "name": "Enterprise",
+          "tag": "custom",
+          "price": "Let's talk",
+          "per": "",
+          "body": "For multiple brands, markets, and languages.",
+          "items": [
+            "Unlimited prompts and domains",
+            "API and MCP Server",
+            "SSO and access controls",
+            "Dedicated support"
+          ],
+          "cta": "Talk to the team",
+          "featured": false
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "q": "What is Ultravis?",
+          "a": "An AI visibility platform: it monitors, measures, and helps improve how your brand appears in the answers of ChatGPT, Claude, Gemini, Google AI Overviews, Perplexity, Copilot, and Grok."
+        },
+        {
+          "q": "How do you measure visibility?",
+          "a": "We continuously run your category's relevant questions through the leading models and analyze the generated answers — mentions, citations, list position, sentiment, and competitor presence."
+        },
+        {
+          "q": "Is this the same as SEO?",
+          "a": "It's the next step. SEO fights over a list of links; AEO and GEO fight over the text of the answer. The signals overlap, but the measurement and the actions are different."
+        },
+        {
+          "q": "How long until I see results?",
+          "a": "The initial diagnosis is ready in minutes. Content and authority changes usually show up in model answers within two to six weeks."
+        },
+        {
+          "q": "Do I need to install anything on my site?",
+          "a": "Not to monitor. AI traffic analysis is optional and uses a lightweight script or an integration with your current analytics."
+        }
+      ]
+    },
+    "cta": {
+      "title": "When they ask, let the answer be you.",
+      "subtitle": "Create your account and see the first picture of your AI visibility today.",
+      "primary": "Create account",
+      "secondary": "Talk to the team",
+      "note": "14-day free trial · no card required · cancel anytime"
+    },
+    "footer": {
+      "tagline": "Vision beyond reach. A platform for brand visibility inside language models.",
+      "columns": [
+        {
+          "title": "Platform",
+          "links": [
+            "Monitored answers",
+            "Prompts and volumes",
+            "Query Fan-Out",
+            "Citations",
+            "Site Audit",
+            "MCP Server"
+          ]
+        },
+        {
+          "title": "Solutions",
+          "links": [
+            "SEO & AEO",
+            "Content",
+            "PR & Brand",
+            "Agencies",
+            "Developers"
+          ]
+        },
+        {
+          "title": "Company",
+          "links": [
+            "About",
+            "Pricing",
+            "Blog",
+            "Contact",
+            "Careers"
+          ]
+        }
+      ],
+      "rights": "All rights reserved.",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "aiPolicy": "AI Policy"
+    }
   }
 }

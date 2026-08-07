@@ -13,7 +13,9 @@
     "search": "Search",
     "filter": "Filter",
     "export": "Export",
-    "noData": "No data available"
+    "noData": "No data available",
+    "previous": "Previous",
+    "pagerRange": "{start}–{end} of {total}"
   },
   "nav": {
     "overview": "Overview",
@@ -476,7 +478,98 @@
     "excludeOwnDomain": "Exclude own domain",
     "competitorsOnly": "Competitors only",
     "noBrandTitle": "No brand selected",
-    "noBrandDescription": "Select or create a brand to see the citations AI platforms use when answering about it."
+    "noBrandDescription": "Select or create a brand to see the citations AI platforms use when answering about it.",
+    "filters": {
+      "dateRange": "Date Range",
+      "from": "From",
+      "to": "To",
+      "presetAll": "All",
+      "presetCustom": "Custom",
+      "topic": "Topic",
+      "allTopics": "All Topics",
+      "prompt": "Prompt",
+      "allPrompts": "All Prompts",
+      "searchPrompts": "Search prompts…",
+      "noPromptsMatch": "No prompts match.",
+      "platform": "Platform",
+      "allPlatforms": "All Platforms",
+      "region": "Region",
+      "allRegions": "All Regions",
+      "ownDomainOnly": "Own domain only"
+    },
+    "table": {
+      "rank": "Rank",
+      "domain": "Domain",
+      "platforms": "Platforms",
+      "usage": "Usage",
+      "avgCitations": "Avg Citations",
+      "url": "URL",
+      "citations": "Citations",
+      "sourceType": "Source type",
+      "competitorAnswers": "Competitor answers",
+      "whichCompetitors": "Which competitors",
+      "strength": "Strength",
+      "answersFeeding": "Answers feeding",
+      "alsoCitesUs": "Also cites us?",
+      "yes": "✓ Yes",
+      "no": "✗ No",
+      "openInNewTab": "Open {domain} in a new tab",
+      "strengthTitle": "Strength {pct}%"
+    },
+    "empty": {
+      "checking": "Checking citation data…",
+      "period24h": "the last 24 hours",
+      "period7d": "the last 7 days",
+      "period30d": "the last 30 days",
+      "period90d": "the last 90 days",
+      "periodSelected": "the selected period",
+      "noCitationsIn": "No citations in {period}",
+      "existsOutside": "Citation data exists outside this window.",
+      "showAll": "Show all data",
+      "noMatch": "No citations match your filters",
+      "tryWidening": "Try widening your date range or removing filters."
+    },
+    "addCompetitor": {
+      "button": "Add as competitor",
+      "title": "Add {domain} as competitor?",
+      "description": "Track this domain as a competitor. You can edit the name below.",
+      "name": "Name",
+      "namePlaceholder": "Competitor name",
+      "cancel": "Cancel",
+      "add": "Add",
+      "added": "{domain} added as competitor",
+      "failed": "Could not add this domain as a competitor. Please try again."
+    },
+    "gaps": {
+      "methodology": "Sources that appear in answers mentioning competitors but not you, weighted by how many sources each answer had.",
+      "howThisWorks": "How this works",
+      "gapList": "Gap list",
+      "byCompetitor": "By competitor",
+      "competitor": "Competitor",
+      "selectCompetitor": "Select competitor",
+      "noGapDomains": "No gap domains for these filters",
+      "noGapDomainsBody": "Every domain citing a competitor also cites you, or there isn't enough data yet.",
+      "noCompetitorData": "No competitor source data yet",
+      "noCompetitorDataBody": "Add competitors (with domains) and let a few tracking runs complete.",
+      "lowVisibility": "Your visibility is low in this window, so this list may be broad — focus on baseline visibility first."
+    },
+    "categories": {
+      "you": "You",
+      "competitor": "Competitor",
+      "editorial": "Editorial",
+      "forum": "Forum",
+      "social": "Social",
+      "review": "Review",
+      "institutional": "Institutional",
+      "other": "Other"
+    },
+    "donut": {
+      "noSources": "No citation sources yet."
+    },
+    "tabGaps": "Competitor Gaps",
+    "exportCsv": "Export CSV",
+    "exporting": "Exporting...",
+    "exportFailed": "Failed to export CSV"
   },
   "citability": {
     "title": "Citability",

@@ -63,14 +63,19 @@ Score da marca = `Σ (score_dimensão × peso)`. Réguas propostas por
 dimensão, mapeadas ao que a plataforma **já mede** — nada aqui exige
 fonte de dado nova para a v1:
 
+As categorias de fonte citadas abaixo são as do classificador da
+plataforma (`web/src/lib/citations/classify.ts`): `you`, `competitor`,
+`editorial`, `forum`, `social`, `review`, `institutional`, `other` —
+o mesmo usado pela página Citações, pelo agent e pela página Citabilidade.
+
 | Dim | Fonte de dado na plataforma | Régua v1 (0–100) |
 |---|---|---|
-| 01 Legibilidade | **Site Audit** (categorias técnicas: schema, estrutura, extraibilidade) | Score técnico do audit da home/páginas-chave |
-| 02 Conteúdo | **Site Audit** (categorias de conteúdo) + cobertura: % de tópicos rastreados com página própria citável | Média ponderada audit-conteúdo × cobertura de tópicos |
-| 03 Social Presence | **Citações** tipo `social` extraídas dos resultados + presença nos canais citados pelo setor (ex.: YouTube 19× no censo Datarisk) | % dos domínios sociais top-citados do setor onde a marca tem presença ativa |
-| 04 Customer Reviews | **Citações** tipo `review`/`forum` (G2, Reclame Aqui, Reddit...) | % das plataformas de review citadas no setor onde a marca tem perfil reivindicado + avaliações recentes |
-| 05 Open Media & AI Sources | **Citações** tipo `news`/`external` — o ranking real de domínios que as IAs citam nos prompts do cliente | % dos top-N domínios citados do setor em que a marca aparece (no censo Datarisk: exame, finsidersbrasil, ibgia.org, pwc, kpmg... Datarisk ausente do top 25 → score ~0) |
-| 06 Verticals/Regulators | **Visibilidade por tópico** em prompts de vertical + citações de domínios de associação/regulador | Presença nos prompts de categoria ("melhores empresas de X") + domínios institucionais do setor |
+| 01 Legibilidade | **Site Audit do domínio principal** (mesma fonte do headline da página Auditoria — `getAuditTrend`) | Score do audit mais recente do domínio principal |
+| 02 Conteúdo | **Citações** categoria `you`: % das respostas de IA (todo o período) que citam o domínio próprio | Cobertura de citações owned; evolução futura: cruzar com cobertura de tópicos |
+| 03 Social Presence | **Citações** categoria `social` (ex.: YouTube 19× no censo Datarisk) | % dos domínios sociais top-citados do setor onde a marca tem presença ativa |
+| 04 Customer Reviews | **Citações** categorias `review` + `forum` (G2, Reclame Aqui, Reddit...) | % das plataformas de review citadas no setor onde a marca tem perfil reivindicado + avaliações recentes |
+| 05 Open Media & AI Sources | **Citações** categorias `editorial` + `other` — o ranking real de domínios que as IAs citam nos prompts do cliente | % dos top-N domínios citados do setor em que a marca aparece (no censo Datarisk: exame, finsidersbrasil, ibgia.org, pwc, kpmg... Datarisk ausente do top 25 → score ~0) |
+| 06 Verticals/Regulators | **Citações** categoria `institutional` + visibilidade por tópico em prompts de vertical | Presença nos prompts de categoria ("melhores empresas de X") + domínios institucionais do setor |
 
 O insight-chave da v1: **as citações extraídas pelo rastreamento são o
 "gabarito" das zonas B e C** — em vez de auditar a internet inteira, o IC

@@ -16,17 +16,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Eye } from 'lucide-react';
+import { ArrowRight, Eye, FileText, Gauge } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBrandStore } from '@/stores/use-brand-store';
-import { getAudits, type AuditSummary } from '@/lib/actions/audits';
+import { getAuditTrend, type AuditTrend } from '@/lib/actions/audits';
 import { getCitationsOverview, type CitationsOverview } from '@/lib/actions/citations';
 import { pct } from '@/components/audit/audit-report';
 import type { SourceCategory } from '@/lib/citations/classify';
-import { cn } from '@/lib/utils';
 
 // ─── Framework constants (mirror estrategia/indice-citabilidade.md) ─────────
 
@@ -61,13 +60,48 @@ const DIMENSIONS: Dimension[] = [
 
 const ZONES: Zone[] = ['A', 'B', 'C'];
 
+// ─── KPI card (mirrors the Citations page KPI styling) ───────────────────────
+
+function KpiCard({
+  title,
+  value,
+  sub,
+  icon: Icon,
+  loading,
+}: {
+  title: string;
+  value: string;
+  sub: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
+  loading: boolean;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {title}
+        </CardTitle>
+        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <Skeleton className="h-9 w-16" />
+        ) : (
+          <div className="text-3xl font-bold tabular-nums">{value}</div>
+        )}
+        <p className="text-xs mt-1 text-muted-foreground">{sub}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Matrix (SVG) ────────────────────────────────────────────────────────────
 
 function CitabilityMatrix({ dimLabel }: { dimLabel: (key: Dimension['key']) => string }) {
   const t = useTranslations('citability');
-  const W = 560;
-  const H = 360;
-  const M = { l: 44, r: 16, t: 16, b: 40 };
+  const W = 640;
+  const H = 340;
+  const M = { l: 48, r: 20, t: 20, b: 44 };
   const PW = W - M.l - M.r;
   const PH = H - M.t - M.b;
   const px = (x: number) => M.l + (x / 100) * PW;
@@ -80,42 +114,28 @@ function CitabilityMatrix({ dimLabel }: { dimLabel: (key: Dimension['key']) => s
         y={M.t}
         width={PW}
         height={PH}
+        rx={8}
         className="fill-muted/30 stroke-border"
         strokeWidth={1}
       />
-      {/* Quadrant hints */}
-      <text x={M.l + 10} y={M.t + 20} className="fill-muted-foreground text-[11px] font-medium">
-        {t('matrix.zoneA')}
-      </text>
-      <text
-        x={M.l + PW - 10}
-        y={M.t + 20}
-        textAnchor="end"
-        className="fill-muted-foreground text-[11px] font-medium"
-      >
-        {t('matrix.zoneB')}
-      </text>
-      <text
-        x={M.l + PW - 10}
-        y={M.t + PH - 12}
-        textAnchor="end"
-        className="fill-muted-foreground text-[11px] font-medium"
-      >
-        {t('matrix.zoneC')}
-      </text>
-      <text x={M.l + 10} y={M.t + PH - 12} className="fill-muted-foreground/60 text-[10px] italic">
+      <text x={M.l + 12} y={M.t + PH - 14} className="fill-muted-foreground/60 text-[10px] italic">
         {t('matrix.emptyZone')}
       </text>
       {/* Axes labels */}
-      <text x={M.l + PW / 2} y={H - 8} textAnchor="middle" className="fill-foreground text-[11px]">
+      <text
+        x={M.l + PW / 2}
+        y={H - 10}
+        textAnchor="middle"
+        className="fill-muted-foreground text-[11px]"
+      >
         {t('matrix.xAxis')}
       </text>
       <text
-        x={12}
+        x={14}
         y={M.t + PH / 2}
         textAnchor="middle"
-        transform={`rotate(-90 12 ${M.t + PH / 2})`}
-        className="fill-foreground text-[11px]"
+        transform={`rotate(-90 14 ${M.t + PH / 2})`}
+        className="fill-muted-foreground text-[11px]"
       >
         {t('matrix.yAxis')}
       </text>
@@ -125,9 +145,11 @@ function CitabilityMatrix({ dimLabel }: { dimLabel: (key: Dimension['key']) => s
           <circle
             cx={px(d.x)}
             cy={py(d.y)}
-            r={d.weight * 1.4}
+            r={d.weight * 1.1}
             fill={ZONE_COLORS[d.zone]}
-            fillOpacity={0.85}
+            fillOpacity={0.9}
+            className="stroke-background"
+            strokeWidth={2}
           >
             <title>{`${d.n} · ${dimLabel(d.key)} · ${d.weight}%`}</title>
           </circle>
@@ -145,38 +167,12 @@ function CitabilityMatrix({ dimLabel }: { dimLabel: (key: Dimension['key']) => s
   );
 }
 
-// ─── Score ring ──────────────────────────────────────────────────────────────
-
-function ScoreRing({ score }: { score: number | null }) {
-  const R = 52;
-  const C = 2 * Math.PI * R;
-  const filled = score === null ? 0 : (score / 100) * C;
-  return (
-    <svg viewBox="0 0 128 128" className="h-32 w-32">
-      <circle cx={64} cy={64} r={R} className="fill-none stroke-muted" strokeWidth={10} />
-      <circle
-        cx={64}
-        cy={64}
-        r={R}
-        className="fill-none stroke-primary"
-        strokeWidth={10}
-        strokeLinecap="round"
-        strokeDasharray={`${filled} ${C - filled}`}
-        transform="rotate(-90 64 64)"
-      />
-      <text x={64} y={70} textAnchor="middle" className="fill-foreground text-3xl font-bold">
-        {score === null ? '—' : score}
-      </text>
-    </svg>
-  );
-}
-
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function CitabilityPage() {
   const t = useTranslations('citability');
   const activeBrandId = useBrandStore((s) => s.activeBrandId);
-  const [audits, setAudits] = useState<AuditSummary[] | null>(null);
+  const [auditTrend, setAuditTrend] = useState<AuditTrend | null>(null);
   const [overview, setOverview] = useState<CitationsOverview | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -186,12 +182,12 @@ export default function CitabilityPage() {
     setLoading(true);
     (async () => {
       try {
-        const [auditData, citationData] = await Promise.all([
-          getAudits(activeBrandId),
+        const [trendData, citationData] = await Promise.all([
+          getAuditTrend(activeBrandId),
           getCitationsOverview(activeBrandId, { datePreset: 'all' }),
         ]);
         if (!cancelled) {
-          setAudits(auditData);
+          setAuditTrend(trendData);
           setOverview(citationData);
         }
       } catch (err) {
@@ -205,15 +201,23 @@ export default function CitabilityPage() {
     };
   }, [activeBrandId]);
 
-  // D1 — latest completed Site Audit score (0–100).
+  // D1 — latest Site Audit score for the brand's PRIMARY domain (0–100).
+  // Same source as the Site Audit page's headline (getAuditTrend), so both
+  // pages always show the same number; getAudits would mix in audits of
+  // arbitrary URLs.
   const d1Score = useMemo(() => {
-    const latest = (audits ?? []).find((a) => a.status === 'completed' && a.total_score !== null);
-    return latest ? pct(latest.total_score) : null;
-  }, [audits]);
+    const points = auditTrend?.points ?? [];
+    for (let i = points.length - 1; i >= 0; i--) {
+      if (points[i].totalScore !== null) return pct(points[i].totalScore);
+    }
+    return null;
+  }, [auditTrend]);
 
   // D2 — owned-citation coverage: share of tracked AI answers citing the
   // brand's own domain. A proxy for "each question has an own, extractable
   // page" — if the pages existed and ranked, the AIs would cite them.
+  // resultsCiting is per-domain, so a result citing two owned subdomains
+  // counts twice in the sum; Math.min caps the ratio at 100.
   const d2Score = useMemo(() => {
     if (!overview || overview.totals.results === 0) return null;
     const ownedResults = overview.rows
@@ -255,44 +259,75 @@ export default function CitabilityPage() {
     key === 'dim1' ? d1Score : key === 'dim2' ? d2Score : null;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-            <Eye className="h-6 w-6 text-primary" />
-            {t('title')}
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t('subtitle')}</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground text-sm mt-1 max-w-2xl">{t('subtitle')}</p>
         </div>
       </div>
 
-      {/* Score + matrix */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t('score.title')}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-3">
-            {loading ? (
-              <Skeleton className="h-32 w-32 rounded-full" />
+      {/* KPI row */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <KpiCard
+          title={t('kpis.icTitle')}
+          value={partialScore === null ? '—' : `${partialScore}`}
+          sub={t('kpis.icHint')}
+          icon={Eye}
+          loading={loading}
+        />
+        <KpiCard
+          title={t('kpis.d1Title')}
+          value={d1Score === null ? '—' : `${d1Score}`}
+          sub={
+            d1Score === null ? (
+              <Link
+                href="/dashboard/audit"
+                className="inline-flex items-center gap-1 text-primary hover:underline"
+              >
+                {t('dims.runAuditCta')}
+                <ArrowRight className="h-3 w-3" />
+              </Link>
             ) : (
-              <ScoreRing score={partialScore} />
-            )}
-            <p className="text-center text-xs text-muted-foreground">
-              {partialScore === null ? t('score.noData') : t('score.partialNote')}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t('matrix.title')}</CardTitle>
-            <p className="text-xs text-muted-foreground">{t('matrix.subtitle')}</p>
-          </CardHeader>
-          <CardContent>
-            <CitabilityMatrix dimLabel={(key) => t(`dims.${key}.name`)} />
-          </CardContent>
-        </Card>
+              t('kpis.d1Hint')
+            )
+          }
+          icon={Gauge}
+          loading={loading}
+        />
+        <KpiCard
+          title={t('kpis.d2Title')}
+          value={d2Score === null ? '—' : `${d2Score}`}
+          sub={t('kpis.d2Hint')}
+          icon={FileText}
+          loading={loading}
+        />
       </div>
+
+      {/* Matrix */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t('matrix.title')}</CardTitle>
+          <p className="text-xs text-muted-foreground">{t('matrix.subtitle')}</p>
+        </CardHeader>
+        <CardContent>
+          <div className="mx-auto max-w-3xl">
+            <CitabilityMatrix dimLabel={(key) => t(`dims.${key}.name`)} />
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+            {ZONES.map((zone) => (
+              <span key={zone} className="inline-flex items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: ZONE_COLORS[zone] }}
+                />
+                {t(`matrix.zone${zone}`)}
+              </span>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Dimension cards */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -319,9 +354,9 @@ export default function CitabilityPage() {
                   <Skeleton className="h-8 w-full" />
                 ) : dim.categories ? (
                   domains.length > 0 ? (
-                    <div>
-                      <p className="mb-1 font-medium text-foreground">{t('dims.answerKey')}</p>
-                      <ul className="space-y-0.5">
+                    <div className="rounded-md border bg-muted/30 p-2.5">
+                      <p className="mb-1.5 font-medium text-foreground">{t('dims.answerKey')}</p>
+                      <ul className="space-y-1">
                         {domains.map((d) => (
                           <li key={d.domain} className="flex justify-between gap-2">
                             <span className="truncate">{d.domain}</span>
@@ -336,13 +371,8 @@ export default function CitabilityPage() {
                     <p className="italic">{t('dims.noCitations')}</p>
                   )
                 ) : (
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={cn(
-                        'text-2xl font-bold tabular-nums',
-                        score === null ? 'text-muted-foreground' : 'text-foreground',
-                      )}
-                    >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-2xl font-bold tabular-nums text-foreground">
                       {score === null ? '—' : score}
                     </span>
                     {dim.key === 'dim1' && score === null && (
@@ -364,18 +394,14 @@ export default function CitabilityPage() {
 
       {/* Action plan by zone */}
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader>
           <CardTitle className="text-base">{t('plan.title')}</CardTitle>
           <p className="text-xs text-muted-foreground">{t('plan.subtitle')}</p>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             {ZONES.map((zone) => (
-              <div
-                key={zone}
-                className="rounded-lg border p-4"
-                style={{ borderColor: `${ZONE_COLORS[zone]}55` }}
-              >
+              <div key={zone} className="rounded-lg border p-4">
                 <p className="text-sm font-semibold" style={{ color: ZONE_COLORS[zone] }}>
                   {t(`zones.${zone}.name`)}
                 </p>

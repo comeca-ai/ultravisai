@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { AuthProvider } from '@/components/providers/auth-provider';
 import { OnboardingSignOutButton } from '@/components/auth/onboarding-sign-out-button';
+import { LocaleSwitcher } from '@/components/marketing/locale-switcher';
 import { isCloud } from '@/config/plans';
 import { evaluateSubscriptionAccess } from '@/lib/billing/subscription-access';
 import { SubscriptionExpiredNotice } from '@/components/billing/subscription-expired-notice';
@@ -49,6 +50,9 @@ export default async function OnboardingLayout({ children }: { children: React.R
   return (
     <>
       <AuthProvider user={user} />
+      <div className="fixed top-4 right-4 z-50">
+        <LocaleSwitcher />
+      </div>
       <OnboardingSignOutButton />
       {children}
     </>

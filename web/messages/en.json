@@ -32,7 +32,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "citability": "Citability",
-    "badgeNew": "New"
+    "badgeNew": "New",
+    "costs": "Costs & Usage"
   },
   "agent": {
     "newChat": "New chat",
@@ -1569,6 +1570,57 @@
       "checkoutFailed": "Checkout failed",
       "describeFailed": "Couldn't read the site right now — write a brief description manually.",
       "generatePromptsFailed": "Failed to generate prompts from topics"
+    }
+  },
+  "adminCosts": {
+    "title": "Costs & Usage",
+    "subtitle": "Monitor of what the platform consumes from AI providers — counts come straight from the database; US$ figures are estimates using the assumptions below. Exact billing lives in the provider consoles.",
+    "lastData": "Latest data: {date}",
+    "kpis": {
+      "llmSpend": "LLM spend (estimated)",
+      "llmSpendSub": "Anthropic + OpenAI, all time; Gemini on free tier",
+      "cloroCredits": "Cloro credits",
+      "cloroCreditsSub": "1 scrape = 1 credit — the main cost driver",
+      "results": "Tracked answers",
+      "resultsSub": "{cloro} via Cloro + {api} via Claude API",
+      "sentiment": "Sentiment analyses",
+      "sentimentSub": "gpt-5-mini, one per tracked answer"
+    },
+    "byPlatform": "Answers by platform",
+    "byBrand": "Answers by brand",
+    "byBrandSub": "{brands} brands · {prompts} active prompts",
+    "providers": {
+      "title": "Spend by provider",
+      "subtitle": "\"Measured\" = exact count in the database · \"estimated\" = tokens and cost derived from real response sizes",
+      "provider": "Provider",
+      "what": "What it does",
+      "volume": "Volume",
+      "tokens": "Tokens (in/out)",
+      "cost": "Cost",
+      "status": "Status",
+      "cloroDesc": "Scrapes of the AI surfaces (ChatGPT, AIO, Perplexity...)",
+      "cloroCost": "credits × plan rate",
+      "anthropicDesc": "Claude API tracking + AI Agent + suggestions (Haiku)",
+      "openaiDesc": "Sentiment analysis of each answer",
+      "geminiDesc": "Suggestions and site summary until the free-tier daily quota ran out",
+      "credits": "{count, plural, one {# credit} other {# credits}}",
+      "calls": "{count, plural, one {# call} other {# calls}}",
+      "measured": "measured",
+      "estimated": "estimated",
+      "freeTier": "free tier"
+    },
+    "notes": {
+      "title": "Where the exact numbers live · assumptions",
+      "exactTitle": "Consoles (billing source of truth):",
+      "exactAnthropic": "Anthropic — console.anthropic.com › Usage",
+      "exactOpenai": "OpenAI — platform.openai.com › Usage",
+      "exactGemini": "Gemini — aistudio.google.com (free tier: 20 req/day; enabling billing removes the cap)",
+      "exactCloro": "Cloro — plan dashboard (credits used/remaining)",
+      "exactRailway": "Railway — project Usage tab (fixed infra ~US$ 5–15/mo)",
+      "assumptionsTitle": "Estimation assumptions:",
+      "assumptionTokens": "Tokens ≈ characters ÷ 3.6 (mixed pt/en text)",
+      "assumptionPrices": "Prices per million tokens: Claude Sonnet US$ 3 in / US$ 15 out · gpt-5-mini US$ 0.25 / US$ 2",
+      "assumptionSource": "Volumes read live from the database (prompt_results, site_audits, agent_token_usage)"
     }
   }
 }

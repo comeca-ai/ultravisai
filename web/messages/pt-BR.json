@@ -32,7 +32,8 @@
     "reports": "Relatórios",
     "settings": "Configurações",
     "citability": "Citabilidade",
-    "badgeNew": "Novo"
+    "badgeNew": "Novo",
+    "costs": "Custos & Consumo"
   },
   "agent": {
     "newChat": "Novo chat",
@@ -1582,6 +1583,57 @@
       "checkoutFailed": "Falha no checkout",
       "describeFailed": "Não conseguimos ler o site agora — escreva uma breve descrição manualmente.",
       "generatePromptsFailed": "Falha ao gerar prompts a partir dos tópicos"
+    }
+  },
+  "adminCosts": {
+    "title": "Custos & Consumo",
+    "subtitle": "Monitor do que a plataforma consome de provedores de IA — contagens vêm direto do banco; valores em US$ são estimativas com as premissas do rodapé. O número exato de cobrança vive nos consoles dos provedores.",
+    "lastData": "Último dado: {date}",
+    "kpis": {
+      "llmSpend": "LLM gasto (estimado)",
+      "llmSpendSub": "Anthropic + OpenAI, todo o período; Gemini no free tier",
+      "cloroCredits": "Créditos Cloro",
+      "cloroCreditsSub": "1 scrape = 1 crédito — driver principal de custo",
+      "results": "Respostas rastreadas",
+      "resultsSub": "{cloro} via Cloro + {api} via API Claude",
+      "sentiment": "Análises de sentimento",
+      "sentimentSub": "gpt-5-mini, uma por resposta rastreada"
+    },
+    "byPlatform": "Respostas por plataforma",
+    "byBrand": "Respostas por marca",
+    "byBrandSub": "{brands} marcas · {prompts} prompts ativos",
+    "providers": {
+      "title": "Gasto por provider",
+      "subtitle": "\"Medido\" = contagem exata no banco · \"estimado\" = tokens e custo derivados do tamanho real das respostas",
+      "provider": "Provider",
+      "what": "O que faz",
+      "volume": "Volume",
+      "tokens": "Tokens (in/out)",
+      "cost": "Custo",
+      "status": "Status",
+      "cloroDesc": "Scrapes das superfícies de IA (ChatGPT, AIO, Perplexity...)",
+      "cloroCost": "créditos × valor do plano",
+      "anthropicDesc": "Rastreio via API Claude + AI Agent + sugestões (Haiku)",
+      "openaiDesc": "Análise de sentimento de cada resposta",
+      "geminiDesc": "Sugestões e resumo de site até estourar a cota diária do free tier",
+      "credits": "{count, plural, one {# crédito} other {# créditos}}",
+      "calls": "{count, plural, one {# chamada} other {# chamadas}}",
+      "measured": "medido",
+      "estimated": "estimado",
+      "freeTier": "free tier"
+    },
+    "notes": {
+      "title": "Onde ver o número exato · premissas",
+      "exactTitle": "Consoles (fonte da verdade de cobrança):",
+      "exactAnthropic": "Anthropic — console.anthropic.com › Usage",
+      "exactOpenai": "OpenAI — platform.openai.com › Usage",
+      "exactGemini": "Gemini — aistudio.google.com (free tier: 20 req/dia; ativar billing remove o limite)",
+      "exactCloro": "Cloro — painel do plano (créditos consumidos/restantes)",
+      "exactRailway": "Railway — aba Usage do projeto (infra fixa ~US$ 5–15/mês)",
+      "assumptionsTitle": "Premissas das estimativas:",
+      "assumptionTokens": "Tokens ≈ caracteres ÷ 3,6 (texto pt/en misto)",
+      "assumptionPrices": "Preços por milhão de tokens: Claude Sonnet US$ 3 in / US$ 15 out · gpt-5-mini US$ 0,25 / US$ 2",
+      "assumptionSource": "Volumes lidos ao vivo do banco (prompt_results, site_audits, agent_token_usage)"
     }
   }
 }

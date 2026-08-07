@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Building2,
+  CircleDollarSign,
   Eye,
   FileText,
   Gauge,
@@ -116,6 +117,17 @@ export const dashboardNav: NavGroup[] = [
         href: '/dashboard/audit',
         icon: Gauge,
         requiredFeature: 'content_optimization',
+      },
+    ],
+  },
+  // Ultravis addition (fork layer): operator-facing cost monitor.
+  {
+    title: 'Admin',
+    items: [
+      {
+        title: 'Costs',
+        href: '/dashboard/admin/costs',
+        icon: CircleDollarSign,
       },
     ],
   },

@@ -92,10 +92,31 @@ async function collect() {
     count('site_audits'),
   ]);
 
+  // Accounts — who signed up, when, last sign-in and via which provider.
+  // Uses the auth admin API (service role). Newest first; capped at 25.
+  let accounts = [];
+  try {
+    const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 100 });
+    accounts = (list?.users ?? [])
+      .map((u) => ({
+        email: u.email || '—',
+        createdAt: u.created_at,
+        lastSignInAt: u.last_sign_in_at,
+        providers: (
+          u.app_metadata?.providers || (u.app_metadata?.provider ? [u.app_metadata.provider] : [])
+        ).join(', '),
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 25);
+  } catch {
+    accounts = null;
+  }
+
   return {
     machine,
     providers,
     consumption: { results, results24h, pending, brands, activePrompts, audits },
+    accounts,
     now: new Date().toISOString(),
   };
 }
@@ -105,6 +126,18 @@ function render(d) {
     `<div class="row"><span class="l">${label}</span><span class="v">${value ?? '—'}</span></div>`;
   const chip = (label, on) =>
     `<span class="chip ${on ? 'on' : 'off'}">${on ? '●' : '○'} ${label}</span>`;
+  const dt = (iso) => (iso ? String(iso).slice(0, 16).replace('T', ' ') : '—');
+  const accountsRows =
+    d.accounts === null
+      ? '<tr><td colspan="4" class="muted">não foi possível carregar</td></tr>'
+      : d.accounts.length === 0
+        ? '<tr><td colspan="4" class="muted">nenhuma conta ainda</td></tr>'
+        : d.accounts
+            .map(
+              (a) =>
+                `<tr><td>${a.email}</td><td class="mono">${dt(a.createdAt)}</td><td class="mono">${dt(a.lastSignInAt)}</td><td class="muted">${a.providers || '—'}</td></tr>`,
+            )
+            .join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="refresh" content="30">
@@ -131,6 +164,13 @@ function render(d) {
   .chips{display:flex;flex-wrap:wrap;gap:7px}
   .chip{font-size:11px;font-family:ui-monospace,monospace;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}
   .chip.on{color:var(--ok)} .chip.off{color:var(--off)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px}
+  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);font-weight:600;padding:5px 8px 5px 0;border-bottom:1px solid var(--line)}
+  td{padding:6px 8px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.mono{font-family:ui-monospace,monospace;color:var(--ink2);white-space:nowrap}
+  td.muted,.muted{color:var(--ink3)}
+  .ovf{overflow-x:auto}
   .foot{color:var(--ink3);font-size:11px;margin-top:22px;font-family:ui-monospace,monospace}
 </style></head><body><div class="wrap">
   <h1><span class="dot"></span>Ultravis · Ops</h1>
@@ -160,8 +200,17 @@ function render(d) {
     </div>
   </div>
 
+  <div class="card" style="margin-top:14px"><h2>Contas${d.accounts && d.accounts.length ? ` (${d.accounts.length})` : ''}</h2>
+    <div class="ovf"><table>
+      <thead><tr><th>E-mail</th><th>Criada em (UTC)</th><th>Último acesso</th><th>Login</th></tr></thead>
+      <tbody>${accountsRows}</tbody>
+    </table></div>
+  </div>
+
   <div class="card" style="margin-top:14px"><h2>Providers configurados</h2>
-    <div class="chips">${Object.entries(d.providers).map(([k, v]) => chip(k, v)).join('')}</div>
+    <div class="chips">${Object.entries(d.providers)
+      .map(([k, v]) => chip(k, v))
+      .join('')}</div>
   </div>
 
   <div class="foot">

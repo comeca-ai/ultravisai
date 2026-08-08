@@ -586,7 +586,8 @@
       "icRecalc": "A nota se recalcula conforme novas dimensões forem medidas.",
       "coverageBarAria": "Cobertura do índice: dimensões medidas e não medidas, proporcionais ao peso",
       "runTrackingCta": "Rodar rastreamento",
-      "d2Zero": "Nenhuma resposta de IA cita o seu domínio ainda — esse zero é real, não falta de dado."
+      "d2Zero": "Nenhuma resposta de IA cita o seu domínio ainda — esse zero é real, não falta de dado.",
+      "dimsActive": "{active} de 6 dimensões ativas"
     },
     "matrix": {
       "title": "Matriz de Citabilidade",
@@ -656,7 +657,8 @@
       },
       "comingSoon": "Em breve",
       "presenceUnknown": "sem dado",
-      "lowSample": "Amostra pequena ({count, plural, one {# citação} other {# citações}} na categoria) — use como direção, não como decisão."
+      "lowSample": "Amostra pequena ({count, plural, one {# citação} other {# citações}} na categoria) — use como direção, não como decisão.",
+      "lockedHint": "Entra no índice assim que esta dimensão tiver dado."
     },
     "notMeasured": "Não medido",
     "howItWorks": "Como funciona o IC",
@@ -667,6 +669,10 @@
       "wikidata": "Wikidata: base pública de entidades que as IAs usam para confirmar quem é a sua marca.",
       "entity": "Entidade: a identidade da marca reconhecida pelas IAs — nome, site e dados consistentes entre fontes.",
       "extractable": "Página extraível: estruturada de forma que a IA consiga recortar a resposta dela (títulos claros, listas, resposta direta)."
+    },
+    "status": {
+      "active": "Ativo",
+      "locked": "A desbloquear"
     }
   },
   "shopping": {

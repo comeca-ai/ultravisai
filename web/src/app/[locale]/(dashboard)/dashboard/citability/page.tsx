@@ -8,11 +8,12 @@
  * Framework source of truth: `estrategia/indice-citabilidade.md`.
  *
  * Scoring is deliberately partial and honest: only dimensions the platform
- * already measures get a number (D1 from the latest Site Audit of the
- * primary domain, D2 from owned-citation coverage). Every unmeasured
- * dimension renders an explicit "not measured" state — never a bare 0 or
- * "—" that could be confused with a real bad score. The partial IC card
- * declares how much of the index is actually covered.
+ * already measures feed the index (D1 from the latest Site Audit of the
+ * primary domain, D2 from owned-citation coverage). The page is framed as a
+ * PROGRESSIVE UNLOCK: measured dimensions read as "Ativo" (they count toward
+ * your IC); the rest read as "A desbloquear" with the concrete path — and
+ * still show the category's "answer key" (who the AIs cite there) as the
+ * benchmark to chase, so the page is a roadmap, never half a grey screen.
  *
  * The bubble matrix is a CONCEPTUAL diagram of the framework (positions are
  * fixed by the methodology, not driven by the brand's data), so it lives
@@ -21,11 +22,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, ChevronDown, Eye, FileText, Gauge } from 'lucide-react';
+import { ArrowRight, ChevronDown, Eye, Lock, Check } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBrandStore } from '@/stores/use-brand-store';
 import { getAuditTrend, type AuditTrend } from '@/lib/actions/audits';
@@ -87,16 +88,6 @@ type DimStatus = { measured: true; score: number } | { measured: false };
 /** Below this many citations, a category's answer key is directional only. */
 const LOW_SAMPLE_THRESHOLD = 10;
 
-// ─── Glossary term (dotted underline + native tooltip) ──────────────────────
-
-function Term({ def, children }: { def: string; children: React.ReactNode }) {
-  return (
-    <span className="cursor-help underline decoration-dotted underline-offset-2" title={def}>
-      {children}
-    </span>
-  );
-}
-
 // ─── Conceptual diagram (no chart framing — it is not data-driven) ──────────
 
 function CitabilityDiagram({ dimLabel }: { dimLabel: (key: DimKey) => string }) {
@@ -156,14 +147,23 @@ function CitabilityDiagram({ dimLabel }: { dimLabel: (key: DimKey) => string }) 
   );
 }
 
-// ─── Not-measured label (shared visual for the empty state) ─────────────────
+// ─── Active / locked status pill (the progressive-unlock affordance) ────────
 
-function NotMeasured({ className }: { className?: string }) {
+function StatusPill({ active }: { active: boolean }) {
   const t = useTranslations('citability');
-  return (
-    <span className={cn('font-medium italic text-muted-foreground', className)}>
-      {t('notMeasured')}
-    </span>
+  return active ? (
+    <Badge
+      variant="outline"
+      className="gap-1 border-emerald-500/40 bg-emerald-500/10 text-[10px] font-medium text-emerald-700 dark:text-emerald-300"
+    >
+      <Check className="h-3 w-3" />
+      {t('status.active')}
+    </Badge>
+  ) : (
+    <Badge variant="outline" className="gap-1 text-[10px] font-medium text-muted-foreground">
+      <Lock className="h-3 w-3" />
+      {t('status.locked')}
+    </Badge>
   );
 }
 
@@ -173,9 +173,15 @@ function DimensionCta({ href, label }: { href?: string; label: string }) {
   const t = useTranslations('citability');
   if (!href) {
     return (
-      <Button variant="outline" size="sm" className="w-full" disabled title={t('dims.comingSoon')}>
+      <span
+        className={cn(
+          buttonVariants({ variant: 'outline', size: 'sm' }),
+          'pointer-events-none w-full opacity-60',
+        )}
+        aria-disabled
+      >
         {label} · {t('dims.comingSoon')}
-      </Button>
+      </span>
     );
   }
   return (
@@ -204,14 +210,14 @@ function CoverageBar({ statuses }: { statuses: Record<DimKey, DimStatus> }) {
             width: `${d.weight}%`,
             backgroundColor: statuses[d.key].measured ? ZONE_COLORS[d.zone] : undefined,
           }}
-          title={`${d.n} · ${d.weight}%${statuses[d.key].measured ? '' : ` · ${t('notMeasured')}`}`}
+          title={`${d.n} · ${d.weight}%${statuses[d.key].measured ? '' : ` · ${t('status.locked')}`}`}
         />
       ))}
     </div>
   );
 }
 
-// ─── Answer-key table (favicon, clickable domain, citations, presence) ──────
+// ─── Answer-key table (favicon, clickable domain, citations) ────────────────
 
 interface AnswerKeyRow {
   domain: string;
@@ -222,7 +228,7 @@ function AnswerKeyTable({ rows, categoryTotal }: { rows: AnswerKeyRow[]; categor
   const t = useTranslations('citability');
   return (
     <div className="rounded-md border bg-muted/30 p-2.5">
-      <p className="mb-1.5 text-xs font-medium text-foreground">{t('dims.answerKey')}</p>
+      <p className="mb-1.5 text-[11px] font-medium text-foreground">{t('dims.answerKey')}</p>
       <table className="w-full text-xs">
         <tbody>
           {rows.map((row) => (
@@ -240,15 +246,8 @@ function AnswerKeyTable({ rows, categoryTotal }: { rows: AnswerKeyRow[]; categor
                   <span className="truncate text-foreground">{row.domain}</span>
                 </a>
               </td>
-              <td className="whitespace-nowrap py-1.5 pr-2 text-right tabular-nums text-muted-foreground">
+              <td className="whitespace-nowrap py-1.5 text-right tabular-nums text-muted-foreground">
                 {t('dims.citationCount', { count: row.totalCitations })}
-              </td>
-              <td className="py-1.5 text-right">
-                {/* The platform has no brand-presence data for third-party
-                    domains yet — say so instead of guessing. */}
-                <Badge variant="outline" className="text-[10px] font-normal text-muted-foreground">
-                  {t('dims.presenceUnknown')}
-                </Badge>
               </td>
             </tr>
           ))}
@@ -314,8 +313,6 @@ export default function CitabilityPage() {
   // brand's own domain. Measured as soon as at least one tracking result
   // exists — a genuine 0 ("no AI answer cites you") is a real, meaningful
   // score, distinct from "never tracked".
-  // resultsCiting is per-domain, so a result citing two owned subdomains
-  // counts twice in the sum; Math.min caps the ratio at 100.
   const d2: DimStatus = useMemo(() => {
     if (!overview || overview.totals.results === 0) return { measured: false };
     const ownedResults = overview.rows
@@ -337,6 +334,11 @@ export default function CitabilityPage() {
       dim6: { measured: false },
     }),
     [d1, d2],
+  );
+
+  const activeCount = useMemo(
+    () => DIMENSIONS.filter((d) => statuses[d.key].measured).length,
+    [statuses],
   );
 
   // Coverage: how much of the index's total weight is actually measured.
@@ -368,25 +370,13 @@ export default function CitabilityPage() {
       const inCategory = overview.rows.filter((r) => dim.categories!.includes(r.category));
       const rows = [...inCategory]
         .sort((a, b) => b.totalCitations - a.totalCitations)
-        .slice(0, 4)
+        .slice(0, 3)
         .map((r) => ({ domain: r.domain, totalCitations: r.totalCitations }));
       const categoryTotal = inCategory.reduce((sum, r) => sum + r.totalCitations, 0);
       map.set(dim.key, { rows, categoryTotal });
     }
     return map;
   }, [overview]);
-
-  // Rich-text renderer for dimension descriptions: glossary terms get a
-  // dotted underline + one-sentence tooltip. The tag map is shared — a
-  // message that doesn't use a tag simply ignores it.
-  const richDesc = (key: DimKey) =>
-    t.rich(`dims.${key}.desc`, {
-      geo: (chunks) => <Term def={t('glossary.geo')}>{chunks}</Term>,
-      llms: (chunks) => <Term def={t('glossary.llms')}>{chunks}</Term>,
-      wikidata: (chunks) => <Term def={t('glossary.wikidata')}>{chunks}</Term>,
-      entity: (chunks) => <Term def={t('glossary.entity')}>{chunks}</Term>,
-      ext: (chunks) => <Term def={t('glossary.extractable')}>{chunks}</Term>,
-    });
 
   return (
     <div className="space-y-6">
@@ -400,116 +390,122 @@ export default function CitabilityPage() {
         <p className="text-xs text-muted-foreground">{t('windowNote')}</p>
       </div>
 
-      {/* KPI row — the partial IC is the headline card (double width) */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="sm:col-span-2 border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {t('kpis.icTitle')}
-            </CardTitle>
-            <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="space-y-2.5">
-            {loading ? (
-              <Skeleton className="h-10 w-32" />
-            ) : partialScore === null ? (
-              <div>
-                <NotMeasured className="text-xl" />
-                <p className="text-xs mt-1 text-muted-foreground">{t('kpis.icNoData')}</p>
+      {/* IC hero — the single headline. D1/D2 detail lives in their cards
+          below (no duplicate KPI row). */}
+      <Card className="border-primary/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {t('kpis.icTitle')}
+          </CardTitle>
+          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {loading ? (
+            <Skeleton className="h-11 w-40" />
+          ) : partialScore === null ? (
+            <div>
+              <span className="text-xl font-medium italic text-muted-foreground">
+                {t('notMeasured')}
+              </span>
+              <p className="text-xs mt-1 text-muted-foreground">{t('kpis.icNoData')}</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span
+                  className={cn(
+                    'font-bold tabular-nums',
+                    coverage < 50 ? 'text-3xl text-muted-foreground' : 'text-5xl',
+                  )}
+                >
+                  {partialScore}
+                  <span className="text-sm font-normal text-muted-foreground">/100</span>
+                </span>
+                <span className="text-sm font-semibold">{t('kpis.icCoverage', { coverage })}</span>
               </div>
-            ) : (
-              <>
-                <div className="flex items-baseline gap-3">
-                  {/* Attenuated while coverage < 50%: the coverage line is the
-                      headline, the score is the secondary figure. */}
-                  <span
-                    className={cn(
-                      'font-bold tabular-nums',
-                      coverage < 50 ? 'text-2xl text-muted-foreground' : 'text-4xl',
-                    )}
-                  >
-                    {partialScore}
-                    <span className="text-sm font-normal text-muted-foreground">/100</span>
-                  </span>
-                  <span className="text-base font-semibold">
-                    {t('kpis.icCoverage', { coverage })}
-                  </span>
-                </div>
-                <CoverageBar statuses={statuses} />
-                <p className="text-xs text-muted-foreground">{t('kpis.icRecalc')}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              <CoverageBar statuses={statuses} />
+              <p className="text-xs text-muted-foreground">
+                {t('kpis.dimsActive', { active: activeCount })} · {t('kpis.icRecalc')}
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* D1 KPI */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {t('kpis.d1Title')}
-            </CardTitle>
-            <Gauge className="h-3.5 w-3.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-9 w-16" />
-            ) : d1.measured ? (
-              <div className="text-3xl font-bold tabular-nums">{d1.score}</div>
-            ) : (
-              <NotMeasured className="text-lg" />
-            )}
-            <p className="text-xs mt-1 text-muted-foreground">
-              {d1.measured ? (
-                t('kpis.d1Hint')
-              ) : (
-                <Link
-                  href="/dashboard/audit"
-                  className="inline-flex items-center gap-1 text-primary hover:underline"
+      {/* Dimension cards, grouped by zone. Each is Active (feeds your IC) or
+          To-unlock (with the path + the category's benchmark). */}
+      {ZONES.map((zone) => (
+        <section key={zone} className="space-y-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: ZONE_COLORS[zone] }}
+              />
+              {t(`zones.${zone}.name`)}
+            </h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">{t(`zones.${zone}.desc`)}</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {DIMENSIONS.filter((d) => d.zone === zone).map((dim) => {
+              const status = statuses[dim.key];
+              const key = answerKey.get(dim.key);
+              return (
+                <Card
+                  key={dim.n}
+                  className={cn('flex flex-col', !status.measured && 'bg-muted/20')}
                 >
-                  {t('dims.dim1.cta')}
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              )}
-            </p>
-          </CardContent>
-        </Card>
+                  <CardHeader className="space-y-1.5 pb-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className="text-xs font-semibold"
+                        style={{ color: ZONE_COLORS[dim.zone] }}
+                      >
+                        {dim.n}
+                        <span className="ml-1.5 font-normal text-muted-foreground">
+                          {t('dims.weight', { weight: dim.weight })}
+                        </span>
+                      </span>
+                      <StatusPill active={status.measured} />
+                    </div>
+                    <CardTitle className="text-sm">{t(`dims.${dim.key}.name`)}</CardTitle>
+                    <p className="text-xs font-medium text-primary">
+                      {t(`dims.${dim.key}.action`)}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col gap-3 pt-0 text-xs text-muted-foreground">
+                    <div className="flex-1">
+                      {loading ? (
+                        <Skeleton className="h-8 w-full" />
+                      ) : status.measured ? (
+                        <div>
+                          <span className="text-3xl font-bold tabular-nums text-foreground">
+                            {status.score}
+                            <span className="text-sm font-normal text-muted-foreground">/100</span>
+                          </span>
+                          {dim.key === 'dim2' && status.score === 0 && (
+                            <p className="mt-0.5">{t('kpis.d2Zero')}</p>
+                          )}
+                        </div>
+                      ) : dim.categories && key && key.rows.length > 0 ? (
+                        <AnswerKeyTable rows={key.rows} categoryTotal={key.categoryTotal} />
+                      ) : (
+                        <p className="italic">
+                          {dim.categories ? t('dims.noCitations') : t('dims.lockedHint')}
+                        </p>
+                      )}
+                    </div>
+                    <DimensionCta href={dim.ctaHref} label={t(`dims.${dim.key}.cta`)} />
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+      ))}
 
-        {/* D2 KPI */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {t('kpis.d2Title')}
-            </CardTitle>
-            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-9 w-16" />
-            ) : d2.measured ? (
-              <div className="text-3xl font-bold tabular-nums">{d2.score}</div>
-            ) : (
-              <NotMeasured className="text-lg" />
-            )}
-            <p className="text-xs mt-1 text-muted-foreground">
-              {!d2.measured ? (
-                <Link
-                  href="/dashboard/insights"
-                  className="inline-flex items-center gap-1 text-primary hover:underline"
-                >
-                  {t('kpis.runTrackingCta')}
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              ) : d2.score === 0 ? (
-                t('kpis.d2Zero')
-              ) : (
-                t('kpis.d2Hint')
-              )}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* How the IC works — collapsible, holds the conceptual diagram */}
+      {/* How the IC works — collapsible, holds the conceptual diagram. Kept
+          last so the page leads with score + actions, not theory. */}
       <Card>
         <button
           type="button"
@@ -544,76 +540,6 @@ export default function CitabilityPage() {
           </CardContent>
         )}
       </Card>
-
-      {/* Dimension cards, grouped by zone — the zone description lives here,
-          once, instead of repeating in a separate action-plan block. */}
-      {ZONES.map((zone) => (
-        <section key={zone} className="space-y-3">
-          <div>
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: ZONE_COLORS[zone] }}
-              />
-              {t(`zones.${zone}.name`)}
-            </h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">{t(`zones.${zone}.desc`)}</p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {DIMENSIONS.filter((d) => d.zone === zone).map((dim) => {
-              const status = statuses[dim.key];
-              const key = answerKey.get(dim.key);
-              return (
-                <Card key={dim.n} className="flex flex-col">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className="text-xs font-semibold"
-                        style={{ color: ZONE_COLORS[dim.zone] }}
-                      >
-                        {dim.n} · {t(`zones.${dim.zone}.name`)}
-                      </span>
-                      <Badge variant="outline" className="shrink-0 text-[10px]">
-                        {t('dims.weight', { weight: dim.weight })}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-sm">{t(`dims.${dim.key}.name`)}</CardTitle>
-                    <p className="text-xs font-medium text-primary">
-                      {t(`dims.${dim.key}.action`)}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="flex flex-1 flex-col gap-2 text-xs text-muted-foreground">
-                    <p>{richDesc(dim.key)}</p>
-                    <div className="flex-1">
-                      {loading ? (
-                        <Skeleton className="h-8 w-full" />
-                      ) : dim.categories ? (
-                        key && key.rows.length > 0 ? (
-                          <AnswerKeyTable rows={key.rows} categoryTotal={key.categoryTotal} />
-                        ) : (
-                          <p className="italic">{t('dims.noCitations')}</p>
-                        )
-                      ) : status.measured ? (
-                        <div>
-                          <span className="text-2xl font-bold tabular-nums text-foreground">
-                            {status.score}
-                          </span>
-                          {dim.key === 'dim2' && status.score === 0 && (
-                            <p className="mt-0.5">{t('kpis.d2Zero')}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <NotMeasured />
-                      )}
-                    </div>
-                    <DimensionCta href={dim.ctaHref} label={t(`dims.${dim.key}.cta`)} />
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-      ))}
     </div>
   );
 }

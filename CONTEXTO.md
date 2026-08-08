@@ -36,6 +36,11 @@ Mote: **"Visão além do alcance"** / *Vision beyond reach*.
 - Cron de rastreamento: **semanal** (`DAILY_CRON_SCHEDULE=0 6 * * 1`).
 - **Modo webhook do Cloro ativo** (`CLORO_WEBHOOK_URL=https://api.ultravis.ai/cloro/callback`)
   — resultados sobrevivem a restarts/deploys do server.
+- **Painel de operação:** `https://api.ultravis.ai/ops` — saúde da máquina
+  (uptime, memória) + consumo + providers. Login **próprio** (Basic Auth,
+  `OPS_USER`/`OPS_PASS` no Railway), separado do login do produto. Código:
+  `server/src/routes/ops.js`. Complementa (não substitui) o painel nativo do
+  Railway (CPU/rede) e os consoles dos providers (custo real de token).
 
 ## 4. Providers de IA (todos configurados via env no Railway)
 

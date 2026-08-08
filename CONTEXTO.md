@@ -44,6 +44,14 @@ fazer** para aparecer mais.
   (staging do frontend, protegida por SSO); a branch `staging` tem URL fixa;
   a `main` deploya produção. Guia completo: `docs/AMBIENTES.md`.
 - Cron de rastreamento: **semanal** (`DAILY_CRON_SCHEDULE=0 6 * * 1`).
+- **MCP + API v1 (no app Next.js, não no server Express):** a Ultravis expõe um
+  **servidor MCP** em `https://ultravis.ai/api/mcp` (Streamable HTTP, ~20 tools:
+  visibilidade, citações, concorrentes, tráfego de IA, product-visibility…) e uma
+  **API REST v1** em `https://ultravis.ai/api/v1/*` (a mesma que o conector
+  Looker Studio consome). Ambas autenticam por **API key** (`ans_`, gerada em
+  Settings → API Keys). Código: `web/src/app/api/mcp`, `web/src/app/api/v1`,
+  `web/src/lib/mcp/`. Nome do MCP rebrandeado pra `ultravis`. É um **diferencial**
+  (Ultravis plugável em Claude/Cursor/qualquer IA).
 - **Modo webhook do Cloro ativo** (`CLORO_WEBHOOK_URL=https://api.ultravis.ai/cloro/callback`)
   — resultados sobrevivem a restarts/deploys do server.
 - **Painel de operação:** `https://api.ultravis.ai/ops` — saúde da máquina

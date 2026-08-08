@@ -13,6 +13,7 @@ import { apiLimiter } from './middleware/rate-limiter.js';
 import requestIdMiddleware from './middleware/request-id.js';
 import routes from './routes/index.js';
 import trafficRoutes from './routes/traffic.js';
+import opsRoutes from './routes/ops.js';
 import {
   createJob,
   cleanupStaleJobs,
@@ -44,6 +45,10 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // --- Public traffic tracking (before helmet/cors — needs its own CORS for any origin) ---
 app.use('/', trafficRoutes);
+
+// --- Operator dashboard (/ops) — own HTTP Basic Auth, before the API token
+// middleware. Additive; see routes/ops.js. Fails closed if OPS_USER/PASS unset.
+app.use('/', opsRoutes);
 
 // --- Request logger (before everything to catch all requests) ---
 app.use(requestIdMiddleware);

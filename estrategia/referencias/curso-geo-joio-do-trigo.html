@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO — como fazer as IAs citarem a sua marca · um curso do Joio do Trigo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: oklch(0.965 0.012 88);
+    --paper2: oklch(0.985 0.008 90);
+    --paper3: oklch(0.935 0.016 88);
+    --ink: oklch(0.245 0.02 70);
+    --ink2: oklch(0.42 0.02 70);
+    --ink3: oklch(0.56 0.018 75);
+    --trigo: oklch(0.8 0.13 88);
+    --trigo-deep: oklch(0.52 0.11 78);
+    --trigo-soft: oklch(0.8 0.13 88 / 0.18);
+    --trigo-ink: oklch(0.28 0.06 78);
+    --border: oklch(0.87 0.015 85);
+    --border2: oklch(0.8 0.02 85);
+    --serif:"Newsreader", Georgia, serif;
+    --sans:"Inter", system-ui, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--trigo); color:var(--trigo-ink); }
+
+  .app{ display:grid; grid-template-columns:288px 1fr; min-height:100vh; }
+
+  /* ---------- sidebar ---------- */
+  .side{ border-right:1px solid var(--border); background:var(--paper2); padding:30px 22px 26px; position:sticky; top:0; height:100vh; overflow-y:auto; display:flex; flex-direction:column; }
+  .side .kicker{ font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--trigo-deep); }
+  .side h1{ font-family:var(--serif); font-weight:500; font-size:25px; line-height:1.12; letter-spacing:-0.01em; margin:9px 0 4px; }
+  .side h1 em{ font-style:italic; color:var(--trigo-deep); }
+  .side .by{ font-size:12px; color:var(--ink3); margin-bottom:20px; }
+  #nav{ display:flex; flex-direction:column; gap:2px; }
+  #nav button{ display:grid; grid-template-columns:26px 1fr auto; gap:8px; align-items:baseline; text-align:left; background:none; border:none; border-left:2px solid transparent; font-family:var(--sans); font-size:13px; color:var(--ink2); padding:7.5px 10px 7.5px 12px; cursor:pointer; border-radius:0 7px 7px 0; line-height:1.3; }
+  #nav button .n{ font-family:var(--mono); font-size:10px; color:var(--ink3); }
+  #nav button .mini{ font-family:var(--mono); font-size:9px; color:var(--ink3); }
+  #nav button:hover{ background:var(--paper3); color:var(--ink); }
+  #nav button.on{ background:var(--paper3); border-left-color:var(--trigo-deep); color:var(--ink); font-weight:600; }
+  #nav button.done .n{ color:var(--trigo-deep); font-weight:700; }
+  .side .prog{ margin-top:auto; padding-top:20px; }
+  .prog .pl{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:7px; }
+  .prog .pl b{ color:var(--trigo-deep); }
+  .pbar{ height:5px; border-radius:99px; background:var(--paper3); overflow:hidden; border:1px solid var(--border); }
+  .pbar i{ display:block; height:100%; width:0%; background:var(--trigo); border-radius:99px; transition:width .35s ease; }
+  .side .foot-note{ font-size:10.5px; color:var(--ink3); line-height:1.55; margin-top:14px; }
+
+  /* ---------- main ---------- */
+  main{ padding:52px 58px 90px; max-width:860px; }
+  section{ display:none; }
+  section.on{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{ opacity:0; transform:translateY(5px);} to{ opacity:1; transform:none;} }
+
+  .aula-kicker{ display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--trigo-deep); }
+  .aula-kicker .etapa{ border:1px solid var(--trigo-deep); border-radius:4px; padding:1.5px 7px; }
+  h2.title{ font-family:var(--serif); font-weight:500; font-size:clamp(30px,4.2vw,42px); line-height:1.06; letter-spacing:-0.015em; margin:12px 0 20px; max-width:22ch; }
+  h2.title em{ font-style:italic; color:var(--trigo-deep); }
+
+  .lead{ font-family:var(--serif); font-size:19px; line-height:1.55; color:var(--ink); max-width:60ch; }
+  .lead p{ margin-bottom:12px; }
+  .lead p:first-child::first-letter{ font-size:52px; line-height:0.85; float:left; padding:6px 10px 0 0; color:var(--trigo-deep); font-weight:500; }
+
+  .body{ margin-top:10px; max-width:62ch; }
+  .body p{ margin-bottom:13px; color:var(--ink2); }
+  .body p b, .body li b{ color:var(--ink); font-weight:600; }
+  .body h3{ font-family:var(--serif); font-size:20px; font-weight:560; letter-spacing:-0.008em; margin:26px 0 10px; color:var(--ink); }
+  .body ol, .body ul{ margin:0 0 14px 20px; color:var(--ink2); }
+  .body li{ margin-bottom:8px; }
+  .marker{ display:flex; align-items:center; gap:14px; margin:28px 0 22px; }
+  .marker::before, .marker::after{ content:''; height:1px; background:var(--border2); flex:1; }
+  .marker span{ font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--trigo-deep); }
+
+  .duo{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:18px 0; }
+  .duo .col{ border:1px solid var(--border); border-radius:11px; background:var(--paper2); padding:16px 17px; }
+  .duo .col.win{ border-color:var(--trigo-deep); }
+  .duo .col .tag{ font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:9px; display:block; }
+  .duo .col.win .tag{ color:var(--trigo-deep); }
+  .duo .col.lose .tag{ color:var(--ink3); }
+  .duo .col ul{ list-style:none; margin:0; }
+  .duo .col li{ font-size:13px; color:var(--ink2); line-height:1.5; padding-left:16px; position:relative; margin-bottom:7px; }
+  .duo .col.win li::before{ content:'+'; position:absolute; left:0; font-family:var(--mono); font-weight:700; color:var(--trigo-deep); }
+  .duo .col.lose li::before{ content:'–'; position:absolute; left:0; font-family:var(--mono); font-weight:700; color:var(--ink3); }
+  .duo .col li b{ color:var(--ink); }
+
+  .freio{ border:1px dashed var(--border2); border-radius:11px; padding:16px 18px; margin:22px 0; background:var(--paper2); max-width:62ch; }
+  .freio .fl{ font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink3); display:block; margin-bottom:6px; }
+  .freio p{ font-size:13.5px; color:var(--ink2); line-height:1.6; }
+
+  .segunda{ border-radius:12px; padding:18px 20px; margin:22px 0; background:var(--trigo-soft); border:1px solid var(--trigo); max-width:62ch; }
+  .segunda .sl{ font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--trigo-ink); display:block; margin-bottom:7px; }
+  .segunda p{ font-size:14px; color:var(--ink); line-height:1.6; }
+  .segunda p b{ font-weight:700; }
+  .segunda .metr{ display:block; margin-top:8px; font-family:var(--mono); font-size:10.5px; color:var(--trigo-ink); }
+
+  .fonte{ font-family:var(--mono); font-size:10px; letter-spacing:0.04em; color:var(--ink3); margin:6px 0 0; }
+  .fonte::before{ content:'⌁ '; color:var(--trigo-deep); }
+
+  /* checkpoint */
+  .quiz{ border:1px solid var(--trigo-deep); border-radius:13px; background:var(--paper2); padding:20px 22px; margin:30px 0 8px; max-width:62ch; }
+  .quiz > .qk{ font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--trigo-deep); }
+  .quiz > .qs-score{ float:right; font-family:var(--mono); font-size:10.5px; color:var(--ink3); }
+  .qq{ margin-top:16px; }
+  .qq p.qt{ font-size:14.5px; font-weight:600; letter-spacing:-0.005em; margin-bottom:9px; color:var(--ink); }
+  .qq .opt{ display:block; width:100%; text-align:left; background:var(--paper); border:1px solid var(--border2); border-radius:9px; color:var(--ink2); font-family:var(--sans); font-size:13.5px; padding:9px 13px; margin-bottom:6px; cursor:pointer; line-height:1.45; }
+  .qq .opt:hover{ border-color:var(--ink3); color:var(--ink); }
+  .qq.answered .opt{ cursor:default; opacity:0.7; }
+  .qq .opt.correct{ border-color:var(--trigo-deep); background:var(--trigo-soft); color:var(--ink); opacity:1; font-weight:600; }
+  .qq .opt.wrong{ border-color:oklch(0.55 0.16 28); color:oklch(0.48 0.14 28); opacity:1; }
+  .qq .why{ display:none; font-size:13px; color:var(--ink2); line-height:1.55; border-left:2px solid var(--trigo-deep); padding:4px 0 4px 12px; margin-top:8px; }
+  .qq.answered .why{ display:block; }
+  .qq .why b{ color:var(--trigo-deep); font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; margin-right:6px; }
+
+  .concluir{ margin-top:18px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; border:1.5px solid var(--trigo-deep); border-radius:9px; background:none; color:var(--trigo-deep); padding:10px 18px; cursor:pointer; }
+  .concluir:hover{ background:var(--trigo-soft); }
+  .concluir.ok{ background:var(--trigo); border-color:var(--trigo); color:var(--trigo-ink); }
+  .navrow{ display:flex; justify-content:space-between; align-items:center; margin-top:26px; padding-top:18px; border-top:1px solid var(--border); }
+  .navrow button{ font-family:var(--mono); font-size:11px; letter-spacing:0.05em; border:1px solid var(--border2); border-radius:8px; background:none; color:var(--ink2); padding:8px 14px; cursor:pointer; }
+  .navrow button:hover{ color:var(--ink); border-color:var(--ink3); }
+
+  /* guia */
+  .mapa{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:24px 0 6px; }
+  .mapa .m{ border:1px solid var(--border); border-radius:11px; background:var(--paper2); padding:14px 15px; }
+  .mapa .m .mv{ font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.12em; color:var(--trigo-deep); }
+  .mapa .m .mt{ font-family:var(--serif); font-size:16.5px; font-weight:560; margin:5px 0 3px; }
+  .mapa .m .md{ font-size:11.5px; color:var(--ink3); line-height:1.45; }
+  .espinha{ border-left:3px solid var(--trigo); background:var(--paper2); border-radius:0 11px 11px 0; padding:15px 19px; margin:22px 0; max-width:62ch; }
+  .espinha .el{ font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink3); display:block; margin-bottom:5px; }
+  .espinha p{ font-family:var(--serif); font-size:19px; font-style:italic; color:var(--ink); }
+
+  /* plano de 30 dias */
+  .semanas{ display:flex; flex-direction:column; gap:10px; margin:20px 0; max-width:66ch; }
+  .semana{ border:1px solid var(--border); border-radius:12px; background:var(--paper2); padding:16px 18px; display:grid; grid-template-columns:auto 1fr; gap:16px; }
+  .semana .sn{ font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.1em; color:var(--trigo-deep); text-transform:uppercase; padding-top:3px; white-space:nowrap; }
+  .semana h4{ font-size:14.5px; font-weight:600; margin-bottom:4px; }
+  .semana p{ font-size:13px; color:var(--ink2); line-height:1.55; }
+  .cklist{ margin:20px 0 6px; max-width:62ch; }
+  .cklist .ck{ display:flex; gap:11px; align-items:flex-start; padding:9px 4px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .cklist .ck .box{ width:17px; height:17px; border:1.5px solid var(--border2); border-radius:5px; flex:none; margin-top:2px; display:grid; place-items:center; font-size:11px; color:var(--trigo-ink); background:var(--paper); }
+  .cklist .ck.on .box{ background:var(--trigo); border-color:var(--trigo); }
+  .cklist .ck.on .box::after{ content:'✓'; font-weight:700; }
+  .cklist .ck span{ font-size:13.5px; color:var(--ink2); line-height:1.5; }
+  .cklist .ck.on span{ color:var(--ink3); text-decoration:line-through; text-decoration-color:var(--border2); }
+
+  /* cta / rodapé */
+  .cta{ border:1px solid var(--trigo-deep); border-radius:13px; background:var(--trigo-soft); padding:22px 24px; margin:34px 0 0; max-width:62ch; }
+  .cta .cl{ font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--trigo-ink); display:block; margin-bottom:8px; }
+  .cta p{ font-size:13.5px; color:var(--ink); line-height:1.6; margin-bottom:10px; }
+  .cta .btn{ display:inline-block; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--ink); color:var(--paper); border-radius:8px; padding:10px 18px; text-decoration:none; }
+  .assin{ font-family:var(--serif); font-size:18px; font-style:italic; color:var(--ink); margin:22px 0 0; }
+  .rodape{ margin-top:40px; padding-top:16px; border-top:1px solid var(--border); font-size:11.5px; color:var(--ink3); line-height:1.65; max-width:70ch; }
+
+  button:focus-visible{ outline:2px solid var(--trigo-deep); outline-offset:2px; }
+
+  @media (max-width:900px){
+    .app{ grid-template-columns:1fr; }
+    .side{ position:relative; height:auto; border-right:none; border-bottom:1px solid var(--border); padding:22px 18px 16px; }
+    #nav{ flex-direction:row; overflow-x:auto; gap:6px; padding-bottom:4px; }
+    #nav button{ border-left:none; border:1px solid var(--border); border-radius:8px; white-space:nowrap; grid-template-columns:auto auto; }
+    #nav button .mini{ display:none; }
+    #nav button.on{ border-color:var(--trigo-deep); }
+    .side .prog{ margin-top:12px; }
+    .side .foot-note{ display:none; }
+    main{ padding:30px 18px 70px; }
+    .mapa{ grid-template-columns:1fr 1fr; }
+    .duo{ grid-template-columns:1fr; }
+    .semana{ grid-template-columns:1fr; gap:6px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <span class="kicker">O Joio do Trigo · curso</span>
+    <h1>GEO: como fazer as IAs citarem a <em>sua</em> marca.</h1>
+    <div class="by">por Jhon · 8 aulas curtas · uma segunda-feira por aula</div>
+    <nav id="nav"></nav>
+    <div class="prog">
+      <div class="pl"><span>Progresso</span><b id="pcount">0/8</b></div>
+      <div class="pbar"><i id="pfill"></i></div>
+    </div>
+    <div class="foot-note">Rascunho autoral para revisão do Jhon. O progresso vive nesta sessão da página (não fica salvo ao recarregar).</div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+/* =================== conteúdo =================== */
+const ETAPAS = { pan:'panorama', ler:'ler', ent:'entender', conf:'confiar', med:'medir', plano:'plano' };
+
+const GUIA = {
+  id:'guia', nav:'Comece por aqui', kicker:'Guia do curso',
+  title:'Antes de otimizar, <em>entenda o jogo.</em>',
+  html: `
+  <div class="lead">
+    <p>Olá amigos 👋,</p>
+    <p>Eu repito por aqui, sem cansar, que a era da IA está apenas começando. Este curso é sobre um pedaço bem específico desse começo: o momento em que o seu cliente para de digitar no Google — e passa a <b>perguntar</b>. E uma máquina responde por você.</p>
+    <p>GEO (Generative Engine Optimization) é o trabalho de fazer sua marca ser lida, entendida e citada por essas máquinas. Não é truque de growth. É mais parecido com reputação: lenta de construir, visível de longe.</p>
+  </div>
+  <div class="espinha"><span class="el">A tese do curso em uma frase</span><p>Sua marca será descrita por uma IA — com ou sem você.</p></div>
+  <div class="body">
+    <p>São oito aulas curtas. Cada uma fecha com um <b>freio cético</b> (o que essa tática não faz por você) e uma ação de <b>segunda-feira de manhã</b> — porque estratégia que não cabe na sua segunda não é estratégia, é decoração.</p>
+    <h3>O mapa: quatro verbos</h3>
+    <p>Tudo o que existe de GEO sério cabe em quatro verbos. A IA só cita quem ela consegue ler, entender e confiar — e você só melhora o que mede.</p>
+    <div class="mapa">
+      <div class="m"><div class="mv">01 · LER</div><div class="mt">Acesso</div><div class="md">A máquina consegue chegar no seu conteúdo? (aula 4)</div></div>
+      <div class="m"><div class="mv">02 · ENTENDER</div><div class="mt">Conteúdo</div><div class="md">O que você publica tem formato de resposta? (aula 5)</div></div>
+      <div class="m"><div class="mv">03 · CONFIAR</div><div class="mt">Reputação</div><div class="md">O que os outros dizem sustenta a citação? (aula 6)</div></div>
+      <div class="m"><div class="mv">04 · MEDIR</div><div class="mt">Loop</div><div class="md">Você sabe se está funcionando? (aulas 3 e 7)</div></div>
+    </div>
+    <p style="margin-top:14px">As aulas 1 e 2 são o chão: o que mudou e o que a ciência já mediu. A aula 8 amarra tudo num plano de 30 dias. Siga na ordem na primeira vez; depois volte por aula, como consulta.</p>
+    <p class="fonte">Base científica: GEO — Generative Engine Optimization (Aggarwal et al., KDD 2024) · caso de conteúdo: material do próprio autor</p>
+  </div>`
+};
+
+const AULAS = [
+{
+  id:'a1', n:'01', etapa:'PANORAMA', nav:'A homepage que você não desenhou',
+  title:'A homepage que você <em>não desenhou.</em>',
+  html:`
+  <div class="lead">
+    <p>Pergunte a uma IA o que ela acha da sua marca. Vá lá — eu espero.</p>
+    <p>O que voltou é a sua nova homepage. Montada sem briefing, sem aprovação, a partir do que existe publicado sobre você. E é a primeira impressão de um número crescente de clientes.</p>
+  </div>
+  <div class="body">
+    <p>A busca em lista te dava dez chances de clique. A resposta gerada dá <b>uma</b>. Ou nenhuma. Quando alguém pergunta "qual o melhor [o que você vende]?" a um ChatGPT, um Gemini, um Perplexity, a resposta vem pronta: uma recomendação, duas ou três marcas citadas, uma descrição de cada. Quem não está na resposta não perdeu posição — <b>saiu da prateleira</b>.</p>
+    <p>Isso já aparece nos números que qualquer dono de site acompanha: o tráfego orgânico de quem vivia de clique vem encolhendo, porque parte das perguntas morre dentro da resposta gerada. A descoberta está mudando de endereço.</p>
+    <p><b>GEO em uma frase:</b> o conjunto de práticas para sua marca ser citada, bem descrita e recomendada dentro das respostas geradas por IA. O resto do curso são os quatro verbos: fazer a máquina <b>ler</b> você, <b>entender</b> você, <b>confiar</b> em você — e você <b>medir</b> tudo isso.</p>
+  </div>
+  <div class="freio"><span class="fl">Freio cético</span><p>O Google não morreu, e o volume da busca tradicional ainda é gigante. SEO segue pagando boletos — GEO não substitui, disputa a camada nova, onde a decisão começa a se formar. Quem abandona um pelo outro erra duas vezes.</p></div>
+  <div class="segunda"><span class="sl">Na segunda de manhã</span><p>Pergunte a <b>duas IAs</b>: "o que você acha de [sua marca]?" e "quais as melhores opções de [sua categoria]?". Guarde os prints com data.<span class="metr">métrica: existir um registro do "antes" — você vai precisar dele na aula 7</span></p></div>
+  <p class="fonte">Conceito e enquadramento: paper GEO §1 · observação de mercado do autor</p>`
+},
+{
+  id:'a2', n:'02', etapa:'PANORAMA', nav:'O joio e o trigo da evidência',
+  title:'O que a ciência mediu (e o que é <em>só palpite</em>).',
+  html:`
+  <div class="lead">
+    <p>Todo mundo tem palpite sobre "aparecer no ChatGPT". Palpite é barato. Medição é rara.</p>
+    <p>Em 2024, pesquisadores de Princeton, IIT Delhi, Georgia Tech e Allen AI resolveram medir — no paper que criou o termo GEO, publicado no KDD: 9 táticas, 10 mil consultas, respostas geradas de verdade.</p>
+  </div>
+  <div class="body">
+    <p>Vamos separar o Joio do Trigo?</p>
+    <div class="duo">
+      <div class="col win"><span class="tag">O trigo — melhora a visibilidade</span><ul>
+        <li><b>Aspas de fontes</b> (citação direta de quem sabe): <b>+41%</b> — a tática campeã</li>
+        <li><b>Estatísticas</b> com origem: <b>+31%</b></li>
+        <li><b>Referências citáveis</b>: <b>+27%</b></li>
+        <li>Fluência + dados <b>combinados</b> superam qualquer tática isolada</li>
+      </ul></div>
+      <div class="col lose"><span class="tag">O joio — não funciona</span><ul>
+        <li><b>Keyword stuffing</b> — repetir palavra-chave — <b>piora</b> o resultado (−8%)</li>
+        <li>Otimização genérica igual para todo domínio (o efeito varia por assunto)</li>
+        <li>Confiar que a posição no Google se transfere sozinha para a resposta</li>
+      </ul></div>
+    </div>
+    <div class="marker"><span>O chique é ser simples</span></div>
+    <p>Repare no padrão: o que funciona não é truque — é <b>prova visível</b>. Citar quem sabe, mostrar número com origem, dar referência. O hábito mais entranhado do SEO antigo (entupir de palavra-chave) é justamente o que menos serve aqui.</p>
+    <p>E o achado mais interessante do paper para quem não é líder de mercado: <b>sites mal posicionados no Google são os que mais ganham</b> com essas táticas. A disputa recomeçou — e recomeçar favorece quem chegou depois.</p>
+  </div>
+  <div class="freio"><span class="fl">Freio cético</span><p>O paper mede visibilidade dentro da resposta — não conversão, não venda. E mede num benchmark, não no seu mercado específico. Trate os números como bússola, não como garantia.</p></div>
+  <div class="segunda"><span class="sl">Na segunda de manhã</span><p>Pegue sua página mais importante e acrescente <b>duas provas com fonte</b>: um número com origem nomeada e uma citação de fonte respeitada do seu setor.<span class="metr">métrica: 2 provas publicadas na página que mais vende</span></p></div>
+  <p class="fonte">Paper GEO (Aggarwal et al., KDD 2024) — Tabela 1, §5 e §6</p>`
+},
+{
+  id:'a3', n:'03', etapa:'MEDIR', nav:'O teste do espelho',
+  title:'O teste do espelho: seu diagnóstico <em>em meia hora.</em>',
+  html:`
+  <div class="lead">
+    <p>Antes de otimizar qualquer coisa, descubra o que a máquina já diz de você. Meia hora, sem ferramenta paga.</p>
+  </div>
+  <div class="body">
+    <h3>O roteiro</h3>
+    <ol>
+      <li><b>Liste 10 a 15 perguntas que um cliente faria de verdade.</b> Inclua as três famílias que decidem compra: "qual o melhor [categoria]?", "[você] ou [concorrente]?", "quanto custa [serviço]?".</li>
+      <li><b>Rode em 2 ou 3 IAs diferentes</b> — pelo menos uma com busca na web ligada.</li>
+      <li><b>Repita em dias e horários diferentes.</b> As respostas variam por natureza — a mesma pergunta pode citar você hoje e ignorar você amanhã. Por isso a unidade de medida é <b>frequência de citação</b>, nunca uma resposta isolada.</li>
+      <li><b>Registre quatro coisas:</b> fui citado? como fui descrito? quem foi citado no meu lugar? de quais fontes a resposta bebeu?</li>
+      <li><b>Anote o desalinhamento.</b> A IA te descreve de um jeito diferente do seu posicionamento? Isso não é a IA errando — é o seu discurso publicado deixando margem.</li>
+    </ol>
+    <p>As fontes que aparecerem no passo 4 são ouro: são os lugares onde a máquina confia. Parte da sua estratégia (aula 6) vai ser <b>estar nesses lugares</b>.</p>
+  </div>
+  <div class="freio"><span class="fl">Freio cético</span><p>Uma rodada não prova nada — nem a favor, nem contra. Aleatoriedade faz parte do jogo. O espelho só vira diagnóstico quando você repete o mesmo protocolo e compara rodadas.</p></div>
+  <div class="segunda"><span class="sl">Na segunda de manhã</span><p>Monte a <b>planilha do espelho</b>: perguntas nas linhas; IA, data, "citado?", "descrição" e "fontes" nas colunas. Complete a primeira rodada.<span class="metr">métrica: baseline registrado — 10+ perguntas × 2+ IAs</span></p></div>
+  <p class="fonte">Protocolo do autor · princípio da aleatoriedade: paper GEO §5 e prática de monitoramento</p>`
+},
+{
+  id:'a4', n:'04', etapa:'LER', nav:'O lado entediante',
+  title:'O lado entediante <em>que decide o jogo.</em>',
+  html:`
+  <div class="lead">
+    <p>Agora a parte que ninguém posta no LinkedIn: encanamento.</p>
+    <p>Antes de a IA citar você, ela precisa conseguir <b>ler</b> você. E a leitura falha por motivos constrangedoramente banais.</p>
+  </div>
+  <div class="body">
+    <ol>
+      <li><b>Bing, o índice esquecido.</b> O ChatGPT enriquece respostas a partir do índice do Bing. Dá para estar bem no Google e ser invisível numa fatia relevante das respostas de IA. Busque sua marca no Bing hoje — muita empresa nunca olhou.</li>
+      <li><b>robots.txt: decisão, não herança.</b> Os crawlers de IA (GPTBot e companhia) respeitam o seu robots.txt. Bloqueá-los pode ter sido um padrão herdado do seu template ou uma decisão antiga de outro contexto. Torne isso uma escolha consciente: quem quer ser citado, libera.</li>
+      <li><b>O teste do código-fonte.</b> Abra sua página principal e clique em "exibir código-fonte". O texto que importa está lá, no HTML? Se só aparece renderizado por JavaScript, não conte que os crawlers de IA vão executá-lo. Conteúdo decisivo vai em HTML direto ou renderizado no servidor.</li>
+      <li><b>Dados estruturados.</b> Schema (organização, produto, FAQ, avaliações) é legenda para máquina: diz quem é quem sem depender de interpretação.</li>
+      <li><b>llms.txt, a aposta barata.</b> Um arquivo que apresenta seu site aos modelos. Ainda não é padrão consolidado — trate como aposta de custo quase zero, não como bala de prata.</li>
+    </ol>
+    <p>É entediante? É. Funciona? Também. E o melhor: é o tipo de vantagem que seu concorrente acha chata demais para copiar.</p>
+  </div>
+  <div class="freio"><span class="fl">Freio cético</span><p>Encanamento não é "configurou, esqueceu". Cada release do site pode quebrar o que estava certo — o teste do código-fonte e o robots.txt entram na rotina da aula 7, não no baú.</p></div>
+  <div class="segunda"><span class="sl">Na segunda de manhã</span><p>Três checagens de 10 minutos: <b>(1)</b> busque sua marca no Bing; <b>(2)</b> abra seudominio.com/robots.txt e veja o que está bloqueado; <b>(3)</b> exiba o código-fonte da página principal e procure seu texto central.<span class="metr">métrica: 3 checks com veredito ok/ajustar — e dono para cada ajuste</span></p></div>
+  <p class="fonte">Práticas de indexação e renderização — reescritas do estudo do autor (projeto GEO)</p>`
+},
+{
+  id:'a5', n:'05', etapa:'ENTENDER', nav:'Conteúdo que vira resposta',
+  title:'Conteúdo que <em>vira resposta.</em>',
+  html:`
+  <div class="lead">
+    <p>A IA não cita "conteúdo de qualidade". Ela cita <b>respostas</b>.</p>
+    <p>A diferença é menos poética e mais estrutural do que parece.</p>
+  </div>
+  <div class="body">
+    <ol>
+      <li><b>Título é pergunta — a pergunta inteira.</b> Seus H2 e H3 devem ser as perguntas reais do cliente, por extenso: "Quanto custa [serviço] em 2026?" — e a resposta vem direta, nas três primeiras linhas, sem cerimônia de abertura.</li>
+      <li><b>Formato extraível.</b> Listas numeradas, tabelas, passos. Se a pergunta pede "5 melhores", entregue 5, numerados. A máquina recorta o que já vem em formato de recorte.</li>
+      <li><b>Comparativos honestos, assinados.</b> "X ou Y?" é o formato que as IAs mais reaproveitam. Publique você a comparação do seu mercado — com critérios e tabela — antes que a resposta padrão seja a de outro.</li>
+      <li><b>Pilar + subpáginas.</b> Uma página profunda no seu tema central, cercada de subpáginas específicas. Autoridade temática é o que transforma citação pontual em presença recorrente.</li>
+    </ol>
+    <h3>Caso real (o meu)</h3>
+    <p>Exportei do AlsoAsked as <b>50 perguntas reais</b> que orbitam "palestra de IA para negócios" — minha vitrine. Na mesma busca, <b>quatro intenções diferentes</b>: quem quer aprender IA, quem compara ferramenta, quem quer fazer slides… e quem <b>contrata palestrante</b> ("qual o valor cobrado por um palestrante?", "quais temas estão em alta?"). Só uma dessas paga a conta — e foi ela que virou o FAQ da minha página, pergunta por pergunta, com resposta direta. O detalhe que me convenceu: a resposta que estava vencendo no ramo principal era… uma lista numerada.</p>
+    <p><b>E a IA na produção?</b> Use como apoio — subtemas, rascunho, reformulação. O que ela não inventa por você: seus números, seus casos, sua experiência. E é exatamente isso que o modelo quer citar.</p>
+  </div>
+  <div class="freio"><span class="fl">Freio cético</span><p>Conteúdo 100% gerado, sem prova própria, compete com o infinito — e empata com ele. O desempate é o que só você tem: dado proprietário, caso vivido, opinião com assinatura.</p></div>
+  <div class="segunda"><span class="sl">Na segunda de manhã</span><p>Escolha <b>uma pergunta do seu espelho</b> (aula 3) em que você não foi citado — e publique a melhor resposta da internet para ela: título-pergunta, resposta nas 3 primeiras linhas, uma prova com fonte.<span class="metr">métrica: 1 página nova no ar nesta semana</span></p></div>
+  <p class="fonte">Caso AlsoAsked: material do autor (plano GEO da palestra) · táticas de formato: paper GEO + estudo do autor</p>`
+},
+{
+  id:'a6', n:'06', etapa:'CONFIAR', nav:'Quem fala de você',
+  title:'O que dizem de você quando você <em>não está na sala.</em>',
+  html:`
+  <div class="lead">
+    <p>No SEO antigo, reputação era backlink. As IAs leem mais parecido com gente: o que <b>os outros</b> falam de você.</p>
+    <p>Avaliações, menções, entrevistas, fóruns. Sua reputação é feita das provas visíveis que você deixa — se este curso tivesse uma regra de ouro, seria essa.</p>
+  </div>
+  <div class="body">
+    <ol>
+      <li><b>Fluxo de avaliações com inteligência.</b> Peça avaliação por e-mail depois da compra. Quem daria 5 estrelas vai para o público (Google, Trustpilot); quem daria menos cai numa conversa privada de feedback. O elogio vira sinal público; a crítica vira melhoria interna. Nada disso é esconder problema — é dar o destino certo a cada conversa.</li>
+      <li><b>Menções que pesam.</b> Imprensa do setor, entrevistas, artigos convidados, podcasts. É o tipo de fonte que aparece no passo 4 do seu espelho — os lugares onde a máquina confia.</li>
+      <li><b>Comunidades (Reddit, Quora, fóruns do setor).</b> As IAs bebem dessas discussões. Funciona quando você responde de verdade, com utilidade e nome próprio. Colar link da marca em toda thread não é estratégia, é spam com etapas.</li>
+      <li><b>Perfis oficiais completos</b> — e Wikipedia, quando sua relevância sustentar (pelas regras deles, não pelas suas).</li>
+      <li><b>Backlinks comprados:</b> atalho que ajuda pouco e envelhece mal. Os que seguram são os naturais — de colaboração, entrevista e conteúdo que mereceu o link.</li>
+    </ol>
+  </div>
+  <div class="freio"><span class="fl">Freio cético</span><p>Reputação fabricada tem validade curta: review incentivado, astroturfing em fórum, rede de guest post. O barato sai caro quando quem lê é uma máquina treinada em padrões — e ela é.</p></div>
+  <div class="segunda"><span class="sl">Na segunda de manhã</span><p>Monte o <b>fluxo de pedido de avaliação</b> (e-mail padrão + roteamento 5★ público / 1–4★ privado) e envie para os últimos 10 clientes.<span class="metr">métrica: 10 pedidos enviados · respostas na primeira semana</span></p></div>
+  <p class="fonte">Práticas de reputação — reescritas do estudo do autor · princípio das provas: paper GEO (citações e fontes)</p>`
+},
+{
+  id:'a7', n:'07', etapa:'MEDIR', nav:'O loop',
+  title:'O loop: medir, ajustar, <em>medir de novo.</em>',
+  html:`
+  <div class="lead">
+    <p>GEO não é projeto com data de entrega. É rotina — tipo academia, tipo caixa.</p>
+    <p>A pergunta certa não é "fui citado hoje?". É: "minha frequência de citação está subindo, nas perguntas que importam, nos mercados que importam?"</p>
+  </div>
+  <div class="body">
+    <ol>
+      <li><b>Cadência:</b> semanal — ou a cada 3–4 dias num mercado quente. Modelos atualizam, concorrentes publicam; a foto de ontem vence rápido.</li>
+      <li><b>Por mercado × idioma.</b> Se você atende Brasil e fora, cada combinação país-idioma é uma medição separada. A resposta em português não prevê a resposta em inglês.</li>
+      <li><b>As mesmas perguntas do espelho.</b> Comparabilidade vale mais que novidade — rodada nova, protocolo velho.</li>
+      <li><b>Leitura qualitativa junto da quantitativa.</b> Está sendo citado, mas descrito fora do seu posicionamento? O discurso publicado precisa de ajuste — conteúdo, contexto, provas.</li>
+      <li><b>Um ou dois ajustes por rodada.</b> Auditar → priorizar → publicar → medir na rodada seguinte. Mudar dez coisas de uma vez é garantir que você nunca saberá qual funcionou.</li>
+    </ol>
+    <p>Ferramentas de monitoramento de menções em IA ajudam a escalar isso — mas repare: a lógica é exatamente a da sua planilha. Ferramenta acelera protocolo; não substitui.</p>
+  </div>
+  <div class="freio"><span class="fl">Freio cético</span><p>Métrica de vaidade existe aqui também: ser citado numa pergunta que nenhum cliente faz é troféu de estante. Toda rodada, volte à lista de perguntas que vendem.</p></div>
+  <div class="segunda"><span class="sl">Na segunda de manhã</span><p>Agende <b>30 minutos semanais recorrentes</b>: rodar o espelho, registrar, escolher 1 ajuste e publicar.<span class="metr">métrica: 4 rodadas consecutivas no primeiro mês</span></p></div>
+  <p class="fonte">Protocolo de monitoramento — estudo do autor · aleatoriedade e variação: paper GEO §5</p>`
+},
+{
+  id:'a8', n:'08', etapa:'PLANO', nav:'O plano de 30 dias',
+  title:'O plano de 30 dias <em>(as quatro segundas).</em>',
+  html:`
+  <div class="lead">
+    <p>Estratégia que não cabe na segunda-feira de manhã é decoração. Aqui estão as suas — quatro delas.</p>
+  </div>
+  <div class="body">
+    <div class="semanas">
+      <div class="semana"><div class="sn">Semana 1</div><div><h4>O espelho + o encanamento</h4><p>Planilha do espelho com a primeira rodada completa (aula 3) e as três checagens técnicas: Bing, robots.txt, código-fonte (aula 4).</p></div></div>
+      <div class="semana"><div class="sn">Semana 2</div><div><h4>A primeira resposta</h4><p>FAQ da página principal com títulos-pergunta reais + 1 página nova respondendo uma pergunta em que você não é citado (aula 5).</p></div></div>
+      <div class="semana"><div class="sn">Semana 3</div><div><h4>As provas</h4><p>Duas provas com fonte nas páginas-chave (aula 2) + fluxo de avaliações no ar, com os 10 primeiros pedidos enviados (aula 6).</p></div></div>
+      <div class="semana"><div class="sn">Semana 4</div><div><h4>A rodada 2</h4><p>Re-medir com o mesmo protocolo, registrar o delta contra o baseline e escolher os 2 próximos ajustes (aula 7). O loop começou.</p></div></div>
+    </div>
+    <h3>Checklist dos 30 dias</h3>
+    <div class="cklist" id="cklist">
+      <div class="ck"><div class="box"></div><span>Prints do "antes": 2 IAs perguntadas sobre minha marca e categoria</span></div>
+      <div class="ck"><div class="box"></div><span>Planilha do espelho com 10+ perguntas e a 1ª rodada completa</span></div>
+      <div class="ck"><div class="box"></div><span>Bing checado · robots.txt revisado · código-fonte testado</span></div>
+      <div class="ck"><div class="box"></div><span>FAQ com títulos-pergunta na página principal</span></div>
+      <div class="ck"><div class="box"></div><span>1 página nova de resposta publicada</span></div>
+      <div class="ck"><div class="box"></div><span>2 provas com fonte nas páginas que mais vendem</span></div>
+      <div class="ck"><div class="box"></div><span>Fluxo de avaliações no ar (5★ público / 1–4★ privado) + 10 pedidos</span></div>
+      <div class="ck"><div class="box"></div><span>Rodada 2 do espelho medida e delta registrado</span></div>
+      <div class="ck"><div class="box"></div><span>30 min semanais recorrentes na agenda</span></div>
+      <div class="ck"><div class="box"></div><span>Próximos 2 ajustes escolhidos (e só 2)</span></div>
+    </div>
+    <p>Trinta dias não fazem você dominar as respostas do seu mercado. Fazem algo melhor: te tiram da arquibancada. Daqui em diante é loop — e loop é onde esse jogo se ganha.</p>
+    <p>A era da IA está apenas começando!</p>
+    <p class="assin">Abs, Jhon</p>
+    <div class="cta">
+      <span class="cl">Adoramos uma indicação!</span>
+      <p>Se você conhece alguém que precisa parar de ser invisível para as IAs, indique este curso — e para receber as próximas análises no seu e-mail, assine O Joio do Trigo.</p>
+      <a class="btn" href="#" onclick="return false">Inscreva-se · O Joio do Trigo</a>
+    </div>
+  </div>`
+}
+];
+
+const QUIZ = [
+  { a:'a1', q:'O que muda de verdade quando a descoberta acontece dentro de uma resposta de IA?',
+    opts:['Nada — a resposta é só uma lista de links com outro nome','A lista de dez chances vira uma recomendação única: quem não é citado sai da prateleira'], c:1,
+    why:'A resposta gerada recomenda e descreve poucas marcas — não exibe dez posições. Aula 1.' },
+  { a:'a2', q:'Segundo o paper GEO (KDD 2024), qual tática MELHORA a visibilidade — e qual PIORA?',
+    opts:['Melhora: repetir a palavra-chave · Piora: citar fontes','Melhora: aspas de fontes (+41%) · Piora: keyword stuffing (−8%)','Melhora: texto mais longo · Piora: usar estatísticas'], c:1,
+    why:'Provas visíveis (citações, estatísticas, referências) sobem; o hábito de entupir de palavra-chave desce. Aula 2, Tabela 1 do paper.' },
+  { a:'a2', q:'Quem MAIS ganha com as táticas do paper?',
+    opts:['Os líderes que já dominam o topo do Google','Sites mal posicionados na busca tradicional — a disputa recomeça'], c:1,
+    why:'É o achado mais animador para quem chegou depois: o jogo novo redistribui as chances. Aula 2.' },
+  { a:'a3', q:'Por que o teste do espelho exige repetir as perguntas em dias diferentes?',
+    opts:['Porque as IAs variam as respostas por natureza — mede-se frequência de citação, não uma foto','Para gastar menos créditos das ferramentas'], c:0,
+    why:'Uma rodada não prova nada, nem a favor nem contra. Frequência é a unidade de medida. Aula 3.' },
+  { a:'a4', q:'O texto principal da sua página não aparece no "exibir código-fonte". O que isso significa?',
+    opts:['Nada — o que importa é o visual renderizado','Que ele depende de JavaScript — e boa parte dos crawlers de IA não vai enxergá-lo'], c:1,
+    why:'Conteúdo decisivo vai em HTML direto ou renderizado no servidor. Aula 4, teste 3.' },
+  { a:'a4', q:'Por que olhar o Bing, se "todo mundo usa Google"?',
+    opts:['Porque o ChatGPT enriquece respostas a partir do índice do Bing','Porque o Bing paga por cadastro de sites'], c:0,
+    why:'Estar bem no Google e invisível no Bing é ser invisível numa fatia das respostas de IA. Aula 4, teste 1.' },
+  { a:'a5', q:'Como o curso manda escrever os títulos H2/H3 das páginas?',
+    opts:['Com a palavra-chave repetida em variações','Como perguntas reais e completas do cliente — com resposta direta nas primeiras linhas'], c:1,
+    why:'A máquina recorta o que já tem formato de resposta. Aula 5, regra 1.' },
+  { a:'a5', q:'No caso AlsoAsked do autor, qual ramo de perguntas virou prioridade máxima?',
+    opts:['O de quem quer aprender IA do zero','O de quem contrata palestrante — a intenção que paga a conta','O de quem quer fazer slides com IA'], c:1,
+    why:'Quatro intenções na mesma busca; só uma é o cliente comprador. O FAQ nasceu dela. Aula 5, caso real.' },
+  { a:'a6', q:'No fluxo de avaliações da aula, para onde vai quem daria 1 a 4 estrelas?',
+    opts:['Para o mesmo link público de todo mundo','Para uma conversa privada de feedback — o público recebe os 5★, você recebe a melhoria'], c:1,
+    why:'Cada conversa tem o destino certo: elogio vira sinal público, crítica vira correção interna. Aula 6, regra 1.' },
+  { a:'a6', q:'E os backlinks comprados?',
+    opts:['São a base de qualquer estratégia séria de GEO','Atalho que ajuda pouco e envelhece mal — os naturais são os que seguram'], c:1,
+    why:'Reputação fabricada tem validade curta quando quem lê é uma máquina treinada em padrões. Aula 6.' },
+  { a:'a7', q:'Qual é a cadência de medição que o curso recomenda?',
+    opts:['Uma auditoria por ano, no planejamento','Semanal (ou a cada 3–4 dias), por combinação mercado × idioma, sempre com as mesmas perguntas'], c:1,
+    why:'Modelos atualizam e concorrentes publicam — e comparabilidade exige protocolo fixo. Aula 7.' },
+  { a:'a8', q:'Pelo plano de 30 dias, qual é a PRIMEIRA coisa a fazer?',
+    opts:['Publicar dez páginas novas de uma vez','O espelho e o encanamento: baseline medido + Bing, robots.txt e código-fonte checados'], c:1,
+    why:'Sem baseline não existe delta; sem leitura não existe citação. Semana 1. ' }
+];
+
+/* =================== engine =================== */
+const RODAPE = `<div class="rodape"><b>Sobre este material.</b> Curso autoral de Jhonata Emerick (Jhon) — fundador da Datarisk, palestrante de IA para negócios, autor da newsletter O Joio do Trigo. Base científica: GEO — Generative Engine Optimization (Aggarwal et al., KDD 2024). O caso AlsoAsked é material do próprio autor. Práticas de mercado reescritas em palavras próprias a partir do estudo interno do projeto GEO — sem reaproveitar texto de terceiros. Rascunho para revisão do autor antes de publicar.</div>`;
+
+const ALL = [GUIA, ...AULAS];
+const done = new Set();
+let current = 'guia';
+
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+
+ALL.forEach(item => {
+  const isAula = item.id !== 'guia';
+  const b = document.createElement('button');
+  b.dataset.s = item.id;
+  b.innerHTML = '<span class="n">' + (isAula ? item.n : '→') + '</span><span>' + item.nav + '</span><span class="mini" data-mini="' + item.id + '"></span>';
+  b.addEventListener('click', () => show(item.id));
+  nav.appendChild(b);
+
+  const sec = document.createElement('section');
+  sec.id = item.id;
+  const kicker = isAula ? ('Aula ' + item.n + ' · ' + item.etapa) : item.kicker;
+  sec.innerHTML =
+    '<div class="aula-kicker"><span class="etapa">' + kicker + '</span></div>' +
+    '<h2 class="title">' + item.title + '</h2>' +
+    item.html +
+    (isAula ? '<div class="quiz" data-quiz="' + item.id + '"><span class="qs-score" data-qscore="' + item.id + '"></span><span class="qk">Checkpoint</span></div>' : '') +
+    (isAula ? '<button class="concluir" data-conc="' + item.id + '">marcar aula como concluída</button>' : '') +
+    (item.id === 'a8' ? RODAPE : '') +
+    '<div class="navrow">' +
+      '<button data-go="prev">← anterior</button>' +
+      '<button data-go="next">' + (item.id === 'a8' ? 'voltar ao guia' : 'próxima →') + '</button>' +
+    '</div>';
+  main.appendChild(sec);
+
+  if (isAula) {
+    const quizWrap = sec.querySelector('[data-quiz="' + item.id + '"]');
+    const qs = QUIZ.filter(q => q.a === item.id);
+    let qDone = 0, qRight = 0;
+    qs.forEach(qz => {
+      const qq = document.createElement('div');
+      qq.className = 'qq';
+      qq.innerHTML = '<p class="qt">' + qz.q + '</p>';
+      qz.opts.forEach((opt, oi) => {
+        const ob = document.createElement('button');
+        ob.className = 'opt'; ob.textContent = opt;
+        ob.addEventListener('click', () => {
+          if (qq.classList.contains('answered')) return;
+          qq.classList.add('answered');
+          qq.querySelectorAll('.opt').forEach((o2, o2i) => {
+            if (o2i === qz.c) o2.classList.add('correct');
+            else if (o2i === oi) o2.classList.add('wrong');
+          });
+          qDone++; if (oi === qz.c) qRight++;
+          quizWrap.querySelector('[data-qscore="' + item.id + '"]').textContent = qRight + '/' + qs.length + ' certas';
+        });
+        qq.appendChild(ob);
+      });
+      const why = document.createElement('div');
+      why.className = 'why';
+      why.innerHTML = '<b>Por quê</b>' + qz.why;
+      qq.appendChild(why);
+      quizWrap.appendChild(qq);
+    });
+
+    sec.querySelector('[data-conc="' + item.id + '"]').addEventListener('click', e => {
+      const btn = e.currentTarget;
+      if (done.has(item.id)) { done.delete(item.id); btn.classList.remove('ok'); btn.textContent = 'marcar aula como concluída'; }
+      else { done.add(item.id); btn.classList.add('ok'); btn.textContent = '✓ aula concluída'; }
+      updateProgress();
+    });
+  }
+
+  sec.querySelectorAll('[data-go]').forEach(gb => gb.addEventListener('click', () => {
+    const idx = ALL.findIndex(x => x.id === current);
+    if (gb.dataset.go === 'prev') show(ALL[Math.max(0, idx - 1)].id);
+    else show(ALL[(idx + 1) % ALL.length].id);
+  }));
+});
+
+function show(id){
+  current = id;
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === id));
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.s === id));
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function updateProgress(){
+  document.getElementById('pcount').textContent = done.size + '/8';
+  document.getElementById('pfill').style.width = (done.size / 8 * 100) + '%';
+  document.querySelectorAll('#nav button').forEach(b => {
+    const isDone = done.has(b.dataset.s);
+    b.classList.toggle('done', isDone);
+    const mini = b.querySelector('[data-mini]');
+    if (mini) mini.textContent = isDone ? '✓' : '';
+  });
+}
+
+const ck = document.getElementById('cklist');
+if (ck) ck.querySelectorAll('.ck').forEach(row => row.addEventListener('click', () => row.classList.toggle('on')));
+
+show('guia');
+updateProgress();
+</script>
+</body>
+</html>

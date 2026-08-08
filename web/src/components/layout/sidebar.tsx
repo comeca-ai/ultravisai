@@ -8,6 +8,8 @@ import { usePathname, Link } from '@/i18n/navigation';
 import { dashboardNav } from '@/config/dashboard';
 import { useSidebarStore } from '@/stores/use-sidebar-store';
 import { useBrandStore } from '@/stores/use-brand-store';
+import { useAuthStore } from '@/stores/use-auth-store';
+import { isAdminEmail } from '@/lib/admin';
 import { useFeatureGate } from '@/hooks/use-feature-gate';
 import { useAgentKeyStatus } from '@/hooks/use-agent-key-status';
 import { siteConfig } from '@/config/site';
@@ -27,6 +29,10 @@ export function Sidebar() {
   const t = useTranslations('nav');
   const tBrands = useTranslations('brands');
   const { canUse, requiredPlanFor, isCloud } = useFeatureGate();
+  // Platform-operator gate: adminOnly nav groups (e.g. Costs) are hidden from
+  // client users. Gated by operator e-mail, not org role — see @/lib/admin.
+  const userEmail = useAuthStore((s) => s.user?.email);
+  const isOperator = isAdminEmail(userEmail);
   // Probe once per session whether the org has saved an Anthropic key.
   // Returns 'configured' immediately on self-host (no network call).
   const agentKeyStatus = useAgentKeyStatus(isCloud);
@@ -101,113 +107,115 @@ export function Sidebar() {
       </div>
 
       <ScrollArea className="flex-1 px-2 py-3">
-        {dashboardNav.map((group, i) => (
-          <div key={i} className="mb-4">
-            {group.title && !isCollapsed && (
-              <p className="mb-1 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {group.title}
-              </p>
-            )}
-            {group.title && isCollapsed && i > 0 && <Separator className="my-2" />}
-            <nav className="space-y-0.5">
-              {group.items.map((item) => {
-                // Hide entirely if a required brand preference is off — the
-                // user shouldn't see "Shopping (upgrade)" when the active
-                // brand simply isn't in e-commerce.
-                if (item.requiresBrandPref && !brandPrefs[item.requiresBrandPref]) {
-                  return null;
-                }
+        {dashboardNav
+          .filter((group) => !group.adminOnly || isOperator)
+          .map((group, i) => (
+            <div key={i} className="mb-4">
+              {group.title && !isCollapsed && (
+                <p className="mb-1 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {group.title}
+                </p>
+              )}
+              {group.title && isCollapsed && i > 0 && <Separator className="my-2" />}
+              <nav className="space-y-0.5">
+                {group.items.map((item) => {
+                  // Hide entirely if a required brand preference is off — the
+                  // user shouldn't see "Shopping (upgrade)" when the active
+                  // brand simply isn't in e-commerce.
+                  if (item.requiresBrandPref && !brandPrefs[item.requiresBrandPref]) {
+                    return null;
+                  }
 
-                const isActive =
-                  item.href === '/dashboard'
-                    ? pathname === '/dashboard'
-                    : pathname.startsWith(item.href);
-                const labelFn = navKeyMap[item.title];
-                const label = labelFn ? labelFn() : item.title;
+                  const isActive =
+                    item.href === '/dashboard'
+                      ? pathname === '/dashboard'
+                      : pathname.startsWith(item.href);
+                  const labelFn = navKeyMap[item.title];
+                  const label = labelFn ? labelFn() : item.title;
 
-                // Dynamic badge override: show "Set up" on the Agent item
-                // when the org has no Anthropic key saved (cloud only).
-                const rawBadge =
-                  item.href === '/dashboard/agent' && agentKeyMissing ? 'Set up' : item.badge;
-                // Config stores badge text in English; translate the ones we own.
-                const effectiveBadge = rawBadge === 'New' ? t('badgeNew') : rawBadge;
+                  // Dynamic badge override: show "Set up" on the Agent item
+                  // when the org has no Anthropic key saved (cloud only).
+                  const rawBadge =
+                    item.href === '/dashboard/agent' && agentKeyMissing ? 'Set up' : item.badge;
+                  // Config stores badge text in English; translate the ones we own.
+                  const effectiveBadge = rawBadge === 'New' ? t('badgeNew') : rawBadge;
 
-                const isLocked =
-                  isCloud && item.requiredFeature != null && !canUse(item.requiredFeature);
+                  const isLocked =
+                    isCloud && item.requiredFeature != null && !canUse(item.requiredFeature);
 
-                if (isLocked) {
-                  return (
-                    <span
-                      key={item.href}
-                      className={cn(
-                        'flex cursor-not-allowed items-center gap-3 rounded-md px-2 py-1.5 text-[13px] font-medium text-muted-foreground/50',
-                        isCollapsed && 'justify-center',
-                      )}
-                      title={
-                        isCollapsed
-                          ? `${label} (${requiredPlanFor(item.requiredFeature!)})`
-                          : undefined
-                      }
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!isCollapsed && (
-                        <>
-                          <span className="flex-1 truncate">{label}</span>
-                          <Badge
-                            variant="outline"
-                            className="ml-auto h-5 shrink-0 gap-0.5 px-1.5 text-[10px] font-normal"
-                          >
-                            <Crown className="h-2.5 w-2.5" />
-                            {requiredPlanFor(item.requiredFeature!)}
-                          </Badge>
-                        </>
-                      )}
-                      {isCollapsed && (
-                        <Lock className="absolute right-1 top-1 h-2.5 w-2.5 text-muted-foreground/40" />
-                      )}
-                    </span>
-                  );
-                }
-
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <span
-                      className={cn(
-                        'flex items-center gap-3 rounded-md px-2 py-1.5 text-[13px] font-medium transition-colors',
-                        isActive
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                        isCollapsed && 'justify-center',
-                      )}
-                      title={
-                        isCollapsed
-                          ? effectiveBadge
-                            ? `${label} (${effectiveBadge})`
-                            : label
-                          : undefined
-                      }
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!isCollapsed && (
-                        <>
-                          <span className="flex-1 truncate">{label}</span>
-                          {effectiveBadge && (
+                  if (isLocked) {
+                    return (
+                      <span
+                        key={item.href}
+                        className={cn(
+                          'flex cursor-not-allowed items-center gap-3 rounded-md px-2 py-1.5 text-[13px] font-medium text-muted-foreground/50',
+                          isCollapsed && 'justify-center',
+                        )}
+                        title={
+                          isCollapsed
+                            ? `${label} (${requiredPlanFor(item.requiredFeature!)})`
+                            : undefined
+                        }
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 truncate">{label}</span>
                             <Badge
-                              variant="secondary"
-                              className="ml-auto h-5 shrink-0 px-1.5 text-[10px] font-normal"
+                              variant="outline"
+                              className="ml-auto h-5 shrink-0 gap-0.5 px-1.5 text-[10px] font-normal"
                             >
-                              {effectiveBadge}
+                              <Crown className="h-2.5 w-2.5" />
+                              {requiredPlanFor(item.requiredFeature!)}
                             </Badge>
-                          )}
-                        </>
-                      )}
-                    </span>
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        ))}
+                          </>
+                        )}
+                        {isCollapsed && (
+                          <Lock className="absolute right-1 top-1 h-2.5 w-2.5 text-muted-foreground/40" />
+                        )}
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <Link key={item.href} href={item.href}>
+                      <span
+                        className={cn(
+                          'flex items-center gap-3 rounded-md px-2 py-1.5 text-[13px] font-medium transition-colors',
+                          isActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                          isCollapsed && 'justify-center',
+                        )}
+                        title={
+                          isCollapsed
+                            ? effectiveBadge
+                              ? `${label} (${effectiveBadge})`
+                              : label
+                            : undefined
+                        }
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 truncate">{label}</span>
+                            {effectiveBadge && (
+                              <Badge
+                                variant="secondary"
+                                className="ml-auto h-5 shrink-0 px-1.5 text-[10px] font-normal"
+                              >
+                                {effectiveBadge}
+                              </Badge>
+                            )}
+                          </>
+                        )}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          ))}
       </ScrollArea>
 
       <div className="p-2">

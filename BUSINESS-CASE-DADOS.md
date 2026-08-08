@@ -46,6 +46,26 @@ scrapes por mês  = scrapes por run × frequência (semanal ×4 | diária ×30)
 
 ## 4. Dados reais coletados
 
+### 4.-1 Censo completo disparado — 08/ago 06:34 UTC
+- **Datarisk: 245 scrapes** despachados (35 prompts × 7 plataformas), modo
+  webhook — desta vez sem `INSUFFICIENT_CREDITS` (Cloro recarregado).
+  Ritmo observado de retorno: **~6 resultados/min** (scrape real das 7
+  superfícies) → ~40 min para o censo da marca.
+- **Custo unitário real (marco):** 245 scrapes = 245 créditos Cloro. Com o
+  valor do crédito (ainda pendente, checklist §6) fecha o custo por censo.
+- **Incidente de custo — despacho acidental da Accenture:** antes da
+  Datarisk, "Rodar Tudo" foi clicado na Accenture sem querer e **parado na
+  UI** — mas os **264 scrapes já tinham ido pro Cloro**. Total do dia subiu
+  para **~509 scrapes** (Accenture 264 + Datarisk 245) em vez de 245.
+  - **Lição:** *"Rodar Tudo" em modo webhook é irreversível no clique* —
+    despacha e compromete o crédito na hora; **parar na UI não recolhe**
+    scrapes já enviados ao Cloro. Reforça a prioridade do **seletor de
+    plataformas por prompt / censo enxuto** (estratégia §7) e sugere um
+    **passo de confirmação** ("vai despachar N scrapes, confirmar?") antes
+    do dispatch — mudança pequena de produto, alto valor de proteção de custo.
+  - Silver lining: a Accenture vira **benchmark de graça** (comparação de
+    setor), já que o crédito foi gasto de qualquer forma.
+
 ### 4.0 Snapshot de consumo — 07/ago 22h UTC (1º dia de operação)
 - **63 respostas rastreadas**: 28 scrapes Cloro (Datarisk 27 + E2E 1) +
   35 via API Claude (marca Accenture, rastreio 100% `claude`)

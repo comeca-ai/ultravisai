@@ -26,7 +26,7 @@ export interface McpAuthContext {
 /**
  * Resolve the bearer token on a request into a user/org context.
  *
- * Accepts only Ansvisor API keys (prefix `ans_`) — not Supabase session JWTs.
+ * Accepts only Ultravis API keys (prefix `ans_`) — not Supabase session JWTs.
  * MCP endpoints are intended to be hit by long-lived external clients, so we
  * intentionally don't fall back to the dashboard's session cookie.
  */

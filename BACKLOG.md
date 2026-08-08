@@ -28,6 +28,7 @@
 - [ ] **Money-prompts por intenção** — auto-etiquetar/priorizar prompts que compram (cadência por prompt; personas). `M` · `D2/D4` · Onda 1
 - [ ] **Enriquecer D1/D5 com Ahrefs** — Domain Rating, backlinks, domínios que citam → tira dimensões do "não medido". `M` · `D2/D4` · Onda 1
 - [ ] **Alinhar planos + Stripe** — código (49/249) × landing (390/1.290); pricing faixa R$690–990; `IS_CLOUD=true` só ao monetizar. `M` · `D3` · Onda 0/monetização
+- [ ] **MCP Ultravis (diferencial)** — o servidor MCP + API v1 já existem (`web/src/app/api/mcp`, `.../api/v1`), autenticados por API key (`ans_`). Rebrand pra `ultravis` **feito**. Falta: **doc de conexão** (Claude Desktop/Cursor/curl), testar em produção com uma key real, e **posicionar como diferencial** (ferramenta plugável em qualquer IA). Considerar conector Looker Studio apontando pra `ultravis.ai/api/v1`. `P` · `D2` · Onda 1
 
 ### P2 — Depois
 - [ ] **Atribuição citação → visita → lead** — evoluir a página de Tráfego de IA + GSC/GA4. A maior lacuna do mercado. `G` · `D5` · Onda 2

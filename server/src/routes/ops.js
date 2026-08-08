@@ -102,7 +102,9 @@ async function collect() {
         email: u.email || '—',
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at,
-        providers: (u.app_metadata?.providers || (u.app_metadata?.provider ? [u.app_metadata.provider] : [])).join(', '),
+        providers: (
+          u.app_metadata?.providers || (u.app_metadata?.provider ? [u.app_metadata.provider] : [])
+        ).join(', '),
       }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 25);
@@ -206,7 +208,9 @@ function render(d) {
   </div>
 
   <div class="card" style="margin-top:14px"><h2>Providers configurados</h2>
-    <div class="chips">${Object.entries(d.providers).map(([k, v]) => chip(k, v)).join('')}</div>
+    <div class="chips">${Object.entries(d.providers)
+      .map(([k, v]) => chip(k, v))
+      .join('')}</div>
   </div>
 
   <div class="foot">

@@ -248,7 +248,15 @@
     "competitorsLabel": "Competitors",
     "countMentions": "{count} mentions",
     "countCitations": "{count} citations",
-    "appearedIn": "appeared in {visible}/{total} prompts"
+    "appearedIn": "appeared in {visible}/{total} prompts",
+    "confirmRun": {
+      "title": "Run tracking for all prompts?",
+      "body": "This will dispatch tracking for all active prompts across every platform.",
+      "bodyCount": "This will dispatch tracking for {count, plural, one {# active prompt} other {# active prompts}} across every platform.",
+      "warning": "Each scrape consumes credit and can't be cancelled once sent.",
+      "cancel": "Cancel",
+      "confirm": "Confirm and run"
+    }
   },
   "topics": {
     "addTopic": "Add Topic",

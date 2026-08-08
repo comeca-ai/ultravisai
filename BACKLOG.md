@@ -18,7 +18,7 @@
 
 ### P0 — Agora
 - [ ] **Merge do PR #2** — trabalho acumulado na branch (logout, login Google, Citabilidade 5–8, Citações PT, Custos admin, curso/estratégia, migration 00035). `P` · housekeeping
-- [ ] **Diálogo de confirmação antes de despachar scrapes** — "vai enviar N scrapes, confirmar?" antes do "Rodar Tudo". `P` · protege caixa (lição do despacho acidental da Accenture, 264 scrapes)
+- [x] **Diálogo de confirmação antes de despachar scrapes** — confirmação antes do "Rodar Tudo" (aviso de crédito/irreversibilidade + nº de prompts ativos). `P` · protege caixa (lição do despacho acidental da Accenture, 264 scrapes)
 - [ ] **Alertas de variação** — e-mail quando score cai / concorrente entra (Slack depois). Transforma o pulso em produto percebido. `M` · `D3` · Onda 0
 
 ### P1 — Próximo

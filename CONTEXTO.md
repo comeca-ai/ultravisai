@@ -40,6 +40,9 @@ fazer** para aparecer mais.
 | Repo | GitHub | `comeca-ai/ultravisai` (**privado**), branch `main` deploya tudo |
 
 - Proteção Vercel: URLs `*.vercel.app` exigem login; domínio custom é público.
+- **Ambientes e onde testar:** cada branch/PR gera uma **preview** na Vercel
+  (staging do frontend, protegida por SSO); a branch `staging` tem URL fixa;
+  a `main` deploya produção. Guia completo: `docs/AMBIENTES.md`.
 - Cron de rastreamento: **semanal** (`DAILY_CRON_SCHEDULE=0 6 * * 1`).
 - **Modo webhook do Cloro ativo** (`CLORO_WEBHOOK_URL=https://api.ultravis.ai/cloro/callback`)
   — resultados sobrevivem a restarts/deploys do server.

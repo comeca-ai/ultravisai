@@ -1574,7 +1574,7 @@
   },
   "adminCosts": {
     "title": "Costs & Usage",
-    "subtitle": "Monitor of what the platform consumes from AI providers — counts come straight from the database; US$ figures are estimates using the assumptions below. Exact billing lives in the provider consoles.",
+    "subtitle": "Monitor of what the platform consumes from AI providers. Read every number by its tag: measured, estimate, or real billing.",
     "lastData": "Latest data: {date}",
     "kpis": {
       "llmSpend": "LLM spend (estimated)",
@@ -1590,7 +1590,7 @@
     "byBrand": "Answers by brand",
     "byBrandSub": "{brands} brands · {prompts} active prompts",
     "providers": {
-      "title": "Spend by provider",
+      "title": "Estimated spend by provider",
       "subtitle": "\"Measured\" = exact count in the database · \"estimated\" = tokens and cost derived from real response sizes",
       "provider": "Provider",
       "what": "What it does",
@@ -1600,7 +1600,7 @@
       "status": "Status",
       "cloroDesc": "Scrapes of the AI surfaces (ChatGPT, AIO, Perplexity...)",
       "cloroCost": "credits × plan rate",
-      "anthropicDesc": "Claude API tracking + AI Agent + suggestions (Haiku)",
+      "anthropicDesc": "Claude API tracking + dashboard AI Agent",
       "openaiDesc": "Sentiment analysis of each answer",
       "geminiDesc": "Suggestions and site summary until the free-tier daily quota ran out",
       "credits": "{count, plural, one {# credit} other {# credits}}",
@@ -1621,6 +1621,22 @@
       "assumptionTokens": "Tokens ≈ characters ÷ 3.6 (mixed pt/en text)",
       "assumptionPrices": "Prices per million tokens: Claude Sonnet US$ 3 in / US$ 15 out · gpt-5-mini US$ 0.25 / US$ 2",
       "assumptionSource": "Volumes read live from the database (prompt_results, site_audits, agent_token_usage)"
+    },
+    "guide": {
+      "measuredTitle": "Measured",
+      "measuredDesc": "Counts straight from the database — exact numbers (answers, credits, analyses).",
+      "estimatedTitle": "Estimate",
+      "estimatedDesc": "US$ figures computed here from response sizes × list prices. An approximation, not an invoice.",
+      "billingTitle": "Real billing",
+      "billingDesc": "The official amount you pay lives in the provider consoles (links in the footer)."
+    },
+    "badges": {
+      "measured": "Measured",
+      "estimated": "Estimate"
+    },
+    "sections": {
+      "distribution": "Distribution (measured)",
+      "spend": "Estimated spend by provider"
     }
   }
 }

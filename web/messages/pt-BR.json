@@ -1587,7 +1587,7 @@
   },
   "adminCosts": {
     "title": "Custos & Consumo",
-    "subtitle": "Monitor do que a plataforma consome de provedores de IA — contagens vêm direto do banco; valores em US$ são estimativas com as premissas do rodapé. O número exato de cobrança vive nos consoles dos provedores.",
+    "subtitle": "Monitor do que a plataforma consome de provedores de IA. Leia cada número pela etiqueta: medido, estimativa ou cobrança real.",
     "lastData": "Último dado: {date}",
     "kpis": {
       "llmSpend": "LLM gasto (estimado)",
@@ -1603,7 +1603,7 @@
     "byBrand": "Respostas por marca",
     "byBrandSub": "{brands} marcas · {prompts} prompts ativos",
     "providers": {
-      "title": "Gasto por provider",
+      "title": "Estimativa de gasto por provider",
       "subtitle": "\"Medido\" = contagem exata no banco · \"estimado\" = tokens e custo derivados do tamanho real das respostas",
       "provider": "Provider",
       "what": "O que faz",
@@ -1613,7 +1613,7 @@
       "status": "Status",
       "cloroDesc": "Scrapes das superfícies de IA (ChatGPT, AIO, Perplexity...)",
       "cloroCost": "créditos × valor do plano",
-      "anthropicDesc": "Rastreio via API Claude + AI Agent + sugestões (Haiku)",
+      "anthropicDesc": "Rastreio via API Claude + AI Agent do dashboard",
       "openaiDesc": "Análise de sentimento de cada resposta",
       "geminiDesc": "Sugestões e resumo de site até estourar a cota diária do free tier",
       "credits": "{count, plural, one {# crédito} other {# créditos}}",
@@ -1634,6 +1634,22 @@
       "assumptionTokens": "Tokens ≈ caracteres ÷ 3,6 (texto pt/en misto)",
       "assumptionPrices": "Preços por milhão de tokens: Claude Sonnet US$ 3 in / US$ 15 out · gpt-5-mini US$ 0,25 / US$ 2",
       "assumptionSource": "Volumes lidos ao vivo do banco (prompt_results, site_audits, agent_token_usage)"
+    },
+    "guide": {
+      "measuredTitle": "Medido",
+      "measuredDesc": "Contagens vindas direto do banco — números exatos (respostas, créditos, análises).",
+      "estimatedTitle": "Estimativa",
+      "estimatedDesc": "Valores em US$ calculados aqui a partir do tamanho das respostas × preço de tabela. Aproximação, não fatura.",
+      "billingTitle": "Cobrança real",
+      "billingDesc": "O número oficial que você paga vive nos consoles dos provedores (links no rodapé)."
+    },
+    "badges": {
+      "measured": "Medido",
+      "estimated": "Estimativa"
+    },
+    "sections": {
+      "distribution": "Distribuição (medido)",
+      "spend": "Estimativa de gasto por provider"
     }
   }
 }

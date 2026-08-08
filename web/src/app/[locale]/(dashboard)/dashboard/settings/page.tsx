@@ -46,7 +46,8 @@ export default function SettingsPage() {
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/sign-in');
+    // Sair volta para a landing pública (preserva o locale ativo).
+    router.push('/');
     router.refresh();
   }
 

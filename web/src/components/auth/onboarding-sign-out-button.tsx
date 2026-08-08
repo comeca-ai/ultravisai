@@ -22,7 +22,9 @@ export function OnboardingSignOutButton() {
       return;
     }
 
-    window.location.href = '/sign-in';
+    // Sair leva de volta à landing pública (não à tela de login); o proxy
+    // serve a landing em `/` para visitantes anônimos.
+    window.location.href = '/';
   };
 
   return (

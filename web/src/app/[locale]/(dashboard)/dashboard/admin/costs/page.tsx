@@ -13,7 +13,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CircleDollarSign, Quote, Sparkles, Activity } from 'lucide-react';
+import {
+  CircleDollarSign,
+  Quote,
+  Sparkles,
+  Activity,
+  Database,
+  Calculator,
+  Receipt,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -62,6 +70,57 @@ const usd = (v: number) =>
 
 // ─── Small pieces ────────────────────────────────────────────────────────────
 
+type Tone = 'measured' | 'estimated' | 'free';
+
+const TONE_CLASSES: Record<Tone, string> = {
+  measured: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+  estimated: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  free: 'text-muted-foreground',
+};
+
+function ToneBadge({ tone, label }: { tone: Tone; label: string }) {
+  return (
+    <Badge
+      variant="outline"
+      className={`text-[10px] font-medium whitespace-nowrap ${TONE_CLASSES[tone]}`}
+    >
+      {label}
+    </Badge>
+  );
+}
+
+/** Reading guide — the frame for the whole page: what is exact vs estimated. */
+function ReadingGuide({
+  items,
+}: {
+  items: {
+    icon: React.ComponentType<{ className?: string }>;
+    tone: Tone;
+    title: string;
+    desc: string;
+  }[];
+}) {
+  return (
+    <Card className="bg-muted/30">
+      <CardContent className="grid gap-4 py-4 sm:grid-cols-3">
+        {items.map(({ icon: Icon, tone, title, desc }) => (
+          <div key={title} className="flex gap-3">
+            <span
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${TONE_CLASSES[tone]}`}
+            >
+              <Icon className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{title}</p>
+              <p className="text-xs text-muted-foreground">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 function KpiCard({
   title,
   value,
@@ -69,6 +128,7 @@ function KpiCard({
   icon: Icon,
   loading,
   accent,
+  tag,
 }: {
   title: string;
   value: string;
@@ -76,9 +136,10 @@ function KpiCard({
   icon: React.ComponentType<{ className?: string }>;
   loading: boolean;
   accent?: boolean;
+  tag?: { tone: Tone; label: string };
 }) {
   return (
-    <Card className={accent ? 'border-primary/40' : undefined}>
+    <Card className={accent ? 'border-amber-500/40' : undefined}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
         <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           {title}
@@ -91,7 +152,10 @@ function KpiCard({
         ) : (
           <div className="text-3xl font-bold tabular-nums">{value}</div>
         )}
-        <p className="text-xs mt-1 text-muted-foreground">{sub}</p>
+        <div className="mt-1.5 flex items-center gap-2">
+          {tag && <ToneBadge tone={tag.tone} label={tag.label} />}
+          <p className="text-xs text-muted-foreground">{sub}</p>
+        </div>
       </CardContent>
     </Card>
   );
@@ -119,21 +183,12 @@ function BarList({ rows }: { rows: { key: string; count: number }[] }) {
   );
 }
 
-type ChipTone = 'measured' | 'estimated' | 'free';
-
-function StatusChip({ tone, label }: { tone: ChipTone; label: string }) {
-  const classes: Record<ChipTone, string> = {
-    measured: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-    estimated: 'border-primary/40 bg-primary/10 text-primary',
-    free: 'text-muted-foreground',
-  };
+/** Small section label so the page reads in clear blocks. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Badge
-      variant="outline"
-      className={`text-[10px] font-medium whitespace-nowrap ${classes[tone]}`}
-    >
-      {label}
-    </Badge>
+    <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      {children}
+    </h2>
   );
 }
 
@@ -184,7 +239,31 @@ export default function AdminCostsPage() {
         )}
       </div>
 
-      {/* KPI row */}
+      {/* Reading guide — how to read every number on this page */}
+      <ReadingGuide
+        items={[
+          {
+            icon: Database,
+            tone: 'measured',
+            title: t('guide.measuredTitle'),
+            desc: t('guide.measuredDesc'),
+          },
+          {
+            icon: Calculator,
+            tone: 'estimated',
+            title: t('guide.estimatedTitle'),
+            desc: t('guide.estimatedDesc'),
+          },
+          {
+            icon: Receipt,
+            tone: 'free',
+            title: t('guide.billingTitle'),
+            desc: t('guide.billingDesc'),
+          },
+        ]}
+      />
+
+      {/* KPI row — each card declares whether it is measured or estimated */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           accent
@@ -193,6 +272,7 @@ export default function AdminCostsPage() {
           sub={t('kpis.llmSpendSub')}
           icon={CircleDollarSign}
           loading={loading}
+          tag={{ tone: 'estimated', label: t('badges.estimated') }}
         />
         <KpiCard
           title={t('kpis.cloroCredits')}
@@ -200,6 +280,7 @@ export default function AdminCostsPage() {
           sub={t('kpis.cloroCreditsSub')}
           icon={Quote}
           loading={loading}
+          tag={{ tone: 'measured', label: t('badges.measured') }}
         />
         <KpiCard
           title={t('kpis.results')}
@@ -211,6 +292,7 @@ export default function AdminCostsPage() {
           }
           icon={Activity}
           loading={loading}
+          tag={{ tone: 'measured', label: t('badges.measured') }}
         />
         <KpiCard
           title={t('kpis.sentiment')}
@@ -218,127 +300,136 @@ export default function AdminCostsPage() {
           sub={t('kpis.sentimentSub')}
           icon={Sparkles}
           loading={loading}
+          tag={{ tone: 'measured', label: t('badges.measured') }}
         />
       </div>
 
-      {/* Distribution */}
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Distribution — measured */}
+      <div className="space-y-3">
+        <SectionLabel>{t('sections.distribution')}</SectionLabel>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{t('byPlatform')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-40 w-full" />
+              ) : (
+                <BarList rows={usage?.byPlatform ?? []} />
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{t('byBrand')}</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                {usage
+                  ? t('byBrandSub', { brands: usage.brands, prompts: usage.activePrompts })
+                  : ''}
+              </p>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-40 w-full" />
+              ) : (
+                <BarList rows={usage?.byBrand ?? []} />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Spend by provider — estimated */}
+      <div className="space-y-3">
+        <SectionLabel>{t('sections.spend')}</SectionLabel>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t('byPlatform')}</CardTitle>
+            <CardTitle className="text-base">{t('providers.title')}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t('providers.subtitle')}</p>
           </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-40 w-full" />
-            ) : (
-              <BarList rows={usage?.byPlatform ?? []} />
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t('byBrand')}</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              {usage ? t('byBrandSub', { brands: usage.brands, prompts: usage.activePrompts }) : ''}
-            </p>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-40 w-full" />
-            ) : (
-              <BarList rows={usage?.byBrand ?? []} />
-            )}
+          <CardContent className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="py-2 pr-3 font-medium">{t('providers.provider')}</th>
+                  <th className="py-2 pr-3 font-medium">{t('providers.what')}</th>
+                  <th className="py-2 pr-3 text-right font-medium">{t('providers.volume')}</th>
+                  <th className="py-2 pr-3 text-right font-medium">{t('providers.tokens')}</th>
+                  <th className="py-2 pr-3 text-right font-medium">{t('providers.cost')}</th>
+                  <th className="py-2 font-medium">{t('providers.status')}</th>
+                </tr>
+              </thead>
+              <tbody className="text-xs">
+                <tr className="border-b">
+                  <td className="py-2.5 pr-3 font-semibold">Cloro</td>
+                  <td className="py-2.5 pr-3 text-muted-foreground">{t('providers.cloroDesc')}</td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">
+                    {usage ? t('providers.credits', { count: usage.cloroScrapes }) : '—'}
+                  </td>
+                  <td className="py-2.5 pr-3 text-right">—</td>
+                  <td className="py-2.5 pr-3 text-right">{t('providers.cloroCost')}</td>
+                  <td className="py-2.5">
+                    <ToneBadge tone="measured" label={t('providers.measured')} />
+                  </td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2.5 pr-3 font-semibold">Anthropic</td>
+                  <td className="py-2.5 pr-3 text-muted-foreground">
+                    {t('providers.anthropicDesc')}
+                  </td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">
+                    {usage
+                      ? t('providers.calls', {
+                          count: usage.claudeApiResults,
+                        })
+                      : '—'}
+                  </td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">
+                    {costs
+                      ? `${Math.round((costs.trackingInTokens + usage!.agentPromptTokens) / 1000)}k / ${Math.round((costs.trackingOutTokens + usage!.agentCompletionTokens) / 1000)}k`
+                      : '—'}
+                  </td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">
+                    {costs ? `≈ ${usd(costs.anthropic)}` : '—'}
+                  </td>
+                  <td className="py-2.5">
+                    <ToneBadge tone="estimated" label={t('providers.estimated')} />
+                  </td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2.5 pr-3 font-semibold">OpenAI</td>
+                  <td className="py-2.5 pr-3 text-muted-foreground">{t('providers.openaiDesc')}</td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">
+                    {usage ? t('providers.calls', { count: usage.sentimentRuns }) : '—'}
+                  </td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">
+                    {costs
+                      ? `${Math.round(costs.sentimentInTokens / 1000)}k / ${usage ? Math.round((usage.sentimentRuns * PRICING.sentimentOutputTokens) / 1000) : 0}k`
+                      : '—'}
+                  </td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">
+                    {costs ? `≈ ${usd(costs.openai)}` : '—'}
+                  </td>
+                  <td className="py-2.5">
+                    <ToneBadge tone="estimated" label={t('providers.estimated')} />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-2.5 pr-3 font-semibold">Gemini</td>
+                  <td className="py-2.5 pr-3 text-muted-foreground">{t('providers.geminiDesc')}</td>
+                  <td className="py-2.5 pr-3 text-right">—</td>
+                  <td className="py-2.5 pr-3 text-right">—</td>
+                  <td className="py-2.5 pr-3 text-right">US$ 0,00</td>
+                  <td className="py-2.5">
+                    <ToneBadge tone="free" label={t('providers.freeTier')} />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </CardContent>
         </Card>
       </div>
-
-      {/* Provider breakdown */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">{t('providers.title')}</CardTitle>
-          <p className="text-xs text-muted-foreground">{t('providers.subtitle')}</p>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="py-2 pr-3 font-medium">{t('providers.provider')}</th>
-                <th className="py-2 pr-3 font-medium">{t('providers.what')}</th>
-                <th className="py-2 pr-3 text-right font-medium">{t('providers.volume')}</th>
-                <th className="py-2 pr-3 text-right font-medium">{t('providers.tokens')}</th>
-                <th className="py-2 pr-3 text-right font-medium">{t('providers.cost')}</th>
-                <th className="py-2 font-medium">{t('providers.status')}</th>
-              </tr>
-            </thead>
-            <tbody className="text-xs">
-              <tr className="border-b">
-                <td className="py-2.5 pr-3 font-semibold">Cloro</td>
-                <td className="py-2.5 pr-3 text-muted-foreground">{t('providers.cloroDesc')}</td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">
-                  {usage ? t('providers.credits', { count: usage.cloroScrapes }) : '—'}
-                </td>
-                <td className="py-2.5 pr-3 text-right">—</td>
-                <td className="py-2.5 pr-3 text-right">{t('providers.cloroCost')}</td>
-                <td className="py-2.5">
-                  <StatusChip tone="measured" label={t('providers.measured')} />
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2.5 pr-3 font-semibold">Anthropic</td>
-                <td className="py-2.5 pr-3 text-muted-foreground">
-                  {t('providers.anthropicDesc')}
-                </td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">
-                  {usage
-                    ? t('providers.calls', {
-                        count: usage.claudeApiResults,
-                      })
-                    : '—'}
-                </td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">
-                  {costs
-                    ? `${Math.round((costs.trackingInTokens + usage!.agentPromptTokens) / 1000)}k / ${Math.round((costs.trackingOutTokens + usage!.agentCompletionTokens) / 1000)}k`
-                    : '—'}
-                </td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">
-                  {costs ? `≈ ${usd(costs.anthropic)}` : '—'}
-                </td>
-                <td className="py-2.5">
-                  <StatusChip tone="estimated" label={t('providers.estimated')} />
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2.5 pr-3 font-semibold">OpenAI</td>
-                <td className="py-2.5 pr-3 text-muted-foreground">{t('providers.openaiDesc')}</td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">
-                  {usage ? t('providers.calls', { count: usage.sentimentRuns }) : '—'}
-                </td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">
-                  {costs
-                    ? `${Math.round(costs.sentimentInTokens / 1000)}k / ${usage ? Math.round((usage.sentimentRuns * PRICING.sentimentOutputTokens) / 1000) : 0}k`
-                    : '—'}
-                </td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">
-                  {costs ? `≈ ${usd(costs.openai)}` : '—'}
-                </td>
-                <td className="py-2.5">
-                  <StatusChip tone="estimated" label={t('providers.estimated')} />
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2.5 pr-3 font-semibold">Gemini</td>
-                <td className="py-2.5 pr-3 text-muted-foreground">{t('providers.geminiDesc')}</td>
-                <td className="py-2.5 pr-3 text-right">—</td>
-                <td className="py-2.5 pr-3 text-right">—</td>
-                <td className="py-2.5 pr-3 text-right">US$ 0,00</td>
-                <td className="py-2.5">
-                  <StatusChip tone="free" label={t('providers.freeTier')} />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
 
       {/* Where the exact numbers live + assumptions */}
       <Card>

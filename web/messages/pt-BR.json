@@ -248,7 +248,15 @@
     "competitorsLabel": "Concorrentes",
     "countMentions": "{count} menções",
     "countCitations": "{count} citações",
-    "appearedIn": "apareceu em {visible}/{total} prompts"
+    "appearedIn": "apareceu em {visible}/{total} prompts",
+    "confirmRun": {
+      "title": "Rodar rastreamento de todos os prompts?",
+      "body": "Isso vai despachar o rastreamento de todos os prompts ativos em todas as plataformas.",
+      "bodyCount": "Isso vai despachar o rastreamento de {count, plural, one {# prompt ativo} other {# prompts ativos}} em todas as plataformas.",
+      "warning": "Cada scrape consome crédito e não pode ser cancelado depois de enviado.",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar e rodar"
+    }
   },
   "topics": {
     "addTopic": "Adicionar Tópico",

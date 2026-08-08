@@ -908,6 +908,60 @@ function NoCompetitorsTeaser() {
   );
 }
 
+// ─── Confirm before dispatching a full run (scrapes cost credit & are ─────────
+//     irreversible once sent — guards against an accidental "Run all") ─────────
+
+function ConfirmRunDialog({
+  open,
+  onClose,
+  onConfirm,
+  promptCount,
+  isRunning,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  promptCount: number | null;
+  isRunning: boolean;
+}) {
+  const t = useTranslations('insights');
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <AlertCircle className="h-4 w-4 text-amber-500" />
+            {t('confirmRun.title')}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 pt-1 text-sm text-muted-foreground">
+          <p>
+            {promptCount && promptCount > 0
+              ? t('confirmRun.bodyCount', { count: promptCount })
+              : t('confirmRun.body')}
+          </p>
+          <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-700 dark:text-amber-300">
+            {t('confirmRun.warning')}
+          </p>
+        </div>
+        <div className="flex justify-end gap-2 pt-3">
+          <Button variant="outline" onClick={onClose} disabled={isRunning}>
+            {t('confirmRun.cancel')}
+          </Button>
+          <Button onClick={onConfirm} disabled={isRunning} className="gap-2">
+            {isRunning ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
+            {t('confirmRun.confirm')}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function InsightsPage() {
@@ -923,6 +977,7 @@ export default function InsightsPage() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<TrackingJobStatus | null>(null);
   const [showSinglePrompt, setShowSinglePrompt] = useState(false);
+  const [showRunConfirm, setShowRunConfirm] = useState(false);
   const [filters, setFilters] = useState<InsightsFilters>(DEFAULT_FILTERS);
   const [hasAnyData, setHasAnyData] = useState<boolean | null>(null);
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
@@ -1260,7 +1315,21 @@ export default function InsightsPage() {
           <p className="text-muted-foreground text-sm">{brand.name}</p>
         </div>
         <TrackingProgressBanner jobStatus={jobStatus} onStop={handleStopTracking} />
-        <EmptyState onRunPrompts={handleRunPrompts} isRunning={isRunning} isCloud={isCloud} />
+        <EmptyState
+          onRunPrompts={() => setShowRunConfirm(true)}
+          isRunning={isRunning}
+          isCloud={isCloud}
+        />
+        <ConfirmRunDialog
+          open={showRunConfirm}
+          onClose={() => setShowRunConfirm(false)}
+          onConfirm={() => {
+            setShowRunConfirm(false);
+            handleRunPrompts();
+          }}
+          promptCount={trackedPrompts?.activeInPeriod ?? null}
+          isRunning={isRunning}
+        />
         {!isCloud && (
           <div className="flex justify-center">
             <Button variant="outline" onClick={() => setShowSinglePrompt(true)} className="gap-2">
@@ -1325,7 +1394,11 @@ export default function InsightsPage() {
                 {t('testSingle')}
               </Button>
 
-              <Button onClick={handleRunPrompts} disabled={isRunning} className="gap-2">
+              <Button
+                onClick={() => setShowRunConfirm(true)}
+                disabled={isRunning}
+                className="gap-2"
+              >
                 {isRunning ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -1337,6 +1410,17 @@ export default function InsightsPage() {
           )}
         </div>
       </div>
+
+      <ConfirmRunDialog
+        open={showRunConfirm}
+        onClose={() => setShowRunConfirm(false)}
+        onConfirm={() => {
+          setShowRunConfirm(false);
+          handleRunPrompts();
+        }}
+        promptCount={trackedPrompts?.activeInPeriod ?? null}
+        isRunning={isRunning}
+      />
 
       {/* Filter Bar */}
       <FilterBar

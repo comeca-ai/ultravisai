@@ -30,7 +30,7 @@ Mote: **"Visão além do alcance"** / *Vision beyond reach*.
 | API + cron | Railway, projeto `ultravis` | serviço `ultravis-server` · api.ultravis.ai · root `/server` |
 | Banco + Auth | Supabase | projeto `twhqjfbealruvcbvkegc` |
 | DNS | Cloudflare | registros DNS-only (nuvem cinza) |
-| Repo | GitHub | `comeca-ai/ansvisor`, branch `main` deploya tudo |
+| Repo | GitHub | `comeca-ai/ultravisai` (privado), branch `main` deploya tudo |
 
 - Proteção Vercel: URLs `*.vercel.app` exigem login; domínio custom é público.
 - Cron de rastreamento: **semanal** (`DAILY_CRON_SCHEDULE=0 6 * * 1`).

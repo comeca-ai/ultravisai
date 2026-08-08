@@ -13,7 +13,9 @@
     "search": "Search",
     "filter": "Filter",
     "export": "Export",
-    "noData": "No data available"
+    "noData": "No data available",
+    "previous": "Previous",
+    "pagerRange": "{start}–{end} of {total}"
   },
   "nav": {
     "overview": "Overview",
@@ -30,7 +32,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "citability": "Citability",
-    "badgeNew": "New"
+    "badgeNew": "New",
+    "costs": "Costs & Usage"
   },
   "agent": {
     "newChat": "New chat",
@@ -476,18 +479,108 @@
     "excludeOwnDomain": "Exclude own domain",
     "competitorsOnly": "Competitors only",
     "noBrandTitle": "No brand selected",
-    "noBrandDescription": "Select or create a brand to see the citations AI platforms use when answering about it."
+    "noBrandDescription": "Select or create a brand to see the citations AI platforms use when answering about it.",
+    "filters": {
+      "dateRange": "Date Range",
+      "from": "From",
+      "to": "To",
+      "presetAll": "All",
+      "presetCustom": "Custom",
+      "topic": "Topic",
+      "allTopics": "All Topics",
+      "prompt": "Prompt",
+      "allPrompts": "All Prompts",
+      "searchPrompts": "Search prompts…",
+      "noPromptsMatch": "No prompts match.",
+      "platform": "Platform",
+      "allPlatforms": "All Platforms",
+      "region": "Region",
+      "allRegions": "All Regions",
+      "ownDomainOnly": "Own domain only"
+    },
+    "table": {
+      "rank": "Rank",
+      "domain": "Domain",
+      "platforms": "Platforms",
+      "usage": "Usage",
+      "avgCitations": "Avg Citations",
+      "url": "URL",
+      "citations": "Citations",
+      "sourceType": "Source type",
+      "competitorAnswers": "Competitor answers",
+      "whichCompetitors": "Which competitors",
+      "strength": "Strength",
+      "answersFeeding": "Answers feeding",
+      "alsoCitesUs": "Also cites us?",
+      "yes": "✓ Yes",
+      "no": "✗ No",
+      "openInNewTab": "Open {domain} in a new tab",
+      "strengthTitle": "Strength {pct}%"
+    },
+    "empty": {
+      "checking": "Checking citation data…",
+      "period24h": "the last 24 hours",
+      "period7d": "the last 7 days",
+      "period30d": "the last 30 days",
+      "period90d": "the last 90 days",
+      "periodSelected": "the selected period",
+      "noCitationsIn": "No citations in {period}",
+      "existsOutside": "Citation data exists outside this window.",
+      "showAll": "Show all data",
+      "noMatch": "No citations match your filters",
+      "tryWidening": "Try widening your date range or removing filters."
+    },
+    "addCompetitor": {
+      "button": "Add as competitor",
+      "title": "Add {domain} as competitor?",
+      "description": "Track this domain as a competitor. You can edit the name below.",
+      "name": "Name",
+      "namePlaceholder": "Competitor name",
+      "cancel": "Cancel",
+      "add": "Add",
+      "added": "{domain} added as competitor",
+      "failed": "Could not add this domain as a competitor. Please try again."
+    },
+    "gaps": {
+      "methodology": "Sources that appear in answers mentioning competitors but not you, weighted by how many sources each answer had.",
+      "howThisWorks": "How this works",
+      "gapList": "Gap list",
+      "byCompetitor": "By competitor",
+      "competitor": "Competitor",
+      "selectCompetitor": "Select competitor",
+      "noGapDomains": "No gap domains for these filters",
+      "noGapDomainsBody": "Every domain citing a competitor also cites you, or there isn't enough data yet.",
+      "noCompetitorData": "No competitor source data yet",
+      "noCompetitorDataBody": "Add competitors (with domains) and let a few tracking runs complete.",
+      "lowVisibility": "Your visibility is low in this window, so this list may be broad — focus on baseline visibility first."
+    },
+    "categories": {
+      "you": "You",
+      "competitor": "Competitor",
+      "editorial": "Editorial",
+      "forum": "Forum",
+      "social": "Social",
+      "review": "Review",
+      "institutional": "Institutional",
+      "other": "Other"
+    },
+    "donut": {
+      "noSources": "No citation sources yet."
+    },
+    "tabGaps": "Competitor Gaps",
+    "exportCsv": "Export CSV",
+    "exporting": "Exporting...",
+    "exportFailed": "Failed to export CSV"
   },
   "citability": {
     "title": "Citability",
     "subtitle": "The Citability Index (CI) organizes the 6 levers that make a brand citable by AI engines — with weight, action zone, and the real answer key of sources AIs cite for your prompts.",
     "kpis": {
       "icTitle": "Partial CI",
-      "icHint": "Weighted average of the dimensions already measured (01 and 02), 0 to 100 — all tracked time.",
-      "d1Title": "01 · Site Readability",
+      "d1Title": "01 · AI Readability",
       "d1Hint": "Latest Site Audit score for the primary domain.",
-      "d2Title": "02 · Content",
-      "d2Hint": "% of AI answers citing your domain (all time).",
+      "d2Title": "02 · Content Coverage",
+      "d2Hint": "% of AI answers citing your domain.",
       "icNoData": "Run a Site Audit and a tracking run to start measuring.",
       "icCoverage": "{coverage}% of the index measured",
       "icRecalc": "The score recalculates as more dimensions are measured.",
@@ -503,8 +596,7 @@
       "yAxis": "Third-party dependency",
       "zoneA": "Act now — you control it, it's fast",
       "zoneB": "Claim — third-party, but you activate it",
-      "zoneC": "Earn — depends on third parties, it's slow",
-      "emptyZone": "— empty zone: if it's yours, you control it —"
+      "zoneC": "Earn — depends on third parties, it's slow"
     },
     "zones": {
       "A": {
@@ -517,25 +609,25 @@
       },
       "C": {
         "name": "Earn",
-        "desc": "Depends on third parties and is slow — earned media and vertical authority. The CI's biggest single weight; pays off once A and B stand."
+        "desc": "Depends on third parties and is slow — earned media and vertical authority. The CI's biggest single weight; pays off once the \"Act now\" and \"Claim\" zones are done."
       }
     },
     "dims": {
       "weight": "{weight}% of CI",
-      "answerKey": "Answer key — sources AIs cite in your sector (all time):",
+      "answerKey": "Answer key — sources AIs cite in your sector:",
       "citationCount": "{count, plural, one {# citation} other {# citations}}",
       "noCitations": "No citations in this category from your tracking runs yet.",
       "runAuditCta": "Run Site Audit",
       "dim1": {
-        "name": "Site Readability",
+        "name": "AI Readability",
         "action": "Make your site readable for AIs",
-        "desc": "Technical and entity readiness — schema/JSON-LD, llms.txt, Wikidata. Measured by your latest Site Audit.",
+        "desc": "Technical and <entity>entity</entity> readiness — schema/JSON-LD, <llms>llms.txt</llms>, <wikidata>Wikidata</wikidata>. Measured by the latest Site Audit of the primary domain.",
         "cta": "Run Site Audit"
       },
       "dim2": {
-        "name": "Content",
+        "name": "Content Coverage",
         "action": "Answer every question on your site",
-        "desc": "GEO coverage and quality per topic — an own, extractable page. Measured by the share of AI answers citing your domain.",
+        "desc": "<geo>GEO</geo> coverage and quality per topic — an own, <ext>extractable</ext> page. Measured by the share of AI answers citing your domain.",
         "cta": "See content opportunities"
       },
       "dim3": {
@@ -562,9 +654,20 @@
         "desc": "Segment authority — regulators, associations and brand demand.",
         "cta": "Map sector associations and regulators"
       },
-      "comingSoon": "Coming soon"
+      "comingSoon": "Coming soon",
+      "presenceUnknown": "no data",
+      "lowSample": "Small sample ({count, plural, one {# citation} other {# citations}} in this category) — treat as direction, not decision."
     },
-    "notMeasured": "Not measured"
+    "notMeasured": "Not measured",
+    "howItWorks": "How the CI works",
+    "windowNote": "Considers all tracked time",
+    "glossary": {
+      "geo": "GEO (Generative Engine Optimization): optimizing content to be cited by AI answer engines.",
+      "llms": "llms.txt: a file on your site that tells AIs which pages to read and how to interpret them.",
+      "wikidata": "Wikidata: the public entity database AIs use to confirm who your brand is.",
+      "entity": "Entity: the brand identity AIs recognize — consistent name, site and data across sources.",
+      "extractable": "Extractable page: structured so an AI can lift the answer from it (clear headings, lists, a direct answer)."
+    }
   },
   "shopping": {
     "title": "Shopping",
@@ -1467,6 +1570,57 @@
       "checkoutFailed": "Checkout failed",
       "describeFailed": "Couldn't read the site right now — write a brief description manually.",
       "generatePromptsFailed": "Failed to generate prompts from topics"
+    }
+  },
+  "adminCosts": {
+    "title": "Costs & Usage",
+    "subtitle": "Monitor of what the platform consumes from AI providers — counts come straight from the database; US$ figures are estimates using the assumptions below. Exact billing lives in the provider consoles.",
+    "lastData": "Latest data: {date}",
+    "kpis": {
+      "llmSpend": "LLM spend (estimated)",
+      "llmSpendSub": "Anthropic + OpenAI, all time; Gemini on free tier",
+      "cloroCredits": "Cloro credits",
+      "cloroCreditsSub": "1 scrape = 1 credit — the main cost driver",
+      "results": "Tracked answers",
+      "resultsSub": "{cloro} via Cloro + {api} via Claude API",
+      "sentiment": "Sentiment analyses",
+      "sentimentSub": "gpt-5-mini, one per tracked answer"
+    },
+    "byPlatform": "Answers by platform",
+    "byBrand": "Answers by brand",
+    "byBrandSub": "{brands} brands · {prompts} active prompts",
+    "providers": {
+      "title": "Spend by provider",
+      "subtitle": "\"Measured\" = exact count in the database · \"estimated\" = tokens and cost derived from real response sizes",
+      "provider": "Provider",
+      "what": "What it does",
+      "volume": "Volume",
+      "tokens": "Tokens (in/out)",
+      "cost": "Cost",
+      "status": "Status",
+      "cloroDesc": "Scrapes of the AI surfaces (ChatGPT, AIO, Perplexity...)",
+      "cloroCost": "credits × plan rate",
+      "anthropicDesc": "Claude API tracking + AI Agent + suggestions (Haiku)",
+      "openaiDesc": "Sentiment analysis of each answer",
+      "geminiDesc": "Suggestions and site summary until the free-tier daily quota ran out",
+      "credits": "{count, plural, one {# credit} other {# credits}}",
+      "calls": "{count, plural, one {# call} other {# calls}}",
+      "measured": "measured",
+      "estimated": "estimated",
+      "freeTier": "free tier"
+    },
+    "notes": {
+      "title": "Where the exact numbers live · assumptions",
+      "exactTitle": "Consoles (billing source of truth):",
+      "exactAnthropic": "Anthropic — console.anthropic.com › Usage",
+      "exactOpenai": "OpenAI — platform.openai.com › Usage",
+      "exactGemini": "Gemini — aistudio.google.com (free tier: 20 req/day; enabling billing removes the cap)",
+      "exactCloro": "Cloro — plan dashboard (credits used/remaining)",
+      "exactRailway": "Railway — project Usage tab (fixed infra ~US$ 5–15/mo)",
+      "assumptionsTitle": "Estimation assumptions:",
+      "assumptionTokens": "Tokens ≈ characters ÷ 3.6 (mixed pt/en text)",
+      "assumptionPrices": "Prices per million tokens: Claude Sonnet US$ 3 in / US$ 15 out · gpt-5-mini US$ 0.25 / US$ 2",
+      "assumptionSource": "Volumes read live from the database (prompt_results, site_audits, agent_token_usage)"
     }
   }
 }

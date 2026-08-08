@@ -9,11 +9,13 @@
     "edit": "Editar",
     "view": "Ver",
     "back": "Voltar",
-    "next": "Avançar",
+    "next": "Próxima",
     "search": "Buscar",
     "filter": "Filtrar",
     "export": "Exportar",
-    "noData": "Nenhum dado disponível"
+    "noData": "Nenhum dado disponível",
+    "previous": "Anterior",
+    "pagerRange": "{start}–{end} de {total}"
   },
   "nav": {
     "overview": "Visão geral",
@@ -30,7 +32,8 @@
     "reports": "Relatórios",
     "settings": "Configurações",
     "citability": "Citabilidade",
-    "badgeNew": "Novo"
+    "badgeNew": "Novo",
+    "costs": "Custos & Consumo"
   },
   "agent": {
     "newChat": "Novo chat",
@@ -476,18 +479,108 @@
     "excludeOwnDomain": "Excluir domínio próprio",
     "competitorsOnly": "Só concorrentes",
     "noBrandTitle": "Nenhuma marca selecionada",
-    "noBrandDescription": "Selecione ou crie uma marca para ver as citações que as plataformas de IA usam ao responder sobre ela."
+    "noBrandDescription": "Selecione ou crie uma marca para ver as citações que as plataformas de IA usam ao responder sobre ela.",
+    "filters": {
+      "dateRange": "Período",
+      "from": "De",
+      "to": "Até",
+      "presetAll": "Tudo",
+      "presetCustom": "Personalizado",
+      "topic": "Tópico",
+      "allTopics": "Todos os tópicos",
+      "prompt": "Prompt",
+      "allPrompts": "Todos os prompts",
+      "searchPrompts": "Buscar prompts…",
+      "noPromptsMatch": "Nenhum prompt encontrado.",
+      "platform": "Plataforma",
+      "allPlatforms": "Todas as plataformas",
+      "region": "Região",
+      "allRegions": "Todas as regiões",
+      "ownDomainOnly": "Só meu domínio"
+    },
+    "table": {
+      "rank": "Pos.",
+      "domain": "Domínio",
+      "platforms": "Plataformas",
+      "usage": "Uso",
+      "avgCitations": "Média de citações",
+      "url": "URL",
+      "citations": "Citações",
+      "sourceType": "Tipo de fonte",
+      "competitorAnswers": "Respostas com concorrentes",
+      "whichCompetitors": "Quais concorrentes",
+      "strength": "Força",
+      "answersFeeding": "Respostas alimentadas",
+      "alsoCitesUs": "Também cita você?",
+      "yes": "✓ Sim",
+      "no": "✗ Não",
+      "openInNewTab": "Abrir {domain} em nova aba",
+      "strengthTitle": "Força {pct}%"
+    },
+    "empty": {
+      "checking": "Verificando dados de citações…",
+      "period24h": "nas últimas 24 horas",
+      "period7d": "nos últimos 7 dias",
+      "period30d": "nos últimos 30 dias",
+      "period90d": "nos últimos 90 dias",
+      "periodSelected": "no período selecionado",
+      "noCitationsIn": "Nenhuma citação {period}",
+      "existsOutside": "Existem dados de citação fora desta janela.",
+      "showAll": "Mostrar todos os dados",
+      "noMatch": "Nenhuma citação com esses filtros",
+      "tryWidening": "Amplie o período ou remova filtros."
+    },
+    "addCompetitor": {
+      "button": "Adicionar como concorrente",
+      "title": "Adicionar {domain} como concorrente?",
+      "description": "Rastrear este domínio como concorrente. Você pode editar o nome abaixo.",
+      "name": "Nome",
+      "namePlaceholder": "Nome do concorrente",
+      "cancel": "Cancelar",
+      "add": "Adicionar",
+      "added": "{domain} adicionado como concorrente",
+      "failed": "Não foi possível adicionar este domínio como concorrente. Tente de novo."
+    },
+    "gaps": {
+      "methodology": "Fontes que aparecem em respostas que mencionam concorrentes mas não você, ponderadas por quantas fontes cada resposta tinha.",
+      "howThisWorks": "Como funciona",
+      "gapList": "Lista de lacunas",
+      "byCompetitor": "Por concorrente",
+      "competitor": "Concorrente",
+      "selectCompetitor": "Selecionar concorrente",
+      "noGapDomains": "Nenhum domínio de lacuna para esses filtros",
+      "noGapDomainsBody": "Todo domínio que cita um concorrente também cita você, ou ainda não há dados suficientes.",
+      "noCompetitorData": "Ainda sem dados de fontes de concorrentes",
+      "noCompetitorDataBody": "Adicione concorrentes (com domínios) e aguarde alguns rastreamentos.",
+      "lowVisibility": "Sua visibilidade está baixa nesta janela, então esta lista pode ser ampla — foque primeiro na visibilidade de base."
+    },
+    "categories": {
+      "you": "Você",
+      "competitor": "Concorrente",
+      "editorial": "Editorial",
+      "forum": "Fórum",
+      "social": "Social",
+      "review": "Reviews",
+      "institutional": "Institucional",
+      "other": "Outros"
+    },
+    "donut": {
+      "noSources": "Nenhuma fonte de citação ainda."
+    },
+    "tabGaps": "Lacunas de Concorrentes",
+    "exportCsv": "Exportar CSV",
+    "exporting": "Exportando...",
+    "exportFailed": "Falha ao exportar CSV"
   },
   "citability": {
     "title": "Citabilidade",
     "subtitle": "O Índice de Citabilidade (IC) organiza as 6 frentes que fazem uma marca ser citada pelas IAs — com peso, zona de ação e o gabarito real das fontes que as IAs citam nos seus prompts.",
     "kpis": {
       "icTitle": "IC parcial",
-      "icHint": "Média ponderada das dimensões já medidas (01 e 02), de 0 a 100 — todo o período rastreado.",
-      "d1Title": "01 · Legibilidade do Site",
+      "d1Title": "01 · Legibilidade para IAs",
       "d1Hint": "Score da última Auditoria de Site do domínio principal.",
-      "d2Title": "02 · Conteúdo",
-      "d2Hint": "% das respostas de IA que citam o seu domínio (todo o período).",
+      "d2Title": "02 · Cobertura de Conteúdo",
+      "d2Hint": "% das respostas de IA que citam o seu domínio.",
       "icNoData": "Rode uma Auditoria de Site e um rastreamento para começar a medir.",
       "icCoverage": "{coverage}% do índice medido",
       "icRecalc": "A nota se recalcula conforme novas dimensões forem medidas.",
@@ -503,8 +596,7 @@
       "yAxis": "Dependência de terceiros",
       "zoneA": "Faça agora — você controla, é rápido",
       "zoneB": "Reivindique — de terceiros, mas você ativa",
-      "zoneC": "Conquiste — depende de terceiros, é lento",
-      "emptyZone": "— zona vazia: se é seu, você controla —"
+      "zoneC": "Conquiste — depende de terceiros, é lento"
     },
     "zones": {
       "A": {
@@ -517,25 +609,25 @@
       },
       "C": {
         "name": "Conquiste",
-        "desc": "Depende de terceiros e é lento — mídia earned e autoridade de vertical. Maior peso isolado do IC; colhe quem já fez A e B."
+        "desc": "Depende de terceiros e é lento — mídia earned e autoridade de vertical. Maior peso isolado do IC; colhe quem já fez as zonas \"Faça agora\" e \"Reivindique\"."
       }
     },
     "dims": {
       "weight": "{weight}% do IC",
-      "answerKey": "Gabarito — fontes que as IAs citam no seu setor (todo o período):",
+      "answerKey": "Gabarito — fontes que as IAs citam no seu setor:",
       "citationCount": "{count, plural, one {# citação} other {# citações}}",
       "noCitations": "Nenhuma citação dessa categoria nos seus rastreamentos ainda.",
       "runAuditCta": "Rodar Auditoria de Site",
       "dim1": {
-        "name": "Legibilidade do Site",
+        "name": "Legibilidade para IAs",
         "action": "Deixe o site legível para as IAs",
-        "desc": "Prontidão técnica e entidade — schema/JSON-LD, llms.txt, Wikidata. Medida pela sua Auditoria de Site mais recente.",
+        "desc": "Prontidão técnica e <entity>entidade</entity> — schema/JSON-LD, <llms>llms.txt</llms>, <wikidata>Wikidata</wikidata>. Medida pela Auditoria de Site mais recente do domínio principal.",
         "cta": "Rodar Auditoria de Site"
       },
       "dim2": {
-        "name": "Conteúdo",
+        "name": "Cobertura de Conteúdo",
         "action": "Responda cada pergunta no seu site",
-        "desc": "Cobertura e qualidade GEO por tópico — página própria e extraível. Medida pela fração das respostas de IA que citam o seu domínio.",
+        "desc": "Cobertura e qualidade <geo>GEO</geo> por tópico — página própria e <ext>extraível</ext>. Medida pela fração das respostas de IA que citam o seu domínio.",
         "cta": "Ver oportunidades de conteúdo"
       },
       "dim3": {
@@ -562,9 +654,20 @@
         "desc": "Autoridade de segmento — reguladores, associações e demanda de marca.",
         "cta": "Mapear associações e reguladores"
       },
-      "comingSoon": "Em breve"
+      "comingSoon": "Em breve",
+      "presenceUnknown": "sem dado",
+      "lowSample": "Amostra pequena ({count, plural, one {# citação} other {# citações}} na categoria) — use como direção, não como decisão."
     },
-    "notMeasured": "Não medido"
+    "notMeasured": "Não medido",
+    "howItWorks": "Como funciona o IC",
+    "windowNote": "Considera todo o período rastreado",
+    "glossary": {
+      "geo": "GEO (Generative Engine Optimization): otimizar conteúdo para ser citado por motores de resposta de IA.",
+      "llms": "llms.txt: arquivo no seu site que orienta as IAs sobre quais páginas ler e como interpretá-las.",
+      "wikidata": "Wikidata: base pública de entidades que as IAs usam para confirmar quem é a sua marca.",
+      "entity": "Entidade: a identidade da marca reconhecida pelas IAs — nome, site e dados consistentes entre fontes.",
+      "extractable": "Página extraível: estruturada de forma que a IA consiga recortar a resposta dela (títulos claros, listas, resposta direta)."
+    }
   },
   "shopping": {
     "title": "Shopping",
@@ -1480,6 +1583,57 @@
       "checkoutFailed": "Falha no checkout",
       "describeFailed": "Não conseguimos ler o site agora — escreva uma breve descrição manualmente.",
       "generatePromptsFailed": "Falha ao gerar prompts a partir dos tópicos"
+    }
+  },
+  "adminCosts": {
+    "title": "Custos & Consumo",
+    "subtitle": "Monitor do que a plataforma consome de provedores de IA — contagens vêm direto do banco; valores em US$ são estimativas com as premissas do rodapé. O número exato de cobrança vive nos consoles dos provedores.",
+    "lastData": "Último dado: {date}",
+    "kpis": {
+      "llmSpend": "LLM gasto (estimado)",
+      "llmSpendSub": "Anthropic + OpenAI, todo o período; Gemini no free tier",
+      "cloroCredits": "Créditos Cloro",
+      "cloroCreditsSub": "1 scrape = 1 crédito — driver principal de custo",
+      "results": "Respostas rastreadas",
+      "resultsSub": "{cloro} via Cloro + {api} via API Claude",
+      "sentiment": "Análises de sentimento",
+      "sentimentSub": "gpt-5-mini, uma por resposta rastreada"
+    },
+    "byPlatform": "Respostas por plataforma",
+    "byBrand": "Respostas por marca",
+    "byBrandSub": "{brands} marcas · {prompts} prompts ativos",
+    "providers": {
+      "title": "Gasto por provider",
+      "subtitle": "\"Medido\" = contagem exata no banco · \"estimado\" = tokens e custo derivados do tamanho real das respostas",
+      "provider": "Provider",
+      "what": "O que faz",
+      "volume": "Volume",
+      "tokens": "Tokens (in/out)",
+      "cost": "Custo",
+      "status": "Status",
+      "cloroDesc": "Scrapes das superfícies de IA (ChatGPT, AIO, Perplexity...)",
+      "cloroCost": "créditos × valor do plano",
+      "anthropicDesc": "Rastreio via API Claude + AI Agent + sugestões (Haiku)",
+      "openaiDesc": "Análise de sentimento de cada resposta",
+      "geminiDesc": "Sugestões e resumo de site até estourar a cota diária do free tier",
+      "credits": "{count, plural, one {# crédito} other {# créditos}}",
+      "calls": "{count, plural, one {# chamada} other {# chamadas}}",
+      "measured": "medido",
+      "estimated": "estimado",
+      "freeTier": "free tier"
+    },
+    "notes": {
+      "title": "Onde ver o número exato · premissas",
+      "exactTitle": "Consoles (fonte da verdade de cobrança):",
+      "exactAnthropic": "Anthropic — console.anthropic.com › Usage",
+      "exactOpenai": "OpenAI — platform.openai.com › Usage",
+      "exactGemini": "Gemini — aistudio.google.com (free tier: 20 req/dia; ativar billing remove o limite)",
+      "exactCloro": "Cloro — painel do plano (créditos consumidos/restantes)",
+      "exactRailway": "Railway — aba Usage do projeto (infra fixa ~US$ 5–15/mês)",
+      "assumptionsTitle": "Premissas das estimativas:",
+      "assumptionTokens": "Tokens ≈ caracteres ÷ 3,6 (texto pt/en misto)",
+      "assumptionPrices": "Preços por milhão de tokens: Claude Sonnet US$ 3 in / US$ 15 out · gpt-5-mini US$ 0,25 / US$ 2",
+      "assumptionSource": "Volumes lidos ao vivo do banco (prompt_results, site_audits, agent_token_usage)"
     }
   }
 }

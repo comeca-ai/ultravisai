@@ -51,7 +51,7 @@ import {
 } from '@/components/ui/combobox';
 import { toCsv } from '@/lib/csv';
 import type { Topic } from '@/types';
-import { SOURCE_CATEGORY_LABELS, type SourceCategory } from '@/lib/citations/classify';
+import type { SourceCategory } from '@/lib/citations/classify';
 import { MODEL_PROVIDER_LABELS, PLATFORM_LABELS } from '@/config/platform-labels';
 import {
   CategoryBadge,
@@ -233,11 +233,12 @@ function SourceTypeDonut({
   data: { category: SourceCategory; count: number; pct: number }[];
   total: number;
 }) {
+  const t = useTranslations('citations');
   if (data.length === 0 || total === 0) {
     return (
       <div className="flex h-[220px] flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
         <Layers className="h-8 w-8 opacity-30" />
-        No citation sources yet.
+        {t('donut.noSources')}
       </div>
     );
   }
@@ -245,7 +246,7 @@ function SourceTypeDonut({
   const chartData = data.map((d) => ({
     ...d,
     fill: CATEGORY_COLORS[d.category],
-    label: SOURCE_CATEGORY_LABELS[d.category],
+    label: t(`categories.${d.category}`),
   }));
 
   return (
@@ -292,6 +293,7 @@ function FilterBar({
   // base-ui Combobox needs `{ value, label }` shaped items so it can use the
   // built-in filter and display logic without custom item-to-string helpers.
   // Truncate long prompt text so the dropdown stays a sensible width.
+  const t = useTranslations('citations');
   const promptComboboxItems = useMemo<PromptComboboxItem[]>(
     () =>
       prompts.map((p) => ({
@@ -307,7 +309,9 @@ function FilterBar({
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Date Range</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('filters.dateRange')}
+        </label>
         <div className="flex rounded-md border overflow-hidden">
           {DATE_PRESETS.map((p) => (
             <button
@@ -321,7 +325,11 @@ function FilterBar({
                   : 'bg-card hover:bg-muted text-foreground',
               )}
             >
-              {p === 'custom' ? 'Custom' : p === 'all' ? 'All' : p}
+              {p === 'custom'
+                ? t('filters.presetCustom')
+                : p === 'all'
+                  ? t('filters.presetAll')
+                  : p}
             </button>
           ))}
         </div>
@@ -330,7 +338,9 @@ function FilterBar({
       {filters.datePreset === 'custom' && (
         <>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">From</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('filters.from')}
+            </label>
             <Input
               type="date"
               value={filters.dateFrom}
@@ -339,7 +349,9 @@ function FilterBar({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">To</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('filters.to')}
+            </label>
             <Input
               type="date"
               value={filters.dateTo}
@@ -352,25 +364,27 @@ function FilterBar({
 
       {topics.length > 0 && (
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Topic</label>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            {t('filters.topic')}
+          </label>
           <Select
             value={filters.topic || null}
             onValueChange={(v) => onChange({ topic: !v || v === '__all__' ? '' : v })}
           >
             <SelectTrigger className="h-8 w-40 text-xs">
-              <SelectValue placeholder="All Topics">
+              <SelectValue placeholder={t('filters.allTopics')}>
                 {(value) =>
                   value && value !== '__all__'
-                    ? (topics.find((t) => t.id === value)?.name ?? 'All Topics')
-                    : 'All Topics'
+                    ? (topics.find((topic) => topic.id === value)?.name ?? t('filters.allTopics'))
+                    : t('filters.allTopics')
                 }
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all__">All Topics</SelectItem>
-              {topics.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.name}
+              <SelectItem value="__all__">{t('filters.allTopics')}</SelectItem>
+              {topics.map((topic) => (
+                <SelectItem key={topic.id} value={topic.id}>
+                  {topic.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -380,7 +394,9 @@ function FilterBar({
 
       {prompts.length > 0 && (
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Prompt</label>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            {t('filters.prompt')}
+          </label>
           <Combobox
             items={promptComboboxItems}
             value={
@@ -395,12 +411,12 @@ function FilterBar({
             }
           >
             <ComboboxTrigger className="h-8 w-56 text-xs">
-              <ComboboxValue placeholder="All Prompts" />
+              <ComboboxValue placeholder={t('filters.allPrompts')} />
             </ComboboxTrigger>
             <ComboboxContent>
-              <ComboboxInput placeholder="Search prompts…" />
+              <ComboboxInput placeholder={t('filters.searchPrompts')} />
               <ComboboxList>
-                <ComboboxEmpty>No prompts match.</ComboboxEmpty>
+                <ComboboxEmpty>{t('filters.noPromptsMatch')}</ComboboxEmpty>
                 <ComboboxCollection>
                   {(item: PromptComboboxItem) => (
                     <ComboboxItem key={item.value} value={item} title={item.fullText}>
@@ -415,23 +431,25 @@ function FilterBar({
       )}
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Platform</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('filters.platform')}
+        </label>
         <Select
           value={filters.platform || null}
           onValueChange={(v) => onChange({ platform: !v || v === '__all__' ? '' : v })}
         >
           <SelectTrigger className="h-8 w-40 text-xs">
-            <SelectValue placeholder="All Platforms">
+            <SelectValue placeholder={t('filters.allPlatforms')}>
               {(value) =>
                 value && value !== '__all__'
                   ? (platforms.find((platform) => platform.value === value)?.label ??
                     getGroupedPlatformLabel(value))
-                  : 'All Platforms'
+                  : t('filters.allPlatforms')
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All Platforms</SelectItem>
+            <SelectItem value="__all__">{t('filters.allPlatforms')}</SelectItem>
             {platforms.map((platform) => (
               <SelectItem key={platform.value} value={platform.value}>
                 {platform.label}
@@ -442,16 +460,18 @@ function FilterBar({
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Region</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('filters.region')}
+        </label>
         <Select
           value={filters.region || null}
           onValueChange={(v) => onChange({ region: !v || v === '__all__' ? '' : v })}
         >
           <SelectTrigger className="h-8 w-32 text-xs">
-            <SelectValue placeholder="All Regions" />
+            <SelectValue placeholder={t('filters.allRegions')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All Regions</SelectItem>
+            <SelectItem value="__all__">{t('filters.allRegions')}</SelectItem>
             {regions.map((r) => (
               <SelectItem key={r} value={r}>
                 {r}
@@ -474,7 +494,7 @@ function FilterBar({
             })
           }
         >
-          Exclude own domain
+          {t('excludeOwnDomain')}
         </Button>
         <Button
           type="button"
@@ -489,7 +509,7 @@ function FilterBar({
             })
           }
         >
-          Competitors only
+          {t('competitorsOnly')}
         </Button>
         <Button
           type="button"
@@ -504,7 +524,7 @@ function FilterBar({
             })
           }
         >
-          Own domain only
+          {t('filters.ownDomainOnly')}
         </Button>
       </div>
     </div>
@@ -569,6 +589,7 @@ function AddCompetitorButton({
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
   const nameId = useId();
+  const t = useTranslations('citations');
 
   function openDialog() {
     setName(deriveCompetitorName(domain));
@@ -581,11 +602,11 @@ function AddCompetitorButton({
     setSaving(true);
     try {
       await addCompetitor(brandId, { name: trimmed, domain });
-      toast.success(`${domain} added as competitor`);
+      toast.success(t('addCompetitor.added', { domain }));
       setOpen(false);
       onAdded();
     } catch {
-      toast.error('Could not add this domain as a competitor. Please try again.');
+      toast.error(t('addCompetitor.failed'));
     } finally {
       setSaving(false);
     }
@@ -603,36 +624,34 @@ function AddCompetitorButton({
         size="icon"
         className="h-7 w-7"
         onClick={openDialog}
-        aria-label={`Add ${domain} as competitor`}
-        title="Add as competitor"
+        aria-label={t('addCompetitor.title', { domain })}
+        title={t('addCompetitor.button')}
       >
         <Plus className="h-3.5 w-3.5" />
       </Button>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add {domain} as competitor?</DialogTitle>
-          <DialogDescription>
-            Track this domain as a competitor. You can edit the name below.
-          </DialogDescription>
+          <DialogTitle>{t('addCompetitor.title', { domain })}</DialogTitle>
+          <DialogDescription>{t('addCompetitor.description')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor={nameId}>Name</Label>
+          <Label htmlFor={nameId}>{t('addCompetitor.name')}</Label>
           <Input
             id={nameId}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            placeholder="Competitor name"
+            placeholder={t('addCompetitor.namePlaceholder')}
             autoFocus
           />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
-            Cancel
+            {t('addCompetitor.cancel')}
           </Button>
           <Button onClick={handleAdd} disabled={!name.trim() || saving} className="gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Add
+            {t('addCompetitor.add')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -659,6 +678,7 @@ const DomainsTable = memo(function DomainsTable({
   onResetFilters: () => void;
   hasAnyCitations: boolean | null;
 }) {
+  const t = useTranslations('citations');
   if (rows.length === 0)
     return (
       <EmptyRows
@@ -680,11 +700,11 @@ const DomainsTable = memo(function DomainsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[56px] text-xs">Rank</TableHead>
-            <TableHead className="text-xs">Domain</TableHead>
-            <TableHead className="text-xs">Platforms</TableHead>
-            <TableHead className="text-xs">Usage</TableHead>
-            <TableHead className="text-right text-xs">Avg Citations</TableHead>
+            <TableHead className="w-[56px] text-xs">{t('table.rank')}</TableHead>
+            <TableHead className="text-xs">{t('table.domain')}</TableHead>
+            <TableHead className="text-xs">{t('table.platforms')}</TableHead>
+            <TableHead className="text-xs">{t('table.usage')}</TableHead>
+            <TableHead className="text-right text-xs">{t('table.avgCitations')}</TableHead>
             <TableHead className="w-[44px]">
               <span className="sr-only">Add as competitor</span>
             </TableHead>
@@ -762,6 +782,7 @@ const UrlsTable = memo(function UrlsTable({
   onResetFilters: () => void;
   hasAnyCitations: boolean | null;
 }) {
+  const t = useTranslations('citations');
   if (rows.length === 0)
     return (
       <EmptyRows
@@ -783,11 +804,11 @@ const UrlsTable = memo(function UrlsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[56px] text-xs">Rank</TableHead>
-            <TableHead className="text-xs">URL</TableHead>
-            <TableHead className="text-xs">Platforms</TableHead>
-            <TableHead className="text-xs">Usage</TableHead>
-            <TableHead className="text-right text-xs">Citations</TableHead>
+            <TableHead className="w-[56px] text-xs">{t('table.rank')}</TableHead>
+            <TableHead className="text-xs">{t('table.url')}</TableHead>
+            <TableHead className="text-xs">{t('table.platforms')}</TableHead>
+            <TableHead className="text-xs">{t('table.usage')}</TableHead>
+            <TableHead className="text-right text-xs">{t('table.citations')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -869,12 +890,13 @@ function EmptyRows({
   onShowAll?: () => void;
   hasAnyCitations?: boolean | null;
 }) {
+  const t = useTranslations('citations');
   // ── 1. Checking ──────────────────────────────────────────────────────────────
   if (hasAnyCitations === null) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/60 mb-3" />
-        <p className="text-xs text-muted-foreground">Checking citation data…</p>
+        <p className="text-xs text-muted-foreground">{t('empty.checking')}</p>
       </div>
     );
   }
@@ -883,24 +905,22 @@ function EmptyRows({
   if (hasAnyCitations && isFiltered) {
     const periodLabel =
       datePreset === '24h'
-        ? 'the last 24 hours'
+        ? t('empty.period24h')
         : datePreset === '7d'
-          ? 'the last 7 days'
+          ? t('empty.period7d')
           : datePreset === '30d'
-            ? 'the last 30 days'
+            ? t('empty.period30d')
             : datePreset === '90d'
-              ? 'the last 90 days'
-              : 'the selected period';
+              ? t('empty.period90d')
+              : t('empty.periodSelected');
 
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <FilterIcon className="h-8 w-8 text-muted-foreground/40 mb-3" />
-        <p className="text-sm font-medium">No citations in {periodLabel}</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Citation data exists outside this window.
-        </p>
+        <p className="text-sm font-medium">{t('empty.noCitationsIn', { period: periodLabel })}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('empty.existsOutside')}</p>
         <Button variant="outline" size="sm" className="mt-4 text-xs" onClick={onShowAll}>
-          Show all data
+          {t('empty.showAll')}
         </Button>
       </div>
     );
@@ -910,29 +930,29 @@ function EmptyRows({
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <FilterIcon className="h-8 w-8 text-muted-foreground/40 mb-3" />
-      <p className="text-sm font-medium">No citations match your filters</p>
-      <p className="mt-1 text-xs text-muted-foreground">
-        Try widening your date range or removing filters.
-      </p>
+      <p className="text-sm font-medium">{t('empty.noMatch')}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{t('empty.tryWidening')}</p>
     </div>
   );
 }
 
 // ─── Competitor Gaps (#300) ───────────────────────────────────────────────────
 
-const GAP_METHODOLOGY =
-  'Sources that appear in answers mentioning competitors but not you, weighted by how many sources each answer had.';
-
 function StrengthBar({ value, max }: { value: number; max: number }) {
+  const t = useTranslations('citations');
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
-    <div className="h-1.5 w-20 rounded-full bg-muted overflow-hidden" title={`Strength ${pct}%`}>
+    <div
+      className="h-1.5 w-20 rounded-full bg-muted overflow-hidden"
+      title={t('table.strengthTitle', { pct })}
+    >
       <div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(6, pct)}%` }} />
     </div>
   );
 }
 
 function DomainCell({ domain }: { domain: string }) {
+  const t = useTranslations('citations');
   return (
     <div className="flex items-center gap-2 min-w-0">
       <DomainFavicon domain={domain} />
@@ -942,7 +962,7 @@ function DomainCell({ domain }: { domain: string }) {
         target="_blank"
         rel="noreferrer noopener"
         className="inline-flex items-center text-muted-foreground hover:text-foreground"
-        aria-label={`Open ${domain} in a new tab`}
+        aria-label={t('table.openInNewTab', { domain })}
       >
         <ExternalLink className="h-3 w-3" />
       </a>
@@ -951,14 +971,13 @@ function DomainCell({ domain }: { domain: string }) {
 }
 
 function GapListTable({ rows }: { rows: CitationGapDomain[] }) {
+  const t = useTranslations('citations');
   if (rows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Layers className="h-8 w-8 text-muted-foreground/40 mb-3" />
-        <p className="text-sm font-medium">No gap domains for these filters</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Every domain citing a competitor also cites you, or there isn&apos;t enough data yet.
-        </p>
+        <p className="text-sm font-medium">{t('gaps.noGapDomains')}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('gaps.noGapDomainsBody')}</p>
       </div>
     );
   }
@@ -967,11 +986,11 @@ function GapListTable({ rows }: { rows: CitationGapDomain[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="text-xs">Domain</TableHead>
-          <TableHead className="text-xs">Source type</TableHead>
-          <TableHead className="text-right text-xs">Competitor answers</TableHead>
-          <TableHead className="text-xs">Which competitors</TableHead>
-          <TableHead className="text-xs">Strength</TableHead>
+          <TableHead className="text-xs">{t('table.domain')}</TableHead>
+          <TableHead className="text-xs">{t('table.sourceType')}</TableHead>
+          <TableHead className="text-right text-xs">{t('table.competitorAnswers')}</TableHead>
+          <TableHead className="text-xs">{t('table.whichCompetitors')}</TableHead>
+          <TableHead className="text-xs">{t('table.strength')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -1014,6 +1033,7 @@ function ByCompetitorView({
   competitorId: string;
   onSelect: (id: string) => void;
 }) {
+  const t = useTranslations('citations');
   const rows = gaps.byCompetitor[competitorId] ?? [];
   const max = rows[0]?.strength ?? 0;
 
@@ -1021,10 +1041,8 @@ function ByCompetitorView({
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Layers className="h-8 w-8 text-muted-foreground/40 mb-3" />
-        <p className="text-sm font-medium">No competitor source data yet</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Add competitors (with domains) and let a few tracking runs complete.
-        </p>
+        <p className="text-sm font-medium">{t('gaps.noCompetitorData')}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('gaps.noCompetitorDataBody')}</p>
       </div>
     );
   }
@@ -1032,7 +1050,7 @@ function ByCompetitorView({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">Competitor</span>
+        <span className="text-xs text-muted-foreground">{t('gaps.competitor')}</span>
         <Select
           value={competitorId}
           onValueChange={(v) => {
@@ -1040,8 +1058,10 @@ function ByCompetitorView({
           }}
         >
           <SelectTrigger className="h-8 w-56 text-xs">
-            <SelectValue placeholder="Select competitor">
-              {(value) => gaps.competitors.find((c) => c.id === value)?.name ?? 'Select competitor'}
+            <SelectValue placeholder={t('gaps.selectCompetitor')}>
+              {(value) =>
+                gaps.competitors.find((c) => c.id === value)?.name ?? t('gaps.selectCompetitor')
+              }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -1059,11 +1079,11 @@ function ByCompetitorView({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xs">Domain</TableHead>
-              <TableHead className="text-xs">Source type</TableHead>
-              <TableHead className="text-right text-xs">Answers feeding</TableHead>
-              <TableHead className="text-center text-xs">Also cites us?</TableHead>
-              <TableHead className="text-xs">Strength</TableHead>
+              <TableHead className="text-xs">{t('table.domain')}</TableHead>
+              <TableHead className="text-xs">{t('table.sourceType')}</TableHead>
+              <TableHead className="text-right text-xs">{t('table.answersFeeding')}</TableHead>
+              <TableHead className="text-center text-xs">{t('table.alsoCitesUs')}</TableHead>
+              <TableHead className="text-xs">{t('table.strength')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -1088,7 +1108,7 @@ function ByCompetitorView({
                         : 'text-muted-foreground',
                     )}
                   >
-                    {row.alsoCitesUs ? '✓ Yes' : '✗ No'}
+                    {row.alsoCitesUs ? t('table.yes') : t('table.no')}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -1104,6 +1124,7 @@ function ByCompetitorView({
 }
 
 function CompetitorGapsTab({ loading, gaps }: { loading: boolean; gaps: CitationGaps | null }) {
+  const t = useTranslations('citations');
   const [view, setView] = useState<'list' | 'byCompetitor'>('list');
   // The user's pick; falls back to the first competitor (derived, no effect) so
   // it stays valid when the gaps data changes under a filter switch.
@@ -1136,7 +1157,7 @@ function CompetitorGapsTab({ loading, gaps }: { loading: boolean; gaps: Citation
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
-            Gap list
+            {t('gaps.gapList')}
           </button>
           <button
             type="button"
@@ -1148,21 +1169,20 @@ function CompetitorGapsTab({ loading, gaps }: { loading: boolean; gaps: Citation
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
-            By competitor
+            {t('gaps.byCompetitor')}
           </button>
         </div>
         <span
           className="inline-flex items-center gap-1 text-xs text-muted-foreground cursor-help"
-          title={GAP_METHODOLOGY}
+          title={t('gaps.methodology')}
         >
-          <Info className="h-3.5 w-3.5" /> How this works
+          <Info className="h-3.5 w-3.5" /> {t('gaps.howThisWorks')}
         </span>
       </div>
 
       {gaps.lowVisibility && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-          Your visibility is low in this window, so this list may be broad — focus on baseline
-          visibility first.
+          {t('gaps.lowVisibility')}
         </div>
       )}
 
@@ -1436,11 +1456,11 @@ export default function CitationsPage() {
         triggerDownload(csv, `ansvisor_${slug}_citations_urls_${date}.csv`);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to export CSV');
+      toast.error(err instanceof Error ? err.message : t('exportFailed'));
     } finally {
       setIsExporting(false);
     }
-  }, [brand, data, sourceTab]);
+  }, [brand, data, sourceTab, t]);
 
   if (!brand) {
     return (
@@ -1471,7 +1491,7 @@ export default function CitationsPage() {
             <Download className="h-4 w-4" />
           )}
 
-          {isExporting ? 'Exporting...' : 'Export CSV'}
+          {isExporting ? t('exporting') : t('exportCsv')}
         </Button>
       </div>
 
@@ -1510,7 +1530,7 @@ export default function CitationsPage() {
                   <TabsTrigger value="urls">
                     {t('tabUrls')} ({data?.totals.urls ?? 0})
                   </TabsTrigger>
-                  <TabsTrigger value="gaps">Competitor Gaps</TabsTrigger>
+                  <TabsTrigger value="gaps">{t('tabGaps')}</TabsTrigger>
                   <TabsTrigger value="types">{t('sourceTypesTitle')}</TabsTrigger>
                 </TabsList>
                 {/* keepMounted: data is already in memory, so mount these panels

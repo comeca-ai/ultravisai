@@ -58,6 +58,7 @@ export function Sidebar() {
     Agent: () => t('agent'),
     'Answer Engine Insights': () => t('insights'),
     Citability: () => t('citability'),
+    Costs: () => t('costs'),
     'AI Traffic Analytics': () => t('traffic'),
     Prompts: () => t('prompts'),
     Topics: () => t('topics'),

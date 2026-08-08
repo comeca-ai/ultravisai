@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 export const PAGE_SIZE = 100;
@@ -53,12 +54,13 @@ export function TablePager({
   end: number;
   onPage: (p: number) => void;
 }) {
+  const t = useTranslations('common');
   if (totalPages <= 1) return null;
 
   return (
     <div className="flex items-center justify-between border-t px-4 py-3">
       <span className="text-xs text-muted-foreground tabular-nums">
-        {start + 1}–{end} of {total}
+        {t('pagerRange', { start: start + 1, end, total })}
       </span>
       <div className="flex items-center gap-2">
         <Button
@@ -68,7 +70,7 @@ export function TablePager({
           disabled={page === 0}
           onClick={() => onPage(page - 1)}
         >
-          Previous
+          {t('previous')}
         </Button>
         <span className="text-xs text-muted-foreground tabular-nums">
           {page + 1} / {totalPages}
@@ -80,7 +82,7 @@ export function TablePager({
           disabled={page >= totalPages - 1}
           onClick={() => onPage(page + 1)}
         >
-          Next
+          {t('next')}
         </Button>
       </div>
     </div>

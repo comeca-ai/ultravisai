@@ -8,11 +8,12 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { getFaviconUrl } from '@/lib/favicon';
-import { SOURCE_CATEGORY_LABELS, type SourceCategory } from '@/lib/citations/classify';
+import type { SourceCategory } from '@/lib/citations/classify';
 import {
   AIProviderAvatar,
   resolveAIProvider,
@@ -31,6 +32,7 @@ export const CATEGORY_BADGE_CLASSES: Record<SourceCategory, string> = {
 };
 
 export function CategoryBadge({ category }: { category: SourceCategory }) {
+  const t = useTranslations('citations');
   return (
     <Badge
       variant="outline"
@@ -39,7 +41,7 @@ export function CategoryBadge({ category }: { category: SourceCategory }) {
         CATEGORY_BADGE_CLASSES[category],
       )}
     >
-      {SOURCE_CATEGORY_LABELS[category]}
+      {t(`categories.${category}`)}
     </Badge>
   );
 }

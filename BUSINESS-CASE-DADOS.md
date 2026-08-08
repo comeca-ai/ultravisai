@@ -46,6 +46,19 @@ scrapes por mês  = scrapes por run × frequência (semanal ×4 | diária ×30)
 
 ## 4. Dados reais coletados
 
+### 4.0 Snapshot de consumo — 07/ago 22h UTC (1º dia de operação)
+- **63 respostas rastreadas**: 28 scrapes Cloro (Datarisk 27 + E2E 1) +
+  35 via API Claude (marca Accenture, rastreio 100% `claude`)
+- **63 análises de sentimento** (gpt-5-mini, ~4,6k chars médios de entrada)
+- **LLM estimado do dia: ≈ US$ 0,70** (Anthropic ~US$ 0,65 — 136k chars de
+  saída no rastreio Accenture; OpenAI ~US$ 0,04; Gemini US$ 0,00 free tier)
+- **Cloro: 28 créditos** (valor do crédito ainda pendente — checklist §6)
+- Gemini free tier = 20 req/dia no `gemini-3-flash` → cota estourada às ~22h
+  (falha em "gerar prompts"); sugestões/audit trocados para Anthropic Haiku
+- 0 site audits · 0 tokens de agent registrados
+- **Página de monitoramento no produto**: `/dashboard/admin/costs` (menu
+  Admin → Custos & Consumo) — contagens ao vivo do banco + estimativas US$
+
 ### 4.1 Teste E2E (marca de teste, 07/ago 15:22 UTC)
 - 1 prompt × 1 plataforma (`chatgpt-web`, região BR)
 - **Duração ponta-a-ponta: ~40 segundos** (cron → Cloro → parse → banco)

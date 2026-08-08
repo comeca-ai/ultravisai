@@ -5,8 +5,10 @@
 > plataforma (agent, página, cards) deve referenciar ESTE arquivo — se o
 > framework evoluir, atualiza-se aqui primeiro e as superfícies depois.
 >
-> Visualização de referência: `referencia-matriz-citabilidade.html`
-> (matriz interativa original, "Olho de Tandera v1").
+> Referências (em `estrategia/referencias/`):
+> `matriz-citabilidade.html` (matriz interativa original, "Olho de Tandera v1")
+> e `curso-geo-joio-do-trigo.html` (curso autoral do Jhon — origem das
+> táticas por dimensão e da âncora científica desta v1.1).
 
 ---
 
@@ -108,3 +110,45 @@ Princípios de implementação (anti-drift do fork):
 - **Zonas: "Faça agora" (A) · "Reivindique" (B) · "Conquiste" (C)** —
   sempre com estes verbos; são a linguagem de ação do produto.
 - Em inglês: *Citability Index*; zonas *Act now / Claim / Earn*.
+
+---
+
+## 7. Os 4 verbos (v1.1 — colhido do curso GEO do autor)
+
+O curso `referencias/curso-geo-joio-do-trigo.html` organiza GEO em **quatro
+verbos** que são o *funil de citação* — a IA só cita quem ela consegue
+**ler**, **entender** e **confiar**, e você só melhora o que **mede**. Isso
+é o eixo pedagógico do IC (o "como funciona"), complementar às zonas (que são
+o eixo de esforço/controle):
+
+| Verbo | Pergunta | Dimensões IC | Táticas concretas (viram itens de ação nos cards/agent) |
+|---|---|---|---|
+| **01 LER** (acesso) | A máquina chega no seu conteúdo? | D1 | Checar Bing (ChatGPT usa o índice do Bing); liberar GPTBot no robots.txt; teste do view-source (texto crítico em HTML, não só JS); schema/JSON-LD; llms.txt (aposta barata) |
+| **02 ENTENDER** (conteúdo) | O que você publica tem formato de resposta? | D2 | H2/H3 como a pergunta real por extenso + resposta nas 3 primeiras linhas; formato extraível (listas, tabelas, passos); comparativos "X ou Y" assinados; página pilar + subpáginas |
+| **03 CONFIAR** (reputação) | O que os outros dizem sustenta a citação? | D3, D4, D5, D6 | Fluxo de reviews (5★ público / 1–4★ privado); menções earned (imprensa, podcasts, artigos); comunidades (Reddit/Quora com utilidade real); perfis oficiais + Wikipedia quando couber; backlinks naturais, não comprados |
+| **04 MEDIR** (loop) | Você sabe se está funcionando? | o rastreamento | Frequência de citação (não resposta isolada); cadência semanal por mercado×idioma; mesmas perguntas do baseline; 1–2 ajustes por rodada |
+
+### Âncora científica (dá credibilidade às recomendações)
+
+Do paper **GEO — Generative Engine Optimization (Aggarwal et al., KDD 2024)**,
+9 táticas × 10 mil consultas:
+
+- **Aspas de fontes** (citação de quem sabe): **+41%** de visibilidade — a
+  tática campeã.
+- **Estatísticas com origem: +31%** · **Referências citáveis: +27%.**
+- **Keyword stuffing: −8%** (piora) — o hábito do SEO antigo é o que menos serve.
+- **Sites mal posicionados no Google são os que mais ganham** — a disputa
+  recomeçou, e recomeçar favorece quem chegou depois (bom argumento de venda
+  para o cliente que não é líder).
+
+Usar esses números **no produto** (agent e cards) para justificar o "por quê"
+de cada recomendação — não como garantia (o paper mede visibilidade em
+benchmark, não venda), mas como bússola com fonte.
+
+### Estilo de recomendação (colhido do curso — vira UX do agent)
+
+Toda recomendação do agent/página deve seguir o padrão do curso: **"freio
+cético" + "segunda de manhã"** — nomear o *limite honesto* da tática (o que
+ela NÃO faz) e entregar *uma ação concreta* que cabe na segunda de manhã.
+Tom honesto, anti-hype — é diferencial de marca (Joio do Trigo) e nos separa
+do growth-speak dos concorrentes.

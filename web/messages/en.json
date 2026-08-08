@@ -586,7 +586,8 @@
       "icRecalc": "The score recalculates as more dimensions are measured.",
       "coverageBarAria": "Index coverage: measured and unmeasured dimensions, sized by weight",
       "runTrackingCta": "Run tracking",
-      "d2Zero": "No AI answer cites your domain yet — this zero is real, not missing data."
+      "d2Zero": "No AI answer cites your domain yet — this zero is real, not missing data.",
+      "dimsActive": "{active} of 6 dimensions active"
     },
     "matrix": {
       "title": "Citability Matrix",
@@ -656,7 +657,8 @@
       },
       "comingSoon": "Coming soon",
       "presenceUnknown": "no data",
-      "lowSample": "Small sample ({count, plural, one {# citation} other {# citations}} in this category) — treat as direction, not decision."
+      "lowSample": "Small sample ({count, plural, one {# citation} other {# citations}} in this category) — treat as direction, not decision.",
+      "lockedHint": "Counts toward the index as soon as this dimension has data."
     },
     "notMeasured": "Not measured",
     "howItWorks": "How the CI works",
@@ -667,6 +669,10 @@
       "wikidata": "Wikidata: the public entity database AIs use to confirm who your brand is.",
       "entity": "Entity: the brand identity AIs recognize — consistent name, site and data across sources.",
       "extractable": "Extractable page: structured so an AI can lift the answer from it (clear headings, lists, a direct answer)."
+    },
+    "status": {
+      "active": "Active",
+      "locked": "To unlock"
     }
   },
   "shopping": {
@@ -923,7 +929,20 @@
     "subscriptionCanceled": "Your subscription has been canceled.",
     "needCustomPlan": "Need a custom plan?",
     "customPlanDescription": "Get unlimited brands, custom integrations, dedicated support, and more.",
-    "contactUs": "Contact Us"
+    "contactUs": "Contact Us",
+    "notifications": "Notifications",
+    "notificationsDescription": "Daily Pulse — a short per-brand digest after each run, with highlights and alerts.",
+    "pulseFrequency_off": "Off",
+    "pulseFrequency_daily": "Daily",
+    "pulseFrequency_weekly": "Weekly",
+    "pulseFrequency_notable": "Only when notable",
+    "pulseRecipients": "Recipients",
+    "pulseRecipientsHint": "Comma-separated email addresses. Leave empty to send to all organization members.",
+    "pulseRecipientsPlaceholder": "alex@example.com, sam@example.com",
+    "pulseNoBrands": "No active brands yet — add a brand to configure its Daily Pulse.",
+    "pulseLoadFailed": "Could not load notification settings.",
+    "pulseSaveFailed": "Could not save notification settings. Please try again.",
+    "pulseSaved": "Notification settings saved"
   },
   "brands": {
     "title": "Brands",

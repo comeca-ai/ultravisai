@@ -112,11 +112,45 @@ async function collect() {
     accounts = null;
   }
 
+  // Recent runs (the platform's own job log) — tracking/content jobs with
+  // status and failure reason. `jobs` is a server-only table (RLS on, no
+  // policy), so only this service-role client can read it; that's why the
+  // in-app pages can't show it and this panel can. Newest first, capped at 15.
+  let jobs = [];
+  try {
+    const { data: jobRows } = await supabaseAdmin
+      .from('jobs')
+      .select('type, status, brand_id, failed_reason, attempts, created_at')
+      .order('created_at', { ascending: false })
+      .limit(15);
+    const ids = [...new Set((jobRows ?? []).map((j) => j.brand_id).filter(Boolean))];
+    let names = {};
+    if (ids.length) {
+      const { data: bs } = await supabaseAdmin.from('brands').select('id, name').in('id', ids);
+      names = Object.fromEntries((bs ?? []).map((b) => [b.id, b.name]));
+    }
+    jobs = (jobRows ?? []).map((j) => ({
+      type: j.type,
+      status: j.status,
+      brand: names[j.brand_id] || '—',
+      failedReason: j.failed_reason || null,
+      attempts: j.attempts || 0,
+      createdAt: j.created_at,
+    }));
+  } catch {
+    jobs = null;
+  }
+  const jobsFailed24h = await count('jobs', (q) =>
+    q.in('status', ['failed', 'cancelled']).gte('created_at', since24h),
+  );
+
   return {
     machine,
     providers,
     consumption: { results, results24h, pending, brands, activePrompts, audits },
     accounts,
+    jobs,
+    jobsFailed24h,
     now: new Date().toISOString(),
   };
 }
@@ -127,6 +161,41 @@ function render(d) {
   const chip = (label, on) =>
     `<span class="chip ${on ? 'on' : 'off'}">${on ? '●' : '○'} ${label}</span>`;
   const dt = (iso) => (iso ? String(iso).slice(0, 16).replace('T', ' ') : '—');
+  const esc = (s) =>
+    String(s ?? '').replace(
+      /[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+    );
+  const JOB_LABEL = { tracking: 'Rastreamento', content: 'Conteúdo' };
+  const ST_LABEL = {
+    waiting: 'Na fila',
+    active: 'Rodando',
+    completed: 'Concluído',
+    failed: 'Falhou',
+    cancelled: 'Cancelado',
+  };
+  const ST_CLASS = {
+    completed: 'st-ok',
+    active: 'st-run',
+    waiting: 'st-mut',
+    failed: 'st-bad',
+    cancelled: 'st-warn',
+  };
+  const jobsRows =
+    d.jobs === null
+      ? '<tr><td colspan="5" class="muted">não foi possível carregar</td></tr>'
+      : d.jobs.length === 0
+        ? '<tr><td colspan="5" class="muted">nenhuma execução ainda</td></tr>'
+        : d.jobs
+            .map((j) => {
+              const detail = j.failedReason
+                ? `<span class="bad">${esc(j.failedReason.slice(0, 70))}</span>`
+                : j.attempts > 1
+                  ? `${j.attempts} tentativas`
+                  : '—';
+              return `<tr><td class="mono">${dt(j.createdAt)}</td><td>${JOB_LABEL[j.type] || esc(j.type)}</td><td>${esc(j.brand)}</td><td><span class="st ${ST_CLASS[j.status] || 'st-mut'}">${ST_LABEL[j.status] || esc(j.status)}</span></td><td class="muted">${detail}</td></tr>`;
+            })
+            .join('');
   const accountsRows =
     d.accounts === null
       ? '<tr><td colspan="4" class="muted">não foi possível carregar</td></tr>'
@@ -170,6 +239,9 @@ function render(d) {
   tr:last-child td{border-bottom:none}
   td.mono{font-family:ui-monospace,monospace;color:var(--ink2);white-space:nowrap}
   td.muted,.muted{color:var(--ink3)}
+  .st{font-size:10.5px;font-family:ui-monospace,monospace;padding:2px 7px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+  .st-ok{color:var(--ok)} .st-bad{color:var(--red)} .st-warn{color:#e0a458} .st-run{color:#5aa9e6} .st-mut{color:var(--ink3)}
+  .bad{color:var(--red)}
   .ovf{overflow-x:auto}
   .foot{color:var(--ink3);font-size:11px;margin-top:22px;font-family:ui-monospace,monospace}
 </style></head><body><div class="wrap">
@@ -198,6 +270,13 @@ function render(d) {
       ${row('Prompts ativos', d.consumption.activePrompts)}
       ${row('Site audits', d.consumption.audits)}
     </div>
+  </div>
+
+  <div class="card" style="margin-top:14px"><h2>Execuções recentes${d.jobsFailed24h ? ` · <span class="bad">${d.jobsFailed24h} falha(s) em 24h</span>` : ''}</h2>
+    <div class="ovf"><table>
+      <thead><tr><th>Quando (UTC)</th><th>Tipo</th><th>Marca</th><th>Status</th><th>Detalhe</th></tr></thead>
+      <tbody>${jobsRows}</tbody>
+    </table></div>
   </div>
 
   <div class="card" style="margin-top:14px"><h2>Contas${d.accounts && d.accounts.length ? ` (${d.accounts.length})` : ''}</h2>

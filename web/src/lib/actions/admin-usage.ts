@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { isAdminEmail } from '@/lib/admin';
 
 export interface UsageByKey {
   key: string;
@@ -51,6 +52,15 @@ interface ResultRow {
 
 export async function getAdminUsage(): Promise<AdminUsage> {
   const supabase = await createClient();
+
+  // Defense in depth: even RLS-scoped, this operator-only aggregate must not
+  // be callable by a client user. Gate by operator e-mail (see @/lib/admin).
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!isAdminEmail(user?.email)) {
+    throw new Error('Not authorized');
+  }
 
   const [resultsRes, brandsRes, promptsRes, auditsRes, agentRes] = await Promise.all([
     supabase

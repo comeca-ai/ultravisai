@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { UserProfileNavItem } from '@/components/layout/user-profile-nav-item';
 import { useBrandStore } from '@/stores/use-brand-store';
+import { useAuthStore } from '@/stores/use-auth-store';
+import { isAdminEmail } from '@/lib/admin';
 import { Crown, Menu, MessageSquareText } from 'lucide-react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
@@ -29,6 +31,7 @@ export function MobileNav() {
   const agentKeyMissing = isCloud && agentKeyStatus === 'missing';
   const { activeBrandId } = useBrandStore();
   const { resolvedTheme } = useTheme();
+  const isOperator = isAdminEmail(useAuthStore((s) => s.user?.email));
   const [mounted, setMounted] = useState(false);
   // Hydration guard — see sidebar.tsx for the rationale; the two
   // components mirror each other and can't share a hook without breaking
@@ -45,6 +48,7 @@ export function MobileNav() {
       Overview: t('overview'),
       Brands: tBrands('title'),
       'Answer Engine Insights': t('insights'),
+      Costs: t('costs'),
       'AI Traffic Analytics': t('traffic'),
       Prompts: t('prompts'),
       'Content Optimization': t('content'),
@@ -93,66 +97,68 @@ export function MobileNav() {
                 </span>
               </Link>
             )}
-            {dashboardNav.flatMap((group) =>
-              group.items.map((item) => {
-                const isActive =
-                  item.href === '/dashboard'
-                    ? pathname === '/dashboard'
-                    : pathname.startsWith(item.href);
-                const label = getLabel(item.title);
+            {dashboardNav
+              .filter((group) => !group.adminOnly || isOperator)
+              .flatMap((group) =>
+                group.items.map((item) => {
+                  const isActive =
+                    item.href === '/dashboard'
+                      ? pathname === '/dashboard'
+                      : pathname.startsWith(item.href);
+                  const label = getLabel(item.title);
 
-                // Dynamic badge override: show "Set up" on the Agent item
-                // when the org has no Anthropic key saved (cloud only).
-                const effectiveBadge =
-                  item.href === '/dashboard/agent' && agentKeyMissing ? 'Set up' : item.badge;
+                  // Dynamic badge override: show "Set up" on the Agent item
+                  // when the org has no Anthropic key saved (cloud only).
+                  const effectiveBadge =
+                    item.href === '/dashboard/agent' && agentKeyMissing ? 'Set up' : item.badge;
 
-                const isLocked =
-                  isCloud && item.requiredFeature != null && !canUse(item.requiredFeature);
+                  const isLocked =
+                    isCloud && item.requiredFeature != null && !canUse(item.requiredFeature);
 
-                if (isLocked) {
-                  return (
-                    <span
-                      key={item.href}
-                      className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground/50 cursor-not-allowed"
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="flex-1">{label}</span>
-                      <Badge
-                        variant="outline"
-                        className="h-5 gap-0.5 px-1.5 text-[10px] font-normal"
+                  if (isLocked) {
+                    return (
+                      <span
+                        key={item.href}
+                        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground/50 cursor-not-allowed"
                       >
-                        <Crown className="h-2.5 w-2.5" />
-                        {requiredPlanFor(item.requiredFeature!)}
-                      </Badge>
-                    </span>
-                  );
-                }
-
-                return (
-                  <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
-                    <span
-                      className={cn(
-                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="flex-1">{label}</span>
-                      {effectiveBadge && (
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span className="flex-1">{label}</span>
                         <Badge
-                          variant="secondary"
-                          className="h-5 shrink-0 px-1.5 text-[10px] font-normal"
+                          variant="outline"
+                          className="h-5 gap-0.5 px-1.5 text-[10px] font-normal"
                         >
-                          {effectiveBadge}
+                          <Crown className="h-2.5 w-2.5" />
+                          {requiredPlanFor(item.requiredFeature!)}
                         </Badge>
-                      )}
-                    </span>
-                  </Link>
-                );
-              }),
-            )}
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+                      <span
+                        className={cn(
+                          'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                          isActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span className="flex-1">{label}</span>
+                        {effectiveBadge && (
+                          <Badge
+                            variant="secondary"
+                            className="h-5 shrink-0 px-1.5 text-[10px] font-normal"
+                          >
+                            {effectiveBadge}
+                          </Badge>
+                        )}
+                      </span>
+                    </Link>
+                  );
+                }),
+              )}
           </nav>
         </div>
         <div className="border-t p-2">

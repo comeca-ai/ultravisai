@@ -37,6 +37,8 @@ export interface NavItem {
 export interface NavGroup {
   title?: string;
   items: NavItem[];
+  /** Only rendered for platform operators (see @/lib/admin). */
+  adminOnly?: boolean;
 }
 
 export const dashboardNav: NavGroup[] = [
@@ -120,9 +122,12 @@ export const dashboardNav: NavGroup[] = [
       },
     ],
   },
-  // Ultravis addition (fork layer): operator-facing cost monitor.
+  // Ultravis addition (fork layer): operator-facing cost monitor. adminOnly
+  // hides the whole group from client users (gated by operator e-mail, not
+  // org role); the route is also guarded server-side.
   {
     title: 'Admin',
+    adminOnly: true,
     items: [
       {
         title: 'Costs',

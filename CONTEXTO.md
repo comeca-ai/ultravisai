@@ -101,6 +101,8 @@ structured outputs da Anthropic, i18n do Insights.
 | `CONTEXTO.md` (este) | Foto do estado + aprendizado + próximos passos. **Ler primeiro.** |
 | `CLAUDE.md` | Instruções pra sessões de IA (regras do fork, i18n, validação, git). |
 | `ARQUITETURA-POCS.md` | Arquitetura do fork: core imutável + 4 camadas de customização, anti-drift. |
+| `docs/ARQUITETURA.md` | Arquitetura técnica: stack, topologia, fluxos, modelo de dados (nível banco), segurança, ADRs. |
+| `docs/AMBIENTES.md` · `docs/MCP.md` | Ambientes/deploy · guia do MCP & API v1. |
 | `BACKLOG.md` | Backlog operacional priorizado (P0–P3, esforço, driver de valuation, onda). |
 | `estrategia/roadmap-produto-e-valuation.md` | Roadmap ondas 0–3 × drivers de valuation. |
 | `estrategia/benchmarking-competitivo.md` | Concorrência global + Brasil e onde está a lacuna. |

@@ -46,16 +46,12 @@ export const metadata: Metadata = {
     description:
       'Track how AI search engines mention your brand — ChatGPT, Gemini, Perplexity, Claude, Copilot.',
   },
-  // The product app at app.ultravis.ai should not appear in search results;
-  // ultravis.ai (the Webflow marketing site) is the indexable surface.
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: {
-      index: false,
-      follow: false,
-    },
-  },
+  // The public marketing pages (landing at `/`) MUST be indexable and
+  // crawlable by search + AI bots — that's the whole point of an AEO product.
+  // The authenticated app, onboarding and auth pages are noindexed per
+  // route-group layout ((dashboard)/(onboarding)/(marketing)) and blocked in
+  // robots.ts. (Upstream noindexed everything because its marketing site was a
+  // separate Webflow app; ours lives here, so that default was wrong.)
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

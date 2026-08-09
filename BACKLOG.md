@@ -46,8 +46,14 @@
 
 ## 🐞 Bugs & qualidade
 
+### P0 — Achados do Q&A do site público (crítico)
+- [x] **Landing bloqueada pra buscadores/bots de IA** (`robots Disallow: /` + `noindex` global, herdado do upstream) — **corrigido**: landing indexável, app noindex escopado, robots + sitemap.
+- [ ] **Termos & Privacidade → 404 (risco LGPD)** — o usuário "concorda" no cadastro com documentos inexistentes. `siteConfig.legal` aponta pra `/privacy-policy` e `/terms-of-service` que não existem. **Precisa de conteúdo/decisão jurídica** (redigir ou template + revisão). `M`
+- [ ] **Rodapé com links mortos** — na landing, colunas (Sobre/Blog/Contato/Carreiras/Desenvolvedores) e Termos/Privacidade/AI Policy apontam pra `#top`; `siteConfig.links.github` aponta pro repo **upstream** `ansvisor/ansvisor`. Decidir: criar as páginas vs. remover os links + corrigir o GitHub. `P`
+
 ### P1
 - [ ] **i18n páginas restantes** — Prompts, Tópicos, Configurações (verificar também Conteúdo, Auditoria, Tráfego, Shopping, Relatórios, Agent). `M` · mesmo método do Insights/Citações
+- [ ] **Cache da landing no CDN** — HTML servido por SSR serverless a cada visita (TTFB ~0,6s, custo e latência à toa numa página estática). Avaliar `revalidate`/headers de cache. `P` · perf (Q&A)
 - [ ] **4 bugs do docx (verificar quais persistem):**
   - [ ] Login sem mensagem "conta já existe"
   - [ ] Algo "rodando como Ansvisor" (suspeita: templates de e-mail do Supabase)
@@ -65,7 +71,6 @@
 
 ### P2
 - [ ] **Limpar dados de teste E2E** — org `Ultravis Teste E2E` (ids `aaaaaaaa-e2e0-...`). `P`
-- [ ] **Páginas legais** — Termos/Privacidade (footer da landing aponta pra `#`). `M`
 - [ ] **SMTP custom no Supabase** — e-mail padrão tem limites. `P`
 - [ ] **Preencher business case** com resultado do censo Datarisk quando terminar. `P`
 

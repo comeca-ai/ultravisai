@@ -1,19 +1,35 @@
 import type { MetadataRoute } from 'next';
 
+const BASE_URL = 'https://ultravis.ai';
+
 /**
- * Block search engines from indexing the application subdomain.
+ * Public marketing pages (the landing at `/`) are crawlable — that's the whole
+ * point of an AEO/GEO product: GPTBot, ClaudeBot, PerplexityBot and search
+ * engines need to read us. The authenticated app, onboarding, auth flows,
+ * invites and API endpoints are disallowed (they're also noindexed per
+ * route-group layout).
  *
- * The marketing site at `ansvisor.com` is hosted separately (Webflow) and
- * is the surface that should be indexed. The Next.js app at `app.ansvisor.com`
- * is purely the authenticated product UI and provides no value in search.
+ * (Upstream blocked everything because its marketing site was a separate
+ * Webflow app; ours lives in this Next.js app, so that default was wrong.)
  */
 export default function robots(): MetadataRoute.Robots {
+  const privatePaths = [
+    '/dashboard',
+    '/onboarding',
+    '/sign-in',
+    '/sign-up',
+    '/forgot-password',
+    '/reset-password',
+    '/auth',
+    '/invite',
+    '/api',
+  ];
+  // Cover both the default (pt-BR, unprefixed) and the `en` locale.
+  const disallow = privatePaths.flatMap((p) => [p, `/en${p}`]);
+
   return {
-    rules: [
-      {
-        userAgent: '*',
-        disallow: '/',
-      },
-    ],
+    rules: [{ userAgent: '*', allow: '/', disallow }],
+    sitemap: `${BASE_URL}/sitemap.xml`,
+    host: BASE_URL,
   };
 }

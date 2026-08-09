@@ -8,6 +8,9 @@ import { evaluateSubscriptionAccess } from '@/lib/billing/subscription-access';
 import { SubscriptionExpiredNotice } from '@/components/billing/subscription-expired-notice';
 import type { TeamRole } from '@/components/providers/role-provider';
 
+// Private onboarding — keep out of search/AI indexes.
+export const metadata = { robots: { index: false, follow: false } };
+
 export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {

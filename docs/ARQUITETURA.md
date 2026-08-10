@@ -264,6 +264,25 @@ de execução vive no `/ops` (service role), não no app.
 concorrente, auditoria, sentimento) escolhe o modelo por variável — trocar de
 provedor/modelo em runtime, sem deploy.
 
+**ADR‑8 · Monitoramento de domínio em código próprio (watchdog).** O upstream
+não tem alerting nenhum. Ferramentas genéricas (Uptime Kuma, Sentry) não
+entendem degradação de domínio — ex.: "sentimento 100% neutro = provider
+caindo em fallback" (incidente real do 401 da OpenAI em 10/ago, que rodou uma
+madrugada sem ninguém saber). Solução: ~200 linhas testadas dentro do próprio
+server (custo zero, deploy junto), com alerta push via `ALERT_WEBHOOK_URL`.
+Complementos externos (uptime check, Gatus/Prometheus) entram quando escalar.
+
+## 8.1 Observabilidade & operação
+
+| Camada | O quê | Onde |
+|---|---|---|
+| **Watchdog** (ativo) | A cada 15 min checa: jobs falhos, fila Cloro presa >2h, sentimento 100% neutro (provider degradado), censo ausente >8 dias. Alerta deduplicado (re-alerta após 6h) → log + POST em `ALERT_WEBHOOK_URL` (payload Slack/n8n) | `server/src/lib/watchdog.js` |
+| **Painel `/ops`** (passivo) | Máquina, consumo, execuções recentes com `failed_reason`, contas. Basic Auth própria | `server/src/routes/ops.js` |
+| **Custos & Consumo** (app) | Estimativa de gasto por provider, operador-only | `dashboard/admin/costs` |
+| **Auditoria diária de código** | Cron 09:00 UTC: Gitleaks + npm/yarn audit + Semgrep (issue `auditoria` se houver achado) + agente Claude auditando o diff de 24h (requer secret `ANTHROPIC_API_KEY`) | `.github/workflows/auditoria.yml` |
+| **Dependabot** | PRs semanais de atualização de dependências (web, server, actions) | `.github/dependabot.yml` |
+| **Logs** | pino estruturado → Railway; custo real de tokens nos consoles dos providers | — |
+
 ## 9. CI/CD & validação
 
 - **CI** (GitHub Actions): `web` (prettier `format:check`, eslint, `tsc`,

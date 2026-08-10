@@ -27,7 +27,7 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
   // 1. Fetch brand info with domains
   const { data: brand, error: brandErr } = await supabaseAdmin
     .from('brands')
-    .select('id, name, organization_id, shopping_mode_enabled')
+    .select('id, name, organization_id, shopping_mode_enabled, aliases')
     .eq('id', brandId)
     .single();
   if (brandErr || !brand) throw new Error(`Brand not found: ${brandId}`);
@@ -40,6 +40,7 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
   const brandInfo = {
     brandName: brand.name,
     domains: (domains || []).map((d) => d.domain),
+    aliases: brand.aliases || [],
   };
 
   // 2. Fetch active prompts

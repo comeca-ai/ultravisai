@@ -15,6 +15,7 @@ import routes from './routes/index.js';
 import trafficRoutes from './routes/traffic.js';
 import opsRoutes from './routes/ops.js';
 import { startWatchdog } from './lib/watchdog.js';
+import { runPendingMentionBackfillFromEnv } from './lib/backfill-mentions.js';
 import {
   createJob,
   cleanupStaleJobs,
@@ -435,7 +436,7 @@ app.post('/cloro/callback', async (req, res) => {
 
     // Fetch context for result handler
     const [{ data: brand }, { data: domains }, { data: competitorRows }] = await Promise.all([
-      supabaseAdmin.from('brands').select('id, name').eq('id', pending.brand_id).single(),
+      supabaseAdmin.from('brands').select('id, name, aliases').eq('id', pending.brand_id).single(),
       supabaseAdmin.from('brand_domains').select('domain').eq('brand_id', pending.brand_id),
       supabaseAdmin.from('competitors').select('id, name, domain').eq('brand_id', pending.brand_id),
     ]);
@@ -452,6 +453,7 @@ app.post('/cloro/callback', async (req, res) => {
     const brandInfo = {
       brandName: brand.name,
       domains: (domains || []).map((d) => d.domain),
+      aliases: brand.aliases || [],
     };
     const competitors = (competitorRows || []).map((c) => ({
       id: c.id,
@@ -533,6 +535,10 @@ server.listen(PORT, async () => {
   // jobs fail, the Cloro queue jams, sentiment silently degrades, or the
   // weekly census goes missing. See lib/watchdog.js.
   startWatchdog();
+
+  // Ultravis addition: one-shot mention/sentiment backfill when
+  // BACKFILL_MENTIONS_BRAND_ID is set (see lib/backfill-mentions.js).
+  runPendingMentionBackfillFromEnv();
 });
 
 export { app, server, io };

@@ -89,7 +89,12 @@ export async function handleScraperResult({
     platform: scraperId,
     region,
     rawCards: aiResponse.shopping_cards ?? [],
-    brandInfo: { brandId, brandName: brandInfo.brandName, domains: brandInfo.domains },
+    brandInfo: {
+      brandId,
+      brandName: brandInfo.brandName,
+      domains: brandInfo.domains,
+      aliases: brandInfo.aliases || [],
+    },
     competitors,
   });
 

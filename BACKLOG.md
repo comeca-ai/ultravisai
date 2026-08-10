@@ -22,6 +22,7 @@
 - [ ] **Alertas de variação** — e-mail quando score cai / concorrente entra (Slack depois). Transforma o pulso em produto percebido. `M` · `D3` · Onda 0
 
 ### P1 — Próximo
+- [ ] **UI de aliases de marca** — campo em Settings/onboarding pros apelidos (backend pronto: migration 00036 + parser + backfill; hoje configura-se via banco). Sugerir alias automaticamente quando o nome tiver 2+ palavras. `P` · caso Polar Electro
 - [ ] **Grader grátis sem login** — "qual sua citabilidade?" (reusa `describe-from-site` + 1 run enxuto + IC parcial). Funil de topo. `M` · `D3` · Onda 0
 - [ ] **Citabilidade v2 (o herói)** — plano de ação sequenciado + táticas do curso (4 verbos) + âncora do paper (+41%). `M` · `D2` · Onda 1
 - [ ] **Grounding de prompts em perguntas reais** — Semrush `phrase_questions` no onboarding/adicionar-marca (volume + intenção). `P` · `D4` · Onda 1

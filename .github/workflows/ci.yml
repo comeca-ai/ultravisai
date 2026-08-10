@@ -10,7 +10,7 @@ jobs:
     name: schema — consolidated schema.sql is up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Regenerate schema.sql from migrations
         run: bash supabase/build-schema.sh
       - name: Fail if schema.sql is out of date
@@ -28,7 +28,7 @@ jobs:
       run:
         working-directory: web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -50,7 +50,7 @@ jobs:
       run:
         working-directory: server
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 20

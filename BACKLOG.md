@@ -66,7 +66,8 @@
 ## 🔧 Operacional & infra
 
 ### P1
-- [ ] **Rotacionar chaves que passaram por chat** — Cloro, OpenAI, Anthropic, Gemini (Google secret já resetado). `P`
+- [ ] **Rotacionar chaves que passaram por chat** — Cloro, OpenAI, Anthropic, Gemini (Google secret já resetado) + Scrape.do. `P`
+- [ ] **Backfill de sentimento** — script (padrão `scripts/backfill-shopping-cards.js`) pra re-analisar resultados com sentimento de fallback (ex.: os 795 "neutral" do censo de 10/ago, gravados durante o 401 da OpenAI). Nota: coluna `sentiment` é NOT NULL — não dá pra anular; o script re-analisa in-place. `P`
 - [ ] **Modelo de custo completo no painel de Custos** — valor do crédito Cloro (pendente) + quota Ahrefs/Semrush. `P`
 
 ### P2

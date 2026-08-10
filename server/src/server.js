@@ -14,6 +14,7 @@ import requestIdMiddleware from './middleware/request-id.js';
 import routes from './routes/index.js';
 import trafficRoutes from './routes/traffic.js';
 import opsRoutes from './routes/ops.js';
+import { startWatchdog } from './lib/watchdog.js';
 import {
   createJob,
   cleanupStaleJobs,
@@ -527,6 +528,11 @@ server.listen(PORT, async () => {
     });
     logger.info({ schedule }, 'self-hosted daily cron active');
   }
+
+  // Ultravis addition: active monitoring — pushes alerts (webhook/log) when
+  // jobs fail, the Cloro queue jams, sentiment silently degrades, or the
+  // weekly census goes missing. See lib/watchdog.js.
+  startWatchdog();
 });
 
 export { app, server, io };

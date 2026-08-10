@@ -54,6 +54,11 @@ fazer** para aparecer mais.
   (Ultravis plugável em Claude/Cursor/qualquer IA).
 - **Modo webhook do Cloro ativo** (`CLORO_WEBHOOK_URL=https://api.ultravis.ai/cloro/callback`)
   — resultados sobrevivem a restarts/deploys do server.
+- **Watchdog (alerta ativo):** o server checa a cada 15 min (jobs falhos, fila
+  Cloro travada, sentimento 100% neutro = provedor degradado, censo ausente) e
+  **empurra alerta** pra `ALERT_WEBHOOK_URL` (n8n/Slack; sem a env, só loga).
+  Código: `server/src/lib/watchdog.js`. Nasceu do incidente do 401 silencioso
+  da OpenAI (10/ago). **Pendente: configurar `ALERT_WEBHOOK_URL` no Railway.**
 - **Painel de operação:** `https://api.ultravis.ai/ops` — saúde da máquina
   (uptime, memória), consumo (respostas, fila Cloro, marcas, prompts, audits),
   providers configurados (presente/ausente) e **Contas** (quem criou, e-mail,

@@ -145,7 +145,8 @@
       "passwordMismatch": "As senhas não conferem.",
       "generic": "Ocorreu um erro. Tente de novo.",
       "emailNotConfirmed": "Verifique seu e-mail primeiro. Confira sua caixa de entrada pelo link de confirmação.",
-      "signOutError": "Não foi possível sair. Tente de novo."
+      "signOutError": "Não foi possível sair. Tente de novo.",
+      "accountExists": "Já existe uma conta com este e-mail. Entre com sua senha — ou use “Esqueci a senha” para recuperar o acesso."
     }
   },
   "dashboard": {
@@ -160,7 +161,7 @@
     "viewAll": "Ver tudo"
   },
   "insights": {
-    "title": "Insights dos Motores de Resposta",
+    "title": "Resumo de Visibilidade nas IAs",
     "description": "Monitore como sua marca é representada nas respostas geradas por IA.",
     "runPrompts": "Rodar Prompts",
     "runPromptsNow": "Rodar Prompts Agora",
@@ -226,7 +227,7 @@
     "exportCsv": "Exportar CSV",
     "testSingle": "Testar Prompt Único",
     "runAll": "Rodar Tudo",
-    "visibilityRateTitle": "Taxa de Visibilidade",
+    "visibilityRateTitle": "Índice de Visibilidade",
     "trackedPromptsTitle": "Prompts Rastreados",
     "visibilityTooltip": "Parcela dos prompts rastreados em que sua marca apareceu em pelo menos uma resposta de IA, nos filtros atuais.",
     "trackedTooltip": "Prompts distintos que produziram resultados no período e filtros selecionados. A cota abaixo é o uso atual da sua organização — não muda com o período.",
@@ -256,7 +257,12 @@
       "warning": "Cada scrape consome crédito e não pode ser cancelado depois de enviado.",
       "cancel": "Cancelar",
       "confirm": "Confirmar e rodar"
-    }
+    },
+    "sovTrendTitle": "Evolução do Share of Voice",
+    "sovTooltip": "Share of Voice é a sua fatia das menções de marca: menções à sua marca ÷ (suas + dos concorrentes) nas respostas de IA do período. Respostas sem nenhuma menção não entram na conta.",
+    "overallSov": "Share of Voice geral",
+    "sovNoData": "Sem dados de share of voice no período",
+    "sovZeroHint": "Zero aqui é real: houve respostas de IA, mas nenhuma mencionou sua marca ou seus concorrentes pelo nome. Ter respostas não pontua — o que conta é ser mencionado."
   },
   "topics": {
     "addTopic": "Adicionar Tópico",
@@ -411,7 +417,41 @@
     "totalVolume": "Volume Total",
     "trending": "Em Alta",
     "presenceRate": "Taxa de Presença",
-    "gaps": "Lacunas de Conteúdo"
+    "gaps": "Lacunas de Conteúdo",
+    "work": {
+      "todo": "A fazer",
+      "in_progress": "Em andamento",
+      "done": "Concluído",
+      "none": "Sem status",
+      "set": "Definir status",
+      "aria": "Definir status do trabalho de conteúdo"
+    },
+    "allTable": {
+      "title": "Todos os Prompts ({count})",
+      "subtitleEdit": "Todos os prompts rastreados desta marca · edite ou pause qualquer linha",
+      "subtitleRead": "Visão somente leitura de todos os prompts rastreados desta marca",
+      "searchPlaceholder": "Buscar prompts…",
+      "filterAll": "Todo trabalho",
+      "colPrompt": "Prompt",
+      "colTopic": "Tópico",
+      "colStatus": "Status",
+      "colWork": "Conteúdo",
+      "colWorkTip": "Etapa do seu trabalho de conteúdo para este prompt: você já criou ou otimizou a página que responde a ele?",
+      "colVisibility": "Visibilidade",
+      "colVisibilityTip": "Nota de 0 a 100: quanto (e quão bem) sua marca aparece nas respostas de IA deste prompt, na média dos últimos 30 dias. Não é posição de ranking.",
+      "colMentions": "Menções",
+      "colMentionsTip": "Total de vezes que sua marca foi mencionada nas respostas de IA deste prompt nos últimos 30 dias.",
+      "colVolume": "Volume",
+      "colVolumeTip": "Volume mensal estimado de consultas em IA, por análise de palavras-chave. Vazio até ser analisado.",
+      "colCompetition": "Concorrência",
+      "colCompetitionTip": "Concorrência no Google Ads para palavras-chave relacionadas (BAIXA / MÉDIA / ALTA). Um proxy da dificuldade do tópico.",
+      "colLastRun": "Última análise",
+      "colLastRunTip": "Rastreamento mais recente deste prompt.",
+      "colEdit": "Editar",
+      "active": "Ativo",
+      "paused": "Pausado",
+      "statusUpdateFailed": "Falha ao atualizar o status"
+    }
   },
   "competitors": {
     "title": "Concorrentes",
@@ -590,7 +630,7 @@
       "d2Title": "02 · Cobertura de Conteúdo",
       "d2Hint": "% das respostas de IA que citam o seu domínio.",
       "icNoData": "Rode uma Auditoria de Site e um rastreamento para começar a medir.",
-      "icCoverage": "{coverage}% do índice medido",
+      "icCoverage": "nota calculada sobre {coverage}% do peso do índice — só as dimensões já medidas",
       "icRecalc": "A nota se recalcula conforme novas dimensões forem medidas.",
       "coverageBarAria": "Cobertura do índice: dimensões medidas e não medidas, proporcionais ao peso",
       "runTrackingCta": "Rodar rastreamento",
@@ -681,6 +721,13 @@
     "status": {
       "active": "Ativo",
       "locked": "A desbloquear"
+    },
+    "bands": {
+      "undesirable": "Indesejável",
+      "regular": "Regular",
+      "good": "Boa",
+      "great": "Ótima",
+      "best": "Best in class"
     }
   },
   "shopping": {

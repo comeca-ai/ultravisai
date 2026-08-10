@@ -1371,6 +1371,31 @@ export default function InsightsPage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {/* Self-host only — the primary CTA leads the group (client feedback:
+              "Rodar Tudo" was hard to find behind the outline buttons) */}
+          {!isCloud && (
+            <>
+              <Button
+                size="lg"
+                onClick={() => setShowRunConfirm(true)}
+                disabled={isRunning}
+                className="gap-2"
+              >
+                {isRunning ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+                {t('runAll')}
+              </Button>
+
+              <Button variant="outline" onClick={() => setShowSinglePrompt(true)} className="gap-2">
+                <FlaskConical className="h-4 w-4" />
+                {t('testSingle')}
+              </Button>
+            </>
+          )}
+
           {/* Always visible */}
           <Button
             variant="outline"
@@ -1385,29 +1410,6 @@ export default function InsightsPage() {
             )}
             {isExporting ? t('exporting') : t('exportCsv')}
           </Button>
-
-          {/* Self-host only */}
-          {!isCloud && (
-            <>
-              <Button variant="outline" onClick={() => setShowSinglePrompt(true)} className="gap-2">
-                <FlaskConical className="h-4 w-4" />
-                {t('testSingle')}
-              </Button>
-
-              <Button
-                onClick={() => setShowRunConfirm(true)}
-                disabled={isRunning}
-                className="gap-2"
-              >
-                {isRunning ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
-                {t('runAll')}
-              </Button>
-            </>
-          )}
         </div>
       </div>
 
@@ -1597,6 +1599,7 @@ export default function InsightsPage() {
                       <CardTitle className="flex items-center gap-2 text-sm font-medium">
                         <PieChart className="h-4 w-4" />
                         {t('sovByPlatform')}
+                        <InfoTip content={t('sovTooltip')} />
                       </CardTitle>
                       {sovData.overallSovChange !== null && sovData.overallSovChange !== 0 && (
                         <DeltaBadge delta={sovData.overallSovChange} suffix=" pts" />
@@ -1614,7 +1617,7 @@ export default function InsightsPage() {
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center gap-2 text-sm font-medium">
                         <TrendingUp className="h-4 w-4" />
-                        Share of Voice Trend
+                        {t('sovTrendTitle')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>

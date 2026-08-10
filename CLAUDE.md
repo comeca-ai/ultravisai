@@ -43,6 +43,13 @@ cd server && npm run lint && npm test                  # 124+ testes verdes
 Após adicionar migration: `bash supabase/build-schema.sh` (regenera
 `schema.sql`; CI cobra).
 
+## Rastreabilidade de decisões (obrigatório)
+
+- **Toda decisão** (produto, técnica, negócio) vira uma linha em `DECISOES.md`
+  — **no mesmo PR** do trabalho. Formato: data · decisão · motivo · detalhe.
+- Decisões de arquitetura ganham também um ADR em `docs/ARQUITETURA.md` §8.
+- Estilo de resposta: pronto e direto; sem re-litigar decisão já registrada.
+
 ## Git/PR
 
 - Branch de trabalho da sessão → PR draft para `main` (template em

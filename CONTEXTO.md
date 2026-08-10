@@ -59,6 +59,12 @@ fazer** para aparecer mais.
   **empurra alerta** pra `ALERT_WEBHOOK_URL` (n8n/Slack; sem a env, só loga).
   Código: `server/src/lib/watchdog.js`. Nasceu do incidente do 401 silencioso
   da OpenAI (10/ago). **Pendente: configurar `ALERT_WEBHOOK_URL` no Railway.**
+- **Auditoria diária de código:** workflow `.github/workflows/auditoria.yml`
+  roda todo dia 09:00 UTC — Gitleaks (segredos) + npm/yarn audit (CVEs) +
+  Semgrep (padrões inseguros), abrindo issue `auditoria` se houver achado; e
+  um **agente Claude** audita o diff de 24h (AppSec + regras do fork).
+  Dependabot semanal (`.github/dependabot.yml`). **Pendente: secret
+  `ANTHROPIC_API_KEY` em Settings → Secrets → Actions pro job do agente.**
 - **Painel de operação:** `https://api.ultravis.ai/ops` — saúde da máquina
   (uptime, memória), consumo (respostas, fila Cloro, marcas, prompts, audits),
   providers configurados (presente/ausente) e **Contas** (quem criou, e-mail,

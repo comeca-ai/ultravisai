@@ -1,0 +1,194 @@
+# Ultravis addition — auditoria diária de código (segurança & qualidade).
+#
+# Duas camadas, todo dia às 09:00 UTC (06:00 BRT) + disparo manual:
+#   1. scanners  — determinísticos e gratuitos: Gitleaks (segredos vazados),
+#                  npm/yarn audit (CVEs de dependências) e Semgrep (padrões
+#                  inseguros). Se houver achados, abre/comenta uma issue
+#                  "Auditoria diária" com o resumo.
+#   2. agente    — Claude auditando o diff das últimas 24h com olhar de
+#                  AppSec/arquitetura (multi-tenancy/RLS, segredos, injeção,
+#                  regras do fork). Requer o secret ANTHROPIC_API_KEY no repo;
+#                  sem ele, o job é pulado com aviso.
+
+name: Auditoria diária
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  scanners:
+    name: scanners — segredos, dependências, padrões
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gitleaks (segredos no working tree)
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest \
+            detect --source /repo --no-git --redact \
+            --report-format json --report-path /repo/gitleaks.json \
+            --exit-code 0
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: npm audit (server)
+        run: |
+          cd server && npm audit --omit=dev --audit-level=high --json \
+            > ../server-audit.json 2>/dev/null || true
+
+      - name: yarn audit (web)
+        run: |
+          cd web && (yarn audit --level high --json || true) \
+            > ../web-audit.json 2>/dev/null
+
+      - name: Semgrep (padrões inseguros)
+        run: |
+          pip install --quiet semgrep
+          semgrep scan --config p/ci --json -o semgrep.json \
+            --exclude node_modules --exclude '*.test.js' --metrics off || true
+
+      - name: Resumo e issue (só se houver achados)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - << 'PY'
+          import json, os, subprocess, datetime
+
+          findings = []
+
+          # Gitleaks: array de vazamentos
+          try:
+              leaks = json.load(open('gitleaks.json'))
+              for l in (leaks or [])[:10]:
+                  findings.append(('critical', f"Gitleaks: possível segredo em `{l.get('File')}` (regra {l.get('RuleID')})"))
+          except Exception:
+              pass
+
+          # npm audit (server): vulnerabilities por severidade
+          try:
+              na = json.load(open('server-audit.json'))
+              meta = (na.get('metadata') or {}).get('vulnerabilities') or {}
+              hi = int(meta.get('high') or 0) + int(meta.get('critical') or 0)
+              if hi:
+                  findings.append(('critical', f"npm audit (server): {hi} vulnerabilidade(s) high/critical em dependências"))
+          except Exception:
+              pass
+
+          # yarn audit (web): NDJSON com auditAdvisory
+          try:
+              hi = 0
+              for line in open('web-audit.json'):
+                  try:
+                      j = json.loads(line)
+                  except Exception:
+                      continue
+                  if j.get('type') == 'auditAdvisory':
+                      sev = ((j.get('data') or {}).get('advisory') or {}).get('severity', '')
+                      if sev in ('high', 'critical'):
+                          hi += 1
+              if hi:
+                  findings.append(('critical', f"yarn audit (web): {hi} advisory(ies) high/critical em dependências"))
+          except Exception:
+              pass
+
+          # Semgrep: results com severity ERROR
+          try:
+              sg = json.load(open('semgrep.json'))
+              errs = [r for r in sg.get('results', []) if (r.get('extra') or {}).get('severity') == 'ERROR']
+              for r in errs[:10]:
+                  findings.append(('warning', f"Semgrep: `{r.get('path')}:{(r.get('start') or {}).get('line')}` — {r.get('check_id')}"))
+          except Exception:
+              pass
+
+          if not findings:
+              print('Auditoria limpa — nenhum achado. Nenhuma issue criada.')
+              raise SystemExit(0)
+
+          today = datetime.date.today().isoformat()
+          body_lines = [f"Auditoria automática de {today} encontrou **{len(findings)} achado(s)**:", ""]
+          for sev, msg in findings:
+              icon = '🔴' if sev == 'critical' else '🟠'
+              body_lines.append(f"- {icon} {msg}")
+          body_lines += ["", "_Workflow: `.github/workflows/auditoria.yml` (scanners: Gitleaks · npm/yarn audit · Semgrep). Artefatos com o detalhe completo no run._"]
+          body = '\n'.join(body_lines)
+
+          # Reusa a issue aberta com a label, senão cria.
+          out = subprocess.run(
+              ['gh', 'issue', 'list', '--label', 'auditoria', '--state', 'open',
+               '--json', 'number', '--jq', '.[0].number'],
+              capture_output=True, text=True)
+          num = (out.stdout or '').strip()
+          if num:
+              subprocess.run(['gh', 'issue', 'comment', num, '--body', body], check=True)
+              print(f'Comentado na issue #{num}')
+          else:
+              subprocess.run(['gh', 'issue', 'create',
+                              '--title', f'Auditoria diária: {len(findings)} achado(s)',
+                              '--label', 'auditoria', '--body', body], check=True)
+              print('Issue criada')
+          PY
+
+      - name: Anexa relatórios completos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-auditoria
+          path: |
+            gitleaks.json
+            server-audit.json
+            web-audit.json
+            semgrep.json
+          retention-days: 14
+
+  agente:
+    name: agente — Claude audita o diff de 24h
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verifica se a chave está configurada
+        id: haskey
+        run: |
+          if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Secret ANTHROPIC_API_KEY ausente — job do agente auditor pulado. Configure em Settings → Secrets → Actions."
+          fi
+
+      - name: Auditoria com Claude
+        if: steps.haskey.outputs.ok == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Você é o auditor diário deste repositório (Ultravis — fork do
+            Ansvisor). Audite APENAS o que mudou nas últimas 24 horas
+            (`git log --since=24.hours -p`) com olhar de AppSec/arquitetura:
+
+            1. Segredos/credenciais em código ou config;
+            2. Injeção (SQL/HTML/comando), XSS, validação de entrada ausente;
+            3. Multi-tenancy: dados sem escopo de organização/RLS, rotas sem auth;
+            4. Violações das regras do fork (ARQUITETURA-POCS.md): reescrita de
+               core, migration fora da numeração, feature não-aditiva;
+            5. Bugs de correção óbvios no diff.
+
+            Se NÃO houver mudanças nas 24h ou nenhum achado relevante, termine
+            silenciosamente sem criar nada. Se houver achados, crie UMA issue
+            via `gh issue create` com label `auditoria`, título
+            "Auditoria (agente): <resumo>" e os achados em lista, cada um com
+            arquivo:linha, gravidade e correção sugerida. Não altere código.
+          claude_args: '--allowedTools "Bash(git log:*),Bash(git diff:*),Bash(git show:*),Bash(gh issue:*),Read,Grep,Glob"'
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -6,6 +6,7 @@
  * identically.
  */
 
+import { useTranslations } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,17 +18,16 @@ import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PromptWorkStatus } from '@/lib/actions/prompt-workflow';
 
-export const WORK_STATUS_META: Record<PromptWorkStatus, { label: string; className: string }> = {
+// Labels come from the `prompts.work` i18n namespace (client feedback #17 —
+// the column read as untranslated jargon); only the colors live here.
+export const WORK_STATUS_META: Record<PromptWorkStatus, { className: string }> = {
   todo: {
-    label: 'To do',
     className: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
   },
   in_progress: {
-    label: 'In progress',
     className: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-400',
   },
   done: {
-    label: 'Done',
     className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
   },
 };
@@ -52,11 +52,13 @@ export function WorkStatusBadge({
   status: PromptWorkStatus | null;
   onChange?: (status: PromptWorkStatus | null) => void;
 }) {
+  const t = useTranslations('prompts.work');
+
   if (!onChange) {
     if (!status) return <span className="text-xs text-muted-foreground">—</span>;
     return (
       <Badge variant="outline" className={cn('text-xs whitespace-nowrap', badgeClasses(status))}>
-        {WORK_STATUS_META[status].label}
+        {t(status)}
       </Badge>
     );
   }
@@ -68,21 +70,21 @@ export function WorkStatusBadge({
           'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap transition-colors',
           badgeClasses(status),
         )}
-        aria-label="Set work status"
+        aria-label={t('aria')}
       >
-        {status ? WORK_STATUS_META[status].label : 'Set status'}
+        {status ? t(status) : t('set')}
         <ChevronDown className="h-3 w-3" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         {WORK_STATUS_ORDER.map((s) => (
           <DropdownMenuItem key={s} className="gap-2 text-xs" onClick={() => onChange(s)}>
             <Check className={cn('h-3.5 w-3.5', status === s ? 'opacity-100' : 'opacity-0')} />
-            {WORK_STATUS_META[s].label}
+            {t(s)}
           </DropdownMenuItem>
         ))}
         <DropdownMenuItem className="gap-2 text-xs" onClick={() => onChange(null)}>
           <Check className={cn('h-3.5 w-3.5', status === null ? 'opacity-100' : 'opacity-0')} />
-          No status
+          {t('none')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

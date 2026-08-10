@@ -145,7 +145,8 @@
       "passwordMismatch": "Passwords do not match.",
       "generic": "An error occurred. Please try again.",
       "emailNotConfirmed": "Please verify your email address first. Check your inbox for the confirmation link.",
-      "signOutError": "Failed to sign out. Please try again."
+      "signOutError": "Failed to sign out. Please try again.",
+      "accountExists": "An account with this email already exists. Sign in with your password — or use “Forgot password” to recover access."
     }
   },
   "dashboard": {
@@ -160,7 +161,7 @@
     "viewAll": "View all"
   },
   "insights": {
-    "title": "Answer Engine Insights",
+    "title": "AI Visibility Summary",
     "description": "Monitor how your brand is represented in AI-generated answers.",
     "runPrompts": "Run Prompts",
     "runPromptsNow": "Run Prompts Now",
@@ -226,7 +227,7 @@
     "exportCsv": "Export CSV",
     "testSingle": "Test Single Prompt",
     "runAll": "Run All",
-    "visibilityRateTitle": "Visibility Rate",
+    "visibilityRateTitle": "Visibility Index",
     "trackedPromptsTitle": "Tracked Prompts",
     "visibilityTooltip": "Share of tracked prompts where your brand appeared in at least one AI answer under the current filters.",
     "trackedTooltip": "Distinct prompts that produced tracked results in the selected period and filters. The quota below is current usage across your organization — it does not change with the date range.",
@@ -256,7 +257,12 @@
       "warning": "Each scrape consumes credit and can't be cancelled once sent.",
       "cancel": "Cancel",
       "confirm": "Confirm and run"
-    }
+    },
+    "sovTrendTitle": "Share of Voice Trend",
+    "sovTooltip": "Share of Voice is your slice of brand mentions: your brand mentions ÷ (yours + competitors’) across the period’s AI answers. Answers with no mentions don’t count.",
+    "overallSov": "Overall Share of Voice",
+    "sovNoData": "No share of voice data available",
+    "sovZeroHint": "This zero is real: AI answers came back, but none mentioned your brand or competitors by name. Getting answers doesn’t score — being mentioned does."
   },
   "topics": {
     "addTopic": "Add Topic",
@@ -411,7 +417,41 @@
     "totalVolume": "Total Volume",
     "trending": "Trending",
     "presenceRate": "Presence Rate",
-    "gaps": "Content Gaps"
+    "gaps": "Content Gaps",
+    "work": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "done": "Done",
+      "none": "No status",
+      "set": "Set status",
+      "aria": "Set content work status"
+    },
+    "allTable": {
+      "title": "All Prompts ({count})",
+      "subtitleEdit": "Every tracked prompt for this brand · edit or pause any row in place",
+      "subtitleRead": "Read-only overview of every tracked prompt for this brand",
+      "searchPlaceholder": "Search prompts…",
+      "filterAll": "All work",
+      "colPrompt": "Prompt",
+      "colTopic": "Topic",
+      "colStatus": "Status",
+      "colWork": "Content",
+      "colWorkTip": "Your content-work stage for this prompt: have you created or optimized the page that answers it yet?",
+      "colVisibility": "Visibility",
+      "colVisibilityTip": "0–100 score: how much (and how well) your brand shows up in this prompt’s AI answers, averaged over the last 30 days. Not a ranking position.",
+      "colMentions": "Mentions",
+      "colMentionsTip": "Total times your brand was mentioned across this prompt’s AI answers over the last 30 days.",
+      "colVolume": "Volume",
+      "colVolumeTip": "Estimated monthly AI prompt volume, from keyword analysis. Empty until analysed.",
+      "colCompetition": "Competition",
+      "colCompetitionTip": "Google Ads competition for related keywords (LOW / MEDIUM / HIGH). A proxy for topic difficulty.",
+      "colLastRun": "Last run",
+      "colLastRunTip": "Most recent tracking run for this prompt.",
+      "colEdit": "Edit",
+      "active": "Active",
+      "paused": "Paused",
+      "statusUpdateFailed": "Failed to update status"
+    }
   },
   "competitors": {
     "title": "Competitors",
@@ -590,7 +630,7 @@
       "d2Title": "02 · Content Coverage",
       "d2Hint": "% of AI answers citing your domain.",
       "icNoData": "Run a Site Audit and a tracking run to start measuring.",
-      "icCoverage": "{coverage}% of the index measured",
+      "icCoverage": "score based on {coverage}% of the index weight — measured dimensions only",
       "icRecalc": "The score recalculates as more dimensions are measured.",
       "coverageBarAria": "Index coverage: measured and unmeasured dimensions, sized by weight",
       "runTrackingCta": "Run tracking",
@@ -681,6 +721,13 @@
     "status": {
       "active": "Active",
       "locked": "To unlock"
+    },
+    "bands": {
+      "undesirable": "Undesirable",
+      "regular": "Fair",
+      "good": "Good",
+      "great": "Great",
+      "best": "Best in class"
     }
   },
   "shopping": {

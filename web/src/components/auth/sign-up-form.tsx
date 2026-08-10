@@ -38,7 +38,7 @@ export function SignUpForm() {
     setIsLoading(true);
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -49,7 +49,18 @@ export function SignUpForm() {
     });
 
     if (error) {
-      toast.error(t('errors.generic'));
+      const alreadyExists = /already (registered|exists)|user exists/i.test(error.message);
+      toast.error(alreadyExists ? t('errors.accountExists') : t('errors.generic'));
+      setIsLoading(false);
+      return;
+    }
+
+    // With email confirmation on, Supabase answers an existing confirmed email
+    // with a fake success (anti-enumeration) whose user has no identities —
+    // without this check the user is told "verification email sent" and waits
+    // for an email that never comes (pilot-client feedback #27).
+    if (data.user && (data.user.identities?.length ?? 0) === 0) {
+      toast.error(t('errors.accountExists'));
       setIsLoading(false);
       return;
     }

@@ -46,6 +46,40 @@ const ZONE_COLORS: Record<Zone, string> = {
   C: '#1baf7a',
 };
 
+// Score bands requested by the pilot client (feedback item #9): a label next
+// to the number so a reader knows instantly whether the score is good.
+const SCORE_BANDS = [
+  {
+    max: 30,
+    key: 'undesirable',
+    className: 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
+  },
+  {
+    max: 50,
+    key: 'regular',
+    className: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  },
+  {
+    max: 70,
+    key: 'good',
+    className: 'border-lime-600/30 bg-lime-500/10 text-lime-700 dark:text-lime-400',
+  },
+  {
+    max: 90,
+    key: 'great',
+    className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  },
+  {
+    max: 100,
+    key: 'best',
+    className: 'border-emerald-600/40 bg-emerald-600/15 text-emerald-700 dark:text-emerald-300',
+  },
+] as const;
+
+function scoreBand(score: number) {
+  return SCORE_BANDS.find((b) => score <= b.max) ?? SCORE_BANDS[SCORE_BANDS.length - 1];
+}
+
 type DimKey = 'dim1' | 'dim2' | 'dim3' | 'dim4' | 'dim5' | 'dim6';
 
 interface Dimension {
@@ -411,7 +445,7 @@ export default function CitabilityPage() {
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span
                   className={cn(
                     'font-bold tabular-nums',
@@ -421,7 +455,15 @@ export default function CitabilityPage() {
                   {partialScore}
                   <span className="text-sm font-normal text-muted-foreground">/100</span>
                 </span>
-                <span className="text-sm font-semibold">{t('kpis.icCoverage', { coverage })}</span>
+                <Badge
+                  variant="outline"
+                  className={cn('translate-y-[-2px] text-xs', scoreBand(partialScore).className)}
+                >
+                  {t(`bands.${scoreBand(partialScore).key}`)}
+                </Badge>
+                <span className="text-sm font-medium text-muted-foreground">
+                  {t('kpis.icCoverage', { coverage })}
+                </span>
               </div>
               <CoverageBar statuses={statuses} />
               <p className="text-xs text-muted-foreground">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
@@ -1632,14 +1633,6 @@ export default function PromptsPage() {
 
 // ─── All Prompts Tab ──────────────────────────────────────────────────────────
 
-const WORK_FILTER_LABELS: Record<string, string> = {
-  all: 'All work',
-  todo: 'To do',
-  in_progress: 'In progress',
-  done: 'Done',
-  none: 'No status',
-};
-
 function AllPromptsTab({
   loading,
   prompts,
@@ -1659,6 +1652,8 @@ function AllPromptsTab({
   /** Opens the Edit Prompt dialog for a row; undefined hides the pencil (member role). */
   onEditPrompt?: (prompt: Prompt) => void;
 }) {
+  const t = useTranslations('prompts.allTable');
+  const tWork = useTranslations('prompts.work');
   const [search, setSearch] = useState('');
   const [workFilter, setWorkFilter] = useState<'all' | 'none' | PromptWorkStatus>('all');
   // Optimistic per-row status overrides — the prompts prop belongs to the
@@ -1682,10 +1677,10 @@ function AllPromptsTab({
       setStatusOverrides((prev) => new Map(prev).set(prompt.id, status));
       setPromptWorkStatus(prompt.id, status).catch(() => {
         setStatusOverrides((prev) => new Map(prev).set(prompt.id, previous));
-        toast.error('Failed to update status');
+        toast.error(t('statusUpdateFailed'));
       });
     },
-    [statusOverrides],
+    [statusOverrides, t],
   );
 
   const rawSort = searchParams.get('sort');
@@ -1789,11 +1784,11 @@ function AllPromptsTab({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <CardTitle className="text-sm font-medium">All Prompts ({prompts.length})</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t('title', { count: prompts.length })}
+            </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {onEditPrompt
-                ? 'Every tracked prompt for this brand · edit or pause any row in place'
-                : 'Read-only overview of every tracked prompt for this brand'}
+              {onEditPrompt ? t('subtitleEdit') : t('subtitleRead')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -1801,23 +1796,26 @@ function AllPromptsTab({
               value={workFilter}
               onValueChange={(v) => setWorkFilter((v as typeof workFilter) ?? 'all')}
             >
-              <SelectTrigger className="h-8 w-32 text-xs">
-                <SelectValue placeholder="All work">
-                  {(value) => WORK_FILTER_LABELS[(value as string) ?? 'all'] ?? 'All work'}
+              <SelectTrigger className="h-8 w-36 text-xs">
+                <SelectValue placeholder={t('filterAll')}>
+                  {(value) => {
+                    const v = (value as string) ?? 'all';
+                    return v === 'all' ? t('filterAll') : tWork(v);
+                  }}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All work</SelectItem>
-                <SelectItem value="todo">To do</SelectItem>
-                <SelectItem value="in_progress">In progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-                <SelectItem value="none">No status</SelectItem>
+                <SelectItem value="all">{t('filterAll')}</SelectItem>
+                <SelectItem value="todo">{tWork('todo')}</SelectItem>
+                <SelectItem value="in_progress">{tWork('in_progress')}</SelectItem>
+                <SelectItem value="done">{tWork('done')}</SelectItem>
+                <SelectItem value="none">{tWork('none')}</SelectItem>
               </SelectContent>
             </Select>
             <div className="relative w-60">
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search prompts…"
+                placeholder={t('searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8 h-8 text-xs"
@@ -1830,62 +1828,58 @@ function AllPromptsTab({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="pl-6">Prompt</TableHead>
-              <TableHead>Topic</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <ColHead
-                className="text-center"
-                tooltip="Your workflow state for this prompt — has content work been done for it yet?"
-              >
-                Work
+              <TableHead className="pl-6">{t('colPrompt')}</TableHead>
+              <TableHead>{t('colTopic')}</TableHead>
+              <TableHead className="text-center">{t('colStatus')}</TableHead>
+              <ColHead className="text-center" tooltip={t('colWorkTip')}>
+                {t('colWork')}
               </ColHead>
               <SortableHead
                 className="text-right"
-                tooltip="Average brand visibility score in AI answers for this prompt over the last 30 days."
+                tooltip={t('colVisibilityTip')}
                 sortKey="visibility"
                 activeSort={activeSort}
                 dir={dir}
                 onSort={handleSort}
               >
-                Visibility
+                {t('colVisibility')}
               </SortableHead>
               <SortableHead
                 className="text-right"
-                tooltip="Total times the brand was mentioned across AI answers for this prompt over the last 30 days."
+                tooltip={t('colMentionsTip')}
                 sortKey="mentions"
                 activeSort={activeSort}
                 dir={dir}
                 onSort={handleSort}
               >
-                Mentions
+                {t('colMentions')}
               </SortableHead>
               <SortableHead
                 className="text-right"
-                tooltip="Estimated monthly AI prompt volume, from keyword analysis. Empty until analysed."
+                tooltip={t('colVolumeTip')}
                 sortKey="volume"
                 activeSort={activeSort}
                 dir={dir}
                 onSort={handleSort}
               >
-                Volume
+                {t('colVolume')}
               </SortableHead>
-              <ColHead
-                className="text-center"
-                tooltip="Based on Google Ads competition for related keywords (LOW / MEDIUM / HIGH). A proxy for topic difficulty."
-              >
-                Competition
+              <ColHead className="text-center" tooltip={t('colCompetitionTip')}>
+                {t('colCompetition')}
               </ColHead>
               <SortableHead
                 className="text-right"
-                tooltip="Most recent tracking run for this prompt."
+                tooltip={t('colLastRunTip')}
                 sortKey="lastRun"
                 activeSort={activeSort}
                 dir={dir}
                 onSort={handleSort}
               >
-                Last run
+                {t('colLastRun')}
               </SortableHead>
-              {onEditPrompt && <TableHead className="text-right pr-6 w-[60px]">Edit</TableHead>}
+              {onEditPrompt && (
+                <TableHead className="text-right pr-6 w-[60px]">{t('colEdit')}</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -1917,7 +1911,7 @@ function AllPromptsTab({
                           : 'border-muted-foreground/20 text-muted-foreground',
                       )}
                     >
-                      {p.isActive ? 'Active' : 'Paused'}
+                      {p.isActive ? t('active') : t('paused')}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">

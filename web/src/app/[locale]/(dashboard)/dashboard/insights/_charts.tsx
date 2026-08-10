@@ -556,10 +556,12 @@ export function ShareOfVoicePlatformChart({
   data: SoVByPlatform[];
   overallSov: number;
 }) {
+  const t = useTranslations('insights');
+
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[280px] text-sm text-muted-foreground">
-        No share of voice data available
+        {t('sovNoData')}
       </div>
     );
   }
@@ -586,7 +588,13 @@ export function ShareOfVoicePlatformChart({
     <div className="flex flex-col gap-4">
       <div className="text-center">
         <div className="text-4xl font-bold tabular-nums">{overallSov}%</div>
-        <div className="text-xs text-muted-foreground mt-0.5">Overall Share of Voice</div>
+        <div className="text-xs text-muted-foreground mt-0.5">{t('overallSov')}</div>
+        {/* A genuine 0% confused the pilot client ("SoV zero despite having
+            answers") — say explicitly what a zero means instead of letting
+            the user assume the tracking is broken. */}
+        {overallSov === 0 && (
+          <p className="mx-auto mt-2 max-w-xs text-xs text-muted-foreground">{t('sovZeroHint')}</p>
+        )}
       </div>
 
       <ChartContainer height={200}>

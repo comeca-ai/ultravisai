@@ -5,12 +5,21 @@
 > 184 resultados rastreados em 10/ago). Cada item com diagnóstico honesto,
 > esforço (P/M/G) e status. **Última atualização:** 10/ago/2026.
 
-## Achado transversal (causa raiz compartilhada)
+## Achados transversais (diagnóstico FINAL, corrigido em 10/ago à noite)
 
-Os itens **1, 2, 22 e 28** têm a mesma causa: a **`OPENAI_API_KEY` inválida**
-(incidente de 10/ago). Descrição-do-site, sugestão de tópicos e sugestão de
-prompts usam `openai/gpt-5-mini` — a mesma chave do sentimento. **Fix único:**
-chave válida no Railway (pendente verificação de billing pelo operador).
+**A) Itens 1, 2 e 19 (descrição do site, tópicos, prompt suggestions):** a
+**`OPENAI_API_KEY` estava morta durante o onboarding do cliente** (21:55 de
+domingo — janela do 401). Chave corrigida às 08:36 de 10/ago; **testada
+válida via banco (HTTP 200)**. Resolvido.
+
+**B) SoV = 0, sentimento 100% neutro e visibilidade ~0 do run (item 7):**
+**NÃO era a chave** — era **matching exato do nome da marca**. O cliente
+cadastrou "**Polar Electro**" (razão social); as IAs escrevem "Polar". O
+parser conta texto literal → **0 menções em 184 respostas** → SoV 0 →
+sentimento nem roda ("Brand not mentioned"). **Fix:** aliases de marca
+(migration 00036; alias "Polar" configurado) + **backfill** dos 184
+resultados recomputado do texto salvo (zero crédito Cloro). Decisão: **não
+renomear a marca do cliente** — o produto se adapta à marca.
 
 ## Tabela estruturada
 

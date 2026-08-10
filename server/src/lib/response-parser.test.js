@@ -41,6 +41,31 @@ describe('response-parser', () => {
     });
   });
 
+  describe('countBrandMentions with aliases (Ultravis)', () => {
+    it('counts alias occurrences as brand mentions (Polar Electro case)', () => {
+      const brand = { brandName: 'Polar Electro', domains: ['polar.com'], aliases: ['Polar'] };
+      const text = 'O Polar Vantage V3 é ótimo. A Polar também tem o H10.';
+      // "Polar Electro" nunca aparece; alias "Polar" aparece 2×.
+      expect(countBrandMentions(text, brand)).toBe(2);
+    });
+
+    it('is backward compatible when aliases is absent', () => {
+      const brand = { brandName: 'Acme', domains: [] };
+      expect(countBrandMentions('Acme wins.', brand)).toBe(1);
+    });
+
+    it('parseResponse also counts aliases in mentionCount', () => {
+      const brand = { brandName: 'Polar Electro', domains: [], aliases: ['Polar'] };
+      const result = parseResponse(
+        { text: 'A Polar lidera em GPS de corrida.', citations: [] },
+        brand,
+        'neutral',
+        [],
+      );
+      expect(result.mentionCount).toBe(1);
+    });
+  });
+
   describe('parseResponse', () => {
     const brand = {
       brandName: 'Acme',

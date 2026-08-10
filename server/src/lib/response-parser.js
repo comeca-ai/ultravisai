@@ -83,6 +83,11 @@ export function countBrandMentions(text, brand) {
   for (const domain of brand.domains) {
     count += countOccurrences(cleanText, domain);
   }
+  // Ultravis: aliases count as brand mentions — corporate names ("Polar
+  // Electro") rarely appear verbatim in AI answers that say "Polar".
+  for (const alias of brand.aliases || []) {
+    count += countOccurrences(cleanText, alias);
+  }
   return count;
 }
 
@@ -103,6 +108,10 @@ export function parseResponse(response, brand, sentiment = 'neutral', competitor
   let mentionCount = countOccurrences(cleanText, brand.brandName);
   for (const domain of brand.domains) {
     mentionCount += countOccurrences(cleanText, domain);
+  }
+  // Ultravis: aliases (see countBrandMentions).
+  for (const alias of brand.aliases || []) {
+    mentionCount += countOccurrences(cleanText, alias);
   }
 
   // --- Brand citation count (hostname-based, see countOwnDomainCitations) ---

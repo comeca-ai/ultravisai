@@ -52,6 +52,14 @@
 - [x] **Termos & Privacidade → 404 (risco LGPD)** — **resolvido (11/ago)**: páginas publicadas em versão preliminar genérica (sem razão social, com aviso de revisão interna), pt-BR + en, indexáveis e no sitemap. Pendência futura: texto final aprovado internamente + revisão jurídica.
 - [x] **Rodapé com links mortos** — **resolvido (11/ago)**: colunas mortas removidas da landing; Termos/Privacidade apontam pras páginas reais; link do GitHub upstream removido. Colunas voltam conforme as páginas existirem.
 
+### P1 — Achados do Q&A #2 (11/ago, reprodução do onboarding)
+- [x] **"Preencher com IA" lia a home errada** — o path digitado era descartado (`polar.com/br` → lia `polar.com` global), gerando descrição genérica. **Corrigido**: path preservado no describe-from-site. Nota: o mecanismo SEMPRE leu o site real (cheerio: title/meta/headings/parágrafos) — não era "conhecimento do modelo".
+- [ ] **Monitorar operação por subpath** — a aba Domínios só aceita domínio raiz; não dá pra monitorar `polar.com/br` especificamente (citações contam por hostname). Requer decisão de produto (domínio+path nas citações). `M`
+- [ ] **Região → idioma no wizard** — default vem `US/en`; escolher Brazil deveria puxar `pt` automaticamente. `P`
+- [ ] **Sugerir tópicos sem feedback de progresso** — ~55s com 3 mensagens sequenciais, sem barra/ETA; parece travado (provável causa da percepção de bug no onboarding do cliente, além da janela do 401). Adicionar progresso/ETA e investigar timeout. `P/M`
+- [ ] **Marca criada no 1º "Continuar"** — o wizard persiste a marca antes de terminar; teste abandonado deixa marca ativa órfã (risco de crédito no censo). Criar como rascunho ou limpar ao abandonar. `M`
+- [ ] **Insumo pro Citabilidade v2**: o próprio polar.com/br não tem `llms.txt` (404) nem JSON-LD — evidência perfeita do valor dos snippets prontos (#15). `—`
+
 ### P1
 - [ ] **i18n páginas restantes** — Prompts, Tópicos, Configurações (verificar também Conteúdo, Auditoria, Tráfego, Shopping, Relatórios, Agent). `M` · mesmo método do Insights/Citações
 - [ ] **Cache da landing no CDN** — HTML servido por SSR serverless a cada visita (TTFB ~0,6s, custo e latência à toa numa página estática). Avaliar `revalidate`/headers de cache. `P` · perf (Q&A)

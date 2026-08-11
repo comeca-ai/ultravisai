@@ -10,15 +10,18 @@ const router = Router();
 const FETCH_TIMEOUT_MS = 10_000;
 const MAX_SITE_TEXT_CHARS = 8000;
 
-/** Coerce user input ("datarisk.io", "https://datarisk.io/about") to a fetchable homepage URL. */
-function normalizeWebsiteUrl(website) {
+/** Coerce user input ("datarisk.io", "polar.com/br/") to a fetchable URL. */
+export function normalizeWebsiteUrl(website) {
   const trimmed = String(website).trim();
   if (!trimmed) return null;
   const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
   try {
     const url = new URL(withProtocol);
-    // Homepage only — the pitch lives there, and it keeps the fetch bounded.
-    return `${url.protocol}//${url.host}/`;
+    // Keep the typed path (dropping only query/hash): "polar.com/br" is a
+    // different storefront than "polar.com" — stripping it made the AI read
+    // the global homepage and produce a generic description (QA, 11/ago).
+    const path = url.pathname.replace(/\/+$/, '');
+    return `${url.protocol}//${url.host}${path}${path ? '' : '/'}`;
   } catch {
     return null;
   }

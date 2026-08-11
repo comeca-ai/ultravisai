@@ -68,12 +68,13 @@
 
 ### P1
 - [x] **Rotacionar chaves que passaram por chat** — **feito (confirmado pelo dono em 11/ago)**.
+- [ ] **Ativar alertas do watchdog por e-mail** — código pronto (PR #40); aguarda o dono criar um **e-mail dedicado** (decisão 11/ago: não usar o Gmail pessoal) e setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway. Até lá o watchdog só loga. `P` · depende do dono
 - [ ] **Backfill de sentimento** — script (padrão `scripts/backfill-shopping-cards.js`) pra re-analisar resultados com sentimento de fallback (ex.: os 795 "neutral" do censo de 10/ago, gravados durante o 401 da OpenAI). Nota: coluna `sentiment` é NOT NULL — não dá pra anular; o script re-analisa in-place. `P`
 - [ ] **Modelo de custo completo no painel de Custos** — valor do crédito Cloro (pendente) + quota Ahrefs/Semrush. `P`
 
 ### P2
 - [ ] **Limpar dados de teste E2E** — org `Ultravis Teste E2E` (ids `aaaaaaaa-e2e0-...`). `P`
-- [ ] **SMTP custom no Supabase** — e-mail padrão tem limites. `P`
+- [ ] **SMTP custom no Supabase** — decisão 11/ago: **manter o padrão por ora**; revisitar quando houver e-mail dedicado (limite baixo do padrão + templates com marca — item #28 do feedback). `P`
 - [ ] **Preencher business case** com resultado do censo Datarisk quando terminar. `P`
 
 ---

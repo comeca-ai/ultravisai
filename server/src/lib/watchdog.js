@@ -9,8 +9,13 @@
  * invalid OpenAI key making every sentiment fall back to "neutral") get
  * noticed in minutes instead of days.
  *
- * Config (all optional):
- *   ALERT_WEBHOOK_URL     — where alerts are POSTed; unset = log-only.
+ * Config (all optional; email and webhook are independent — configure either
+ * or both):
+ *   ALERT_WEBHOOK_URL     — where alerts are POSTed; unset = skip webhook.
+ *   ALERT_EMAIL_TO        — address to email alerts to (SMTP vars required).
+ *   SMTP_HOST / SMTP_PORT — SMTP server (default smtp.gmail.com:465).
+ *   SMTP_USER / SMTP_PASS — SMTP credentials (Gmail: use an App Password).
+ *   ALERT_EMAIL_FROM      — sender address (default: SMTP_USER).
  *   WATCHDOG_INTERVAL_MIN — check cadence in minutes (default 15, min 5).
  *
  * Checks are pure functions over a data snapshot (see evaluateChecks) so they
@@ -158,6 +163,57 @@ async function collectSnapshot(intervalMin) {
   return snap;
 }
 
+/**
+ * Pure formatter for the alert email (exported for unit tests).
+ *
+ * @param {{ key: string, severity: string, message: string }[]} alerts
+ * @param {Date} now
+ */
+export function formatAlertEmail(alerts, now) {
+  const critical = alerts.filter((a) => a.severity === 'critical').length;
+  const subject =
+    `[Ultravis] ${alerts.length} alerta(s) do monitoramento` +
+    (critical > 0 ? ` — ${critical} crítico(s)` : '');
+  const lines = alerts.map((a) => `• [${a.severity.toUpperCase()}] ${a.message}`);
+  const text = [
+    `O watchdog da Ultravis detectou ${alerts.length} problema(s) em ${now.toISOString()}:`,
+    '',
+    ...lines,
+    '',
+    'Onde olhar: painel /ops (jobs e log) · Railway (logs do server) · Supabase.',
+    'Este aviso repete no máximo a cada 6h por condição enquanto ela persistir.',
+  ].join('\n');
+  return { subject, text };
+}
+
+async function sendEmailAlert(fresh) {
+  const to = process.env.ALERT_EMAIL_TO;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  if (!to || !user || !pass) return;
+
+  try {
+    // Lazy import keeps boot/test paths free of the dependency.
+    const { default: nodemailer } = await import('nodemailer');
+    const port = parseInt(process.env.SMTP_PORT || '465', 10) || 465;
+    const transport = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+    });
+    const { subject, text } = formatAlertEmail(fresh, new Date());
+    await transport.sendMail({
+      from: process.env.ALERT_EMAIL_FROM || user,
+      to,
+      subject,
+      text,
+    });
+  } catch (err) {
+    logger.error({ err }, 'watchdog: failed to deliver alert email');
+  }
+}
+
 /** In-memory anti-spam: condition key → last time it was alerted. */
 const lastSent = new Map();
 
@@ -170,6 +226,8 @@ async function deliver(alerts) {
   fresh.forEach((a) => lastSent.set(a.key, Date.now()));
 
   for (const a of fresh) logger.warn({ alert: a }, 'watchdog alert');
+
+  await sendEmailAlert(fresh);
 
   const url = process.env.ALERT_WEBHOOK_URL;
   if (!url) return;
@@ -208,5 +266,12 @@ export function startWatchdog() {
       logger.error({ err }, 'watchdog run failed');
     }
   });
-  logger.info({ intervalMin, webhook: Boolean(process.env.ALERT_WEBHOOK_URL) }, 'watchdog active');
+  logger.info(
+    {
+      intervalMin,
+      webhook: Boolean(process.env.ALERT_WEBHOOK_URL),
+      email: Boolean(process.env.ALERT_EMAIL_TO && process.env.SMTP_USER && process.env.SMTP_PASS),
+    },
+    'watchdog active',
+  );
 }

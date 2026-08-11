@@ -64,11 +64,6 @@ interface FaqItem {
   q: string;
   a: string;
 }
-interface FooterColumn {
-  title: string;
-  links: string[];
-}
-
 function UltravisMark({
   size,
   stroke,
@@ -112,7 +107,6 @@ export default function LandingPage() {
   const teams = t.raw('teams.items') as TeamItem[];
   const plans = t.raw('pricing.plans') as PlanItem[];
   const faq = t.raw('faq.items') as FaqItem[];
-  const footerColumns = t.raw('footer.columns') as FooterColumn[];
 
   const barWidths = [71, 64, 58, 49, 31];
 
@@ -618,55 +612,36 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer — link columns removed on purpose (they pointed nowhere;
+          QA + client feedback). Bring sections back only as their pages
+          actually exist. */}
       <footer className="border-t border-[#E2DED5]">
-        <div className="mx-auto grid max-w-[1240px] gap-10 px-6 pt-14 pb-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-8">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2.5">
-              <Image
-                src="/logo_light.svg"
-                alt=""
-                width={24}
-                height={24}
-                className="h-6 w-6 shrink-0"
-              />
-              <span className="text-[17px] font-extrabold tracking-tight uppercase">Ultravis</span>
-            </div>
-            <div className="max-w-[280px] text-[14.5px] leading-normal text-[#5B5851] text-pretty">
-              {t('footer.tagline')}
-            </div>
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-3 px-6 pt-14 pb-10 lg:px-8">
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/logo_light.svg"
+              alt=""
+              width={24}
+              height={24}
+              className="h-6 w-6 shrink-0"
+            />
+            <span className="text-[17px] font-extrabold tracking-tight uppercase">Ultravis</span>
           </div>
-          {footerColumns.map((col) => (
-            <div key={col.title} className="flex flex-col gap-3">
-              <div className="font-mono text-[11px] tracking-[0.14em] text-[#A8A398] uppercase">
-                {col.title}
-              </div>
-              {col.links.map((link) => (
-                <a
-                  key={link}
-                  href="#top"
-                  className="text-[14.5px] text-[#5B5851] hover:text-[#D8452F]"
-                >
-                  {link}
-                </a>
-              ))}
-            </div>
-          ))}
+          <div className="max-w-[280px] text-[14.5px] leading-normal text-[#5B5851] text-pretty">
+            {t('footer.tagline')}
+          </div>
         </div>
         <div className="mx-auto flex max-w-[1240px] flex-wrap justify-between gap-5 border-t border-[#E2DED5] px-6 pt-5 pb-11 text-[13px] text-[#8A867E] lg:px-8">
           <span>
             © {new Date().getFullYear()} Ultravis. {t('footer.rights')}
           </span>
           <span className="flex gap-5">
-            <a href="#top" className="hover:text-[#0B0D10]">
+            <Link href="/terms-of-service" className="hover:text-[#0B0D10]">
               {t('footer.terms')}
-            </a>
-            <a href="#top" className="hover:text-[#0B0D10]">
+            </Link>
+            <Link href="/privacy-policy" className="hover:text-[#0B0D10]">
               {t('footer.privacy')}
-            </a>
-            <a href="#top" className="hover:text-[#0B0D10]">
-              {t('footer.aiPolicy')}
-            </a>
+            </Link>
           </span>
         </div>
       </footer>

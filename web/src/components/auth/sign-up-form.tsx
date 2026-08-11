@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -140,23 +140,23 @@ export function SignUpForm() {
 
         <p className="text-center text-xs text-muted-foreground">
           {t('termsAgreement')}{' '}
-          <a
+          <Link
             href={siteConfig.legal.terms}
             target="_blank"
             rel="noopener noreferrer"
             className="underline underline-offset-4 hover:text-primary"
           >
             {t('termsOfService')}
-          </a>{' '}
+          </Link>{' '}
           {t('and')}{' '}
-          <a
+          <Link
             href={siteConfig.legal.privacy}
             target="_blank"
             rel="noopener noreferrer"
             className="underline underline-offset-4 hover:text-primary"
           >
             {t('privacyPolicy')}
-          </a>
+          </Link>
           .
         </p>
       </form>

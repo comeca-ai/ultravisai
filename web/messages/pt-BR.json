@@ -1487,43 +1487,9 @@
     },
     "footer": {
       "tagline": "Vision beyond reach. Plataforma de visibilidade de marcas dentro dos modelos de linguagem.",
-      "columns": [
-        {
-          "title": "Plataforma",
-          "links": [
-            "Respostas monitoradas",
-            "Prompts e volumes",
-            "Query Fan-Out",
-            "Citações",
-            "Site Audit",
-            "MCP Server"
-          ]
-        },
-        {
-          "title": "Soluções",
-          "links": [
-            "SEO & AEO",
-            "Conteúdo",
-            "PR & Marca",
-            "Agências",
-            "Desenvolvedores"
-          ]
-        },
-        {
-          "title": "Empresa",
-          "links": [
-            "Sobre",
-            "Preços",
-            "Blog",
-            "Contato",
-            "Carreiras"
-          ]
-        }
-      ],
       "rights": "Todos os direitos reservados.",
       "terms": "Termos",
-      "privacy": "Privacidade",
-      "aiPolicy": "Política de IA"
+      "privacy": "Privacidade"
     }
   },
   "onboarding": {
@@ -1711,6 +1677,174 @@
     "sections": {
       "distribution": "Distribuição (medido)",
       "spend": "Estimativa de gasto por provider"
+    }
+  },
+  "legal": {
+    "updated": "Última atualização: 10 de agosto de 2026",
+    "draftNotice": "Versão preliminar em revisão interna. Este documento pode ser ajustado sem aviso prévio durante o período de testes da plataforma.",
+    "backHome": "Voltar ao início",
+    "contactEmail": "contato@ultravis.ai",
+    "terms": {
+      "title": "Termos de Uso",
+      "sections": [
+        {
+          "h": "1. Aceitação",
+          "p": [
+            "Ao criar uma conta ou usar a plataforma Ultravis (\"Plataforma\"), você concorda com estes Termos de Uso e com a Política de Privacidade. Se não concordar, não utilize a Plataforma."
+          ]
+        },
+        {
+          "h": "2. O serviço",
+          "p": [
+            "A Plataforma monitora e analisa a visibilidade de marcas em respostas geradas por sistemas de inteligência artificial de terceiros, produzindo métricas, relatórios e recomendações.",
+            "A Plataforma encontra-se em fase de testes: funcionalidades podem ser adicionadas, alteradas ou descontinuadas a qualquer momento."
+          ]
+        },
+        {
+          "h": "3. Conta e acesso",
+          "p": [
+            "Você é responsável pela veracidade dos dados informados no cadastro e pela guarda das suas credenciais. Atividades realizadas com a sua conta são de sua responsabilidade."
+          ]
+        },
+        {
+          "h": "4. Uso aceitável",
+          "p": [
+            "É vedado usar a Plataforma para fins ilícitos, tentar acessar dados de outras organizações, sobrecarregar ou burlar mecanismos de segurança, realizar engenharia reversa ou revender o serviço sem autorização."
+          ]
+        },
+        {
+          "h": "5. Dados e conteúdo do cliente",
+          "p": [
+            "Os dados de marca, prompts e configurações que você fornece continuam sendo seus. Você nos concede licença para processá-los exclusivamente para prestar o serviço."
+          ]
+        },
+        {
+          "h": "6. Resultados de IA",
+          "p": [
+            "As respostas analisadas são geradas por plataformas de IA de terceiros e podem variar entre consultas. As métricas apresentadas são estimativas analíticas e não constituem garantia de resultado comercial."
+          ]
+        },
+        {
+          "h": "7. Propriedade intelectual",
+          "p": [
+            "A marca, a identidade visual e as funcionalidades da Plataforma são protegidas. Componentes de código aberto utilizados permanecem regidos por suas respectivas licenças."
+          ]
+        },
+        {
+          "h": "8. Disponibilidade",
+          "p": [
+            "Empregamos esforços razoáveis para manter a Plataforma disponível, sem garantia de operação ininterrupta. Manutenções e indisponibilidades podem ocorrer, especialmente durante a fase de testes."
+          ]
+        },
+        {
+          "h": "9. Limitação de responsabilidade",
+          "p": [
+            "A Plataforma é fornecida \"no estado em que se encontra\". Na máxima extensão permitida pela lei, não respondemos por danos indiretos, lucros cessantes ou decisões tomadas com base nas métricas apresentadas."
+          ]
+        },
+        {
+          "h": "10. Vigência e rescisão",
+          "p": [
+            "Você pode encerrar sua conta a qualquer momento. Podemos suspender ou encerrar contas em caso de violação destes Termos."
+          ]
+        },
+        {
+          "h": "11. Alterações destes Termos",
+          "p": [
+            "Estes Termos podem ser atualizados. A versão vigente estará sempre publicada nesta página, com a data de atualização."
+          ]
+        },
+        {
+          "h": "12. Lei aplicável",
+          "p": [
+            "Estes Termos são regidos pelas leis da República Federativa do Brasil."
+          ]
+        },
+        {
+          "h": "13. Contato",
+          "p": [
+            "Dúvidas sobre estes Termos podem ser enviadas para o e-mail de contato indicado ao final desta página."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Política de Privacidade",
+      "sections": [
+        {
+          "h": "1. Escopo",
+          "p": [
+            "Esta Política descreve como a plataforma Ultravis (\"Plataforma\") trata dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD)."
+          ]
+        },
+        {
+          "h": "2. Dados coletados",
+          "p": [
+            "Cadastro: nome, e-mail e, no login social, os dados básicos fornecidos pelo provedor (Google).",
+            "Uso do serviço: dados de marcas, prompts e configurações fornecidos por você; registros técnicos de acesso (logs, endereço IP, identificadores de sessão)."
+          ]
+        },
+        {
+          "h": "3. Finalidades e bases legais",
+          "p": [
+            "Tratamos dados para prestar o serviço contratado (execução de contrato), garantir segurança e melhorar a Plataforma (legítimo interesse) e enviar comunicações operacionais sobre a sua conta."
+          ]
+        },
+        {
+          "h": "4. Compartilhamento",
+          "p": [
+            "Utilizamos operadores para hospedagem em nuvem, banco de dados e consulta às plataformas de IA analisadas. O compartilhamento limita-se ao necessário para a prestação do serviço. Não vendemos dados pessoais."
+          ]
+        },
+        {
+          "h": "5. Transferência internacional",
+          "p": [
+            "Parte da infraestrutura pode estar localizada fora do Brasil. Nesses casos, adotamos salvaguardas compatíveis com a LGPD."
+          ]
+        },
+        {
+          "h": "6. Retenção",
+          "p": [
+            "Mantemos os dados enquanto a conta estiver ativa e pelos prazos legais aplicáveis após o encerramento. Dados analíticos podem ser mantidos de forma agregada e anonimizada."
+          ]
+        },
+        {
+          "h": "7. Segurança",
+          "p": [
+            "Adotamos medidas técnicas e organizacionais proporcionais ao risco: criptografia em trânsito, controle de acesso por organização e registro de atividades."
+          ]
+        },
+        {
+          "h": "8. Seus direitos (art. 18 da LGPD)",
+          "p": [
+            "Você pode solicitar confirmação de tratamento, acesso, correção, anonimização, portabilidade, eliminação e informações sobre compartilhamento, além de revogar consentimentos. As solicitações são atendidas pelo canal de contato ao final desta página."
+          ]
+        },
+        {
+          "h": "9. Cookies",
+          "p": [
+            "Usamos cookies essenciais para autenticação e funcionamento da sessão. Não utilizamos cookies de publicidade."
+          ]
+        },
+        {
+          "h": "10. Crianças e adolescentes",
+          "p": [
+            "A Plataforma é destinada a uso profissional e não é direcionada a menores de 18 anos."
+          ]
+        },
+        {
+          "h": "11. Alterações desta Política",
+          "p": [
+            "Esta Política pode ser atualizada. A versão vigente estará sempre publicada nesta página, com a data de atualização."
+          ]
+        },
+        {
+          "h": "12. Contato",
+          "p": [
+            "Solicitações sobre dados pessoais podem ser enviadas para o e-mail de contato indicado ao final desta página."
+          ]
+        }
+      ]
     }
   }
 }

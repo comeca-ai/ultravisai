@@ -11,5 +11,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: `${BASE_URL}/`, lastModified, changeFrequency: 'weekly', priority: 1 },
     { url: `${BASE_URL}/en`, lastModified, changeFrequency: 'weekly', priority: 0.9 },
+    {
+      url: `${BASE_URL}/terms-of-service`,
+      lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    { url: `${BASE_URL}/privacy-policy`, lastModified, changeFrequency: 'monthly', priority: 0.3 },
+    {
+      url: `${BASE_URL}/en/terms-of-service`,
+      lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.2,
+    },
+    {
+      url: `${BASE_URL}/en/privacy-policy`,
+      lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.2,
+    },
   ];
 }

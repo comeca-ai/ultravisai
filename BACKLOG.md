@@ -49,8 +49,8 @@
 
 ### P0 — Achados do Q&A do site público (crítico)
 - [x] **Landing bloqueada pra buscadores/bots de IA** (`robots Disallow: /` + `noindex` global, herdado do upstream) — **corrigido**: landing indexável, app noindex escopado, robots + sitemap.
-- [ ] **Termos & Privacidade → 404 (risco LGPD)** — o usuário "concorda" no cadastro com documentos inexistentes. `siteConfig.legal` aponta pra `/privacy-policy` e `/terms-of-service` que não existem. **Precisa de conteúdo/decisão jurídica** (redigir ou template + revisão). `M`
-- [ ] **Rodapé com links mortos** — na landing, colunas (Sobre/Blog/Contato/Carreiras/Desenvolvedores) e Termos/Privacidade/AI Policy apontam pra `#top`; `siteConfig.links.github` aponta pro repo **upstream** `ansvisor/ansvisor`. Decidir: criar as páginas vs. remover os links + corrigir o GitHub. `P`
+- [x] **Termos & Privacidade → 404 (risco LGPD)** — **resolvido (11/ago)**: páginas publicadas em versão preliminar genérica (sem razão social, com aviso de revisão interna), pt-BR + en, indexáveis e no sitemap. Pendência futura: texto final aprovado internamente + revisão jurídica.
+- [x] **Rodapé com links mortos** — **resolvido (11/ago)**: colunas mortas removidas da landing; Termos/Privacidade apontam pras páginas reais; link do GitHub upstream removido. Colunas voltam conforme as páginas existirem.
 
 ### P1
 - [ ] **i18n páginas restantes** — Prompts, Tópicos, Configurações (verificar também Conteúdo, Auditoria, Tráfego, Shopping, Relatórios, Agent). `M` · mesmo método do Insights/Citações
@@ -67,7 +67,7 @@
 ## 🔧 Operacional & infra
 
 ### P1
-- [ ] **Rotacionar chaves que passaram por chat** — Cloro, OpenAI, Anthropic, Gemini (Google secret já resetado) + Scrape.do. `P`
+- [x] **Rotacionar chaves que passaram por chat** — **feito (confirmado pelo dono em 11/ago)**.
 - [ ] **Backfill de sentimento** — script (padrão `scripts/backfill-shopping-cards.js`) pra re-analisar resultados com sentimento de fallback (ex.: os 795 "neutral" do censo de 10/ago, gravados durante o 401 da OpenAI). Nota: coluna `sentiment` é NOT NULL — não dá pra anular; o script re-analisa in-place. `P`
 - [ ] **Modelo de custo completo no painel de Custos** — valor do crédito Cloro (pendente) + quota Ahrefs/Semrush. `P`
 

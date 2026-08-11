@@ -6,12 +6,11 @@ export const siteConfig = {
   url: 'https://ultravis.ai',
   ogImage: 'https://app.ultravis.ai/opengraph-image',
   links: {
-    github: 'https://github.com/ansvisor/ansvisor',
     docs: 'https://docs.ultravis.ai',
   },
   legal: {
-    privacy: 'https://www.ultravis.ai/privacy-policy',
-    terms: 'https://www.ultravis.ai/terms-of-service',
+    privacy: '/privacy-policy',
+    terms: '/terms-of-service',
   },
 } as const;
 

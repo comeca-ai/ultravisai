@@ -93,6 +93,16 @@ export function evaluateChecks(snap, now) {
     }
   }
 
+  // Regra do dono (11/ago): toda marca precisa de um usuário ativo por trás.
+  // Uma marca ativa em org sem usuário só gasta crédito sem ninguém olhando.
+  if ((snap.orphanBrands ?? 0) > 0) {
+    alerts.push({
+      key: 'orphan-brands',
+      severity: 'warning',
+      message: `${snap.orphanBrands} marca(s) ativa(s) em organização sem nenhum usuário — pausar ou apagar (o arquivo-morto preserva os dados).`,
+    });
+  }
+
   return alerts;
 }
 
@@ -113,6 +123,7 @@ async function collectSnapshot(intervalMin) {
     stuckTasks: 0,
     recentResults: { total: 0, neutral: 0 },
     lastResultAt: null,
+    orphanBrands: 0,
   };
 
   try {
@@ -156,6 +167,24 @@ async function collectSnapshot(intervalMin) {
       .order('created_at', { ascending: false })
       .limit(1);
     snap.lastResultAt = data?.[0]?.created_at ?? null;
+  } catch {
+    /* best-effort */
+  }
+
+  try {
+    // Active brands whose org has no user profile ("toda marca precisa de um
+    // usuário ativo", 11/ago). Two small queries — org counts are tiny.
+    const { data: profs } = await supabaseAdmin.from('profiles').select('organization_id');
+    const orgsWithUsers = [...new Set((profs ?? []).map((p) => p.organization_id))].filter(Boolean);
+    let query = supabaseAdmin
+      .from('brands')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true);
+    if (orgsWithUsers.length > 0) {
+      query = query.not('organization_id', 'in', `(${orgsWithUsers.join(',')})`);
+    }
+    const { count } = await query;
+    snap.orphanBrands = count ?? 0;
   } catch {
     /* best-effort */
   }

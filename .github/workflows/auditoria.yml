@@ -121,6 +121,12 @@ jobs:
           body_lines += ["", "_Workflow: `.github/workflows/auditoria.yml` (scanners: Gitleaks · npm/yarn audit · Semgrep). Artefatos com o detalhe completo no run._"]
           body = '\n'.join(body_lines)
 
+          # A label precisa existir antes do create (o run #1/#2 falhou aqui:
+          # "could not add label: 'auditoria' not found").
+          subprocess.run(['gh', 'label', 'create', 'auditoria', '--color', 'D93F0B',
+                          '--description', 'Achados da auditoria diária automática',
+                          '--force'], capture_output=True)
+
           # Reusa a issue aberta com a label, senão cria.
           out = subprocess.run(
               ['gh', 'issue', 'list', '--label', 'auditoria', '--state', 'open',

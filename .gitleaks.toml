@@ -1,0 +1,6 @@
+# Configuração do Gitleaks usada pela auditoria diária
+# (.github/workflows/auditoria.yml). Herda todas as regras padrão.
+
+[allowlist]
+description = "Arquivos de exemplo contêm placeholders (sk-..., AIza...), não segredos reais"
+paths = ['''\.env\.example$''']

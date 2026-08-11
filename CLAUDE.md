@@ -3,6 +3,9 @@
 Leia primeiro: **`CONTEXTO.md`** (estado atual completo) e
 **`ARQUITETURA-POCS.md`** (regras do fork).
 
+**`STATUS.md`** é a visão de 1 página pro dono — mantenha-o atualizado ao
+fim de cada sessão com mudanças relevantes (estado, números, pendências).
+
 ## O que é este repo
 
 Fork do [Ansvisor](https://github.com/ansvisor/ansvisor) operando como

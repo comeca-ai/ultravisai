@@ -8,6 +8,7 @@ const healthy = {
   stuckTasks: 0,
   recentResults: { total: 120, neutral: 40 },
   lastResultAt: '2026-08-10T06:00:00Z',
+  orphanBrands: 0,
 };
 
 describe('watchdog evaluateChecks', () => {
@@ -62,6 +63,19 @@ describe('watchdog evaluateChecks', () => {
   it('stays quiet when lastResultAt is unknown (fresh install)', () => {
     const alerts = evaluateChecks({ ...healthy, lastResultAt: null }, NOW);
     expect(alerts).toEqual([]);
+  });
+
+  it('flags active brands in orgs without any user (owner rule, 11/ago)', () => {
+    const alerts = evaluateChecks({ ...healthy, orphanBrands: 2 }, NOW);
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0].key).toBe('orphan-brands');
+    expect(alerts[0].severity).toBe('warning');
+    expect(alerts[0].message).toContain('2 marca(s)');
+  });
+
+  it('tolerates snapshots without the orphanBrands field (older shape)', () => {
+    const { orphanBrands: _omitted, ...older } = healthy;
+    expect(evaluateChecks(older, NOW)).toEqual([]);
   });
 });
 

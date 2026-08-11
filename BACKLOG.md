@@ -81,7 +81,7 @@
 - [ ] **Modelo de custo completo no painel de Custos** — valor do crédito Cloro (pendente) + quota Ahrefs/Semrush. `P`
 
 ### P2
-- [ ] **Limpar dados de teste E2E** — org `Ultravis Teste E2E` (ids `aaaaaaaa-e2e0-...`). `P`
+- [x] **Limpar dados de teste E2E** — **feito (11/ago)**: org e marca apagadas, snapshot no arquivo-morto.
 - [ ] **SMTP custom no Supabase** — decisão 11/ago: **manter o padrão por ora**; revisitar quando houver e-mail dedicado (limite baixo do padrão + templates com marca — item #28 do feedback). `P`
 - [ ] **Preencher business case** com resultado do censo Datarisk quando terminar. `P`
 

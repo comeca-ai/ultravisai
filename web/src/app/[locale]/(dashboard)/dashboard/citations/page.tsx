@@ -706,7 +706,7 @@ const DomainsTable = memo(function DomainsTable({
             <TableHead className="text-xs">{t('table.usage')}</TableHead>
             <TableHead className="text-right text-xs">{t('table.avgCitations')}</TableHead>
             <TableHead className="w-[44px]">
-              <span className="sr-only">Add as competitor</span>
+              <span className="sr-only">{t('addCompetitor.button')}</span>
             </TableHead>
           </TableRow>
         </TableHeader>

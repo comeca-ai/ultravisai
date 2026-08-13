@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,8 @@ interface Props {
 const EXPANDED_KEY = 'aeo:topic-suggestions-expanded';
 
 export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) {
+  const t = useTranslations('topics.suggestionsCard');
+  const tTopics = useTranslations('topics');
   const [suggestions, setSuggestions] = useState<TopicSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -108,9 +111,9 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
       const fresh = await refreshTopicSuggestions(brandId);
       setSuggestions(fresh);
       setLoaded(true);
-      toast.success('Topic suggestions refreshed');
+      toast.success(t('refreshed'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Refresh failed');
+      toast.error(err instanceof Error ? err.message : t('refreshFailed'));
     } finally {
       setRefreshing(false);
     }
@@ -123,9 +126,9 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
         await acceptTopicSuggestion(s.id);
         setSuggestions((prev) => prev.filter((x) => x.id !== s.id));
         onAccepted?.();
-        toast.success(`"${s.name}" added to your topics`);
+        toast.success(tTopics('topicAdded', { name: s.name }));
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Failed to add');
+        toast.error(err instanceof Error ? err.message : t('addFailed'));
       } finally {
         setPendingId(null);
       }
@@ -139,7 +142,7 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
       .catch(() => {
         // Roll back on failure
         setSuggestions((prev) => [...prev, s]);
-        toast.error('Failed to dismiss');
+        toast.error(t('dismissFailed'));
       })
       .finally(() => setPendingId(null));
   };
@@ -160,15 +163,12 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             )}
             <Sparkles className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm font-medium">Topic Suggestions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('title')}</CardTitle>
             <Info
               className="h-3.5 w-3.5 text-muted-foreground cursor-help"
-              aria-label="AI-generated topic ideas for your brand. Topics you already track and dismissed ideas never reappear."
+              aria-label={t('infoTooltip')}
             >
-              <title>
-                AI-generated topic ideas for your brand. Topics you already track and dismissed
-                ideas never reappear.
-              </title>
+              <title>{t('infoTooltip')}</title>
             </Info>
             {loading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
@@ -177,13 +177,9 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
                 {suggestions.length}
               </Badge>
             ) : loaded ? (
-              !expanded && (
-                <span className="text-xs text-muted-foreground">no new ideas — expand</span>
-              )
+              !expanded && <span className="text-xs text-muted-foreground">{t('noNewIdeas')}</span>
             ) : (
-              !expanded && (
-                <span className="text-xs text-muted-foreground">expand for AI topic ideas</span>
-              )
+              !expanded && <span className="text-xs text-muted-foreground">{t('expandHint')}</span>
             )}
           </button>
           {expanded && canManage && (
@@ -199,7 +195,7 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
               ) : (
                 <RefreshCw className="h-3.5 w-3.5" />
               )}
-              {refreshing ? 'Generating…' : 'Refresh'}
+              {refreshing ? t('generating') : t('refresh')}
             </Button>
           )}
         </div>
@@ -213,11 +209,9 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
           ) : suggestions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <Sparkles className="h-8 w-8 text-muted-foreground/40 mb-2" />
-              <p className="text-sm font-medium mb-1">No suggestions right now</p>
+              <p className="text-sm font-medium mb-1">{t('emptyTitle')}</p>
               <p className="text-xs text-muted-foreground mb-3 max-w-sm">
-                {canManage
-                  ? 'Generate AI topic ideas tailored to your brand and industry. Topics you already track are excluded automatically.'
-                  : 'No topic suggestions have been generated for this brand yet.'}
+                {canManage ? t('emptyBodyManage') : t('emptyBodyReadOnly')}
               </p>
               {canManage && (
                 <Button onClick={handleRefresh} disabled={refreshing} size="sm" className="gap-2">
@@ -226,7 +220,7 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
                   ) : (
                     <Sparkles className="h-3.5 w-3.5" />
                   )}
-                  Generate Suggestions
+                  {t('generate')}
                 </Button>
               )}
             </div>
@@ -253,8 +247,8 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
                           className="h-8 w-8"
                           onClick={() => handleAccept(s)}
                           disabled={busy}
-                          title="Add to tracked topics"
-                          aria-label="Add to tracked topics"
+                          title={t('addAction')}
+                          aria-label={t('addAction')}
                         >
                           {busy ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -268,8 +262,8 @@ export function TopicSuggestionsCard({ brandId, canManage, onAccepted }: Props) 
                           className="h-8 w-8 text-muted-foreground"
                           onClick={() => handleDismiss(s)}
                           disabled={busy}
-                          title="Dismiss suggestion"
-                          aria-label="Dismiss suggestion"
+                          title={t('dismissAction')}
+                          aria-label={t('dismissAction')}
                         >
                           <X className="h-3.5 w-3.5" />
                         </Button>

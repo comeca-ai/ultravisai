@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ComponentType } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import {
   getPromptDetail,
@@ -97,10 +98,13 @@ function DateRangeBar({
   onCustomFrom: (v: string) => void;
   onCustomTo: (v: string) => void;
 }) {
+  const t = useTranslations('prompts.detail');
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Date Range</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('dateRange')}
+        </label>
         <div className="flex overflow-hidden rounded-md border">
           {DATE_PRESETS.map((p) => (
             <button
@@ -114,7 +118,7 @@ function DateRangeBar({
                   : 'bg-card hover:bg-muted text-foreground',
               )}
             >
-              {p === 'custom' ? 'Custom' : p === 'all' ? 'All' : p}
+              {t(`datePresets.${p}`)}
             </button>
           ))}
         </div>
@@ -122,7 +126,9 @@ function DateRangeBar({
       {preset === 'custom' && (
         <>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">From</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('dateFrom')}
+            </label>
             <Input
               type="date"
               value={customFrom}
@@ -131,7 +137,9 @@ function DateRangeBar({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">To</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('dateTo')}
+            </label>
             <Input
               type="date"
               value={customTo}
@@ -145,10 +153,10 @@ function DateRangeBar({
   );
 }
 
-function getModelDisplayName(model?: string, platform?: string): string {
+function getModelDisplayName(unknownLabel: string, model?: string, platform?: string): string {
   if (model && MODEL_PROVIDER_LABELS[model]) return MODEL_PROVIDER_LABELS[model];
   if (platform && PLATFORM_LABELS[platform]) return PLATFORM_LABELS[platform];
-  return model ?? platform ?? 'Unknown';
+  return model ?? platform ?? unknownLabel;
 }
 
 function formatTimestamp(iso: string): string {
@@ -163,6 +171,7 @@ function formatTimestamp(iso: string): string {
 }
 
 function SentimentBadge({ sentiment }: { sentiment: 'positive' | 'neutral' | 'negative' }) {
+  const t = useTranslations('prompts.detail');
   return (
     <Badge
       variant="outline"
@@ -176,17 +185,18 @@ function SentimentBadge({ sentiment }: { sentiment: 'positive' | 'neutral' | 'ne
           'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
       )}
     >
-      {sentiment}
+      {t(`sentiment.${sentiment}`)}
     </Badge>
   );
 }
 
 function ModelBadge({ model, platform }: { model?: string; platform?: string }) {
+  const t = useTranslations('prompts.detail');
   const provider = resolveAIProvider(model ?? platform ?? '', platform);
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-2 py-1">
       <AIProviderAvatar provider={provider} className="h-4 w-4" />
-      <span className="text-xs">{getModelDisplayName(model, platform)}</span>
+      <span className="text-xs">{getModelDisplayName(t('unknownModel'), model, platform)}</span>
     </span>
   );
 }
@@ -232,6 +242,8 @@ function KpiCard({
 }
 
 function TopSourceDomainsTable({ rows }: { rows: PromptTopSource[] }) {
+  // Reuses the shared citations table vocabulary so both tables stay in sync.
+  const t = useTranslations('citations.table');
   const pager = usePagination(rows.length, rows.length);
   const pageRows = rows.slice(pager.start, pager.end);
 
@@ -240,11 +252,11 @@ function TopSourceDomainsTable({ rows }: { rows: PromptTopSource[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[56px] text-xs">Rank</TableHead>
-            <TableHead className="text-xs">Domain</TableHead>
-            <TableHead className="text-xs">Platforms</TableHead>
-            <TableHead className="text-xs">Usage</TableHead>
-            <TableHead className="text-right text-xs">Citations</TableHead>
+            <TableHead className="w-[56px] text-xs">{t('rank')}</TableHead>
+            <TableHead className="text-xs">{t('domain')}</TableHead>
+            <TableHead className="text-xs">{t('platforms')}</TableHead>
+            <TableHead className="text-xs">{t('usage')}</TableHead>
+            <TableHead className="text-right text-xs">{t('citations')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -266,7 +278,7 @@ function TopSourceDomainsTable({ rows }: { rows: PromptTopSource[] }) {
                         target="_blank"
                         rel="noreferrer noopener"
                         className="inline-flex items-center text-muted-foreground hover:text-foreground"
-                        aria-label={`Open ${row.domain} in a new tab`}
+                        aria-label={t('openInNewTab', { domain: row.domain })}
                       >
                         <ExternalLink className="h-3 w-3" />
                       </a>
@@ -300,6 +312,8 @@ function TopSourceDomainsTable({ rows }: { rows: PromptTopSource[] }) {
 }
 
 function TopSourceUrlsTable({ rows }: { rows: PromptTopSourceUrl[] }) {
+  // Reuses the shared citations table vocabulary so both tables stay in sync.
+  const t = useTranslations('citations.table');
   const pager = usePagination(rows.length, rows.length);
   const pageRows = rows.slice(pager.start, pager.end);
 
@@ -308,11 +322,11 @@ function TopSourceUrlsTable({ rows }: { rows: PromptTopSourceUrl[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[56px] text-xs">Rank</TableHead>
-            <TableHead className="text-xs">URL</TableHead>
-            <TableHead className="text-xs">Platforms</TableHead>
-            <TableHead className="text-xs">Usage</TableHead>
-            <TableHead className="text-right text-xs">Citations</TableHead>
+            <TableHead className="w-[56px] text-xs">{t('rank')}</TableHead>
+            <TableHead className="text-xs">{t('url')}</TableHead>
+            <TableHead className="text-xs">{t('platforms')}</TableHead>
+            <TableHead className="text-xs">{t('usage')}</TableHead>
+            <TableHead className="text-right text-xs">{t('citations')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -376,19 +390,18 @@ function TopSourcesCard({
   sources: PromptTopSource[];
   sourceUrls: PromptTopSourceUrl[];
 }) {
+  const t = useTranslations('prompts.detail');
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium">Top Sources</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Sources AI platforms cite when answering this prompt.
-        </p>
+        <CardTitle className="text-sm font-medium">{t('topSourcesTitle')}</CardTitle>
+        <p className="text-xs text-muted-foreground">{t('topSourcesSubtitle')}</p>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="domains">
           <TabsList>
-            <TabsTrigger value="domains">Domains ({sources.length})</TabsTrigger>
-            <TabsTrigger value="urls">URLs ({sourceUrls.length})</TabsTrigger>
+            <TabsTrigger value="domains">{t('tabDomains', { count: sources.length })}</TabsTrigger>
+            <TabsTrigger value="urls">{t('tabUrls', { count: sourceUrls.length })}</TabsTrigger>
           </TabsList>
           <TabsContent value="domains" keepMounted className="mt-4">
             <TopSourceDomainsTable rows={sources} />
@@ -413,6 +426,7 @@ function PlatformResultGroup({
   onToggle: () => void;
   onViewResult: (result: PromptResultWithText) => void;
 }) {
+  const t = useTranslations('prompts.detail');
   const visibleRuns = group.results.slice(0, 10);
   const hiddenCount = group.results.length - visibleRuns.length;
 
@@ -445,17 +459,17 @@ function PlatformResultGroup({
               </Badge>
             )}
             <span className="text-[11px] text-muted-foreground">
-              {group.results.length} run{group.results.length !== 1 ? 's' : ''}
+              {t('runsCount', { count: group.results.length })}
             </span>
           </div>
         </div>
         <div className="hidden items-center gap-5 sm:flex">
           <div className="text-right">
-            <p className="text-[10px] text-muted-foreground">Mentions</p>
+            <p className="text-[10px] text-muted-foreground">{t('mentionsLabel')}</p>
             <p className="text-xs font-semibold tabular-nums">{group.totalMentions}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-muted-foreground">Citations</p>
+            <p className="text-[10px] text-muted-foreground">{t('citationsLabel')}</p>
             <p className="text-xs font-semibold tabular-nums">{group.totalCitations}</p>
           </div>
           <div className="w-32">
@@ -467,7 +481,7 @@ function PlatformResultGroup({
       {expanded && (
         <div className="border-t bg-muted/10 px-4 py-3">
           <p className="mb-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            Runs
+            {t('runsHeading')}
           </p>
           <div className="overflow-hidden rounded-md border bg-background">
             {visibleRuns.map((result, index) => (
@@ -486,11 +500,17 @@ function PlatformResultGroup({
                 </div>
                 <div className="hidden text-center tabular-nums sm:block">
                   <span className="font-semibold">{result.mentionCount}</span>
-                  <span className="text-muted-foreground"> mentions</span>
+                  <span className="text-muted-foreground">
+                    {' '}
+                    {t('mentionsWord', { count: result.mentionCount })}
+                  </span>
                 </div>
                 <div className="hidden text-center tabular-nums sm:block">
                   <span className="font-semibold">{result.citationCount}</span>
-                  <span className="text-muted-foreground"> citations</span>
+                  <span className="text-muted-foreground">
+                    {' '}
+                    {t('citationsWord', { count: result.citationCount })}
+                  </span>
                 </div>
                 <div className="hidden justify-center sm:flex">
                   <SentimentBadge sentiment={result.sentiment} />
@@ -502,23 +522,29 @@ function PlatformResultGroup({
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 justify-self-end"
-                  title="View response detail"
+                  title={t('viewResponse')}
                   onClick={(event) => {
                     event.stopPropagation();
                     onViewResult(result);
                   }}
-                  aria-label="View response details"
+                  aria-label={t('viewResponse')}
                 >
                   <Eye className="h-3.5 w-3.5" />
                 </Button>
                 <div className="col-span-2 flex flex-wrap items-center gap-2 sm:hidden">
                   <span className="tabular-nums">
                     <span className="font-semibold">{result.mentionCount}</span>
-                    <span className="text-muted-foreground"> mentions</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      {t('mentionsWord', { count: result.mentionCount })}
+                    </span>
                   </span>
                   <span className="tabular-nums">
                     <span className="font-semibold">{result.citationCount}</span>
-                    <span className="text-muted-foreground"> citations</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      {t('citationsWord', { count: result.citationCount })}
+                    </span>
                   </span>
                   <SentimentBadge sentiment={result.sentiment} />
                   <div className="w-32">
@@ -530,7 +556,7 @@ function PlatformResultGroup({
           </div>
           {hiddenCount > 0 && (
             <p className="mt-2 text-xs text-muted-foreground">
-              Showing latest {visibleRuns.length} of {group.results.length} runs for this platform.
+              {t('showingRuns', { shown: visibleRuns.length, total: group.results.length })}
             </p>
           )}
         </div>
@@ -543,6 +569,12 @@ export default function PromptDetailPage() {
   const params = useParams();
   const router = useRouter();
   const promptId = params.id as string;
+
+  const t = useTranslations('prompts.detail');
+  // Reused vocabularies: Active/Paused + status toast live with the All
+  // Prompts table; "Back" is the shared common label.
+  const tAll = useTranslations('prompts.allTable');
+  const tCommon = useTranslations('common');
 
   const { canManage } = useUserRole();
 
@@ -579,7 +611,7 @@ export default function PromptDetailPage() {
     setWorkStatus(status);
     setPromptWorkStatus(promptId, status).catch(() => {
       setWorkStatus(previous);
-      toast.error('Failed to update status');
+      toast.error(tAll('statusUpdateFailed'));
     });
   };
 
@@ -639,13 +671,11 @@ export default function PromptDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <MessageSquareText className="mb-4 h-12 w-12 text-muted-foreground/40" />
-        <h2 className="text-lg font-semibold">Prompt not found</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          This prompt may have been deleted or does not exist.
-        </p>
+        <h2 className="text-lg font-semibold">{t('notFoundTitle')}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t('notFoundBody')}</p>
         <Button variant="outline" className="mt-6 gap-2" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4" />
-          Go back
+          {tCommon('back')}
         </Button>
       </div>
     );
@@ -660,7 +690,7 @@ export default function PromptDetailPage() {
         onClick={() => router.back()}
       >
         <ArrowLeft className="h-4 w-4" />
-        Back
+        {tCommon('back')}
       </Button>
 
       <div className="space-y-3">
@@ -680,12 +710,12 @@ export default function PromptDetailPage() {
                 : 'border-muted-foreground/20 text-muted-foreground',
             )}
           >
-            {data.prompt.isActive ? 'Active' : 'Paused'}
+            {data.prompt.isActive ? tAll('active') : tAll('paused')}
           </Badge>
           {data.summary.lastCheckedAt && (
             <Badge variant="outline" className="gap-1 text-xs">
               <Clock className="h-3 w-3" />
-              Last run: {formatTimestamp(data.summary.lastCheckedAt)}
+              {t('lastRun', { time: formatTimestamp(data.summary.lastCheckedAt) })}
             </Badge>
           )}
           <WorkStatusBadge
@@ -719,17 +749,17 @@ export default function PromptDetailPage() {
         <div className={cn('space-y-6', isRefetching && 'opacity-60')}>
           <div className="grid gap-4 sm:grid-cols-3">
             <KpiCard
-              title="Visibility Score"
+              title={t('kpiVisibility')}
               value={`${data.summary.avgVisibilityScore}/100`}
               icon={Eye}
             />
             <KpiCard
-              title="Mentions"
+              title={t('mentionsLabel')}
               value={data.summary.totalMentions.toLocaleString()}
               icon={MessageSquareText}
             />
             <KpiCard
-              title="Citations"
+              title={t('citationsLabel')}
               value={data.summary.totalCitations.toLocaleString()}
               icon={Quote}
             />
@@ -737,26 +767,25 @@ export default function PromptDetailPage() {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Platform Results</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('platformResultsTitle')}</CardTitle>
               <p className="text-xs text-muted-foreground">
-                {data.summary.totalResults} result{data.summary.totalResults !== 1 ? 's' : ''}{' '}
-                grouped by platform and model.
+                {t('platformResultsSubtitle', { count: data.summary.totalResults })}
               </p>
             </CardHeader>
             <CardContent className="space-y-3">
               {platformGroups.length === 0 ? (
                 <div className="rounded-lg border border-dashed py-12 text-center text-sm text-muted-foreground">
                   {datePreset === 'all' ? (
-                    'No tracking results yet for this prompt.'
+                    t('emptyAll')
                   ) : (
                     <>
-                      No results in the selected date range.{' '}
+                      {t('emptyRange')}{' '}
                       <button
                         type="button"
                         className="font-medium text-foreground underline underline-offset-2"
                         onClick={() => setDatePreset('all')}
                       >
-                        Show all data
+                        {t('showAllData')}
                       </button>
                     </>
                   )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ function formatDate(iso: string | null): string {
  * On save / clear we just refetch.
  */
 export function AgentSection() {
+  const t = useTranslations('settings.agent');
   const [state, setState] = useState<KeyState | null>(null);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
@@ -51,7 +53,7 @@ export function AgentSection() {
     try {
       const res = await fetch('/api/settings/anthropic-key');
       const body = (await res.json()) as Partial<KeyState> & { error?: string };
-      if (!res.ok) throw new Error(body.error || 'Failed to load');
+      if (!res.ok) throw new Error(body.error || t('errors.load'));
       setState({
         configured: !!body.configured,
         last4: body.last4 ?? null,
@@ -59,11 +61,11 @@ export function AgentSection() {
         setByEmail: body.setByEmail ?? null,
       });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to load');
+      toast.error(err instanceof Error ? err.message : t('errors.load'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -80,34 +82,30 @@ export function AgentSection() {
         body: JSON.stringify({ apiKey }),
       });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(body.error || 'Failed to save');
-      toast.success('Anthropic API key saved');
+      if (!res.ok) throw new Error(body.error || t('errors.save'));
+      toast.success(t('keySaved'));
       setInput('');
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to save');
+      toast.error(err instanceof Error ? err.message : t('errors.save'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleClear = async () => {
-    if (
-      !confirm(
-        'Remove the Anthropic API key? Team members will lose access to the agent until a new key is saved.',
-      )
-    ) {
+    if (!confirm(t('removeConfirm'))) {
       return;
     }
     setClearing(true);
     try {
       const res = await fetch('/api/settings/anthropic-key', { method: 'DELETE' });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(body.error || 'Failed to clear');
-      toast.success('Key removed');
+      if (!res.ok) throw new Error(body.error || t('errors.clear'));
+      toast.success(t('keyRemoved'));
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to clear');
+      toast.error(err instanceof Error ? err.message : t('errors.clear'));
     } finally {
       setClearing(false);
     }
@@ -121,12 +119,9 @@ export function AgentSection() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-4 w-4" />
-          Agent
+          {t('title')}
         </CardTitle>
-        <CardDescription>
-          Bring your own Anthropic API key. The in-product agent uses your key to call Claude
-          directly — usage is billed to your Anthropic account, not to Ultravis.
-        </CardDescription>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? (
@@ -136,29 +131,27 @@ export function AgentSection() {
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="gap-1">
                 <CheckCircle2 className="h-3 w-3" />
-                Key configured
+                {t('keyConfigured')}
               </Badge>
               {state.last4 && (
                 <code className="text-xs font-mono text-muted-foreground">sk-…{state.last4}</code>
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Saved {formatDate(state.setAt)}
-              {state.setByEmail && ` by ${state.setByEmail}`}.
+              {state.setByEmail
+                ? t('savedAtBy', { date: formatDate(state.setAt), email: state.setByEmail })
+                : t('savedAt', { date: formatDate(state.setAt) })}
             </p>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            No key configured. The agent will be locked for everyone in this organization until a
-            key is saved.
-          </p>
+          <p className="text-sm text-muted-foreground">{t('noKey')}</p>
         )}
 
         {canAdmin ? (
           <>
             <div className="space-y-2">
               <Label htmlFor="anthropic-key">
-                {configured ? 'Replace key' : 'Anthropic API key'}
+                {configured ? t('replaceKeyLabel') : t('keyLabel')}
               </Label>
               <div className="flex gap-2">
                 <Input
@@ -174,11 +167,11 @@ export function AgentSection() {
                 />
                 <Button onClick={handleSave} disabled={saving || !input.trim()}>
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isReplacing ? 'Replace' : 'Save'}
+                  {isReplacing ? t('replace') : t('save')}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Get a key from{' '}
+                {t('getKeyPrefix')}{' '}
                 <a
                   href="https://console.anthropic.com/settings/keys"
                   target="_blank"
@@ -187,7 +180,7 @@ export function AgentSection() {
                 >
                   console.anthropic.com
                 </a>
-                . The key is encrypted at rest; Ultravis support cannot read it.
+                {t('getKeySuffix')}
               </p>
             </div>
 
@@ -205,7 +198,7 @@ export function AgentSection() {
                   ) : (
                     <Trash2 className="mr-2 h-4 w-4" />
                   )}
-                  Remove key
+                  {t('removeKey')}
                 </Button>
               </div>
             )}
@@ -218,11 +211,8 @@ export function AgentSection() {
           <div className="flex items-start gap-3 rounded-md border bg-muted/40 p-3 text-sm">
             <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <div>
-              <p className="font-medium">Admin-only setting</p>
-              <p className="mt-1 text-muted-foreground">
-                Only org admins can add, replace, or remove the Anthropic API key. Ask an admin if
-                you need it changed.
-              </p>
+              <p className="font-medium">{t('adminOnlyTitle')}</p>
+              <p className="mt-1 text-muted-foreground">{t('adminOnlyBody')}</p>
             </div>
           </div>
         )}

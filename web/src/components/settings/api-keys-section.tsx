@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,8 @@ function formatDate(iso: string | null): string {
 }
 
 export function ApiKeysSection() {
+  const t = useTranslations('settings.apiKeysSection');
+  const tCommon = useTranslations('common');
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
@@ -58,14 +61,14 @@ export function ApiKeysSection() {
     try {
       const res = await fetch('/api/keys');
       const body = (await res.json()) as { keys?: ApiKey[]; error?: string };
-      if (!res.ok) throw new Error(body.error || 'Failed to load');
+      if (!res.ok) throw new Error(body.error || t('errors.load'));
       setKeys(body.keys ?? []);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to load');
+      toast.error(err instanceof Error ? err.message : t('errors.load'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -84,38 +87,38 @@ export function ApiKeysSection() {
         key?: ApiKey & { token: string };
         error?: string;
       };
-      if (!res.ok || !body.key) throw new Error(body.error || 'Failed to create');
+      if (!res.ok || !body.key) throw new Error(body.error || t('errors.create'));
       setRevealedToken(body.key.token);
       setNewName('');
       setCreateOpen(false);
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to create');
+      toast.error(err instanceof Error ? err.message : t('errors.create'));
     } finally {
       setCreating(false);
     }
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm('Revoke this API key? Clients using it will lose access immediately.')) {
+    if (!confirm(t('revokeConfirm'))) {
       return;
     }
     try {
       const res = await fetch(`/api/keys/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(body.error || 'Failed to revoke');
+        throw new Error(body.error || t('errors.revoke'));
       }
-      toast.success('Key revoked');
+      toast.success(t('keyRevoked'));
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to revoke');
+      toast.error(err instanceof Error ? err.message : t('errors.revoke'));
     }
   };
 
   const copy = async (text: string) => {
     await navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
+    toast.success(t('copied'));
   };
 
   return (
@@ -125,22 +128,19 @@ export function ApiKeysSection() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <KeyRound className="h-4 w-4" />
-              API Keys
+              {t('title')}
             </CardTitle>
-            <CardDescription>
-              Long-lived tokens for the Ultravis MCP server and other external clients. Keys are
-              shown once at creation — store them somewhere safe.
-            </CardDescription>
+            <CardDescription>{t('description')}</CardDescription>
           </div>
           <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-1.5 shrink-0">
             <Plus className="h-4 w-4" />
-            New key
+            {t('newKey')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="rounded-md border bg-muted/40 p-3 text-xs space-y-1.5">
-          <p className="font-medium text-foreground">MCP endpoint</p>
+          <p className="font-medium text-foreground">{t('mcpEndpoint')}</p>
           <div className="flex items-center gap-2">
             <code className="flex-1 truncate font-mono">{mcpEndpoint}</code>
             <Button
@@ -153,9 +153,9 @@ export function ApiKeysSection() {
             </Button>
           </div>
           <p className="text-muted-foreground">
-            Paste this URL + a key below into Claude Desktop / Claude Code / Cursor. See the{' '}
+            {t('mcpInstructions')}{' '}
             <a href="https://ultravis.ai" target="_blank" rel="noreferrer" className="underline">
-              MCP guide
+              {t('mcpGuide')}
             </a>
             .
           </p>
@@ -167,9 +167,7 @@ export function ApiKeysSection() {
             <Skeleton className="h-12 w-full" />
           </div>
         ) : keys.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">
-            No API keys yet. Create one to connect the MCP server.
-          </p>
+          <p className="text-sm text-muted-foreground py-6 text-center">{t('empty')}</p>
         ) : (
           <div className="divide-y rounded-md border">
             {keys.map((k) => {
@@ -181,13 +179,16 @@ export function ApiKeysSection() {
                       <p className="text-sm font-medium truncate">{k.name}</p>
                       {revoked && (
                         <Badge variant="outline" className="text-[10px]">
-                          revoked
+                          {t('revokedBadge')}
                         </Badge>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground font-mono">{k.prefix}…</p>
                     <p className="text-[11px] text-muted-foreground">
-                      Created {formatDate(k.created_at)} · Last used {formatDate(k.last_used_at)}
+                      {t('createdLastUsed', {
+                        created: formatDate(k.created_at),
+                        lastUsed: formatDate(k.last_used_at),
+                      })}
                     </p>
                   </div>
                   {!revoked && (
@@ -210,29 +211,27 @@ export function ApiKeysSection() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New API key</DialogTitle>
-            <DialogDescription>
-              Give this key a memorable name (e.g. &quot;MCP — my laptop&quot;).
-            </DialogDescription>
+            <DialogTitle>{t('createTitle')}</DialogTitle>
+            <DialogDescription>{t('createDescription')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <Label htmlFor="apiKeyName">Name</Label>
+            <Label htmlFor="apiKeyName">{t('nameLabel')}</Label>
             <Input
               id="apiKeyName"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="MCP — local"
+              placeholder={t('namePlaceholder')}
               autoFocus
               disabled={creating}
             />
           </div>
           <DialogFooter>
             <DialogClose render={<Button variant="outline" disabled={creating} />}>
-              Cancel
+              {tCommon('cancel')}
             </DialogClose>
             <Button onClick={handleCreate} disabled={creating || !newName.trim()}>
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create
+              {t('create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -241,10 +240,8 @@ export function ApiKeysSection() {
       <Dialog open={!!revealedToken} onOpenChange={(v) => !v && setRevealedToken(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Copy your API key</DialogTitle>
-            <DialogDescription>
-              You won&apos;t be able to see this again. Store it somewhere safe.
-            </DialogDescription>
+            <DialogTitle>{t('revealTitle')}</DialogTitle>
+            <DialogDescription>{t('revealDescription')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
             <div className="flex items-center gap-2 rounded-md border bg-muted/40 p-2 font-mono text-xs">
@@ -259,7 +256,7 @@ export function ApiKeysSection() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => setRevealedToken(null)}>Done</Button>
+            <Button onClick={() => setRevealedToken(null)}>{t('done')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

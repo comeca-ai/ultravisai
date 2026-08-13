@@ -178,13 +178,13 @@ export default function ContentPage() {
         return data.total;
       } catch (err) {
         console.error('Failed to load opportunities:', err);
-        toast.error('Failed to load content opportunities');
+        toast.error(t('toasts.loadFailed'));
         return 0;
       } finally {
         setLoading(false);
       }
     },
-    [activeBrandId, statusFilter, impactFilter, typeFilter],
+    [activeBrandId, statusFilter, impactFilter, typeFilter, t],
   );
 
   useEffect(() => {
@@ -207,7 +207,7 @@ export default function ContentPage() {
               pollRef.current = false;
               clearGenerationJob();
               setGenerating(false);
-              toast.success(`Generated ${status.result?.generated ?? 0} opportunities`);
+              toast.success(t('toasts.generated', { count: status.result?.generated ?? 0 }));
               loadData();
               break;
             }
@@ -216,7 +216,7 @@ export default function ContentPage() {
               pollRef.current = false;
               clearGenerationJob();
               setGenerating(false);
-              toast.error(status.failedReason || 'Generation failed — please try again');
+              toast.error(status.failedReason || t('toasts.generationFailed'));
               break;
             }
 
@@ -224,7 +224,7 @@ export default function ContentPage() {
               pollRef.current = false;
               clearGenerationJob();
               setGenerating(false);
-              toast.error('Generation timed out — please try again');
+              toast.error(t('toasts.generationTimeout'));
               break;
             }
           } catch {
@@ -235,7 +235,7 @@ export default function ContentPage() {
 
       poll();
     },
-    [loadData],
+    [loadData, t],
   );
 
   // Restore generation state from localStorage on mount
@@ -259,7 +259,7 @@ export default function ContentPage() {
       pollJob(jobId, startedAt);
     } catch (err) {
       console.error('Generate failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to generate opportunities');
+      toast.error(err instanceof Error ? err.message : t('toasts.generateFailed'));
       setGenerating(false);
     }
   };
@@ -271,12 +271,12 @@ export default function ContentPage() {
       if (result.success === false) {
         toast.error(result.error);
       } else {
-        toast.success('Sent to workflow!');
+        toast.success(t('toasts.sentToWorkflow'));
         await loadData(true);
       }
     } catch (err) {
       console.error('Webhook send failed:', err);
-      toast.error('Failed to send');
+      toast.error(t('toasts.sendFailed'));
     } finally {
       setSendingId(null);
     }
@@ -285,11 +285,11 @@ export default function ContentPage() {
   const handleDismiss = async (id: string) => {
     try {
       await updateOpportunityStatus(id, 'dismissed');
-      toast.success('Opportunity dismissed');
+      toast.success(t('toasts.dismissed'));
       await loadData(true);
     } catch (err) {
       console.error('Dismiss failed:', err);
-      toast.error('Failed to dismiss');
+      toast.error(t('toasts.dismissFailed'));
     }
   };
 
@@ -301,13 +301,13 @@ export default function ContentPage() {
         toast.error(result.error);
         return;
       }
-      toast.success(`Sent ${result.sent} opportunities to workflow`);
-      if (result.failed > 0) toast.error(`${result.failed} failed to send`);
+      toast.success(t('toasts.bulkSent', { count: result.sent }));
+      if (result.failed > 0) toast.error(t('toasts.bulkSendFailedCount', { count: result.failed }));
       setSelectedIds(new Set());
       await loadData(true);
     } catch (err) {
       console.error('Bulk webhook send failed:', err);
-      toast.error('Failed to send opportunities.');
+      toast.error(t('toasts.bulkSendFailed'));
     } finally {
       setBulkSending(false);
     }
@@ -321,13 +321,13 @@ export default function ContentPage() {
 
       const result = await bulkUpdateStatus(ids, 'done');
 
-      toast.success(`Marked ${result.updated} opportunities as done`);
+      toast.success(t('toasts.bulkDone', { count: result.updated }));
 
       setSelectedIds(new Set());
 
       await loadData(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Bulk update failed');
+      toast.error(err instanceof Error ? err.message : t('toasts.bulkUpdateFailed'));
     } finally {
       setBulkSending(false);
     }
@@ -338,11 +338,11 @@ export default function ContentPage() {
     try {
       const ids = Array.from(selectedIds);
       const result = await bulkUpdateStatus(ids, 'dismissed');
-      toast.success(`Dismissed ${result.updated} opportunities`);
+      toast.success(t('toasts.bulkDismissed', { count: result.updated }));
       setSelectedIds(new Set());
       await loadData(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Bulk dismiss failed');
+      toast.error(err instanceof Error ? err.message : t('toasts.bulkDismissFailed'));
     } finally {
       setBulkSending(false);
     }
@@ -366,7 +366,7 @@ export default function ContentPage() {
   if (!activeBrandId) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Select a brand to view content opportunities.</p>
+        <p className="text-muted-foreground">{t('noBrand')}</p>
       </div>
     );
   }
@@ -441,20 +441,25 @@ export default function ContentPage() {
               title={t('kpi.total')}
               icon={Lightbulb}
               value={total}
-              sub={`${filtered.length} shown`}
+              sub={t('kpi.shown', { count: filtered.length })}
             />
             <KpiCard
               title={t('kpi.highImpact')}
               icon={Zap}
               value={highImpact}
-              sub="opportunities"
+              sub={t('kpi.subOpportunities')}
             />
-            <KpiCard title={t('kpi.avgScore')} icon={BarChart3} value={avgScore} sub="out of 100" />
+            <KpiCard
+              title={t('kpi.avgScore')}
+              icon={BarChart3}
+              value={avgScore}
+              sub={t('kpi.subOutOf100')}
+            />
             <KpiCard
               title={t('kpi.sentToWorkflow')}
               icon={Send}
               value={sentCount}
-              sub="sent or in progress"
+              sub={t('kpi.subSent')}
             />
           </div>
 
@@ -467,14 +472,14 @@ export default function ContentPage() {
                     variant="outline"
                     className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                   >
-                    {total} Available
+                    {t('available', { count: total })}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="relative w-48">
                     <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
-                      placeholder="Search..."
+                      placeholder={t('searchPlaceholder')}
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       className="pl-8 h-8 text-xs"
@@ -556,7 +561,7 @@ export default function ContentPage() {
                     disabled={bulkSending}
                   >
                     <Check className="h-3 w-3" />
-                    Done
+                    {t('bulk.markDone')}
                   </Button>
 
                   <Button
@@ -670,7 +675,7 @@ export default function ContentPage() {
                                 ) : (
                                   <Send className="h-3 w-3" />
                                 )}
-                                Send
+                                {t('send')}
                               </Button>
                               <Button
                                 variant="ghost"
@@ -695,7 +700,7 @@ export default function ContentPage() {
               </Table>
               {filtered.length === 0 && (
                 <div className="py-10 text-center text-sm text-muted-foreground">
-                  No opportunities match your filters.
+                  {t('noMatch')}
                 </div>
               )}
             </CardContent>

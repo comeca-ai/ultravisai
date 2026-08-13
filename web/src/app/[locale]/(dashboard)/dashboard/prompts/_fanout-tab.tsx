@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Link } from '@/i18n/navigation';
 import {
@@ -71,6 +72,7 @@ function userErrorMessage(err: unknown, fallback: string): string {
 }
 
 export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
+  const t = useTranslations('prompts.fanout');
   const [data, setData] = useState<QueryFanoutData | null>(null);
   const [loading, setLoading] = useState(true);
   const [addingKey, setAddingKey] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
         void classifyProgressively(result.subQueries.map((s) => s.query));
       } catch (err) {
         console.error('[fanout] load failed', err);
-        toast.error(userErrorMessage(err, 'Failed to load query fan-out — please retry.'));
+        toast.error(userErrorMessage(err, t('loadError')));
         setData({ subQueries: [], totalObserved: 0 });
       } finally {
         if (!silent) {
@@ -136,7 +138,7 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
         }
       }
     },
-    [brandId, classifyProgressively],
+    [brandId, classifyProgressively, t],
   );
   useEffect(() => {
     load();
@@ -184,7 +186,7 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
         toast.error(result.error);
         return;
       }
-      toast.success('Added as a tracked prompt');
+      toast.success(t('trackedToast'));
       setData((prev) => {
         if (!prev) return prev;
         return {
@@ -205,7 +207,7 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
       await onTracked?.();
     } catch (err) {
       console.error('[fanout] track failed', err);
-      toast.error(userErrorMessage(err, 'Failed to track this query — please retry.'));
+      toast.error(userErrorMessage(err, t('trackError')));
     } finally {
       setAddingKey(null);
     }
@@ -217,7 +219,7 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-4">
-          <CardTitle className="text-sm font-medium">Query Fan-out</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('title')}</CardTitle>
           {!loading && !isEmpty && (
             <div className="flex rounded-md border p-0.5">
               <button
@@ -229,7 +231,7 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
                 )}
                 onClick={() => setView('by-prompt')}
               >
-                By prompt
+                {t('viewByPrompt')}
               </button>
               <button
                 className={cn(
@@ -240,15 +242,13 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
                 )}
                 onClick={() => setView('frequency')}
               >
-                High frequency
+                {t('viewFrequency')}
               </button>
             </div>
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          {view === 'by-prompt'
-            ? 'Your tracked prompts grouped by the sub-queries their answers actually triggered — expand a prompt to see its observed fan-out.'
-            : 'The sub-queries answer engines actually ran while building your answers (last 30 days) — observed, never predicted. Sorted by how often they were searched. Track any of them with the + to measure its own visibility.'}
+          {view === 'by-prompt' ? t('descByPrompt') : t('descFrequency')}
         </p>
       </CardHeader>
       <CardContent>
@@ -286,14 +286,15 @@ export function QueryFanoutTab({ brandId, onTracked }: QueryFanoutTabProps) {
 }
 
 function EmptyState() {
+  const t = useTranslations('prompts.fanout');
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
       <Search className="h-8 w-8 text-muted-foreground/50" />
-      <p className="text-sm font-medium">No fan-out captured yet</p>
+      <p className="text-sm font-medium">{t('emptyTitle')}</p>
       <p className="max-w-md text-xs text-muted-foreground">
-        Fan-out is emitted mostly by <span className="font-medium">Copilot</span> and{' '}
-        <span className="font-medium">Perplexity</span>, and only for some queries. Once those
-        platforms run for your prompts, the observed sub-queries will appear here.
+        {t.rich('emptyBody', {
+          b: (chunks) => <span className="font-medium">{chunks}</span>,
+        })}
       </p>
     </div>
   );
@@ -330,6 +331,7 @@ function HighFrequencyView({
   onPageChange: (p: number) => void;
   onTrack: (query: string) => void;
 }) {
+  const t = useTranslations('prompts.fanout');
   const totalPages = Math.ceil(subQueries.length / pageSize);
   const pageRows = subQueries.slice((page - 1) * pageSize, page * pageSize);
 
@@ -338,12 +340,12 @@ function HighFrequencyView({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Sub-query</TableHead>
-            <TableHead className="w-[160px]">Engine</TableHead>
-            <TableHead className="w-[120px] text-right">Times searched</TableHead>
-            <TableHead className="w-[220px]">Sourced prompts</TableHead>
-            <TableHead className="w-[130px]">Intent</TableHead>
-            <TableHead className="w-[64px] text-right">Track</TableHead>
+            <TableHead>{t('colSubQuery')}</TableHead>
+            <TableHead className="w-[160px]">{t('colEngine')}</TableHead>
+            <TableHead className="w-[120px] text-right">{t('colTimesSearched')}</TableHead>
+            <TableHead className="w-[220px]">{t('colSourcedPrompts')}</TableHead>
+            <TableHead className="w-[130px]">{t('colIntent')}</TableHead>
+            <TableHead className="w-[64px] text-right">{t('colTrack')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -378,6 +380,7 @@ function HighFrequencyView({
             className="h-7 w-7 p-0 text-xs"
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
+            aria-label={t('pagerPrev')}
           >
             ‹
           </Button>
@@ -407,6 +410,7 @@ function HighFrequencyView({
             className="h-7 w-7 p-0 text-xs"
             onClick={() => onPageChange(page + 1)}
             disabled={page === totalPages}
+            aria-label={t('pagerNext')}
           >
             ›
           </Button>
@@ -431,6 +435,8 @@ function ByPromptView({
   searchText: string;
   onSearchChange: (text: string) => void;
 }) {
+  const t = useTranslations('prompts.fanout');
+  const tAll = useTranslations('prompts.allTable');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   function toggle(id: string) {
@@ -447,7 +453,7 @@ function ByPromptView({
       <div className="relative w-60">
         <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
         <Input
-          placeholder="Search prompts…"
+          placeholder={tAll('searchPlaceholder')}
           value={searchText}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-8 h-8 text-xs"
@@ -457,15 +463,15 @@ function ByPromptView({
       {groups.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-12 text-center">
           <Search className="h-8 w-8 text-muted-foreground/50" />
-          <p className="text-sm font-medium">No prompts match your search</p>
+          <p className="text-sm font-medium">{t('noSearchResults')}</p>
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[28px]" />
-              <TableHead>Prompt</TableHead>
-              <TableHead className="w-[110px] text-right">Sub-queries</TableHead>
+              <TableHead>{tAll('colPrompt')}</TableHead>
+              <TableHead className="w-[110px] text-right">{t('colSubQueries')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -500,13 +506,15 @@ function ByPromptView({
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Sub-query</TableHead>
-                                <TableHead className="w-[160px]">Engine</TableHead>
+                                <TableHead>{t('colSubQuery')}</TableHead>
+                                <TableHead className="w-[160px]">{t('colEngine')}</TableHead>
                                 <TableHead className="w-[120px] text-right">
-                                  Times searched
+                                  {t('colTimesSearched')}
                                 </TableHead>
-                                <TableHead className="w-[130px] pl-6">Intent</TableHead>
-                                <TableHead className="w-[64px] text-right">Track</TableHead>
+                                <TableHead className="w-[130px] pl-6">{t('colIntent')}</TableHead>
+                                <TableHead className="w-[64px] text-right">
+                                  {t('colTrack')}
+                                </TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -573,6 +581,7 @@ function TrackCell({
   adding: boolean;
   onTrack: (query: string) => void;
 }) {
+  const t = useTranslations('prompts.fanout');
   if (sq.tracked) {
     return (
       <Badge
@@ -585,7 +594,7 @@ function TrackCell({
         }
       >
         <Check className="h-3 w-3" />
-        Tracked
+        {t('tracked')}
       </Badge>
     );
   }
@@ -599,7 +608,7 @@ function TrackCell({
         e.stopPropagation();
         onTrack(sq.query);
       }}
-      aria-label={`Track "${sq.query}" as a prompt`}
+      aria-label={t('trackAria', { query: sq.query })}
     >
       {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
     </Button>
@@ -637,15 +646,19 @@ function SourcedPrompts({ prompts }: { prompts: { id: string; text: string }[] }
 }
 
 function IntentBadge({ intent }: { intent?: string }) {
+  const t = useTranslations('prompts.fanout');
   // Intents load on-demand (async, cached server-side); show a placeholder
   // until this row's classification resolves.
   if (!intent) return <span className="text-xs text-muted-foreground">—</span>;
+  // Localized labels keyed by the shared intent taxonomy; the config map is
+  // the fallback for any value the messages don't cover yet.
+  const intentLabels = t.raw('intents') as Record<string, string>;
   return (
     <Badge
       variant="outline"
       className={cn('text-[10px] whitespace-nowrap', INTENT_COLORS[intent] ?? '')}
     >
-      {INTENT_LABELS[intent] ?? intent}
+      {intentLabels[intent] ?? INTENT_LABELS[intent] ?? intent}
     </Badge>
   );
 }

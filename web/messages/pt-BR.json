@@ -97,7 +97,28 @@
       "recommend": "Gerando recomendações com IA…"
     },
     "emptyTitle": "Audite qualquer página para prontidão em busca por IA",
-    "emptyBody": "Informe uma URL acima para avaliá-la com 47 sinais de AEO/GEO e receber correções escritas por IA."
+    "emptyBody": "Informe uma URL acima para avaliá-la com 47 sinais de AEO/GEO e receber correções escritas por IA.",
+    "resultCard": {
+      "signalsEvaluated": "{evaluated} / {total} sinais avaliados",
+      "topRecommendations": "Principais recomendações",
+      "notAvailable": "n/d"
+    },
+    "categories": {
+      "structure": "Estrutura",
+      "content": "Conteúdo",
+      "authority": "Autoridade",
+      "eeat": "E-E-A-T",
+      "trust": "Confiança"
+    },
+    "charts": {
+      "scoreLabel": "Pontuação"
+    },
+    "rangeAll": "Tudo",
+    "na": "n/d",
+    "listStatus": {
+      "running": "em andamento",
+      "failed": "falhou"
+    }
   },
   "auth": {
     "signIn": "Entrar",
@@ -158,7 +179,22 @@
     "activePlatforms": "Plataformas Ativas",
     "recentActivity": "Atividade Recente",
     "quickActions": "Ações Rápidas",
-    "viewAll": "Ver tudo"
+    "viewAll": "Ver tudo",
+    "promptSuggestions": {
+      "saveChanges": "Salvar alterações",
+      "cancelEdit": "Cancelar edição",
+      "topic": "Tópico",
+      "selectTopic": "Selecione um tópico",
+      "platformModels": "Plataforma e Modelos",
+      "selectedCount": "{count, plural, one {# selecionado} other {# selecionados}}",
+      "selectPlatformModels": "Selecione plataforma e modelos",
+      "providerScraper": "{provider} (Scraper)",
+      "providerApi": "{provider} (API)",
+      "editPrompt": "Editar prompt",
+      "deletePrompt": "Excluir prompt",
+      "deleteTitle": "Excluir Prompt",
+      "deleteDescription": "Tem certeza de que quer excluir este prompt? Esta ação não pode ser desfeita."
+    }
   },
   "insights": {
     "title": "Resumo de Visibilidade nas IAs",
@@ -262,7 +298,41 @@
     "sovTooltip": "Share of Voice é a sua fatia das menções de marca: menções à sua marca ÷ (suas + dos concorrentes) nas respostas de IA do período. Respostas sem nenhuma menção não entram na conta.",
     "overallSov": "Share of Voice geral",
     "sovNoData": "Sem dados de share of voice no período",
-    "sovZeroHint": "Zero aqui é real: houve respostas de IA, mas nenhuma mencionou sua marca ou seus concorrentes pelo nome. Ter respostas não pontua — o que conta é ser mencionado."
+    "sovZeroHint": "Zero aqui é real: houve respostas de IA, mas nenhuma mencionou sua marca ou seus concorrentes pelo nome. Ter respostas não pontua — o que conta é ser mencionado.",
+    "breakdown": {
+      "metricVisibility": "Score de Visibilidade",
+      "sheetTitle": "Detalhamento de {metric}",
+      "windowCompare": "Últimos {days} dias vs {days} dias anteriores",
+      "windowCompareFallback": "Comparando o período selecionado com o período anterior de mesma duração.",
+      "loadFailed": "Falha ao carregar o detalhamento",
+      "currentWindow": "Atual {days}d",
+      "vsPrevious": "vs período anterior:",
+      "tabPrompts": "Prompts",
+      "tabPlatforms": "Plataformas",
+      "tabTopics": "Tópicos",
+      "biggestDrop": "Maior queda",
+      "biggestGain": "Maior ganho",
+      "topPlatformDrop": "Maior queda por plataforma",
+      "topPlatformGain": "Maior ganho por plataforma",
+      "emptyWindow": "Ainda sem dados neste período.",
+      "colName": "Nome",
+      "colPrev": "Ant.",
+      "colCur": "Atual",
+      "colChange": "Variação",
+      "pts": "pts",
+      "rose": "subiu {value} pts",
+      "dropped": "caiu {value} pts",
+      "gainedMentions": "{count, plural, one {ganhou # menção} other {ganhou # menções}}",
+      "lostMentions": "{count, plural, one {perdeu # menção} other {perdeu # menções}}"
+    },
+    "resultDetail": {
+      "notFoundTitle": "Resultado não encontrado",
+      "notFoundBody": "Este resultado pode ter sido excluído ou não existe.",
+      "brandCitations": "Citações da Marca",
+      "aiResponse": "Resposta da IA",
+      "queryFanout": "Expansão de consultas ({count})",
+      "checked": "Verificado em: {date}"
+    }
   },
   "topics": {
     "addTopic": "Adicionar Tópico",
@@ -310,6 +380,63 @@
       "minutesAgo": "há {m}min",
       "hoursAgo": "há {h}h",
       "daysAgo": "há {d}d"
+    },
+    "detail": {
+      "notFound": "Tópico não encontrado",
+      "noDataYet": "Nenhum dado ainda para este tópico.",
+      "ptsSuffix": "pts",
+      "kpi": {
+        "avgVisibility": "Visibilidade média",
+        "brandMentions": "Menções da marca",
+        "citations": "Citações",
+        "positiveSentiment": "Sentimento positivo"
+      },
+      "visibilityTrend": {
+        "title": "Tendência de visibilidade",
+        "subtitle": "Visibilidade média diária deste tópico vs. média dos concorrentes"
+      },
+      "sovByPlatform": {
+        "title": "Share of Voice por plataforma",
+        "subtitle": "Marca vs. concorrentes nos mecanismos de resposta",
+        "empty": "Nenhum dado de plataforma ainda."
+      },
+      "competitors": {
+        "title": "Comparação com concorrentes",
+        "subtitle": "Sua marca vs. concorrentes diretos neste tópico",
+        "you": "VOCÊ",
+        "empty": "Nenhuma menção de concorrentes ainda."
+      },
+      "prompts": {
+        "title": "Desempenho dos prompts",
+        "subtitle": "Melhores e piores prompts neste tópico (últimos 50 rastreios)",
+        "empty": "Nenhum resultado de prompt ainda.",
+        "top": "Melhores desempenhos",
+        "weak": "Precisam melhorar",
+        "runs": "{count, plural, one {# rastreio} other {# rastreios}}",
+        "viewAll": "Ver todos os resultados de prompts deste tópico →"
+      }
+    },
+    "charts": {
+      "brand": "Marca",
+      "competitorsAvg": "Média dos concorrentes"
+    },
+    "suggestionsCard": {
+      "title": "Sugestões de Tópicos",
+      "infoTooltip": "Ideias de tópicos geradas por IA para a sua marca. Tópicos que você já rastreia e ideias descartadas nunca reaparecem.",
+      "noNewIdeas": "nenhuma ideia nova — expandir",
+      "expandHint": "expanda para ver ideias de tópicos por IA",
+      "refresh": "Atualizar",
+      "generating": "Gerando…",
+      "refreshed": "Sugestões de tópicos atualizadas",
+      "refreshFailed": "Falha ao atualizar",
+      "addFailed": "Não foi possível adicionar",
+      "dismissFailed": "Não foi possível descartar",
+      "emptyTitle": "Nenhuma sugestão no momento",
+      "emptyBodyManage": "Gere ideias de tópicos por IA sob medida para a sua marca e setor. Tópicos que você já rastreia são excluídos automaticamente.",
+      "emptyBodyReadOnly": "Nenhuma sugestão de tópico foi gerada para esta marca ainda.",
+      "generate": "Gerar Sugestões",
+      "addAction": "Adicionar aos tópicos rastreados",
+      "dismissAction": "Descartar sugestão"
     }
   },
   "content": {
@@ -348,7 +475,11 @@
       "total": "Total de Oportunidades",
       "highImpact": "Alto Impacto",
       "sentToWorkflow": "Enviadas ao Workflow",
-      "avgScore": "Score Médio"
+      "avgScore": "Score Médio",
+      "shown": "{count} exibidas",
+      "subOpportunities": "oportunidades",
+      "subOutOf100": "de 100",
+      "subSent": "enviadas ou em andamento"
     },
     "filters": {
       "allStatuses": "Todos os Status",
@@ -358,7 +489,8 @@
     "bulk": {
       "selected": "{count} selecionadas",
       "sendAll": "Enviar Todas",
-      "dismissAll": "Descartar Todas"
+      "dismissAll": "Descartar Todas",
+      "markDone": "Concluir"
     },
     "table": {
       "action": "Ação",
@@ -381,7 +513,21 @@
       "webhookStatus": "Status do Webhook",
       "notSentYet": "Ainda não enviado a nenhum workflow.",
       "sentAt": "Enviado em {date}",
-      "webhookResponse": "Resposta do Webhook"
+      "webhookResponse": "Resposta do Webhook",
+      "score": "Score: {value}",
+      "volumePerMonth": "~{value}/mês",
+      "fanoutQueries": "Consultas de fan-out observadas",
+      "searchedTimes": "Buscada {count}× pelos motores de resposta",
+      "intents": {
+        "comparison": "Comparação",
+        "how-to": "Como fazer",
+        "what-is": "O que é",
+        "best-top": "Melhores / Top",
+        "vs-review": "vs. / Review",
+        "recommendation": "Recomendação",
+        "problem-solving": "Resolução de problema",
+        "other": "Outro"
+      }
     },
     "webhook": {
       "title": "Configurações de Webhook",
@@ -401,6 +547,47 @@
       "inactive": "Inativo",
       "noWebhook": "Nenhum webhook configurado",
       "setupFirst": "Configure um webhook para enviar oportunidades às suas ferramentas de workflow."
+    },
+    "noBrand": "Selecione uma marca para ver as oportunidades de conteúdo.",
+    "notFound": "Oportunidade não encontrada.",
+    "searchPlaceholder": "Buscar...",
+    "send": "Enviar",
+    "noMatch": "Nenhuma oportunidade corresponde aos seus filtros.",
+    "toasts": {
+      "loadFailed": "Não foi possível carregar as oportunidades de conteúdo",
+      "loadOneFailed": "Não foi possível carregar a oportunidade",
+      "generated": "{count, plural, one {# oportunidade gerada} other {# oportunidades geradas}}",
+      "generationFailed": "A geração falhou — tente de novo",
+      "generationTimeout": "A geração excedeu o tempo limite — tente de novo",
+      "generateFailed": "Não foi possível gerar as oportunidades",
+      "sentToWorkflow": "Enviado ao workflow!",
+      "sendFailed": "Não foi possível enviar",
+      "dismissed": "Oportunidade descartada",
+      "dismissFailed": "Não foi possível descartar",
+      "bulkSent": "{count, plural, one {# oportunidade enviada ao workflow} other {# oportunidades enviadas ao workflow}}",
+      "bulkSendFailedCount": "{count, plural, one {# falhou ao enviar} other {# falharam ao enviar}}",
+      "bulkSendFailed": "Não foi possível enviar as oportunidades.",
+      "bulkDone": "{count, plural, one {# oportunidade marcada como concluída} other {# oportunidades marcadas como concluídas}}",
+      "bulkUpdateFailed": "A atualização em massa falhou",
+      "bulkDismissed": "{count, plural, one {# oportunidade descartada} other {# oportunidades descartadas}}",
+      "bulkDismissFailed": "O descarte em massa falhou"
+    },
+    "brief": {
+      "title": "Briefing de Conteúdo",
+      "outline": "Estrutura do Briefing",
+      "competitorInsights": "Insights de Concorrentes",
+      "keywords": "Palavras-chave",
+      "words": "~{count} palavras",
+      "generate": "Gerar Briefing de Conteúdo",
+      "generating": "Gerando...",
+      "generated": "Briefing de conteúdo gerado!",
+      "generateFailed": "Não foi possível gerar o briefing",
+      "emptyTitle": "Nenhum briefing de conteúdo ainda",
+      "emptyBody": "Gere um briefing de conteúdo com IA, com título sugerido, estrutura, palavras-chave alvo e insights de concorrentes.",
+      "limitReachedTitle": "Limite mensal de briefings atingido",
+      "limitReachedBody": "Você usou todos os {limit} briefings de conteúdo incluídos no seu plano este mês. Faça upgrade para um limite maior, ou aguarde o dia 1º, quando sua cota renova.",
+      "upgrade": "Fazer Upgrade do Plano",
+      "quotaRemaining": "{remaining}/{limit} briefings restantes este mês"
     }
   },
   "traffic": {
@@ -409,7 +596,98 @@
     "totalCrawls": "Total de Rastreamentos",
     "uniqueBots": "Bots Únicos",
     "referralTraffic": "Tráfego de Referência de IA",
-    "topPages": "Páginas Mais Rastreadas"
+    "topPages": "Páginas Mais Rastreadas",
+    "subtitle": "Visitas ao seu site referenciadas por IA",
+    "deltaNew": "novo",
+    "unknownPlatform": "Desconhecida",
+    "snippetTitle": "Adicione este snippet ao seu site",
+    "snippetDescription": "Cole antes do fechamento da tag <code>{tag}</code> para rastrear visitas referenciadas por IA.",
+    "snippetCopyAria": "Copiar script de rastreamento",
+    "timeAgo": {
+      "justNow": "agora mesmo",
+      "minutesAgo": "{count}min atrás",
+      "hoursAgo": "{count}h atrás",
+      "daysAgo": "{count}d atrás"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por URL ou caminho...",
+      "allPlatforms": "Todas as plataformas",
+      "clear": "Limpar filtros"
+    },
+    "pager": {
+      "range": "{start}–{end} de {total}",
+      "previous": "Anterior",
+      "next": "Próxima"
+    },
+    "emptyLogs": {
+      "noMatchTitle": "Nenhuma visita encontrada",
+      "noMatchDescription": "Tente ajustar os filtros ou os termos de busca.",
+      "title": "Nenhuma visita ainda",
+      "description": "Assim que visitantes chegarem de plataformas de IA, as visitas aparecerão aqui."
+    },
+    "range": {
+      "last24h": "últimas 24 horas",
+      "last7d": "últimos 7 dias",
+      "last30d": "últimos 30 dias",
+      "last90d": "últimos 90 dias",
+      "allTime": "todo o período",
+      "between": "{from} – {to}",
+      "from": "a partir de {from}",
+      "through": "até {to}",
+      "selected": "período selecionado"
+    },
+    "trend": {
+      "title": "Tendência de Referências de IA",
+      "last24h": "Tendência de Referências de IA — Últimas 24 Horas",
+      "last7d": "Tendência de Referências de IA — Últimos 7 Dias",
+      "last30d": "Tendência de Referências de IA — Últimos 30 Dias",
+      "last90d": "Tendência de Referências de IA — Últimos 90 Dias",
+      "allTime": "Tendência de Referências de IA — Todo o Período",
+      "custom": "Tendência de Referências de IA — {from} – {to}"
+    },
+    "dateRange": {
+      "label": "Período",
+      "custom": "Personalizado",
+      "all": "Tudo",
+      "from": "De",
+      "to": "Até",
+      "preset": {
+        "24h": "24h",
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d"
+      }
+    },
+    "noBrand": {
+      "title": "Nenhuma marca selecionada",
+      "description": "Selecione uma marca para ver a análise de tráfego de IA."
+    },
+    "empty": {
+      "title": "Nenhum dado de tráfego ainda",
+      "addSnippet": "Adicione o snippet de rastreamento ao seu site para começar a coletar dados de tráfego referenciado por IA."
+    },
+    "kpi": {
+      "visits": "Visitas Referenciadas por IA",
+      "vsPrevious": "{delta}% vs período anterior",
+      "topPlatform": "Plataforma Principal",
+      "visitCount": "{count, plural, one {# visita} other {# visitas}}",
+      "noData": "sem dados",
+      "platforms": "Plataformas",
+      "uniqueSources": "fontes de IA únicas"
+    },
+    "platformBreakdown": "Distribuição por Plataforma",
+    "referralsByPlatform": "Referências por Plataforma",
+    "topLandingPages": "Principais Páginas de Entrada",
+    "recentVisits": "Visitas Recentes de Referência de IA",
+    "totalBadge": "{count} no total",
+    "table": {
+      "platform": "Plataforma",
+      "visits": "Visitas",
+      "change": "Variação",
+      "page": "Página",
+      "time": "Horário",
+      "country": "País"
+    }
   },
   "prompts": {
     "title": "Volumes de Prompts",
@@ -451,6 +729,273 @@
       "active": "Ativo",
       "paused": "Pausado",
       "statusUpdateFailed": "Falha ao atualizar o status"
+    },
+    "detail": {
+      "dateRange": "Período",
+      "dateFrom": "De",
+      "dateTo": "Até",
+      "datePresets": {
+        "24h": "24h",
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d",
+        "all": "Tudo",
+        "custom": "Personalizado"
+      },
+      "unknownModel": "Desconhecido",
+      "sentiment": {
+        "positive": "Positivo",
+        "neutral": "Neutro",
+        "negative": "Negativo"
+      },
+      "kpiVisibility": "Visibilidade",
+      "mentionsLabel": "Menções",
+      "citationsLabel": "Citações",
+      "lastRun": "Última análise: {time}",
+      "notFoundTitle": "Prompt não encontrado",
+      "notFoundBody": "Este prompt pode ter sido excluído ou não existe.",
+      "platformResultsTitle": "Resultados por Plataforma",
+      "platformResultsSubtitle": "{count, plural, one {# resultado agrupado por plataforma e modelo.} other {# resultados agrupados por plataforma e modelo.}}",
+      "emptyAll": "Ainda não há resultados de rastreamento para este prompt.",
+      "emptyRange": "Nenhum resultado no período selecionado.",
+      "showAllData": "Mostrar todos os dados",
+      "runsCount": "{count, plural, one {# análise} other {# análises}}",
+      "runsHeading": "Análises",
+      "mentionsWord": "{count, plural, one {menção} other {menções}}",
+      "citationsWord": "{count, plural, one {citação} other {citações}}",
+      "viewResponse": "Ver detalhes da resposta",
+      "showingRuns": "Mostrando as {shown} análises mais recentes de {total} desta plataforma.",
+      "topSourcesTitle": "Principais Fontes",
+      "topSourcesSubtitle": "Fontes que as plataformas de IA citam ao responder este prompt.",
+      "tabDomains": "Domínios ({count})",
+      "tabUrls": "URLs ({count})"
+    },
+    "workflowCards": {
+      "notCited": "Ainda não citada",
+      "citedBadge": "Citada ×{count}",
+      "citedTooltipCount": "{count, plural, one {Citada em # resposta} other {Citada em # respostas}}",
+      "citedTooltipFirst": "primeira em {date}",
+      "citedTooltipLast": "última em {date}",
+      "citedTooltipAlready": "já era citada antes de virar alvo",
+      "notes": {
+        "title": "Notas",
+        "subtitle": "Acompanhe o trabalho por trás deste prompt — o que foi publicado, planejado ou decidido.",
+        "placeholder": "ex.: Publicamos um post comparativo mirando este prompt…",
+        "add": "Adicionar nota",
+        "empty": "Ainda não há notas.",
+        "emptyManage": "Ainda não há notas — adicione a primeira acima.",
+        "unknownAuthor": "Desconhecido",
+        "deleteAria": "Excluir nota",
+        "addFailed": "Falha ao adicionar a nota",
+        "deleteFailed": "Falha ao excluir a nota"
+      },
+      "urls": {
+        "title": "URLs-alvo",
+        "subtitle": "Páginas que você quer que as respostas de IA citem para este prompt. O status de citação é atualizado automaticamente conforme novos resultados de rastreamento chegam.",
+        "placeholder": "https://exemplo.com/blog/post-comparativo",
+        "add": "Adicionar",
+        "empty": "Ainda não há URLs-alvo.",
+        "emptyManage": "Ainda não há URLs-alvo — adicione as páginas que você quer que sejam citadas.",
+        "removeAria": "Remover URL-alvo",
+        "addFailed": "Falha ao adicionar a URL",
+        "removeFailed": "Falha ao remover a URL"
+      }
+    },
+    "fanout": {
+      "title": "Query Fan-out",
+      "viewByPrompt": "Por prompt",
+      "viewFrequency": "Alta frequência",
+      "descByPrompt": "Seus prompts rastreados agrupados pelas consultas derivadas que as respostas realmente dispararam — expanda um prompt para ver o fan-out observado.",
+      "descFrequency": "As consultas derivadas que os mecanismos de resposta realmente executaram ao montar suas respostas (últimos 30 dias) — observadas, nunca previstas. Ordenadas por frequência de busca. Rastreie qualquer uma delas com o + para medir a visibilidade dela.",
+      "loadError": "Falha ao carregar o Query Fan-out — tente novamente.",
+      "trackError": "Falha ao rastrear esta consulta — tente novamente.",
+      "trackedToast": "Adicionada como prompt rastreado",
+      "emptyTitle": "Nenhum fan-out capturado ainda",
+      "emptyBody": "O fan-out é emitido principalmente por <b>Copilot</b> e <b>Perplexity</b>, e só para algumas consultas. Assim que essas plataformas rodarem para seus prompts, as consultas derivadas observadas aparecerão aqui.",
+      "colSubQuery": "Consulta derivada",
+      "colEngine": "Mecanismo",
+      "colTimesSearched": "Vezes buscada",
+      "colSourcedPrompts": "Prompts de origem",
+      "colIntent": "Intenção",
+      "colTrack": "Rastrear",
+      "colSubQueries": "Consultas derivadas",
+      "noSearchResults": "Nenhum prompt corresponde à sua busca",
+      "tracked": "Rastreado",
+      "trackAria": "Rastrear \"{query}\" como prompt",
+      "pagerPrev": "Página anterior",
+      "pagerNext": "Próxima página",
+      "intents": {
+        "comparison": "Comparação",
+        "how-to": "Como fazer",
+        "what-is": "O que é",
+        "best-top": "Melhores / Top",
+        "vs-review": "vs. / Análise",
+        "recommendation": "Recomendação",
+        "problem-solving": "Resolução de problema",
+        "other": "Outro"
+      }
+    },
+    "suggestionsCard": {
+      "title": "Sugestões de Prompts",
+      "infoTip": "Ideias de prompts geradas por IA com base na sua marca, nos prompts já rastreados e nos concorrentes citados nas respostas de IA.",
+      "collapsedNoIdeas": "sem novas ideias — expandir",
+      "collapsedHint": "expanda para ver ideias de prompts de IA",
+      "refresh": "Atualizar",
+      "generating": "Gerando…",
+      "refreshedToast": "Sugestões atualizadas",
+      "refreshFailed": "Falha ao atualizar",
+      "addedToast": "Prompt adicionado à sua lista de rastreamento",
+      "addFailed": "Falha ao adicionar",
+      "dismissFailed": "Falha ao descartar",
+      "emptyTitle": "Nenhuma sugestão no momento",
+      "emptyBody": "Clique em atualizar para gerar novas ideias de prompts sob medida para sua marca e a atividade dos concorrentes.",
+      "generate": "Gerar Sugestões",
+      "volumePerMonth": "~{volume}/mês",
+      "addAria": "Adicionar aos prompts rastreados",
+      "dismissAria": "Descartar sugestão"
+    },
+    "charts": {
+      "noVolumeData": "Nenhum dado de volume disponível",
+      "estQueries": "Consultas est.",
+      "share": "Participação"
+    },
+    "similarTopics": {
+      "back": "Voltar para Insights de Prompts",
+      "title": "Tópicos Similares",
+      "description": "Clusters de palavras-chave agregados dos prompts analisados.",
+      "topicClusters": "Clusters de Tópicos",
+      "uniqueKeywords": "palavras-chave únicas",
+      "googleVolume": "Volume Google",
+      "monthlySearches": "buscas mensais",
+      "estAiVolume": "Volume de IA Est.",
+      "monthlyAiQueries": "consultas de IA mensais",
+      "allTitle": "Todos os Tópicos Similares",
+      "searchPlaceholder": "Buscar tópicos…",
+      "colGoogleVol": "Vol. Google",
+      "colEstAiVol": "Vol. IA Est.",
+      "colPrompts": "Prompts",
+      "colTopPrompt": "Prompt Principal",
+      "loading": "Carregando tópicos similares…",
+      "empty": "Nenhum tópico similar encontrado.",
+      "seeAll": "Ver todos",
+      "inPrompts": "{keyword} (em {count} prompts)"
+    },
+    "pageTitle": "Prompts",
+    "pageDescription": "Gerencie cada prompt rastreado e revise a demanda estimada em IA",
+    "volumesEstimateNote": "Os volumes são estimativas, não números exatos",
+    "noBrand": "Selecione uma marca para ver os prompts.",
+    "exportHint": "Nenhum prompt ainda - adicione prompts primeiro.",
+    "exportCsv": "Exportar CSV",
+    "addPrompt": "Adicionar prompt",
+    "managePrompts": "Gerenciar prompts",
+    "analyzing": "Analisando...",
+    "refreshing": "Atualizando...",
+    "refreshVolumes": "Atualizar Volumes",
+    "reanalyzeKeywords": "Reanalisar Palavras-chave",
+    "analyzeNewPrompts": "Analisar Novos Prompts",
+    "analyzeVolumes": "Analisar Volumes",
+    "noSearchMatch": "Nenhum prompt corresponde à sua busca.",
+    "tabs": {
+      "all": "Todos os Prompts",
+      "fanout": "Query Fan-out",
+      "insights": "Insights"
+    },
+    "toasts": {
+      "volumesDegraded": "Os dados de volume estão temporariamente indisponíveis — exibindo os prompts sem eles.",
+      "loadFailed": "Não foi possível carregar os dados dos prompts",
+      "noActiveToAnalyze": "Nenhum prompt ativo para analisar. Adicione prompts a uma marca primeiro.",
+      "noActive": "Nenhum prompt ativo para analisar.",
+      "analyzed": "{count, plural, one {# prompt analisado} other {# prompts analisados}}",
+      "refreshed": "{count, plural, one {Volumes atualizados para # prompt} other {Volumes atualizados para # prompts}}",
+      "reanalyzed": "{count, plural, one {# prompt reanalisado com novas palavras-chave} other {# prompts reanalisados com novas palavras-chave}}",
+      "limitReached": "Limite mensal de análises de volume atingido. Faça upgrade do seu plano para analisar mais.",
+      "analysisFailed": "A análise de volume falhou",
+      "refreshFailed": "A atualização de volumes falhou",
+      "reanalysisFailed": "A reanálise falhou"
+    },
+    "banner": {
+      "title": "{count, plural, one {# prompt ainda não foi analisado} other {# prompts ainda não foram analisados}}",
+      "body": "Rode a análise de volume para preencher Volume e Concorrência.",
+      "bodyQuota": "Volume e Concorrência ficam vazios até serem analisados — mas seu limite mensal de análises de volume foi atingido. Faça upgrade do plano para analisar mais.",
+      "analyzeCta": "{count, plural, one {Analisar # prompt} other {Analisar # prompts}}"
+    },
+    "quota": {
+      "left": "{remaining}/{limit} análises restantes",
+      "exhausted": "Limite mensal de análises atingido. Renova quando sua assinatura renovar.",
+      "remainingMonth": "{remaining}/{limit} análises restantes este mês"
+    },
+    "emptyVolumes": {
+      "title": "Sem dados de volume ainda",
+      "bodyHasPrompts": "Clique em \"Analisar Volumes\" para buscar os dados de volume de busca dos seus prompts.",
+      "bodyNoPrompts": "Adicione prompts à sua marca primeiro e depois analise os volumes."
+    },
+    "kpi": {
+      "analyzed": "Prompts Analisados",
+      "analyzedSub": "em {count} palavras-chave",
+      "totalAiVolume": "Volume Total Est. em IA",
+      "totalAiVolumeSub": "de {value} buscas no Google",
+      "adoptionRate": "Taxa de Adoção de IA",
+      "adoptionRateSub": "do volume de busca do Google",
+      "avgAiVolume": "Volume Médio em IA",
+      "avgAiVolumeSub": "por prompt"
+    },
+    "volumesCard": {
+      "description": "Total estimado de consultas respondidas por IA em todos os clusters de tópicos, dividido por participação de cada motor de resposta. Os pesos incluem o Google AI Overview (~35% das buscas no Google), o Google AI Mode e os chatbots independentes."
+    },
+    "volumeTable": {
+      "googleVol": "Vol. Google",
+      "googleVolTip": "Volume mensal total de buscas no Google em todas as palavras-chave extraídas.",
+      "estAiVol": "Vol. Est. IA",
+      "estAiVolTip": "Volume mensal estimado de prompts em IA. Calculado como o volume total do Google multiplicado pela taxa de adoção de IA.",
+      "intent": "Intenção",
+      "intentTip": "A intenção de busca detectada pela análise de IA. Intenções diferentes indicam como os usuários formulam suas consultas.",
+      "footnote": "* Volume Est. em IA = volume total de busca no Google das palavras-chave extraídas × taxa de adoção de IA. Os números são aproximações para fins de planejamento."
+    },
+    "intents": {
+      "comparison": "Comparação",
+      "how-to": "Como fazer",
+      "what-is": "O que é",
+      "best-top": "Melhores / Top",
+      "vs-review": "vs. / Review",
+      "recommendation": "Recomendação",
+      "problem-solving": "Resolução de problema",
+      "other": "Outro"
+    },
+    "highOpp": {
+      "title": "Prompts de Alta Oportunidade",
+      "subtitle": "Prompts com maior demanda estimada de busca em IA",
+      "estAiVolume": "Volume Est. em IA",
+      "estAiVolumeTip": "Volume mensal estimado de prompts em IA. Ordenado do maior para o menor.",
+      "intentTip": "A intenção de busca detectada.",
+      "opportunity": "Oportunidade",
+      "opportunityTip": "Nível de oportunidade baseado no volume estimado em IA. Alta = acima de 10 mil/mês, Média = 5–10 mil/mês.",
+      "high": "Alta",
+      "medium": "Média"
+    },
+    "dialog": {
+      "textPlaceholder": "ex.: Melhores ferramentas de gestão de projetos para startups",
+      "topic": "Tópico",
+      "selectTopic": "Selecione um tópico",
+      "noTopics": "Nenhum tópico definido ainda. Adicione tópicos nas configurações da marca.",
+      "platformModels": "Plataformas e Modelos",
+      "selectedCount": "{count, plural, one {# selecionado} other {# selecionados}}",
+      "selectPlatformModels": "Selecionar plataformas e modelos",
+      "addTitle": "Adicionar Prompt",
+      "addDescription": "Rastreie um novo prompt desta marca nas plataformas selecionadas.",
+      "adding": "Adicionando…",
+      "added": "Prompt adicionado — ele entra no próximo rastreamento.",
+      "addFailed": "Não foi possível adicionar o prompt. Tente de novo.",
+      "editTitle": "Editar Prompt",
+      "editDescription": "As mudanças valem a partir do próximo rastreamento; os resultados passados continuam ligados a este prompt.",
+      "activeLabel": "Ativo — incluído nos rastreamentos",
+      "deleteConfirm": "Excluir este prompt e seu histórico de rastreamento?",
+      "keepIt": "Manter",
+      "saving": "Salvando…",
+      "saveChanges": "Salvar alterações",
+      "updated": "Prompt atualizado.",
+      "updateFailed": "Não foi possível atualizar o prompt. Tente de novo.",
+      "deleted": "Prompt excluído.",
+      "deleteFailed": "Não foi possível excluir o prompt. Tente de novo."
     }
   },
   "competitors": {
@@ -792,7 +1337,17 @@
     "drawerTimestamp": "Data/hora",
     "drawerPlatform": "Plataforma",
     "drawerRegion": "Região",
-    "drawerCardsTitle": "Cards retornados"
+    "drawerCardsTitle": "Cards retornados",
+    "charts": {
+      "cardRate": "Taxa de cards",
+      "yourCards": "Seus cards",
+      "allCards": "Todos os cards"
+    },
+    "loading": "Carregando...",
+    "allPlatforms": "Todas as plataformas",
+    "allRegions": "Todas as regiões",
+    "noProductsFound": "Nenhum produto encontrado com esses filtros.",
+    "viewPromptDetails": "Ver detalhes do prompt"
   },
   "reports": {
     "title": "Relatórios",
@@ -924,7 +1479,67 @@
     "mentionEvidence": "Evidência de Menção",
     "mentionEvidenceDescription": "As respostas que mais mencionaram você neste período, com o trecho ao redor da menção.",
     "citationEvidence": "Evidência de Citação",
-    "citationEvidenceDescription": "As URLs que as respostas de IA mais citaram neste período, e quais prompts rastreados as exibiram."
+    "citationEvidenceDescription": "As URLs que as respostas de IA mais citaram neste período, e quais prompts rastreados as exibiram.",
+    "pdf": {
+      "generatedOn": "Gerado em",
+      "executiveSummary": "Resumo Executivo",
+      "kpiVisibilityRate": "Visibilidade",
+      "kpiAvgScore": "Score Médio",
+      "kpiVisibility": "Visibilidade",
+      "kpiMentions": "Menções",
+      "kpiCitations": "Citações da Marca",
+      "kpiSentiment": "Sentimento Positivo",
+      "kpiCitationsNote": "\"Citações da Marca\" conta as citações do seu próprio site nas respostas de IA.",
+      "promptsSuffix": "prompts",
+      "deltaNew": "novas",
+      "visibilityTrend": "Tendência de Visibilidade",
+      "legendYourBrand": "Sua Marca",
+      "legendAvgCompetitor": "Média dos Concorrentes",
+      "shareOfVoice": "Share of Voice",
+      "competitorLeaderboard": "Ranking de Concorrentes",
+      "columnBrand": "Marca",
+      "columnChange": "Variação",
+      "columnMentions": "Menções",
+      "columnCitations": "Citações",
+      "you": "(você)",
+      "topicPerformance": "Desempenho por Tópico",
+      "columnTopic": "Tópico",
+      "columnVisibility": "Visibilidade",
+      "columnResults": "Resultados",
+      "bestPrompts": "Prompts de Melhor Desempenho",
+      "worstPrompts": "Prompts Mais Fracos",
+      "columnPrompt": "Prompt",
+      "columnRuns": "Rastreios",
+      "mentionEvidence": "Evidência de Menção",
+      "columnPlatform": "Plataforma",
+      "columnDate": "Data",
+      "columnExcerpt": "Como você foi mencionado",
+      "queryFanout": "Fan-out de Consultas",
+      "columnQuery": "Consulta",
+      "columnEngines": "Motores",
+      "columnSearched": "Buscas",
+      "aiTraffic": "Tráfego de IA",
+      "visitsSuffix": "visitas",
+      "columnTopPage": "Principais Páginas",
+      "columnVisits": "Visitas",
+      "shoppingVisibility": "Visibilidade em Shopping",
+      "shoppingSov": "SoV de Shopping",
+      "shoppingProducts": "Produtos Exibidos",
+      "shoppingCardRate": "Taxa de Cards",
+      "shoppingTopMerchant": "Principal Lojista",
+      "auditScore": "Score da Auditoria de Site",
+      "auditedOn": "auditado em",
+      "topCitationSources": "Principais Fontes de Citação",
+      "domainsSuffix": "domínios",
+      "citationsSuffix": "citações",
+      "columnDomain": "Domínio",
+      "columnSourceType": "Tipo de Fonte",
+      "columnUsage": "Uso",
+      "citationEvidence": "Evidência de Citação",
+      "columnUrl": "URL",
+      "columnCitedIn": "Citado em",
+      "footerGeneratedWith": "Gerado com Ultravis · www.ultravis.ai"
+    }
   },
   "settings": {
     "title": "Configurações",
@@ -997,7 +1612,68 @@
     "subscriptionCanceled": "Sua assinatura foi cancelada.",
     "needCustomPlan": "Precisa de um plano personalizado?",
     "customPlanDescription": "Tenha marcas ilimitadas, integrações personalizadas, suporte dedicado e mais.",
-    "contactUs": "Fale Conosco"
+    "contactUs": "Fale Conosco",
+    "themeSwitch": {
+      "light": "Claro",
+      "dark": "Escuro"
+    },
+    "apiKeysSection": {
+      "title": "Chaves de API",
+      "description": "Tokens de longa duração para o servidor MCP do Ultravis e outros clientes externos. As chaves são exibidas uma única vez na criação — guarde-as em um lugar seguro.",
+      "newKey": "Nova chave",
+      "mcpEndpoint": "Endpoint MCP",
+      "mcpInstructions": "Cole esta URL + uma chave abaixo no Claude Desktop / Claude Code / Cursor. Veja o",
+      "mcpGuide": "guia MCP",
+      "empty": "Nenhuma chave de API ainda. Crie uma para conectar o servidor MCP.",
+      "revokedBadge": "revogada",
+      "createdLastUsed": "Criada {created} · Último uso {lastUsed}",
+      "revokeConfirm": "Revogar esta chave de API? Os clientes que a usam perderão acesso imediatamente.",
+      "keyRevoked": "Chave revogada",
+      "copied": "Copiado para a área de transferência",
+      "createTitle": "Nova chave de API",
+      "createDescription": "Dê a esta chave um nome fácil de lembrar (ex.: \"MCP — meu notebook\").",
+      "nameLabel": "Nome",
+      "namePlaceholder": "MCP — local",
+      "create": "Criar",
+      "revealTitle": "Copie sua chave de API",
+      "revealDescription": "Você não poderá vê-la de novo. Guarde-a em um lugar seguro.",
+      "done": "Concluído",
+      "errors": {
+        "load": "Falha ao carregar",
+        "create": "Falha ao criar",
+        "revoke": "Falha ao revogar"
+      }
+    },
+    "agent": {
+      "title": "Agente",
+      "description": "Traga sua própria chave da API da Anthropic. O agente do produto usa sua chave para chamar o Claude diretamente — o uso é cobrado na sua conta Anthropic, não no Ultravis.",
+      "keyConfigured": "Chave configurada",
+      "savedAt": "Salva em {date}.",
+      "savedAtBy": "Salva em {date} por {email}.",
+      "noKey": "Nenhuma chave configurada. O agente ficará bloqueado para todos nesta organização até que uma chave seja salva.",
+      "keyLabel": "Chave da API da Anthropic",
+      "replaceKeyLabel": "Substituir chave",
+      "save": "Salvar",
+      "replace": "Substituir",
+      "getKeyPrefix": "Obtenha uma chave em",
+      "getKeySuffix": ". A chave é criptografada em repouso; o suporte do Ultravis não consegue lê-la.",
+      "removeKey": "Remover chave",
+      "removeConfirm": "Remover a chave da API da Anthropic? A equipe perderá acesso ao agente até que uma nova chave seja salva.",
+      "keySaved": "Chave da API da Anthropic salva",
+      "keyRemoved": "Chave removida",
+      "adminOnlyTitle": "Configuração restrita a admins",
+      "adminOnlyBody": "Só admins da organização podem adicionar, substituir ou remover a chave da API da Anthropic. Peça a um admin se precisar alterá-la.",
+      "errors": {
+        "load": "Falha ao carregar",
+        "save": "Falha ao salvar",
+        "clear": "Falha ao remover"
+      }
+    },
+    "displayNamePlaceholder": "Seu nome",
+    "projectDescription": "Configure as opções do seu projeto.",
+    "projectNamePlaceholder": "Minha Marca",
+    "domainPlaceholder": "exemplo.com",
+    "agentNav": "Agente"
   },
   "brands": {
     "title": "Marcas",
@@ -1072,7 +1748,95 @@
       "viewInsights": "Ver Insights",
       "addTopic": "Adicionar Tópicos",
       "addPrompt": "Adicionar Prompts"
-    }
+    },
+    "managePrompts": {
+      "loadError": "Não foi possível carregar os dados",
+      "selectTopicToGenerate": "Selecione pelo menos um tópico para gerar prompts",
+      "notAuthenticated": "Não autenticado",
+      "serverError": "Erro do servidor ({status})",
+      "suggestionsGenerated": "{count, plural, one {# sugestão de prompt gerada!} other {# sugestões de prompt geradas!}}",
+      "generateError": "Não foi possível gerar as sugestões",
+      "selectPromptToSave": "Selecione pelo menos um prompt para salvar",
+      "savedPrompts": "{count, plural, one {# prompt salvo} other {# prompts salvos}}",
+      "saveError": "Não foi possível salvar os prompts",
+      "promptAdded": "Prompt adicionado",
+      "addError": "Não foi possível adicionar o prompt",
+      "updateError": "Não foi possível atualizar o prompt",
+      "updateTopicError": "Não foi possível atualizar o tópico",
+      "updateModelsError": "Não foi possível atualizar os modelos",
+      "updatePlatformsError": "Não foi possível atualizar as plataformas",
+      "deleteError": "Não foi possível remover o prompt",
+      "loadUnanalyzedError": "Não foi possível carregar os prompts não analisados",
+      "analysisStartError": "Não foi possível iniciar a análise",
+      "allAnalyzedInfo": "Todos os prompts já foram analisados",
+      "analyzingNew": "{count, plural, one {Analisando # novo prompt} other {Analisando # novos prompts}}",
+      "brandNotFound": "Marca não encontrada",
+      "readOnlyTitle": "Acesso somente leitura",
+      "readOnlyBody": "Seu papel pode ver os prompts rastreados, mas não adicionar, editar ou remover. Peça a um admin ou gestor para fazer alterações.",
+      "addPrompt": "Adicionar Prompt",
+      "promptPlaceholder": "ex.: Melhores ferramentas de gestão de projetos para startups",
+      "topicLabel": "Tópico",
+      "selectTopic": "Selecione um tópico",
+      "noTopicsHint": "Nenhum tópico definido ainda. Adicione tópicos nas configurações da marca.",
+      "noTopicsGenerateHint": "Nenhum tópico definido ainda. Adicione tópicos nas configurações da marca primeiro.",
+      "platformModelsLabel": "Plataformas e Modelos",
+      "selectedCount": "{count, plural, one {# selecionado} other {# selecionados}}",
+      "selectPlatformModels": "Selecione plataformas e modelos",
+      "scraperGroup": "{provider} (Scraper)",
+      "apiGroup": "{provider} (API)",
+      "aiGenerate": "Gerar com IA",
+      "aiGenerateDescription": "Selecione tópicos e gere 5 prompts de busca otimizados por tópico usando IA.",
+      "topicsLabel": "Tópicos",
+      "topicsSelectedSummary": "{count, plural, one {# tópico selecionado} other {# tópicos selecionados}} — {prompts} prompts serão gerados",
+      "generating": "Gerando...",
+      "generatePrompts": "Gerar Prompts",
+      "reviewTitle": "Revisar Sugestões da IA",
+      "reviewDescription": "Desative os prompts que não quiser, edite o texto se necessário e depois salve.",
+      "saveSelected": "Salvar Selecionados ({count})",
+      "regenerate": "Gerar Novamente",
+      "dismiss": "Descartar",
+      "allPromptsTitle": "Todos os Prompts ({count})",
+      "analyzePrompts": "Analisar Prompts",
+      "newBadge": "{count, plural, one {# novo} other {# novos}}",
+      "emptyTitle": "Nenhum prompt ainda",
+      "emptyBody": "Adicione prompts manualmente ou gere com IA acima.",
+      "analyzeDialogDescription": "Selecione quais prompts analisar nas plataformas de IA.",
+      "allAnalyzed": "Todos os prompts já foram analisados.",
+      "selectedOfTotal": "{selected} de {total} selecionados",
+      "selectAll": "Selecionar Todos",
+      "deselectAll": "Desmarcar Todos",
+      "allAnalyzedBody": "Todos os prompts foram analisados. Adicione novos prompts para analisá-los.",
+      "analyzeCount": "Analisar ({count})"
+    },
+    "manageTopics": {
+      "title": "Tópicos",
+      "description": "Gerencie os tópicos usados para categorizar seus prompts. Os tópicos são atribuídos aos prompts durante a criação.",
+      "loadError": "Não foi possível carregar os tópicos",
+      "topicUpdated": "Tópico atualizado",
+      "updateError": "Não foi possível atualizar o tópico",
+      "topicRemoved": "Tópico removido",
+      "removeError": "Não foi possível remover o tópico",
+      "saveAria": "Salvar alterações do tópico",
+      "cancelAria": "Cancelar edição",
+      "editAria": "Editar tópico",
+      "deleteAria": "Excluir tópico",
+      "deleteTitle": "Excluir Tópico",
+      "deleteConfirm": "Tem certeza que deseja excluir \"{name}\"?",
+      "deleteWithPrompts": "{count, plural, one {# prompt que usa este tópico ficará sem categoria.} other {# prompts que usam este tópico ficarão sem categoria.}}",
+      "deleteNoPrompts": "Nenhum prompt está usando este tópico.",
+      "emptyState": "Nenhum tópico ainda. Adicione seu primeiro tópico abaixo.",
+      "addPlaceholder": "ex.: Setor, Comparação, Como fazer...",
+      "addButton": "Adicionar",
+      "readOnlyTitle": "Acesso somente leitura",
+      "readOnlyBody": "Seu papel pode ver os tópicos, mas não adicionar, renomear ou excluir. Peça a um admin ou gestor para fazer alterações."
+    },
+    "manageLayout": {
+      "navTopics": "Tópicos",
+      "navPrompts": "Prompts",
+      "navSettings": "Configurações",
+      "backAria": "Voltar para a lista de marcas"
+    },
+    "productTour": "Tour do produto"
   },
   "plans": {
     "free": "Free",

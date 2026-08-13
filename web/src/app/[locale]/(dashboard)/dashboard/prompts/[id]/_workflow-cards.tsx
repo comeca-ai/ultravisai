@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,23 +45,28 @@ function formatShortDate(iso: string): string {
  * targeting it" (the win) from "was already cited before targeting".
  */
 function CitedBadge({ target }: { target: PromptTargetUrl }) {
+  const t = useTranslations('prompts.workflowCards');
   if (target.citedCount === 0) {
     return (
       <Badge
         variant="outline"
         className="shrink-0 border-dashed border-muted-foreground/30 text-[10px] text-muted-foreground whitespace-nowrap"
       >
-        Not cited yet
+        {t('notCited')}
       </Badge>
     );
   }
   const alreadyCited =
     target.firstCitedAt !== null && new Date(target.firstCitedAt) < new Date(target.createdAt);
   const tooltip = [
-    `Cited in ${target.citedCount} answer${target.citedCount !== 1 ? 's' : ''}`,
-    target.firstCitedAt ? `first ${formatShortDate(target.firstCitedAt)}` : null,
-    target.lastCitedAt ? `last ${formatShortDate(target.lastCitedAt)}` : null,
-    alreadyCited ? 'was already cited before targeting' : null,
+    t('citedTooltipCount', { count: target.citedCount }),
+    target.firstCitedAt
+      ? t('citedTooltipFirst', { date: formatShortDate(target.firstCitedAt) })
+      : null,
+    target.lastCitedAt
+      ? t('citedTooltipLast', { date: formatShortDate(target.lastCitedAt) })
+      : null,
+    alreadyCited ? t('citedTooltipAlready') : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -74,7 +80,7 @@ function CitedBadge({ target }: { target: PromptTargetUrl }) {
       )}
     >
       <CheckCircle2 className="h-3 w-3" />
-      Cited ×{target.citedCount}
+      {t('citedBadge', { count: target.citedCount })}
     </Badge>
   );
 }
@@ -102,6 +108,7 @@ export function NotesCard({
   onNotesChange: (notes: PromptNote[]) => void;
   canManage: boolean;
 }) {
+  const t = useTranslations('prompts.workflowCards.notes');
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -114,17 +121,17 @@ export function NotesCard({
       onNotesChange([note, ...notes]);
       setDraft('');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to add note');
+      toast.error(err instanceof Error ? err.message : t('addFailed'));
     } finally {
       setSaving(false);
     }
-  }, [draft, promptId, notes, onNotesChange]);
+  }, [draft, promptId, notes, onNotesChange, t]);
 
   const handleDelete = (note: PromptNote) => {
     onNotesChange(notes.filter((n) => n.id !== note.id));
     deletePromptNote(note.id).catch(() => {
       onNotesChange(notes);
-      toast.error('Failed to delete note');
+      toast.error(t('deleteFailed'));
     });
   };
 
@@ -133,22 +140,20 @@ export function NotesCard({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <MessageSquare className="h-4 w-4" />
-          Notes
+          {t('title')}
           {notes.length > 0 && (
             <Badge variant="secondary" className="text-xs tabular-nums">
               {notes.length}
             </Badge>
           )}
         </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Keep track of the work behind this prompt — what was published, planned or decided.
-        </p>
+        <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
       </CardHeader>
       <CardContent className="space-y-3">
         {canManage && (
           <div className="space-y-2">
             <Textarea
-              placeholder="e.g. Published a comparison blog post targeting this prompt…"
+              placeholder={t('placeholder')}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               rows={2}
@@ -166,14 +171,14 @@ export function NotesCard({
                 ) : (
                   <Send className="h-3.5 w-3.5" />
                 )}
-                Add note
+                {t('add')}
               </Button>
             </div>
           </div>
         )}
         {notes.length === 0 ? (
           <p className="py-4 text-center text-xs text-muted-foreground">
-            No notes yet{canManage ? ' — add the first one above.' : '.'}
+            {canManage ? t('emptyManage') : t('empty')}
           </p>
         ) : (
           <ul className="space-y-2">
@@ -182,14 +187,14 @@ export function NotesCard({
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{note.body}</p>
                 <div className="mt-1.5 flex items-center justify-between gap-2">
                   <p className="text-[11px] text-muted-foreground">
-                    {note.authorName ?? 'Unknown'} · {formatNoteDate(note.createdAt)}
+                    {note.authorName ?? t('unknownAuthor')} · {formatNoteDate(note.createdAt)}
                   </p>
                   {canManage && (
                     <button
                       type="button"
                       className="text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                       onClick={() => handleDelete(note)}
-                      aria-label="Delete note"
+                      aria-label={t('deleteAria')}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -215,6 +220,7 @@ export function TargetUrlsCard({
   onUrlsChange: (urls: PromptTargetUrl[]) => void;
   canManage: boolean;
 }) {
+  const t = useTranslations('prompts.workflowCards.urls');
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -227,17 +233,17 @@ export function TargetUrlsCard({
       onUrlsChange([...urls, added]);
       setDraft('');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to add URL');
+      toast.error(err instanceof Error ? err.message : t('addFailed'));
     } finally {
       setSaving(false);
     }
-  }, [draft, promptId, urls, onUrlsChange]);
+  }, [draft, promptId, urls, onUrlsChange, t]);
 
   const handleDelete = (target: PromptTargetUrl) => {
     onUrlsChange(urls.filter((u) => u.id !== target.id));
     deletePromptTargetUrl(target.id).catch(() => {
       onUrlsChange(urls);
-      toast.error('Failed to remove URL');
+      toast.error(t('removeFailed'));
     });
   };
 
@@ -246,23 +252,20 @@ export function TargetUrlsCard({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Link2 className="h-4 w-4" />
-          Target URLs
+          {t('title')}
           {urls.length > 0 && (
             <Badge variant="secondary" className="text-xs tabular-nums">
               {urls.length}
             </Badge>
           )}
         </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Pages you want AI answers to cite for this prompt. Citation status updates automatically
-          as new tracking results arrive.
-        </p>
+        <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
       </CardHeader>
       <CardContent className="space-y-3">
         {canManage && (
           <div className="flex items-center gap-2">
             <Input
-              placeholder="https://example.com/blog/comparison-post"
+              placeholder={t('placeholder')}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
@@ -285,13 +288,13 @@ export function TargetUrlsCard({
               ) : (
                 <Plus className="h-3.5 w-3.5" />
               )}
-              Add
+              {t('add')}
             </Button>
           </div>
         )}
         {urls.length === 0 ? (
           <p className="py-4 text-center text-xs text-muted-foreground">
-            No target URLs yet{canManage ? ' — add the pages you want cited.' : '.'}
+            {canManage ? t('emptyManage') : t('empty')}
           </p>
         ) : (
           <ul className="space-y-1.5">
@@ -316,7 +319,7 @@ export function TargetUrlsCard({
                     type="button"
                     className="text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                     onClick={() => handleDelete(target)}
-                    aria-label="Remove target URL"
+                    aria-label={t('removeAria')}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

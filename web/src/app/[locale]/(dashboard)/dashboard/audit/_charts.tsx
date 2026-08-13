@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 
 export type TrendDatum = { date: string; score: number };
@@ -45,23 +46,26 @@ function ScoreTooltip({
   active,
   payload,
   label,
+  scoreLabel,
 }: {
   active?: boolean;
   payload?: { value: number }[];
   label?: string;
+  scoreLabel: string;
 }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
       <p className="mb-1 font-medium text-foreground">{label}</p>
       <p>
-        Score: <span className="font-medium">{payload[0].value}</span>/100
+        {scoreLabel}: <span className="font-medium">{payload[0].value}</span>/100
       </p>
     </div>
   );
 }
 
 export function ScoreTrendChart({ data, score }: { data: TrendDatum[]; score: number | null }) {
+  const t = useTranslations('audit.charts');
   const color = scoreHex(score);
   return (
     <ChartContainer height={200}>
@@ -81,7 +85,7 @@ export function ScoreTrendChart({ data, score }: { data: TrendDatum[]; score: nu
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
           <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
           <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-          <Tooltip content={<ScoreTooltip />} />
+          <Tooltip content={<ScoreTooltip scoreLabel={t('scoreLabel')} />} />
           <Area
             type="monotone"
             dataKey="score"

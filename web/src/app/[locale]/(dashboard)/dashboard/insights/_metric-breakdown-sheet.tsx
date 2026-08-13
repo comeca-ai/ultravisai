@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { TrendingDown, TrendingUp, Minus, AlertTriangle } from 'lucide-react';
 import {
   Sheet,
@@ -22,15 +23,7 @@ import {
 } from '@/lib/actions/tracking';
 import { sortBreakdownRowsForDisplay } from './breakdown-display';
 
-const METRIC_TITLE: Record<BreakdownMetric, string> = {
-  mentions: 'Mentions',
-  visibility: 'Visibility Score',
-};
-
-const METRIC_UNIT: Record<BreakdownMetric, string> = {
-  mentions: '',
-  visibility: ' pts',
-};
+type Translator = ReturnType<typeof useTranslations>;
 
 interface Props {
   brandId: string | null;
@@ -46,6 +39,7 @@ interface Props {
 }
 
 export function MetricBreakdownSheet({ brandId, metric, onOpenChange, filters }: Props) {
+  const t = useTranslations('insights');
   const open = Boolean(brandId && metric);
   const [data, setData] = useState<InsightsBreakdown | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,7 +66,7 @@ export function MetricBreakdownSheet({ brandId, metric, onOpenChange, filters }:
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load breakdown');
+          setError(err instanceof Error ? err.message : t('breakdown.loadFailed'));
         }
       })
       .finally(() => {
@@ -86,17 +80,21 @@ export function MetricBreakdownSheet({ brandId, metric, onOpenChange, filters }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, brandId, metric, filtersKey]);
 
-  const title = metric ? METRIC_TITLE[metric] : '';
+  const title = metric
+    ? t('breakdown.sheetTitle', {
+        metric: metric === 'visibility' ? t('breakdown.metricVisibility') : t('mentions'),
+      })
+    : '';
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full flex flex-col gap-0 p-0 sm:max-w-xl">
         <SheetHeader className="border-b px-5 py-4">
-          <SheetTitle className="text-base">{title} Breakdown</SheetTitle>
+          <SheetTitle className="text-base">{title}</SheetTitle>
           <SheetDescription className="text-xs">
             {data
-              ? `Last ${data.windowDays} days vs previous ${data.windowDays} days`
-              : 'Comparing the selected window with the previous equal-length window.'}
+              ? t('breakdown.windowCompare', { days: data.windowDays })
+              : t('breakdown.windowCompareFallback')}
           </SheetDescription>
         </SheetHeader>
 
@@ -131,10 +129,13 @@ function BreakdownSkeleton() {
 }
 
 function BreakdownBody({ data, metric }: { data: InsightsBreakdown; metric: BreakdownMetric }) {
+  const t = useTranslations('insights');
   const [tab, setTab] = useState<'prompts' | 'platforms' | 'topics'>('prompts');
 
   const pickRows = () =>
     tab === 'prompts' ? data.byPrompt : tab === 'platforms' ? data.byPlatform : data.byTopic;
+
+  const unit = metric === 'visibility' ? ` ${t('breakdown.pts')}` : '';
 
   return (
     <div className="space-y-4">
@@ -143,19 +144,17 @@ function BreakdownBody({ data, metric }: { data: InsightsBreakdown; metric: Brea
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="text-xs uppercase tracking-wide text-muted-foreground">
-              Current {data.windowDays}d
+              {t('breakdown.currentWindow', { days: data.windowDays })}
             </div>
             <div className="text-2xl font-semibold tabular-nums">
               {formatValue(data.curTotal, metric)}
-              <span className="text-sm font-normal text-muted-foreground">
-                {METRIC_UNIT[metric]}
-              </span>
+              <span className="text-sm font-normal text-muted-foreground">{unit}</span>
             </div>
             <div className="text-xs text-muted-foreground">
-              vs previous{' '}
+              {t('breakdown.vsPrevious')}{' '}
               <span className="tabular-nums">
                 {formatValue(data.prevTotal, metric)}
-                {METRIC_UNIT[metric]}
+                {unit}
               </span>
             </div>
           </div>
@@ -168,19 +167,19 @@ function BreakdownBody({ data, metric }: { data: InsightsBreakdown; metric: Brea
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
         <TabsList className="w-full">
           <TabsTrigger value="prompts">
-            Prompts
+            {t('breakdown.tabPrompts')}
             <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-[10px]">
               {data.byPrompt.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="platforms">
-            Platforms
+            {t('breakdown.tabPlatforms')}
             <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-[10px]">
               {data.byPlatform.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="topics">
-            Topics
+            {t('breakdown.tabTopics')}
             <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-[10px]">
               {data.byTopic.length}
             </Badge>
@@ -196,6 +195,7 @@ function BreakdownBody({ data, metric }: { data: InsightsBreakdown; metric: Brea
 }
 
 function RootCauseSummary({ data, metric }: { data: InsightsBreakdown; metric: BreakdownMetric }) {
+  const t = useTranslations('insights');
   const isDrop = data.delta < 0;
   const isFlat = data.delta === 0;
   const topPrompt = isDrop ? data.byPrompt[0] : data.byPrompt[data.byPrompt.length - 1];
@@ -212,19 +212,19 @@ function RootCauseSummary({ data, metric }: { data: InsightsBreakdown; metric: B
 
   return (
     <div className="mt-2 text-xs text-muted-foreground leading-relaxed">
-      {isDrop ? 'Biggest drop' : 'Biggest gain'}:{' '}
+      {isDrop ? t('breakdown.biggestDrop') : t('breakdown.biggestGain')}:{' '}
       <Link
         href={`/dashboard/prompts/${topPrompt.id}`}
         className="font-medium text-foreground underline-offset-2 hover:underline"
       >
         &quot;{truncate(topPrompt.label, 60)}&quot;
       </Link>{' '}
-      {formatContribution(topPrompt, metric)}.
+      {formatContribution(topPrompt, metric, t)}.
       {platformContributes && topPlatform && (
         <>
           {' '}
-          Top platform {isDrop ? 'drop' : 'gain'}: {topPlatform.label}{' '}
-          {formatContribution(topPlatform, metric)}.
+          {isDrop ? t('breakdown.topPlatformDrop') : t('breakdown.topPlatformGain')}:{' '}
+          {topPlatform.label} {formatContribution(topPlatform, metric, t)}.
         </>
       )}
     </div>
@@ -240,10 +240,12 @@ function BreakdownTable({
   metric: BreakdownMetric;
   kind: 'prompts' | 'platforms' | 'topics';
 }) {
+  const t = useTranslations('insights');
+
   if (rows.length === 0) {
     return (
       <div className="py-10 text-center text-sm text-muted-foreground">
-        No data in this window yet.
+        {t('breakdown.emptyWindow')}
       </div>
     );
   }
@@ -253,10 +255,10 @@ function BreakdownTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/40 text-[11px] uppercase tracking-wide text-muted-foreground">
-            <th className="text-left font-medium px-3 py-2">Name</th>
-            <th className="text-right font-medium px-2 py-2 w-16">Prev</th>
-            <th className="text-right font-medium px-2 py-2 w-16">Cur</th>
-            <th className="text-right font-medium px-2 py-2 w-24">Change</th>
+            <th className="text-left font-medium px-3 py-2">{t('breakdown.colName')}</th>
+            <th className="text-right font-medium px-2 py-2 w-16">{t('breakdown.colPrev')}</th>
+            <th className="text-right font-medium px-2 py-2 w-16">{t('breakdown.colCur')}</th>
+            <th className="text-right font-medium px-2 py-2 w-24">{t('breakdown.colChange')}</th>
           </tr>
         </thead>
         <tbody>
@@ -303,6 +305,8 @@ function DeltaPill({
   metric: BreakdownMetric;
   big?: boolean;
 }) {
+  const t = useTranslations('insights');
+
   if (delta === 0) {
     return (
       <span
@@ -327,7 +331,7 @@ function DeltaPill({
   const primary = showPct
     ? `${sign}${deltaPct}%`
     : metric === 'visibility'
-      ? `${sign}${delta} pts`
+      ? `${sign}${delta} ${t('breakdown.pts')}`
       : `${sign}${delta}`;
   const secondary = showPct ? `${sign}${delta}` : null;
 
@@ -357,17 +361,18 @@ function formatValue(value: number, metric: BreakdownMetric): string {
   return value.toLocaleString();
 }
 
-function formatContribution(row: BreakdownRow, metric: BreakdownMetric): string {
+function formatContribution(row: BreakdownRow, metric: BreakdownMetric, t: Translator): string {
   const isLoss = row.delta < 0;
   const abs = Math.abs(row.delta);
 
   if (metric === 'visibility') {
-    const verb = isLoss ? 'dropped' : 'rose';
-    return `${verb} ${Math.round(abs * 10) / 10} pts`;
+    const value = Math.round(abs * 10) / 10;
+    return isLoss ? t('breakdown.dropped', { value }) : t('breakdown.rose', { value });
   }
 
-  const verb = isLoss ? 'lost' : 'gained';
-  const core = `${verb} ${abs.toLocaleString()} mentions`;
+  const core = isLoss
+    ? t('breakdown.lostMentions', { count: abs })
+    : t('breakdown.gainedMentions', { count: abs });
   if (row.deltaPct === null) return core;
   const sign = row.deltaPct < 0 ? '−' : '+';
   return `${core} (${sign}${Math.abs(row.deltaPct)}%)`;

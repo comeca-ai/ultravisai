@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, use } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useBrandStore } from '@/stores/use-brand-store';
 import {
@@ -79,6 +80,7 @@ function KpiCard({
   change?: number | null;
   suffix?: string;
 }) {
+  const t = useTranslations('topics.detail');
   return (
     <Card>
       <CardContent className="pt-6 pb-5">
@@ -111,7 +113,7 @@ function KpiCard({
               ) : null}
               {change > 0 ? '+' : ''}
               {change}
-              {suffix === '%' ? 'pts' : ''}
+              {suffix === '%' ? t('ptsSuffix') : ''}
             </span>
           )}
         </div>
@@ -123,16 +125,25 @@ function KpiCard({
 // ─── Visibility trend chart ───────────────────────────────────────────────
 
 function VisibilityTrendChart({ data }: { data: VisibilityTrendPoint[] }) {
+  const t = useTranslations('topics.detail');
+  const tCharts = useTranslations('topics.charts');
   if (data.length === 0) {
     return (
       <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
-        No data yet for this topic.
+        {t('noDataYet')}
       </div>
     );
   }
   return (
     <ChartContainer height={260}>
-      {(width) => <DynamicVisibilityTrendChart width={width} data={data} />}
+      {(width) => (
+        <DynamicVisibilityTrendChart
+          width={width}
+          data={data}
+          brandLabel={tCharts('brand')}
+          competitorsLabel={tCharts('competitorsAvg')}
+        />
+      )}
     </ChartContainer>
   );
 }
@@ -141,6 +152,8 @@ function VisibilityTrendChart({ data }: { data: VisibilityTrendPoint[] }) {
 
 export default function TopicDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: topicId } = use(params);
+  const t = useTranslations('topics.detail');
+  const tTopics = useTranslations('topics');
   const router = useRouter();
   const activeBrandId = useBrandStore((s) => s.activeBrandId);
 
@@ -182,10 +195,8 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
       <div className="flex h-[60vh] items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
-            <h2 className="text-base font-semibold">No brand selected</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Select a brand from the top switcher first.
-            </p>
+            <h2 className="text-base font-semibold">{tTopics('noBrandTitle')}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{tTopics('noBrandBody')}</p>
           </CardContent>
         </Card>
       </div>
@@ -224,7 +235,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
           className="mb-2 -ml-2 text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Topics
+          {tTopics('title')}
         </Button>
         {loading && !topic ? (
           <Skeleton className="h-8 w-64" />
@@ -233,7 +244,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
             <h1 className="text-2xl font-bold tracking-tight">{topic.name}</h1>
           </div>
         ) : (
-          <h1 className="text-2xl font-bold">Topic not found</h1>
+          <h1 className="text-2xl font-bold">{t('notFound')}</h1>
         )}
       </div>
 
@@ -248,26 +259,26 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard
             icon={Eye}
-            label="Avg visibility"
+            label={t('kpi.avgVisibility')}
             value={summary.avgVisibilityScore}
             change={summary.visibilityChange}
             suffix="%"
           />
           <KpiCard
             icon={Zap}
-            label="Brand mentions"
+            label={t('kpi.brandMentions')}
             value={summary.totalMentions.toLocaleString()}
             change={summary.mentionsChange}
           />
           <KpiCard
             icon={Quote}
-            label="Citations"
+            label={t('kpi.citations')}
             value={summary.totalCitations.toLocaleString()}
             change={summary.citationsChange}
           />
           <KpiCard
             icon={BarChart3}
-            label="Positive sentiment"
+            label={t('kpi.positiveSentiment')}
             value={summary.positiveSentimentPct}
             change={summary.sentimentChange}
             suffix="%"
@@ -279,10 +290,8 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Visibility trend</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Daily average visibility for this topic vs. competitor average
-            </p>
+            <CardTitle className="text-sm font-medium">{t('visibilityTrend.title')}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t('visibilityTrend.subtitle')}</p>
           </CardHeader>
           <CardContent>
             {loading ? <Skeleton className="h-[260px]" /> : <VisibilityTrendChart data={trend} />}
@@ -290,8 +299,8 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Share of voice by platform</CardTitle>
-            <p className="text-xs text-muted-foreground">Brand vs. competitors on answer engines</p>
+            <CardTitle className="text-sm font-medium">{t('sovByPlatform.title')}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t('sovByPlatform.subtitle')}</p>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -300,7 +309,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
               <ShareOfVoicePlatformChart data={sov.byPlatform} overallSov={sov.overallSov} />
             ) : (
               <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
-                No platform data yet.
+                {t('sovByPlatform.empty')}
               </div>
             )}
           </CardContent>
@@ -314,11 +323,9 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Competitor comparison
+              {t('competitors.title')}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Your brand vs. direct competitors on this topic
-            </p>
+            <p className="text-xs text-muted-foreground">{t('competitors.subtitle')}</p>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -339,7 +346,9 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
                     <span className="flex-1 text-sm font-medium truncate">
                       {c.name}
                       {c.isOwnBrand && (
-                        <span className="ml-1.5 text-[10px] font-medium text-primary">YOU</span>
+                        <span className="ml-1.5 text-[10px] font-medium text-primary">
+                          {t('competitors.you')}
+                        </span>
                       )}
                     </span>
                     <span className="text-sm tabular-nums w-10 text-right">
@@ -365,7 +374,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
               </ul>
             ) : (
               <p className="text-sm text-muted-foreground py-10 text-center">
-                No competitor mentions yet.
+                {t('competitors.empty')}
               </p>
             )}
           </CardContent>
@@ -374,10 +383,8 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
         {/* Top / Weak prompts */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Prompt performance</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Best & worst performing prompts in this topic (last 50 runs)
-            </p>
+            <CardTitle className="text-sm font-medium">{t('prompts.title')}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t('prompts.subtitle')}</p>
           </CardHeader>
           <CardContent className="space-y-4">
             {loading ? (
@@ -386,15 +393,13 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
                 <Skeleton className="h-24" />
               </>
             ) : promptList.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-6 text-center">
-                No prompt results yet.
-              </p>
+              <p className="text-sm text-muted-foreground py-6 text-center">{t('prompts.empty')}</p>
             ) : (
               <>
                 <div>
                   <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-2">
                     <TrendingUp className="h-3 w-3" />
-                    Top performers
+                    {t('prompts.top')}
                   </div>
                   <ul className="space-y-1.5">
                     {topPrompts.map((p) => (
@@ -403,7 +408,9 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
                           {p.avg}%
                         </Badge>
                         <span className="flex-1 truncate">{p.text}</span>
-                        <span className="text-xs text-muted-foreground">{p.runs} runs</span>
+                        <span className="text-xs text-muted-foreground">
+                          {t('prompts.runs', { count: p.runs })}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -411,7 +418,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
                 <div>
                   <div className="flex items-center gap-2 text-xs font-medium text-rose-600 dark:text-rose-400 mb-2">
                     <TrendingDown className="h-3 w-3" />
-                    Needs improvement
+                    {t('prompts.weak')}
                   </div>
                   <ul className="space-y-1.5">
                     {weakPrompts.map((p) => (
@@ -420,7 +427,9 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
                           {p.avg}%
                         </Badge>
                         <span className="flex-1 truncate">{p.text}</span>
-                        <span className="text-xs text-muted-foreground">{p.runs} runs</span>
+                        <span className="text-xs text-muted-foreground">
+                          {t('prompts.runs', { count: p.runs })}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -430,7 +439,7 @@ export default function TopicDetailPage({ params }: { params: Promise<{ id: stri
                     href={`/dashboard/insights?topic=${topicId}`}
                     className="text-xs text-primary hover:underline"
                   >
-                    View all prompt results for this topic →
+                    {t('prompts.viewAll')}
                   </Link>
                 </div>
               </>

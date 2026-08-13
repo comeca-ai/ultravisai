@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   AreaChart,
   Area,
@@ -92,7 +93,8 @@ function getColor(platform: string): string {
   return PLATFORM_COLORS[platform] ?? '#94a3b8';
 }
 
-export function getPlatformName(platform: string): string {
+export function getPlatformName(platform: string, unknownLabel?: string): string {
+  if (platform === 'unknown' && unknownLabel) return unknownLabel;
   return PLATFORM_NAMES[platform] ?? platform;
 }
 
@@ -102,10 +104,12 @@ function AreaTooltip({
   active,
   payload,
   label,
+  unknownLabel,
 }: {
   active?: boolean;
   payload?: { name: string; value: number; color: string }[];
   label?: string;
+  unknownLabel?: string;
 }) {
   if (!active || !payload?.length) return null;
   return (
@@ -117,7 +121,9 @@ function AreaTooltip({
             className="inline-block h-2 w-2 rounded-full shrink-0"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-muted-foreground">{getPlatformName(entry.name)}:</span>
+          <span className="text-muted-foreground">
+            {getPlatformName(entry.name, unknownLabel)}:
+          </span>
           <span className="font-medium text-foreground">{entry.value.toLocaleString()}</span>
         </div>
       ))}
@@ -178,6 +184,10 @@ function BarList({ data }: { data: { name: string; value: number; color: string 
 // ─── Exported Charts ──────────────────────────────────────────────────────────
 
 export function ReferralTrendChart({ data }: { data: TrafficTrendPoint[] }) {
+  const t = useTranslations('traffic');
+  const locale = useLocale();
+  const unknownLabel = t('unknownPlatform');
+
   if (!data.length) return null;
 
   // Extract platform keys (everything except 'date')
@@ -209,7 +219,7 @@ export function ReferralTrendChart({ data }: { data: TrafficTrendPoint[] }) {
             className="fill-muted-foreground"
             tickFormatter={(v: string) => {
               const d = new Date(v);
-              return d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+              return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
             }}
           />
           <YAxis
@@ -219,12 +229,12 @@ export function ReferralTrendChart({ data }: { data: TrafficTrendPoint[] }) {
             className="fill-muted-foreground"
             allowDecimals={false}
           />
-          <Tooltip content={<AreaTooltip />} />
+          <Tooltip content={<AreaTooltip unknownLabel={unknownLabel} />} />
           <Legend
             iconType="circle"
             iconSize={8}
             wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
-            formatter={(value: string) => getPlatformName(value)}
+            formatter={(value: string) => getPlatformName(value, unknownLabel)}
           />
           {platformKeys.map((key) => (
             <Area
@@ -246,13 +256,15 @@ export function ReferralTrendChart({ data }: { data: TrafficTrendPoint[] }) {
 }
 
 export function PlatformBreakdownChart({ data }: { data: { platform: string; visits: number }[] }) {
+  const t = useTranslations('traffic');
   const [hovered, setHovered] = useState<string | null>(null);
 
+  const unknownLabel = t('unknownPlatform');
   const total = data.reduce((s, d) => s + d.visits, 0) || 1;
   const pieData = data
     .filter((d) => d.visits > 0)
     .map((d) => ({
-      name: getPlatformName(d.platform),
+      name: getPlatformName(d.platform, unknownLabel),
       value: Math.round((d.visits / total) * 100),
       color: getColor(d.platform),
     }));

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   Bar,
   BarChart,
@@ -34,6 +35,7 @@ type PlatformCardRateChartViewProps = {
 };
 
 export function PlatformCardRateChartView({ width, data }: PlatformCardRateChartViewProps) {
+  const t = useTranslations('shopping.charts');
   return (
     <BarChart
       width={width}
@@ -49,7 +51,7 @@ export function PlatformCardRateChartView({ width, data }: PlatformCardRateChart
 
       <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'var(--muted)', opacity: 0.3 }} />
 
-      <Bar dataKey="rate" name="Card rate" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
+      <Bar dataKey="rate" name={t('cardRate')} fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
     </BarChart>
   );
 }
@@ -64,6 +66,7 @@ type ShoppingTrendChartViewProps = {
 };
 
 export function ShoppingTrendChartView({ width, data }: ShoppingTrendChartViewProps) {
+  const t = useTranslations('shopping.charts');
   return (
     <LineChart
       width={width}
@@ -95,7 +98,7 @@ export function ShoppingTrendChartView({ width, data }: ShoppingTrendChartViewPr
       <Line
         type="monotone"
         dataKey="ownCards"
-        name="Your cards"
+        name={t('yourCards')}
         stroke="var(--chart-2)"
         strokeWidth={2}
         dot={{ r: 2 }}
@@ -104,7 +107,7 @@ export function ShoppingTrendChartView({ width, data }: ShoppingTrendChartViewPr
       <Line
         type="monotone"
         dataKey="totalCards"
-        name="All cards"
+        name={t('allCards')}
         stroke="var(--chart-4)"
         strokeWidth={2}
         dot={{ r: 2 }}

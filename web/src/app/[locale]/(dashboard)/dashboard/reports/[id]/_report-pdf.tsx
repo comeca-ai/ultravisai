@@ -24,6 +24,73 @@ import {
 } from '@react-pdf/renderer';
 import type { Report, ReportPromptPerf } from '@/lib/actions/reports';
 
+/**
+ * All visible strings in the PDF, resolved by the caller (page.tsx) with
+ * next-intl under the `reports.pdf` namespace. @react-pdf components render
+ * outside the React tree that holds the NextIntlClientProvider, so no
+ * next-intl hooks are used here — everything arrives via props.
+ */
+export interface ReportPdfLabels {
+  generatedOn: string;
+  executiveSummary: string;
+  kpiVisibilityRate: string;
+  kpiAvgScore: string;
+  kpiVisibility: string;
+  kpiMentions: string;
+  kpiCitations: string;
+  kpiSentiment: string;
+  kpiCitationsNote: string;
+  promptsSuffix: string;
+  deltaNew: string;
+  visibilityTrend: string;
+  legendYourBrand: string;
+  legendAvgCompetitor: string;
+  shareOfVoice: string;
+  competitorLeaderboard: string;
+  columnBrand: string;
+  columnChange: string;
+  columnMentions: string;
+  columnCitations: string;
+  you: string;
+  topicPerformance: string;
+  columnTopic: string;
+  columnVisibility: string;
+  columnResults: string;
+  bestPrompts: string;
+  worstPrompts: string;
+  columnPrompt: string;
+  columnRuns: string;
+  mentionEvidence: string;
+  columnPlatform: string;
+  columnDate: string;
+  columnExcerpt: string;
+  queryFanout: string;
+  columnQuery: string;
+  columnEngines: string;
+  columnSearched: string;
+  aiTraffic: string;
+  visitsSuffix: string;
+  columnTopPage: string;
+  columnVisits: string;
+  shoppingVisibility: string;
+  shoppingSov: string;
+  shoppingProducts: string;
+  shoppingCardRate: string;
+  shoppingTopMerchant: string;
+  auditScore: string;
+  auditedOn: string;
+  topCitationSources: string;
+  domainsSuffix: string;
+  citationsSuffix: string;
+  columnDomain: string;
+  columnSourceType: string;
+  columnUsage: string;
+  citationEvidence: string;
+  columnUrl: string;
+  columnCitedIn: string;
+  footerGeneratedWith: string;
+}
+
 Font.register({
   family: 'Inter',
   fonts: [
@@ -121,9 +188,22 @@ const styles = StyleSheet.create({
   footerText: { fontSize: 7, color: MUTED },
 });
 
-function DeltaText({ value, zeroBaseCount }: { value: number | null; zeroBaseCount?: number }) {
+function DeltaText({
+  value,
+  zeroBaseCount,
+  newLabel,
+}: {
+  value: number | null;
+  zeroBaseCount?: number;
+  /** Word after the count for a new zero-base metric — required with zeroBaseCount. */
+  newLabel?: string;
+}) {
   if (zeroBaseCount !== undefined) {
-    return <Text style={[styles.delta, { color: GREEN }]}>+{zeroBaseCount} new</Text>;
+    return (
+      <Text style={[styles.delta, { color: GREEN }]}>
+        +{zeroBaseCount} {newLabel}
+      </Text>
+    );
   }
   if (value === null) return null;
   const up = value >= 0;
@@ -200,14 +280,26 @@ function HBar({ label, pct, value }: { label: string; pct: number; value: string
   );
 }
 
-function PromptTable({ title, prompts }: { title: string; prompts: ReportPromptPerf[] }) {
+function PromptTable({
+  title,
+  prompts,
+  labels,
+}: {
+  title: string;
+  prompts: ReportPromptPerf[];
+  labels: ReportPdfLabels;
+}) {
   return (
     <View style={styles.section} wrap={false}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Prompt</Text>
-        <Text style={[styles.tableHeaderCell, { width: 60, textAlign: 'right' }]}>Visibility</Text>
-        <Text style={[styles.tableHeaderCell, { width: 40, textAlign: 'right' }]}>Runs</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnPrompt}</Text>
+        <Text style={[styles.tableHeaderCell, { width: 60, textAlign: 'right' }]}>
+          {labels.columnVisibility}
+        </Text>
+        <Text style={[styles.tableHeaderCell, { width: 40, textAlign: 'right' }]}>
+          {labels.columnRuns}
+        </Text>
       </View>
       {prompts.map((p) => (
         <View key={p.text} style={styles.tableRow}>
@@ -230,7 +322,7 @@ function formatDate(iso: string) {
   });
 }
 
-export function ReportPdfDocument({ report }: { report: Report }) {
+export function ReportPdfDocument({ report, labels }: { report: Report; labels: ReportPdfLabels }) {
   const { payload } = report;
   // Every metric field is optional — templates only gather their own
   // sections, so each block below guards on its payload field.
@@ -250,26 +342,26 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         ...(payload.visibilityRate
           ? [
               {
-                label: 'Visibility Rate',
+                label: labels.kpiVisibilityRate,
                 value: `${payload.visibilityRate.ratePct}%`,
                 change: null,
-                sub: `${payload.visibilityRate.visiblePrompts}/${payload.visibilityRate.promptCount} prompts`,
+                sub: `${payload.visibilityRate.visiblePrompts}/${payload.visibilityRate.promptCount} ${labels.promptsSuffix}`,
               },
               {
-                label: 'Avg. Score',
+                label: labels.kpiAvgScore,
                 value: `${payload.insights.avgVisibilityScore}%`,
                 change: payload.insights.visibilityChange,
               },
             ]
           : [
               {
-                label: 'Visibility',
+                label: labels.kpiVisibility,
                 value: `${payload.insights.avgVisibilityScore}%`,
                 change: payload.insights.visibilityChange,
               },
             ]),
         {
-          label: 'Mentions',
+          label: labels.kpiMentions,
           value: String(payload.insights.totalMentions),
           change: payload.insights.mentionsChange,
           zeroBaseCount:
@@ -280,7 +372,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
               : undefined,
         },
         {
-          label: 'Brand Citations',
+          label: labels.kpiCitations,
           value: String(payload.insights.totalCitations),
           change: payload.insights.citationsChange,
           zeroBaseCount:
@@ -291,7 +383,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
               : undefined,
         },
         {
-          label: 'Positive Sentiment',
+          label: labels.kpiSentiment,
           value: `${payload.insights.positiveSentimentPct}%`,
           change: payload.insights.sentimentChange,
         },
@@ -312,8 +404,8 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {/* Header */}
         <Text style={styles.title}>{report.title}</Text>
         <Text style={styles.subtitle}>
-          {payload.brandName} · {formatDate(report.dateFrom)} — {formatDate(report.dateTo)} ·
-          Generated on {formatDate(report.createdAt)}
+          {payload.brandName} · {formatDate(report.dateFrom)} — {formatDate(report.dateTo)} ·{' '}
+          {labels.generatedOn} {formatDate(report.createdAt)}
         </Text>
         <View style={styles.rule} />
 
@@ -321,7 +413,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
             creation time (report still generated; see reports.ts #30 fix) */}
         {payload.summaryText ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Executive Summary</Text>
+            <Text style={styles.sectionTitle}>{labels.executiveSummary}</Text>
             <Text style={styles.paragraph}>{payload.summaryText}</Text>
           </View>
         ) : null}
@@ -334,7 +426,11 @@ export function ReportPdfDocument({ report }: { report: Report }) {
                 <Text style={styles.kpiLabel}>{entry.label}</Text>
                 <View style={styles.kpiValueRow}>
                   <Text style={styles.kpiValue}>{entry.value}</Text>
-                  <DeltaText value={entry.change} zeroBaseCount={entry.zeroBaseCount} />
+                  <DeltaText
+                    value={entry.change}
+                    zeroBaseCount={entry.zeroBaseCount}
+                    newLabel={labels.deltaNew}
+                  />
                 </View>
                 {entry.sub && <Text style={styles.kpiSub}>{entry.sub}</Text>}
               </View>
@@ -343,14 +439,14 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         )}
         {payload.insights && (
           <Text style={{ fontSize: 7, color: MUTED, marginTop: -8, marginBottom: 12 }}>
-            &quot;Brand Citations&quot; counts citations of your own site in AI answers.
+            {labels.kpiCitationsNote}
           </Text>
         )}
 
         {/* Visibility trend */}
         {trend.length > 1 && (
           <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>Visibility Trend</Text>
+            <Text style={styles.sectionTitle}>{labels.visibilityTrend}</Text>
             <TrendSvg data={trend} width={515} height={110} />
             <View style={styles.axisLabelRow}>
               <Text style={styles.axisLabel}>{trend[0].date}</Text>
@@ -359,12 +455,12 @@ export function ReportPdfDocument({ report }: { report: Report }) {
             <View style={styles.legendRow}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendSwatch, { backgroundColor: INDIGO }]} />
-                <Text style={styles.legendText}>Your Brand</Text>
+                <Text style={styles.legendText}>{labels.legendYourBrand}</Text>
               </View>
               {hasCompetitorTrend && (
                 <View style={styles.legendItem}>
                   <View style={[styles.legendSwatch, { backgroundColor: SLATE }]} />
-                  <Text style={styles.legendText}>Avg. Competitor</Text>
+                  <Text style={styles.legendText}>{labels.legendAvgCompetitor}</Text>
                 </View>
               )}
             </View>
@@ -375,7 +471,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {payload.shareOfVoice && (
           <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>
-              Share of Voice — {payload.shareOfVoice.overallSov}%
+              {labels.shareOfVoice} — {payload.shareOfVoice.overallSov}%
             </Text>
             {payload.shareOfVoice.byPlatform.map((p) => (
               <HBar
@@ -391,20 +487,20 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {/* Competitor leaderboard */}
         {payload.competitors && payload.competitors.length > 0 && (
           <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>Competitor Leaderboard</Text>
+            <Text style={styles.sectionTitle}>{labels.competitorLeaderboard}</Text>
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Brand</Text>
+              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnBrand}</Text>
               <Text style={[styles.tableHeaderCell, { width: 60, textAlign: 'right' }]}>
-                {hasCompetitorVisibilityRate ? 'Visibility Rate' : 'Visibility'}
+                {hasCompetitorVisibilityRate ? labels.kpiVisibilityRate : labels.kpiVisibility}
               </Text>
               <Text style={[styles.tableHeaderCell, { width: 50, textAlign: 'right' }]}>
-                Change
+                {labels.columnChange}
               </Text>
               <Text style={[styles.tableHeaderCell, { width: 55, textAlign: 'right' }]}>
-                Mentions
+                {labels.columnMentions}
               </Text>
               <Text style={[styles.tableHeaderCell, { width: 55, textAlign: 'right' }]}>
-                Citations
+                {labels.columnCitations}
               </Text>
             </View>
             {payload.competitors.map((c) => (
@@ -417,7 +513,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
                   ]}
                 >
                   {c.name}
-                  {c.isOwnBrand ? ' (you)' : ''}
+                  {c.isOwnBrand ? ` ${labels.you}` : ''}
                 </Text>
                 <View style={{ width: 60, alignItems: 'flex-end' }}>
                   <Text style={styles.cell}>
@@ -425,7 +521,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
                   </Text>
                   {hasCompetitorVisibilityRate && (
                     <Text style={styles.kpiSub}>
-                      {c.visiblePrompts}/{c.promptCount} prompts
+                      {c.visiblePrompts}/{c.promptCount} {labels.promptsSuffix}
                     </Text>
                   )}
                 </View>
@@ -446,17 +542,17 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {/* Topic performance */}
         {payload.topicPerformance && payload.topicPerformance.length > 0 && (
           <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>Topic Performance</Text>
+            <Text style={styles.sectionTitle}>{labels.topicPerformance}</Text>
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Topic</Text>
+              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnTopic}</Text>
               <Text style={[styles.tableHeaderCell, { width: 60, textAlign: 'right' }]}>
-                Visibility
+                {labels.columnVisibility}
               </Text>
               <Text style={[styles.tableHeaderCell, { width: 50, textAlign: 'right' }]}>
-                Change
+                {labels.columnChange}
               </Text>
               <Text style={[styles.tableHeaderCell, { width: 50, textAlign: 'right' }]}>
-                Results
+                {labels.columnResults}
               </Text>
             </View>
             {payload.topicPerformance.map((tp) => (
@@ -478,21 +574,29 @@ export function ReportPdfDocument({ report }: { report: Report }) {
 
         {/* Best / worst prompts */}
         {payload.promptPerformance && payload.promptPerformance.best.length > 0 && (
-          <PromptTable title="Best Performing Prompts" prompts={payload.promptPerformance.best} />
+          <PromptTable
+            title={labels.bestPrompts}
+            prompts={payload.promptPerformance.best}
+            labels={labels}
+          />
         )}
         {payload.promptPerformance && payload.promptPerformance.worst.length > 0 && (
-          <PromptTable title="Weakest Prompts" prompts={payload.promptPerformance.worst} />
+          <PromptTable
+            title={labels.worstPrompts}
+            prompts={payload.promptPerformance.worst}
+            labels={labels}
+          />
         )}
 
         {/* Mention evidence (#429) — which answers mentioned the brand, and how */}
         {payload.mentionEvidence && payload.mentionEvidence.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Mention Evidence</Text>
+            <Text style={styles.sectionTitle}>{labels.mentionEvidence}</Text>
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderCell, { width: 130 }]}>Prompt</Text>
-              <Text style={[styles.tableHeaderCell, { width: 60 }]}>Platform</Text>
-              <Text style={[styles.tableHeaderCell, { width: 50 }]}>Date</Text>
-              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>How you were mentioned</Text>
+              <Text style={[styles.tableHeaderCell, { width: 130 }]}>{labels.columnPrompt}</Text>
+              <Text style={[styles.tableHeaderCell, { width: 60 }]}>{labels.columnPlatform}</Text>
+              <Text style={[styles.tableHeaderCell, { width: 50 }]}>{labels.columnDate}</Text>
+              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnExcerpt}</Text>
             </View>
             {payload.mentionEvidence.map((m, idx) => (
               <View key={`${m.promptText}-${idx}`} style={styles.tableRow}>
@@ -508,12 +612,12 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {/* Query fan-out */}
         {payload.queryFanout && payload.queryFanout.length > 0 && (
           <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>Query Fan-out</Text>
+            <Text style={styles.sectionTitle}>{labels.queryFanout}</Text>
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Query</Text>
-              <Text style={[styles.tableHeaderCell, { width: 150 }]}>Engines</Text>
+              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnQuery}</Text>
+              <Text style={[styles.tableHeaderCell, { width: 150 }]}>{labels.columnEngines}</Text>
               <Text style={[styles.tableHeaderCell, { width: 60, textAlign: 'right' }]}>
-                Searched
+                {labels.columnSearched}
               </Text>
             </View>
             {payload.queryFanout.map((q) => (
@@ -535,7 +639,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
           <View style={styles.section} wrap={false}>
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6 }}>
               <Text style={styles.sectionTitle}>
-                AI Traffic — {payload.aiTraffic.totalVisits} visits
+                {labels.aiTraffic} — {payload.aiTraffic.totalVisits} {labels.visitsSuffix}
               </Text>
               <View style={{ marginBottom: 6 }}>
                 <DeltaText value={payload.aiTraffic.change} />
@@ -550,9 +654,9 @@ export function ReportPdfDocument({ report }: { report: Report }) {
             {payload.aiTraffic.topPages.length > 0 && (
               <View style={{ marginTop: 6 }}>
                 <View style={styles.tableHeader}>
-                  <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Top Page</Text>
+                  <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnTopPage}</Text>
                   <Text style={[styles.tableHeaderCell, { width: 60, textAlign: 'right' }]}>
-                    Visits
+                    {labels.columnVisits}
                   </Text>
                 </View>
                 {payload.aiTraffic.topPages.map((p) => (
@@ -569,25 +673,25 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {/* Shopping visibility */}
         {payload.shoppingVisibility && (
           <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>Shopping Visibility</Text>
+            <Text style={styles.sectionTitle}>{labels.shoppingVisibility}</Text>
             <View style={styles.kpiRow}>
               <View style={styles.kpiBox}>
-                <Text style={styles.kpiLabel}>Shopping SoV</Text>
+                <Text style={styles.kpiLabel}>{labels.shoppingSov}</Text>
                 <View style={styles.kpiValueRow}>
                   <Text style={styles.kpiValue}>{payload.shoppingVisibility.shoppingSovPct}%</Text>
                   <DeltaText value={payload.shoppingVisibility.sovChange} />
                 </View>
               </View>
               <View style={styles.kpiBox}>
-                <Text style={styles.kpiLabel}>Products Surfaced</Text>
+                <Text style={styles.kpiLabel}>{labels.shoppingProducts}</Text>
                 <Text style={styles.kpiValue}>{payload.shoppingVisibility.productsSurfaced}</Text>
               </View>
               <View style={styles.kpiBox}>
-                <Text style={styles.kpiLabel}>Card Rate</Text>
+                <Text style={styles.kpiLabel}>{labels.shoppingCardRate}</Text>
                 <Text style={styles.kpiValue}>{payload.shoppingVisibility.cardRatePct}%</Text>
               </View>
               <View style={styles.kpiBox}>
-                <Text style={styles.kpiLabel}>Top Merchant</Text>
+                <Text style={styles.kpiLabel}>{labels.shoppingTopMerchant}</Text>
                 <Text style={[styles.cell, { fontWeight: 700 }]}>
                   {payload.shoppingVisibility.topMerchant ?? '—'}
                 </Text>
@@ -599,7 +703,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {/* Site audit score */}
         {payload.auditScore && (
           <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>Site Audit Score</Text>
+            <Text style={styles.sectionTitle}>{labels.auditScore}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
               <Text style={{ fontSize: 18, fontWeight: 700 }}>
                 {payload.auditScore.totalScore ?? '—'}
@@ -617,7 +721,8 @@ export function ReportPdfDocument({ report }: { report: Report }) {
                   </View>
                 )}
               <Text style={[styles.cell, { color: MUTED, marginBottom: 2 }]}>
-                {payload.auditScore.url} · audited {formatDate(payload.auditScore.auditedAt)}
+                {payload.auditScore.url} · {labels.auditedOn}{' '}
+                {formatDate(payload.auditScore.auditedAt)}
               </Text>
             </View>
           </View>
@@ -627,19 +732,21 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {payload.citations && (
           <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>
-              Top Citation Sources — {payload.citations.totals.domains} domains ·{' '}
-              {payload.citations.totals.citations} citations
+              {labels.topCitationSources} — {payload.citations.totals.domains}{' '}
+              {labels.domainsSuffix} · {payload.citations.totals.citations} {labels.citationsSuffix}
             </Text>
             {payload.citations.topDomains.length > 0 && (
               <View style={{ marginTop: 8 }}>
                 <View style={styles.tableHeader}>
-                  <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Domain</Text>
-                  <Text style={[styles.tableHeaderCell, { width: 80 }]}>Source Type</Text>
+                  <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnDomain}</Text>
+                  <Text style={[styles.tableHeaderCell, { width: 80 }]}>
+                    {labels.columnSourceType}
+                  </Text>
                   <Text style={[styles.tableHeaderCell, { width: 60, textAlign: 'right' }]}>
-                    Citations
+                    {labels.columnCitations}
                   </Text>
                   <Text style={[styles.tableHeaderCell, { width: 50, textAlign: 'right' }]}>
-                    Usage
+                    {labels.columnUsage}
                   </Text>
                 </View>
                 {payload.citations.topDomains.map((d) => (
@@ -662,13 +769,13 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         {/* Citation evidence (#429) — the exact URLs and the prompts that surfaced them */}
         {payload.citationEvidence && payload.citationEvidence.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Citation Evidence</Text>
+            <Text style={styles.sectionTitle}>{labels.citationEvidence}</Text>
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>URL</Text>
+              <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{labels.columnUrl}</Text>
               <Text style={[styles.tableHeaderCell, { width: 55, textAlign: 'right' }]}>
-                Citations
+                {labels.columnCitations}
               </Text>
-              <Text style={[styles.tableHeaderCell, { width: 170 }]}>Cited in</Text>
+              <Text style={[styles.tableHeaderCell, { width: 170 }]}>{labels.columnCitedIn}</Text>
             </View>
             {payload.citationEvidence.map((c) => (
               <View key={c.url} style={styles.tableRow}>
@@ -689,7 +796,7 @@ export function ReportPdfDocument({ report }: { report: Report }) {
 
         {/* Footer */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>Generated with Ultravis · www.ultravis.ai</Text>
+          <Text style={styles.footerText}>{labels.footerGeneratedWith}</Text>
           <Text
             style={styles.footerText}
             render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}

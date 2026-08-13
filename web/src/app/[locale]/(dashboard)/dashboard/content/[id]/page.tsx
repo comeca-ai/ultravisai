@@ -51,16 +51,16 @@ const STATUS_COLORS: Record<string, string> = {
   dismissed: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-500 dark:text-zinc-400',
 };
 
-const INTENT_LABELS: Record<string, string> = {
-  comparison: 'Comparison',
-  'how-to': 'How-to',
-  'what-is': 'What is',
-  'best-top': 'Best / Top',
-  'vs-review': 'vs. / Review',
-  recommendation: 'Recommendation',
-  'problem-solving': 'Problem Solving',
-  other: 'Other',
-};
+const INTENT_KEYS = [
+  'comparison',
+  'how-to',
+  'what-is',
+  'best-top',
+  'vs-review',
+  'recommendation',
+  'problem-solving',
+  'other',
+] as const;
 
 function StatCard({
   icon: Icon,
@@ -111,7 +111,7 @@ export default function ContentDetailPage() {
       })
       .catch((err) => {
         console.error('Failed to load opportunity:', err);
-        toast.error('Failed to load opportunity');
+        toast.error(t('toasts.loadOneFailed'));
       })
       .finally(() => setLoading(false));
 
@@ -119,7 +119,7 @@ export default function ContentDetailPage() {
     getBriefQuota()
       .then(setQuota)
       .catch(() => setQuota(null));
-  }, [id]);
+  }, [id, t]);
 
   const handleSend = async () => {
     setSending(true);
@@ -128,13 +128,13 @@ export default function ContentDetailPage() {
       if (result.success === false) {
         toast.error(result.error);
       } else {
-        toast.success('Sent to workflow!');
+        toast.success(t('toasts.sentToWorkflow'));
         const updated = await getOpportunity(id);
         setOpportunity(updated);
       }
     } catch (err) {
       console.error('Send failed:', err);
-      toast.error('Failed to send');
+      toast.error(t('toasts.sendFailed'));
     } finally {
       setSending(false);
     }
@@ -143,11 +143,11 @@ export default function ContentDetailPage() {
   const handleDismiss = async () => {
     try {
       await updateOpportunityStatus(id, 'dismissed');
-      toast.success('Opportunity dismissed');
+      toast.success(t('toasts.dismissed'));
       const updated = await getOpportunity(id);
       setOpportunity(updated);
     } catch {
-      toast.error('Failed to dismiss');
+      toast.error(t('toasts.dismissFailed'));
     }
   };
 
@@ -157,10 +157,10 @@ export default function ContentDetailPage() {
       const result = await generateBrief(id);
       setBrief(result.brief);
       if (result.quota) setQuota(result.quota);
-      toast.success('Content brief generated!');
+      toast.success(t('brief.generated'));
     } catch (err) {
       console.error('Brief generation failed:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to generate brief');
+      toast.error(err instanceof Error ? err.message : t('brief.generateFailed'));
       // Refresh the counter — the failure may have been a quota rejection.
       getBriefQuota()
         .then(setQuota)
@@ -181,7 +181,7 @@ export default function ContentDetailPage() {
   if (!opportunity) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Opportunity not found.</p>
+        <p className="text-muted-foreground">{t('notFound')}</p>
       </div>
     );
   }
@@ -194,7 +194,7 @@ export default function ContentDetailPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/dashboard/content">
-          <Button variant="ghost" size="icon" aria-label="Go back to content list">
+          <Button variant="ghost" size="icon" aria-label={t('detail.backToList')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
@@ -240,7 +240,7 @@ export default function ContentDetailPage() {
           {t(`status.${opportunity.status}` as `status.${typeof opportunity.status}`)}
         </Badge>
         <Badge variant="outline" className="text-xs tabular-nums">
-          Score: {Math.round(opportunity.opportunityScore)}
+          {t('detail.score', { value: Math.round(opportunity.opportunityScore) })}
         </Badge>
         <span className="text-xs text-muted-foreground ml-auto flex items-center gap-1.5">
           <Clock className="h-3.5 w-3.5" />
@@ -267,7 +267,7 @@ export default function ContentDetailPage() {
                 <StatCard
                   icon={TrendingUp}
                   label={t('detail.estAiVolume')}
-                  value={`~${sd.estAiVolume.toLocaleString()}/mo`}
+                  value={t('detail.volumePerMonth', { value: sd.estAiVolume.toLocaleString() })}
                 />
               )}
               {sd.visibilityScore !== undefined && (
@@ -288,7 +288,11 @@ export default function ContentDetailPage() {
                 <StatCard
                   icon={Tag}
                   label={t('detail.intent')}
-                  value={INTENT_LABELS[sd.intent] || sd.intent}
+                  value={
+                    (INTENT_KEYS as readonly string[]).includes(sd.intent)
+                      ? t(`detail.intents.${sd.intent}`)
+                      : sd.intent
+                  }
                 />
               )}
             </div>
@@ -308,14 +312,14 @@ export default function ContentDetailPage() {
 
             {fanoutQueries.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1.5">Observed fan-out queries</p>
+                <p className="text-xs text-muted-foreground mb-1.5">{t('detail.fanoutQueries')}</p>
                 <div className="flex flex-wrap gap-1">
                   {fanoutQueries.map((sq) => (
                     <Badge
                       key={sq.query}
                       variant="outline"
                       className="text-xs border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400 gap-1"
-                      title={`Searched ${sq.timesSearched}× by answer engines`}
+                      title={t('detail.searchedTimes', { count: sq.timesSearched })}
                     >
                       <Search className="h-2.5 w-2.5 shrink-0" />
                       {sq.query}
@@ -352,7 +356,7 @@ export default function ContentDetailPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary" />
-                <CardTitle className="text-sm font-medium">Content Brief</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('brief.title')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -363,7 +367,7 @@ export default function ContentDetailPage() {
                     {brief.contentType.replace(/-/g, ' ')}
                   </Badge>
                   <Badge variant="outline" className="text-xs tabular-nums">
-                    ~{brief.targetWordCount.toLocaleString()} words
+                    {t('brief.words', { count: brief.targetWordCount.toLocaleString() })}
                   </Badge>
                 </div>
               </div>
@@ -371,7 +375,7 @@ export default function ContentDetailPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                  <p className="text-xs font-medium">Keywords</p>
+                  <p className="text-xs font-medium">{t('detail.keywords')}</p>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {brief.targetKeywords.map((kw) => (
@@ -398,25 +402,23 @@ export default function ContentDetailPage() {
               {quotaExhausted ? (
                 <>
                   <Crown className="h-10 w-10 text-amber-500/60 mb-3" />
-                  <h3 className="text-sm font-medium mb-1">Monthly Brief Limit Reached</h3>
+                  <h3 className="text-sm font-medium mb-1">{t('brief.limitReachedTitle')}</h3>
                   <p className="text-xs text-muted-foreground mb-4 max-w-sm">
-                    You&apos;ve used all {quota.limit} content briefs included in your plan this
-                    month. Upgrade for a higher limit, or wait until the 1st when your quota resets.
+                    {t('brief.limitReachedBody', { limit: quota.limit })}
                   </p>
                   <Link href="/dashboard/settings?tab=billing">
                     <Button className="gap-2">
                       <Crown className="h-4 w-4" />
-                      Upgrade Plan
+                      {t('brief.upgrade')}
                     </Button>
                   </Link>
                 </>
               ) : (
                 <>
                   <Sparkles className="h-10 w-10 text-muted-foreground/40 mb-3" />
-                  <h3 className="text-sm font-medium mb-1">No Content Brief Yet</h3>
+                  <h3 className="text-sm font-medium mb-1">{t('brief.emptyTitle')}</h3>
                   <p className="text-xs text-muted-foreground mb-4 max-w-sm">
-                    Generate an AI-powered content brief with a suggested title, outline, target
-                    keywords, and competitor insights.
+                    {t('brief.emptyBody')}
                   </p>
                   <Button
                     onClick={handleGenerateBrief}
@@ -428,11 +430,14 @@ export default function ContentDetailPage() {
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    {generatingBrief ? 'Generating...' : 'Generate Content Brief'}
+                    {generatingBrief ? t('brief.generating') : t('brief.generate')}
                   </Button>
                   {quotaLimited && (
                     <p className="text-xs text-muted-foreground mt-3 tabular-nums">
-                      {quota.remaining}/{quota.limit} briefs remaining this month
+                      {t('brief.quotaRemaining', {
+                        remaining: quota.remaining,
+                        limit: quota.limit,
+                      })}
                     </p>
                   )}
                 </>
@@ -448,7 +453,7 @@ export default function ContentDetailPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <ListOrdered className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-medium">Brief Outline</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('brief.outline')}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -472,7 +477,7 @@ export default function ContentDetailPage() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-medium">Competitor Insights</p>
+                <p className="text-sm font-medium">{t('brief.competitorInsights')}</p>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {brief.competitorInsights}

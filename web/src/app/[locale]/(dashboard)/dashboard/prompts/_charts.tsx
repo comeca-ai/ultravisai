@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
 import { formatCompactNumber } from '@/lib/format';
 
@@ -76,10 +77,13 @@ export const AI_PLATFORM_SHARES: {
 ];
 
 export function PlatformVolumeChart({ totalVolume }: { totalVolume: number }) {
+  // Hook must run before the empty-state early return (rules of hooks).
+  const t = useTranslations('prompts.charts');
+
   if (totalVolume <= 0) {
     return (
       <div className="flex items-center justify-center h-[220px] text-xs text-muted-foreground">
-        No volume data available
+        {t('noVolumeData')}
       </div>
     );
   }
@@ -128,13 +132,13 @@ export function PlatformVolumeChart({ totalVolume }: { totalVolume: number }) {
                 <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-xs">
                   <p className="font-medium text-foreground mb-0.5">{row.name}</p>
                   <p className="text-muted-foreground">
-                    Est. queries:{' '}
+                    {t('estQueries')}:{' '}
                     <span className="font-medium text-foreground">
                       {row.volume.toLocaleString()}
                     </span>
                   </p>
                   <p className="text-muted-foreground">
-                    Share:{' '}
+                    {t('share')}:{' '}
                     <span className="font-medium text-foreground">
                       {(row.share * 100).toFixed(0)}%
                     </span>

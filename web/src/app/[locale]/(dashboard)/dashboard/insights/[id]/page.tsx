@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { getPromptResultById, type PromptResultWithText } from '@/lib/actions/tracking';
@@ -23,6 +24,7 @@ import { PLATFORM_LABELS } from '@/config/platform-labels';
 import { formatSearchQuerySource, visibleSearchQueries } from './query-fanout';
 
 function SentimentBadge({ sentiment }: { sentiment: 'positive' | 'neutral' | 'negative' }) {
+  const t = useTranslations('insights');
   return (
     <Badge
       variant="outline"
@@ -36,12 +38,15 @@ function SentimentBadge({ sentiment }: { sentiment: 'positive' | 'neutral' | 'ne
           'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
       )}
     >
-      {sentiment}
+      {t(sentiment)}
     </Badge>
   );
 }
 
 export default function ResultDetailPage() {
+  const t = useTranslations('insights');
+  const tCommon = useTranslations('common');
+  const tDashboard = useTranslations('dashboard');
   const params = useParams();
   const router = useRouter();
   const resultId = params.id as string;
@@ -83,13 +88,11 @@ export default function ResultDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <MessageSquareText className="h-12 w-12 text-muted-foreground/40 mb-4" />
-        <h2 className="text-lg font-semibold">Result not found</h2>
-        <p className="text-muted-foreground text-sm mt-1">
-          This result may have been deleted or does not exist.
-        </p>
+        <h2 className="text-lg font-semibold">{t('resultDetail.notFoundTitle')}</h2>
+        <p className="text-muted-foreground text-sm mt-1">{t('resultDetail.notFoundBody')}</p>
         <Button variant="outline" className="mt-6 gap-2" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4" />
-          Go back
+          {tCommon('back')}
         </Button>
       </div>
     );
@@ -107,7 +110,7 @@ export default function ResultDetailPage() {
         onClick={() => router.back()}
       >
         <ArrowLeft className="h-4 w-4" />
-        Back
+        {tCommon('back')}
       </Button>
 
       {/* Header */}
@@ -138,7 +141,7 @@ export default function ResultDetailPage() {
             <MessageSquareText className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-2xl font-bold tabular-nums">{result.mentionCount}</p>
-              <p className="text-xs text-muted-foreground">Mentions</p>
+              <p className="text-xs text-muted-foreground">{t('mentions')}</p>
             </div>
           </CardContent>
         </Card>
@@ -147,7 +150,7 @@ export default function ResultDetailPage() {
             <Quote className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-2xl font-bold tabular-nums">{result.citationCount}</p>
-              <p className="text-xs text-muted-foreground">Brand Citations</p>
+              <p className="text-xs text-muted-foreground">{t('resultDetail.brandCitations')}</p>
             </div>
           </CardContent>
         </Card>
@@ -156,7 +159,7 @@ export default function ResultDetailPage() {
             <ExternalLink className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-2xl font-bold tabular-nums">{result.citations.length}</p>
-              <p className="text-xs text-muted-foreground">Total Citations</p>
+              <p className="text-xs text-muted-foreground">{tDashboard('totalCitations')}</p>
             </div>
           </CardContent>
         </Card>
@@ -165,7 +168,7 @@ export default function ResultDetailPage() {
       {/* AI Response */}
       <Card>
         <CardContent className="p-6">
-          <h2 className="text-sm font-medium mb-4">AI Response</h2>
+          <h2 className="text-sm font-medium mb-4">{t('resultDetail.aiResponse')}</h2>
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <Markdown>{result.response}</Markdown>
           </div>
@@ -176,7 +179,9 @@ export default function ResultDetailPage() {
       {result.citations.length > 0 && (
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-sm font-medium mb-4">Citations ({result.citations.length})</h2>
+            <h2 className="text-sm font-medium mb-4">
+              {t('citations')} ({result.citations.length})
+            </h2>
             <div className="space-y-2">
               {result.citations.map((cite, i) => (
                 <a
@@ -202,7 +207,9 @@ export default function ResultDetailPage() {
       {searchQueries.length > 0 && (
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-sm font-medium mb-4">Query fan-out ({searchQueries.length})</h2>
+            <h2 className="text-sm font-medium mb-4">
+              {t('resultDetail.queryFanout', { count: searchQueries.length })}
+            </h2>
             <div className="space-y-2">
               {searchQueries.map((item, i) => (
                 <div key={`${item.query}-${i}`} className="rounded-lg border px-4 py-3 text-sm">
@@ -225,7 +232,7 @@ export default function ResultDetailPage() {
       {/* Timestamp */}
       <div className="flex items-center gap-2 text-xs text-muted-foreground pb-6">
         <Clock className="h-3.5 w-3.5" />
-        Checked: {new Date(result.createdAt).toLocaleString()}
+        {t('resultDetail.checked', { date: new Date(result.createdAt).toLocaleString() })}
       </div>
     </div>
   );

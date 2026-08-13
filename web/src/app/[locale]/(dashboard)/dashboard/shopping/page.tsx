@@ -547,7 +547,7 @@ function PromptsTabContent({
             {loading ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  {t('common.loading')}
+                  {t('loading')}
                 </TableCell>
               </TableRow>
             ) : filteredPrompts.length === 0 ? (
@@ -794,13 +794,13 @@ function FilterBar({
             <SelectValue>
               {(value) =>
                 value === 'all' || !value
-                  ? 'All platforms'
+                  ? t('allPlatforms')
                   : (PLATFORM_LABELS[String(value)] ?? String(value))
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All platforms</SelectItem>
+            <SelectItem value="all">{t('allPlatforms')}</SelectItem>
             {platformOpts.map((p) => (
               <SelectItem key={p} value={p}>
                 {PLATFORM_LABELS[p] ?? p}
@@ -815,12 +815,12 @@ function FilterBar({
           <SelectTrigger className="h-8 w-32">
             <SelectValue>
               {(value) =>
-                value === 'all' || !value ? 'All regions' : formatRegionDisplay(String(value))
+                value === 'all' || !value ? t('allRegions') : formatRegionDisplay(String(value))
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All regions</SelectItem>
+            <SelectItem value="all">{t('allRegions')}</SelectItem>
             {regionOpts.map((r) => (
               <SelectItem key={r} value={r}>
                 {formatRegionDisplay(r)}
@@ -1119,7 +1119,7 @@ function ProductTable({
     return (
       <div className="rounded-xl border border-dashed py-8 text-center bg-card">
         <Layers className="mx-auto h-8 w-8 text-muted-foreground/30" />
-        <p className="mt-2 text-sm text-muted-foreground">No products found matching filters.</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('noProductsFound')}</p>
       </div>
     );
   }
@@ -1389,7 +1389,7 @@ function ProductAppearancesDrawer({ t, product, onOpenChange }: ProductAppearanc
                         <Link
                           href={`/dashboard/prompts/${app.prompt_id}`}
                           className="text-sm text-foreground font-medium hover:text-primary hover:underline line-clamp-3 block leading-relaxed"
-                          title="View Prompt Details"
+                          title={t('viewPromptDetails')}
                           onClick={() => onOpenChange(false)}
                         >
                           &quot;{app.prompt_text}&quot;

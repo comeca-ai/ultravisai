@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,6 +89,8 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
   onCategoryChange,
   mode = 'review',
 }: PromptSuggestionCardProps) {
+  const t = useTranslations('dashboard.promptSuggestions');
+  const tCommon = useTranslations('common');
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(text);
   const [editCategory, setEditCategory] = useState(category);
@@ -161,7 +164,7 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                 className="h-7 w-7 shrink-0"
                 onClick={handleSave}
                 disabled={!editText.trim() || !hasAnySelection}
-                aria-label="Save changes"
+                aria-label={t('saveChanges')}
               >
                 <Check className="h-3.5 w-3.5" />
               </Button>
@@ -170,7 +173,7 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                 variant="ghost"
                 className="h-7 w-7 shrink-0"
                 onClick={handleCancel}
-                aria-label="Cancel edit"
+                aria-label={t('cancelEdit')}
               >
                 <X className="h-3.5 w-3.5" />
               </Button>
@@ -182,11 +185,11 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                 {onCategoryChange && topics && topics.length > 0 && (
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                      Topic
+                      {t('topic')}
                     </label>
                     <Select value={editCategory} onValueChange={(v) => v && setEditCategory(v)}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a topic" />
+                        <SelectValue placeholder={t('selectTopic')} />
                       </SelectTrigger>
                       <SelectContent>
                         {topics.map((t) => (
@@ -203,7 +206,7 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                 {(onModelsChange || onPlatformsChange) && (
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                      Platform & Models
+                      {t('platformModels')}
                     </label>
                     <Select
                       value="__placeholder__"
@@ -222,8 +225,10 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                       <SelectTrigger className="w-full">
                         <span className="truncate text-muted-foreground">
                           {editModels.length + editPlatforms.length > 0
-                            ? `${editModels.length + editPlatforms.length} selected`
-                            : 'Select platform & models'}
+                            ? t('selectedCount', {
+                                count: editModels.length + editPlatforms.length,
+                              })
+                            : t('selectPlatformModels')}
                         </span>
                       </SelectTrigger>
                       <SelectContent>
@@ -235,7 +240,7 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                           return (
                             <div key={group.provider}>
                               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                {group.provider} (Scraper)
+                                {t('providerScraper', { provider: group.provider })}
                               </div>
                               {scrapers.map((s) => (
                                 <SelectItem
@@ -262,7 +267,7 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                           return (
                             <div key={group.provider}>
                               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                {group.provider} (API)
+                                {t('providerApi', { provider: group.provider })}
                               </div>
                               {groupModels.map((m) => (
                                 <SelectItem
@@ -329,7 +334,7 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                 variant="ghost"
                 className="h-7 w-7"
                 onClick={() => setIsEditing(true)}
-                aria-label="Edit prompt"
+                aria-label={t('editPrompt')}
               >
                 <Pencil className="h-3 w-3" />
               </Button>
@@ -341,7 +346,7 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7 text-destructive hover:text-destructive"
-                        aria-label="Delete prompt"
+                        aria-label={t('deletePrompt')}
                       />
                     }
                   >
@@ -349,18 +354,18 @@ export const PromptSuggestionCard = memo(function PromptSuggestionCard({
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-sm">
                     <DialogHeader>
-                      <DialogTitle>Delete Prompt</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to delete this prompt? This action cannot be undone.
-                      </DialogDescription>
+                      <DialogTitle>{t('deleteTitle')}</DialogTitle>
+                      <DialogDescription>{t('deleteDescription')}</DialogDescription>
                     </DialogHeader>
                     <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground line-clamp-2">
                       {text}
                     </p>
                     <DialogFooter>
-                      <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+                      <DialogClose render={<Button variant="outline" />}>
+                        {tCommon('cancel')}
+                      </DialogClose>
                       <DialogClose render={<Button variant="destructive" onClick={onDelete} />}>
-                        Delete
+                        {tCommon('delete')}
                       </DialogClose>
                     </DialogFooter>
                   </DialogContent>

@@ -71,6 +71,19 @@ export async function runTrackingJob(jobId, io) {
         immediate: !!immediate,
       });
     }
+
+    // Daily Pulse (Funil pacote 2, upstream #540): fire-and-forget after a
+    // full run — never for immediate/manual runs or single-prompt refreshes.
+    // The engine is self-contained (eligibility, dedup, error handling).
+    // Sem o gate de stamp do upstream: nosso fork não tem o ledger
+    // tracking_runs; o pulse espera o drain do Cloro por conta própria.
+    if (!immediate && !promptId && !promptIds?.length) {
+      import('./pulse/engine.js')
+        .then(({ generatePulseForBrand }) => generatePulseForBrand(brandId))
+        .catch((err) => {
+          logger.error({ err, brandId }, 'daily pulse trigger failed');
+        });
+    }
   } catch (err) {
     if (abortController.signal.aborted) {
       logger.info({ jobId }, 'tracking job was cancelled');

@@ -21,7 +21,7 @@
 > em desenvolvimento sem decisão conjunta registrada no `DECISOES.md`.
 > **Última varredura:** 13/ago/2026 — release 0.2.0 do upstream (09/ago) + commits até 13/ago.
 
-- [ ] `[ansvisor]` **Daily Pulse** — digest diário por marca pós-run: KPIs, destaques (1ª citação, ganhos por prompt, ultrapassagens) e anomalias (queda brusca, surto de concorrente), e-mail + webhook + Configurações→Notificações. *Nosso ângulo: é o nosso "Alertas de variação" (P0, Onda 0) já pronto no upstream — candidato forte a sync seletivo.*
+- [x] `[ansvisor]` **Daily Pulse** — **lado servidor PORTADO (13/ago)**: engine+metrics+email+webhook-dispatch com todos os fixes (#654 catch-up adaptado pra tabela `jobs`, #690 drain do pulse, #701 dedupe por janela — migration 00038 aplicada). E-mail sai por Resend OU pelo SMTP do watchdog (self-host incluído); sem transporte configurado, dispara só o webhook `daily_pulse.created`. **Follow-ups:** tela Configurações→Notificações (frequência/destinatários) e tradução do e-mail pra pt-BR **antes de ligar o envio**.
 - [ ] `[ansvisor]` **AI Visibility Score** — nova métrica central 0-100 (60% menção · 25% citação · 15% posição da menção), idêntica em todas as superfícies; cobertura vira linha secundária. *Nosso ângulo: responde exatamente a confusão do cliente com a nota; mas muda migrations/core (00041-00042) — sync grande.*
 - [ ] `[ansvisor]` **Integração Google Search Console** — sugestões de prompt alimentadas por demanda real de busca (queries que a marca ranqueia e não rastreia), via Composio. *Nosso ângulo: casa com "grounding de prompts" do P1; nós usaríamos Semrush ou GSC direto.*
 - [ ] `[ansvisor]` **Integração GA4** (pós-0.2.0, #695/#703) — conexão GA por marca. *Nosso ângulo: alimenta a "atribuição citação→visita→lead" (P2, a grande lacuna).*
@@ -41,7 +41,7 @@
 ### P0 — Agora
 - [ ] **Merge do PR #2** — trabalho acumulado na branch (logout, login Google, Citabilidade 5–8, Citações PT, Custos admin, curso/estratégia, migration 00035). `P` · housekeeping
 - [x] **Diálogo de confirmação antes de despachar scrapes** — confirmação antes do "Rodar Tudo" (aviso de crédito/irreversibilidade + nº de prompts ativos). `P` · protege caixa (lição do despacho acidental da Accenture, 264 scrapes)
-- [ ] **Alertas de variação** — e-mail quando score cai / concorrente entra (Slack depois). Transforma o pulso em produto percebido. `M` · `D3` · Onda 0
+- [x] **Alertas de variação** — **resolvido pelo Daily Pulse portado (13/ago)**: anomalias (queda brusca, surto de concorrente, prompt perdendo citação) + destaques, com cooldown de 7 dias. Falta só ligar o transporte de e-mail (decisão do e-mail dedicado) e a UI de Notificações.
 
 ### P1 — Próximo
 - [ ] **UI de aliases de marca** — campo em Settings/onboarding pros apelidos (backend pronto: migration 00036 + parser + backfill; hoje configura-se via banco). Sugerir alias automaticamente quando o nome tiver 2+ palavras. `P` · caso Polar Electro

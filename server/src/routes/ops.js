@@ -124,6 +124,17 @@ async function collect() {
     health = null;
   }
 
+  // Upstream news — site + GitHub of the upstream project (3-day watch;
+  // served from the module cache, so this adds no network cost per view).
+  let upstream = null;
+  try {
+    const { getUpstreamNews, summarizeUpstream } = await import('../lib/upstream-watch.js');
+    const snap = await getUpstreamNews();
+    if (snap) upstream = { ...snap, summary: summarizeUpstream(snap) };
+  } catch {
+    upstream = null;
+  }
+
   // Clients × brands — the whole customer base at a glance.
   let clients = null;
   try {
@@ -190,6 +201,7 @@ async function collect() {
     jobsFailed24h,
     health,
     clients,
+    upstream,
     now: new Date().toISOString(),
   };
 }
@@ -356,6 +368,34 @@ function render(d) {
       <thead><tr><th>E-mail</th><th>Criada em (UTC)</th><th>Último acesso</th><th>Login</th></tr></thead>
       <tbody>${accountsRows}</tbody>
     </table></div>
+  </div>
+
+  <div class="card" style="margin-top:14px"><h2>Upstream (Ansvisor) · vigiado a cada 3 dias${
+    d.upstream?.summary?.hasNews ? ' · <span class="st st-warn">NOVIDADE</span>' : ''
+  }</h2>
+    ${
+      !d.upstream
+        ? '<div class="muted">primeira coleta ainda não rodou (roda ~15s após o boot)</div>'
+        : `
+      ${row('Site ansvisor.com', d.upstream.site?.ok ? `no ar — “${esc((d.upstream.site.title || '').slice(0, 60))}”${d.upstream.siteChanged ? ' · <span class="st st-warn">mudou</span>' : ''}` : `<span class="bad">inacessível</span>`)}
+      ${row('Última release', d.upstream.release ? `${esc(d.upstream.release.tag)} · ${dt(d.upstream.release.publishedAt)}` : 'nenhuma')}
+      ${row('Commits (últimos 3 dias)', d.upstream.summary.recentCommits)}
+      ${row('Coletado em', dt(d.upstream.fetchedAt))}
+      ${
+        d.upstream.commits.length
+          ? `<div class="ovf" style="margin-top:8px"><table>
+        <thead><tr><th>Quando (UTC)</th><th>Commit</th></tr></thead>
+        <tbody>${d.upstream.commits
+          .slice(0, 6)
+          .map(
+            (c) =>
+              `<tr><td class="mono">${dt(c.date)}</td><td class="muted">${esc(c.message)} <span class="mono">${esc(c.sha)}</span></td></tr>`,
+          )
+          .join('')}</tbody>
+      </table></div>`
+          : '<div class="muted" style="margin-top:6px">não foi possível ler os commits do GitHub</div>'
+      }`
+    }
   </div>
 
   <div class="card" style="margin-top:14px"><h2>Providers configurados</h2>

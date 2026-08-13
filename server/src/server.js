@@ -15,6 +15,7 @@ import routes from './routes/index.js';
 import trafficRoutes from './routes/traffic.js';
 import opsRoutes from './routes/ops.js';
 import { startWatchdog } from './lib/watchdog.js';
+import { startUpstreamWatch } from './lib/upstream-watch.js';
 import { runPendingMentionBackfillFromEnv } from './lib/backfill-mentions.js';
 import {
   createJob,
@@ -535,6 +536,10 @@ server.listen(PORT, async () => {
   // jobs fail, the Cloro queue jams, sentiment silently degrades, or the
   // weekly census goes missing. See lib/watchdog.js.
   startWatchdog();
+
+  // Ultravis addition: watches the upstream project (ansvisor.com + GitHub)
+  // every 3 days for news; surfaced in the /ops panel. See lib/upstream-watch.js.
+  startUpstreamWatch();
 
   // Ultravis addition: one-shot mention/sentiment backfill when
   // BACKFILL_MENTIONS_BRAND_ID is set (see lib/backfill-mentions.js).

@@ -63,11 +63,12 @@
 ### P1
 - [ ] **i18n páginas restantes** — Prompts, Tópicos, Configurações (verificar também Conteúdo, Auditoria, Tráfego, Shopping, Relatórios, Agent). `M` · mesmo método do Insights/Citações
 - [ ] **Cache da landing no CDN** — HTML servido por SSR serverless a cada visita (TTFB ~0,6s, custo e latência à toa numa página estática). Avaliar `revalidate`/headers de cache. `P` · perf (Q&A)
-- [ ] **4 bugs do docx (verificar quais persistem):**
-  - [ ] Login sem mensagem "conta já existe"
-  - [ ] Algo "rodando como Ansvisor" (suspeita: templates de e-mail do Supabase)
-  - [ ] Tela de login travando
-  - [ ] Relatório não gerado
+- [ ] **4 bugs do docx:**
+  - [x] Login sem mensagem "conta já existe" — **feito** (PR #38)
+  - [x] "Rodando como Ansvisor" (#28) — **feito (12/ago)**: agente do produto se apresentava como Ansvisor, arquivos exportados chamavam `ansvisor_*.csv/pdf`, `/pricing` redirecionava pro site do UPSTREAM, mailto sales@ansvisor.com, links pro repo upstream — tudo trocado por Ultravis. Restam os templates de e-mail do Supabase (painel — verificar com o dono).
+  - [x] Tela de login travando (#29) — causa mais provável (OAuth Site URL=localhost) já corrigida; **melhorias (12/ago)**: form honra `?redirectTo` do middleware (destino pós-login não se perde). Reverificar com o cliente.
+  - [x] Relatório não gerado (#30) — **feito (12/ago)**: o resumo executivo por IA abortava o relatório inteiro se falhasse (tabela `reports` tinha ZERO linhas na história; a tentativa do cliente caiu na janela da chave morta). Resumo agora é não-fatal: relatório salva sem prosa e as telas/PDF escondem a seção vazia.
+  - [ ] #14 gráfico com escala errada — aguarda print do cliente
 - ✅ ~~Site URL = localhost:3000~~ — **resolvido** nesta sessão (config de OAuth do Google)
 
 ---

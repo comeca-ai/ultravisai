@@ -125,7 +125,7 @@ export function AgentSection() {
         </CardTitle>
         <CardDescription>
           Bring your own Anthropic API key. The in-product agent uses your key to call Claude
-          directly — usage is billed to your Anthropic account, not to Ansvisor.
+          directly — usage is billed to your Anthropic account, not to Ultravis.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -187,7 +187,7 @@ export function AgentSection() {
                 >
                   console.anthropic.com
                 </a>
-                . The key is encrypted at rest; Ansvisor support cannot read it.
+                . The key is encrypted at rest; Ultravis support cannot read it.
               </p>
             </div>
 

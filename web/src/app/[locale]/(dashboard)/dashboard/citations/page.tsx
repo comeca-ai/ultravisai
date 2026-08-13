@@ -1429,7 +1429,7 @@ export default function CitationsPage() {
 
         const csv = toCsv(rows, DOMAIN_HEADERS);
 
-        triggerDownload(csv, `ansvisor_${slug}_citations_domains_${date}.csv`);
+        triggerDownload(csv, `ultravis_${slug}_citations_domains_${date}.csv`);
       } else if (sourceTab === 'urls') {
         const URL_HEADERS = [
           'url',
@@ -1453,7 +1453,7 @@ export default function CitationsPage() {
 
         const csv = toCsv(rows, URL_HEADERS);
 
-        triggerDownload(csv, `ansvisor_${slug}_citations_urls_${date}.csv`);
+        triggerDownload(csv, `ultravis_${slug}_citations_urls_${date}.csv`);
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('exportFailed'));

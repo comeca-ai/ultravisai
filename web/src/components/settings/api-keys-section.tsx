@@ -128,7 +128,7 @@ export function ApiKeysSection() {
               API Keys
             </CardTitle>
             <CardDescription>
-              Long-lived tokens for the Ansvisor MCP server and other external clients. Keys are
+              Long-lived tokens for the Ultravis MCP server and other external clients. Keys are
               shown once at creation — store them somewhere safe.
             </CardDescription>
           </div>
@@ -154,12 +154,7 @@ export function ApiKeysSection() {
           </div>
           <p className="text-muted-foreground">
             Paste this URL + a key below into Claude Desktop / Claude Code / Cursor. See the{' '}
-            <a
-              href="https://github.com/ansvisor/ansvisor#whats-next"
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
+            <a href="https://ultravis.ai" target="_blank" rel="noreferrer" className="underline">
               MCP guide
             </a>
             .

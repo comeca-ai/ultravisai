@@ -317,11 +317,14 @@ export function ReportPdfDocument({ report }: { report: Report }) {
         </Text>
         <View style={styles.rule} />
 
-        {/* Executive summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Executive Summary</Text>
-          <Text style={styles.paragraph}>{payload.summaryText}</Text>
-        </View>
+        {/* Executive summary — may be empty when AI generation was down at
+            creation time (report still generated; see reports.ts #30 fix) */}
+        {payload.summaryText ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Executive Summary</Text>
+            <Text style={styles.paragraph}>{payload.summaryText}</Text>
+          </View>
+        ) : null}
 
         {/* KPI row */}
         {payload.insights && (

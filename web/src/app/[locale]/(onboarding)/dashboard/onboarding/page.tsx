@@ -1668,7 +1668,7 @@ export default function OnboardingPage() {
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           {t('plan.needMore')}{' '}
-          <a href="mailto:sales@ansvisor.com" className="underline hover:text-foreground">
+          <a href="mailto:contato@ultravis.ai" className="underline hover:text-foreground">
             {t('plan.contactSales')}
           </a>{' '}
           {t('plan.forEnterprise')}

@@ -12,6 +12,12 @@ import { applyPlanOverrides } from '../lib/plan-guard.js';
 import { generateContentOpportunities } from '../lib/opportunity-generator.js';
 import { updateTargetUrlStats } from '../lib/target-url-stats.js';
 import logger from '../lib/logger.js';
+import {
+  allTasksAreStale,
+  drainBudgetExceeded,
+  fetchAllPendingRows,
+  PENDING_PAGE_SIZE,
+} from '../lib/drain-helpers.js';
 
 function resolveModelPlatform(model) {
   if (model.startsWith('claude-')) return 'claude';
@@ -248,27 +254,56 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
       const expectedSubmitted = submittedTaskIds.size;
 
       if (expectedSubmitted > 0) {
-        // Hard cap so a stuck Cloro queue can't keep a worker alive forever.
-        const drainDeadline = Date.now() + 60 * 60 * 1000;
         const drainPollMs = 15_000;
-        // Give up early if delivery stalls — no new result for this many
-        // consecutive polls (~10 min) means the rest were almost certainly
-        // dropped, so don't hold the bar (and a concurrency slot) for an hour.
-        const stallPollLimit = 40;
+        // Sync seletivo do upstream (#649/#690/#710/#716), 13/ago:
+        // - Dois orçamentos de tempo em vez de um único prazo a partir da
+        //   submissão: espera pelo PRIMEIRO resultado (fila lenta do Cloro já
+        //   levou 60+ min pra começar a entregar) e cauda medida a partir do
+        //   primeiro resultado.
+        // - Stall subiu de ~10 pra ~25 min: o Cloro entrega em rajadas com
+        //   silêncios de 10+ min no meio de runs saudáveis.
+        // - Saída por "fantasmas": tarefas aceitas que nunca terão callback
+        //   (google-aio sem AI Overview) não seguram o run até o limite.
+        // - Leitura paginada: PostgREST corta select em 1000 linhas.
+        const stallPollLimit = Number(process.env.CLORO_STALL_POLL_LIMIT) || 100;
+        const ghostStallPolls = Number(process.env.CLORO_GHOST_STALL_POLLS) || 60;
+        const ghostTaskAgeMs = (Number(process.env.CLORO_GHOST_TASK_AGE_MIN) || 30) * 60_000;
+        const firstResultWaitMs = (Number(process.env.CLORO_FIRST_RESULT_WAIT_MIN) || 90) * 60_000;
+        const drainTailMs = (Number(process.env.CLORO_DRAIN_TAIL_MIN) || 60) * 60_000;
 
+        const drainStartedAt = Date.now();
+        let firstResultAt = null;
         let lastPending = expectedSubmitted;
         let stalledPolls = 0;
+        let exitReason = 'drained';
+        let finalPending = 0;
 
-        while (Date.now() < drainDeadline) {
-          // Brand-scoped read (a handful of rows at most), intersected in memory
-          // with our own task_ids — avoids a giant `.in(...)` URL.
-          const { data: rows, error: drainErr } = await supabaseAdmin
-            .from('cloro_pending_tasks')
-            .select('task_id')
-            .eq('brand_id', brandId);
+        for (;;) {
+          const budget = drainBudgetExceeded({
+            now: Date.now(),
+            drainStartedAt,
+            firstResultAt,
+            firstResultWaitMs,
+            drainTailMs,
+          });
+          if (budget) {
+            exitReason = budget;
+            finalPending = lastPending;
+            break;
+          }
 
-          // A transient read failure must NOT be read as "0 pending" — that would
-          // break the loop early and report the run as finished while tasks are
+          // Brand-scoped paged read, intersected in memory with our own
+          // task_ids — avoids a giant `.in(...)` URL and the 1000-row cap.
+          const { rows, error: drainErr } = await fetchAllPendingRows((offset) =>
+            supabaseAdmin
+              .from('cloro_pending_tasks')
+              .select('task_id, submitted_at')
+              .eq('brand_id', brandId)
+              .range(offset, offset + PENDING_PAGE_SIZE - 1),
+          );
+
+          // A transient (or partial) read failure must NOT be read as "0
+          // pending" — that would report the run as finished while tasks are
           // still in flight. Skip this tick and retry on the next poll.
           if (drainErr) {
             logger.warn({ err: drainErr, brandId }, 'pending-task poll failed, retrying');
@@ -276,8 +311,10 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
             continue;
           }
 
-          const pending = (rows || []).filter((r) => submittedTaskIds.has(r.task_id)).length;
+          const ourRows = (rows || []).filter((r) => submittedTaskIds.has(r.task_id));
+          const pending = ourRows.length;
           const processed = expectedSubmitted - pending;
+          if (processed > 0 && firstResultAt === null) firstResultAt = Date.now();
 
           if (job) {
             job.progress({
@@ -294,18 +331,42 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
 
           if (pending === 0) break;
 
+          // Stall/ghost exits compare successive pending counts — meaningless
+          // before anything has come back, so they only run after delivery
+          // starts.
           if (pending < lastPending) {
             lastPending = pending;
             stalledPolls = 0;
-          } else if (++stalledPolls >= stallPollLimit) {
-            logger.warn(
-              { brandId, pending, expected: expectedSubmitted },
-              'cloro delivery stalled — some tasks never returned; continuing',
-            );
-            break;
+          } else if (firstResultAt !== null) {
+            const allPendingAreOld = allTasksAreStale(ourRows, ghostTaskAgeMs);
+            if (allPendingAreOld && stalledPolls + 1 >= ghostStallPolls) {
+              exitReason = 'ghost_tasks';
+              finalPending = pending;
+              break;
+            }
+            if (++stalledPolls >= stallPollLimit) {
+              exitReason = 'stalled';
+              finalPending = pending;
+              break;
+            }
           }
 
           await new Promise((r) => setTimeout(r, drainPollMs));
+        }
+
+        // The drain always says how it ended — the silent timeout path once
+        // took the upstream three mornings of forensics to pin down (#710).
+        const elapsedMin = Math.round((Date.now() - drainStartedAt) / 60_000);
+        const firstResultMin =
+          firstResultAt === null ? null : Math.round((firstResultAt - drainStartedAt) / 60_000);
+        const drainLog = { brandId, exitReason, elapsedMin, firstResultMin, expectedSubmitted };
+        if (exitReason === 'drained') {
+          logger.info(drainLog, 'cloro drain complete');
+        } else {
+          logger.warn(
+            { ...drainLog, pending: finalPending },
+            'cloro drain ended early — remaining tasks left to the webhook',
+          );
         }
       }
 

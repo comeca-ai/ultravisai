@@ -32,6 +32,8 @@
 7. **Arquivo-morto de marcas** (PR #44): qualquer marca apagada é arquivada inteira antes do delete — testado em produção.
 8. **Regra "toda marca precisa de usuário ativo"** + check no watchdog (PR #45).
 9. **Base limpa**: contas de teste apagadas; marcas Datarisk/Polar/Accenture apagadas **com arquivo** (515/567/488 resultados preservados); sobrou 1 cliente real ativo + 1 marca sua pausada.
+10. **Painel /ops ganhou Saúde (watchdog ao vivo) + Clientes × Marcas** (PR #47) — acesso: `api.ultravis.ai/ops` (credenciais `OPS_USER`/`OPS_PASS` no Railway).
+11. **Bugs #28/#29/#30 resolvidos** (PR #48): rebranding residual completo (agente, nomes de export `ansvisor_*`, /pricing indo pro site do upstream, mailto de vendas), relatório não aborta mais quando o resumo por IA falha (causa do "relatório não gerado"), login honra `redirectTo`. **18 de 30 itens do feedback respondidos.**
 
 ## Onde cada coisa fica
 

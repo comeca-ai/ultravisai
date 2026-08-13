@@ -52,9 +52,9 @@ renomear a marca do cliente** — o produto se adapta à marca.
 | 25 | Onboarding (old) | "Ler o site pro briefing era muito melhor que digitar" | ✅ Elogio | A feature existe (fomos nós que construímos) — estava quebrada pela chave. Volta com o fix | — | Aguarda chave |
 | 26 | Branding (old) | Visuais/teaser — cliente manda proposta em paralelo | ⏸️ | Aguardar material do cliente | — | Com o cliente |
 | 27 | Login (old) | Conta já existe → não indica, só mostra erro | 🐞 Bug | Conhecido (lista do docx anterior) — melhorar a mensagem no sign-up | P | ✅ Feito (10/ago) |
-| 28 | Branding (old) | "Rodando como Ansvisor (perdemos o segredo)" | 🐞 Branding | Suspeita: **templates de e-mail do Supabase** ainda com marca padrão — trocar textos/remetente | P | A fazer |
-| 29 | Login (old) | Tela de login trava, não avança nem volta | 🐞 Bug | Conhecido; parcialmente endereçado (logout→landing). **Reverificar** pós-mudanças | ? | Verificar |
-| 30 | Relatórios (old) | Relatório não saiu | 🐞 Bug | Conhecido — validar a feature de Relatórios (pré-requisito do "Resumo Executivo" do backlog) | M | Investigar |
+| 28 | Branding (old) | "Rodando como Ansvisor (perdemos o segredo)" | 🐞 Branding | Era maior que e-mail: agente se apresentava como Ansvisor, exports `ansvisor_*.csv/pdf`, /pricing ia pro site do upstream, mailto de vendas — tudo corrigido (PR #48). Falta só conferir templates no painel Supabase | P | ✅ Feito (12/ago) |
+| 29 | Login (old) | Tela de login trava, não avança nem volta | 🐞 Bug | Causa provável (OAuth Site URL=localhost) corrigida antes; form agora honra `redirectTo` (PR #48). Pedir re-teste ao cliente | ? | ✅ Corrigido — re-testar |
+| 30 | Relatórios (old) | Relatório não saiu | 🐞 Bug | Causa raiz: resumo por IA falhou (chave morta) e abortava o relatório inteiro — 0 relatórios na história. Resumo agora é não-fatal (PR #48) | M | ✅ Feito (12/ago) |
 
 ## Leitura executiva
 

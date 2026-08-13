@@ -14,6 +14,28 @@
 
 ---
 
+## 🧲 Funil (novidades de concorrentes — priorizar JUNTOS, sem prioridade até decidirmos)
+
+> Alimentado pelo vigia do upstream (card no `/ops`, varre site + GitHub a cada
+> 3 dias) + varreduras manuais. Cada item leva a tag da origem. Nada aqui entra
+> em desenvolvimento sem decisão conjunta registrada no `DECISOES.md`.
+> **Última varredura:** 13/ago/2026 — release 0.2.0 do upstream (09/ago) + commits até 13/ago.
+
+- [ ] `[ansvisor]` **Daily Pulse** — digest diário por marca pós-run: KPIs, destaques (1ª citação, ganhos por prompt, ultrapassagens) e anomalias (queda brusca, surto de concorrente), e-mail + webhook + Configurações→Notificações. *Nosso ângulo: é o nosso "Alertas de variação" (P0, Onda 0) já pronto no upstream — candidato forte a sync seletivo.*
+- [ ] `[ansvisor]` **AI Visibility Score** — nova métrica central 0-100 (60% menção · 25% citação · 15% posição da menção), idêntica em todas as superfícies; cobertura vira linha secundária. *Nosso ângulo: responde exatamente a confusão do cliente com a nota; mas muda migrations/core (00041-00042) — sync grande.*
+- [ ] `[ansvisor]` **Integração Google Search Console** — sugestões de prompt alimentadas por demanda real de busca (queries que a marca ranqueia e não rastreia), via Composio. *Nosso ângulo: casa com "grounding de prompts" do P1; nós usaríamos Semrush ou GSC direto.*
+- [ ] `[ansvisor]` **Integração GA4** (pós-0.2.0, #695/#703) — conexão GA por marca. *Nosso ângulo: alimenta a "atribuição citação→visita→lead" (P2, a grande lacuna).*
+- [ ] `[ansvisor]` **Leva de confiabilidade do tracking** — runs grandes cortados por paginação (#716), run parcial não vira âncora do 24h (#649), tarefas-fantasma do Cloro (#690), resultado tardio não descarta run (#710), stall window configurável. *Nosso ângulo: são bugs que provavelmente HERDAMOS — cherry-pick barato e de alto valor.*
+- [ ] `[ansvisor]` **Citações: página de detalhe por URL** — cada URL citada abre as respostas que a citaram + breakdown por prompt. *Nosso ângulo: aprofunda a página de Citações que já reformulamos.*
+- [ ] `[ansvisor]` **Fan-out coverage por prompt** — mostra quantas respostas dispararam busca viva (`12/500 · 2%`). *Nosso ângulo: item #16 do feedback (falhas visíveis por prompt) tangencia isso.*
+- [ ] `[ansvisor]` **OpenRouter como provider / sentimento provider-agnostic** (#708). *Nosso ângulo: reduziria dependência da chave OpenAI (causa do incidente de domingo).*
+- [ ] `[ansvisor]` **Range selector 7/30/90d + sort padrão por visibilidade em Prompts** (#697/#714). *Nosso ângulo: quick-win de UX, cherry-pick fácil.*
+- [ ] `[ansvisor]` **robots.txt com allowances explícitas pra AI crawlers + sitemap** (#634). *Nosso ângulo: já fizemos o nosso; comparar abordagens.*
+
+*Contexto de distância do fork: upstream está na migration 00052; nossa base upstream para na 00033 (+ nossas 00034-00037 próprias). Atenção: os números 00034+ deles colidem com os nossos — sync exige renumeração.*
+
+---
+
 ## 🚀 Produto (features)
 
 ### P0 — Agora

@@ -95,9 +95,11 @@ async function collect() {
   // Accounts — who signed up, when, last sign-in and via which provider.
   // Uses the auth admin API (service role). Newest first; capped at 25.
   let accounts = [];
+  let rawUsers = [];
   try {
     const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 100 });
-    accounts = (list?.users ?? [])
+    rawUsers = list?.users ?? [];
+    accounts = rawUsers
       .map((u) => ({
         email: u.email || '—',
         createdAt: u.created_at,
@@ -110,6 +112,41 @@ async function collect() {
       .slice(0, 25);
   } catch {
     accounts = null;
+  }
+
+  // Live health: the watchdog's own checks, evaluated on demand (read-only —
+  // no alert delivery, no anti-spam state). Lazy import keeps boot order sane.
+  let health = null;
+  try {
+    const { checkHealthNow } = await import('../lib/watchdog.js');
+    health = await checkHealthNow();
+  } catch {
+    health = null;
+  }
+
+  // Clients × brands — the whole customer base at a glance.
+  let clients = null;
+  try {
+    const [{ data: orgs }, { data: profs }, { data: brandRows }] = await Promise.all([
+      supabaseAdmin.from('organizations').select('id, name'),
+      supabaseAdmin.from('profiles').select('id, organization_id'),
+      supabaseAdmin.from('brands').select('id, name, is_active, organization_id, created_at'),
+    ]);
+    const emailById = Object.fromEntries(rawUsers.map((u) => [u.id, u.email || '—']));
+    clients = (orgs ?? [])
+      .map((o) => ({
+        org: o.name,
+        users: (profs ?? [])
+          .filter((p) => p.organization_id === o.id)
+          .map((p) => emailById[p.id] || '—'),
+        brands: (brandRows ?? [])
+          .filter((b) => b.organization_id === o.id)
+          .sort((a, b) => Number(b.is_active) - Number(a.is_active))
+          .map((b) => ({ name: b.name, active: b.is_active })),
+      }))
+      .sort((a, b) => a.org.localeCompare(b.org));
+  } catch {
+    clients = null;
   }
 
   // Recent runs (the platform's own job log) — tracking/content jobs with
@@ -151,6 +188,8 @@ async function collect() {
     accounts,
     jobs,
     jobsFailed24h,
+    health,
+    clients,
     now: new Date().toISOString(),
   };
 }
@@ -254,6 +293,21 @@ function render(d) {
     <div class="kpi"><div class="n">${d.machine.uptime}</div><div class="t">Uptime</div></div>
   </div>
 
+  <div class="card" style="margin-bottom:14px"><h2>Saúde (watchdog · mesmos checks do alerta)</h2>
+    ${
+      d.health === null
+        ? '<div class="muted">não foi possível avaliar</div>'
+        : d.health.length === 0
+          ? '<div style="color:var(--ok)">● Nenhum alerta ativo — tudo saudável</div>'
+          : d.health
+              .map(
+                (a) =>
+                  `<div class="row"><span class="l"><span class="st ${a.severity === 'critical' ? 'st-bad' : 'st-warn'}">${a.severity === 'critical' ? 'CRÍTICO' : 'ATENÇÃO'}</span></span><span style="font-size:13px">${esc(a.message)}</span></div>`,
+              )
+              .join('')
+    }
+  </div>
+
   <div class="grid">
     <div class="card"><h2>Máquina</h2>
       ${row('Uptime', d.machine.uptime)}
@@ -276,6 +330,24 @@ function render(d) {
     <div class="ovf"><table>
       <thead><tr><th>Quando (UTC)</th><th>Tipo</th><th>Marca</th><th>Status</th><th>Detalhe</th></tr></thead>
       <tbody>${jobsRows}</tbody>
+    </table></div>
+  </div>
+
+  <div class="card" style="margin-top:14px"><h2>Clientes × Marcas</h2>
+    <div class="ovf"><table>
+      <thead><tr><th>Organização</th><th>Usuários</th><th>Marcas</th></tr></thead>
+      <tbody>${
+        d.clients === null
+          ? '<tr><td colspan="3" class="muted">não foi possível carregar</td></tr>'
+          : d.clients.length === 0
+            ? '<tr><td colspan="3" class="muted">nenhuma organização ainda</td></tr>'
+            : d.clients
+                .map(
+                  (c) =>
+                    `<tr><td>${esc(c.org)}</td><td class="mono">${c.users.map(esc).join('<br>') || '<span class="muted">sem usuário ⚠️</span>'}</td><td>${c.brands.map((b) => `<span class="st ${b.active ? 'st-ok' : 'st-mut'}">${esc(b.name)}${b.active ? '' : ' · pausada'}</span>`).join(' ') || '<span class="muted">—</span>'}</td></tr>`,
+                )
+                .join('')
+      }</tbody>
     </table></div>
   </div>
 

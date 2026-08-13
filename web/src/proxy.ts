@@ -39,11 +39,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // The pricing page lives on the marketing site (ansvisor.com/pricing) now,
-  // not the app subdomain — redirect any stale links / bookmarks so they
-  // land on the canonical page instead of 404'ing (#113).
+  // Ultravis: pricing lives on our own landing's #pricing section. (This
+  // used to send users to the UPSTREAM site ansvisor.com — brand leak.)
   if (pathnameWithoutLocale === '/pricing') {
-    return NextResponse.redirect('https://ansvisor.com/pricing', 302);
+    return NextResponse.redirect(new URL('/#pricing', request.url), 302);
   }
 
   if (isProtected(pathnameWithoutLocale) && !user) {

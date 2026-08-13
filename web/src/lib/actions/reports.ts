@@ -844,19 +844,27 @@ export async function createReport(
 
   // 2. AI executive summary from the server (content.js-style single call).
   //    The template id lets the server flavor the prose for the report type.
-  const res = await fetch(`${API_BASE_URL}/api/reports/summary`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({ brandId, snapshot, dateFrom, dateTo, template: template.id }),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || `Summary generation failed: ${res.status}`);
+  //    Ultravis fix (#30): a summary failure must NOT abort the report — the
+  //    pilot client's attempt during an LLM-provider outage produced zero
+  //    reports ever. The snapshot is the report; the prose is garnish.
+  let summary = '';
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/reports/summary`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ brandId, snapshot, dateFrom, dateTo, template: template.id }),
+    });
+    if (res.ok) {
+      summary = ((await res.json()) as { summary: string }).summary ?? '';
+    } else {
+      console.error(`report summary generation failed: HTTP ${res.status}`);
+    }
+  } catch (err) {
+    console.error('report summary generation unreachable', err);
   }
-  const { summary } = (await res.json()) as { summary: string };
 
   const payload: ReportPayload = { ...snapshot, summaryText: summary };
 

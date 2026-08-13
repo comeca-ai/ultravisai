@@ -163,7 +163,7 @@ export default function ReportDetailPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ansvisor_${slug}_report_${report.dateTo.slice(0, 10)}.pdf`;
+      a.download = `ultravis_${slug}_report_${report.dateTo.slice(0, 10)}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -208,16 +208,20 @@ export default function ReportDetailPage() {
       {/* Everything below renders from the immutable saved payload; the
           container id is the future PDF capture root. */}
       <div id="report-root" className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t('executiveSummary')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-              {payload.summaryText}
-            </p>
-          </CardContent>
-        </Card>
+        {/* Summary may be empty when AI generation was down at creation time
+            (report still generated; see reports.ts #30 fix) */}
+        {payload.summaryText && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{t('executiveSummary')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {payload.summaryText}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Every metric section guards on its payload field: templates only
             gather their own sections, and older (immutable) reports may

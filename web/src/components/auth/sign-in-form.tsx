@@ -19,7 +19,10 @@ export function SignInForm() {
   const t = useTranslations('auth');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get('next');
+  // The middleware sends users here with ?redirectTo=<original path>; older
+  // links use ?next. Honor both so a post-login user lands where they were
+  // headed instead of silently falling back to /dashboard (#29 friction).
+  const nextPath = searchParams.get('next') ?? searchParams.get('redirectTo');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);

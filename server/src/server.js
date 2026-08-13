@@ -118,6 +118,15 @@ async function runDailyTracking() {
   // self-hosted, since both paths funnel through here).
   await cleanupStalePendingTasks();
 
+  // Daily Pulse catch-up (Funil pacote 2, upstream #654): recover pulses
+  // whose fire-and-forget trigger died with the process (deploy, crash)
+  // after the run completed. Non-blocking.
+  import('./lib/pulse/engine.js')
+    .then(({ runPulseCatchUp }) => runPulseCatchUp())
+    .catch((err) => {
+      logger.error({ err }, '[pulse] catch-up sweep crashed');
+    });
+
   // Skip paused brands (is_active = false): the user has explicitly suspended
   // tracking for them, so they should not spend Cloro / LLM credits daily.
   const { data: brands, error } = await supabaseAdmin

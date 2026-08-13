@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { allTasksAreStale, drainBudgetExceeded, fetchAllPendingRows } from '../lib/drain-helpers.js';
+import {
+  allTasksAreStale,
+  drainBudgetExceeded,
+  fetchAllPendingRows,
+} from '../lib/drain-helpers.js';
 
 const NOW = Date.parse('2026-08-13T12:00:00Z');
 const MIN = 60_000;

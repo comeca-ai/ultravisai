@@ -17,9 +17,12 @@ import { processTrackingJob } from '../workers/tracking-worker.js';
 import { processContentJob } from '../workers/content-worker.js';
 import logger from './logger.js';
 
-// Concurrency counters (matches previous Bull concurrency of 2 per queue)
+// Concurrency counters (the default of 2 per queue is inherited from the Bull
+// setup this replaced). Tracking jobs spend almost all of their time waiting
+// on scraper callbacks, so the ceiling mostly decides how many brands queue
+// behind each other — configurable via TRACKING_CONCURRENCY (upstream #690).
 let activeTrackingCount = 0;
-const MAX_CONCURRENT_TRACKING = 2;
+const MAX_CONCURRENT_TRACKING = Number(process.env.TRACKING_CONCURRENCY) || 2;
 let activeContentCount = 0;
 const MAX_CONCURRENT_CONTENT = 2;
 

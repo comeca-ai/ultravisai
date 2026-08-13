@@ -278,6 +278,15 @@ async function deliver(alerts) {
   }
 }
 
+/**
+ * Read-only health check for the /ops panel: evaluates the exact same checks
+ * the cron uses, but never delivers alerts nor touches the anti-spam state.
+ */
+export async function checkHealthNow(intervalMin = 15) {
+  const snap = await collectSnapshot(intervalMin);
+  return evaluateChecks(snap, new Date());
+}
+
 export async function runWatchdogOnce(intervalMin = 15) {
   const snap = await collectSnapshot(intervalMin);
   const alerts = evaluateChecks(snap, new Date());

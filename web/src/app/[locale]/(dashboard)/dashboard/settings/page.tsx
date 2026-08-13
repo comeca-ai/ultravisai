@@ -56,10 +56,10 @@ export default function SettingsPage() {
     { id: 'theme', label: t('theme') },
     { id: 'project', label: t('project') },
     { id: 'team', label: t('team') },
-    { id: 'api-keys', label: 'API Keys' },
+    { id: 'api-keys', label: t('apiKeys') },
     // Agent BYOK is a cloud-only concern — self-host operators configure
     // ANTHROPIC_API_KEY in their own env, no UI needed.
-    ...(isCloud ? [{ id: 'agent' as Section, label: 'Agent' }] : []),
+    ...(isCloud ? [{ id: 'agent' as Section, label: t('agentNav') }] : []),
     ...(isCloud ? [{ id: 'billing' as Section, label: t('billing') }] : []),
   ];
 
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                   <Label htmlFor="name">{t('displayName')}</Label>
                   <Input
                     id="name"
-                    placeholder="Your name"
+                    placeholder={t('displayNamePlaceholder')}
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                   />
@@ -115,7 +115,7 @@ export default function SettingsPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@company.com"
+                    placeholder={tAuth('emailPlaceholder')}
                     value={email}
                     onChange={() => {}}
                     disabled
@@ -154,16 +154,16 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>{t('project')}</CardTitle>
-                <CardDescription>Configure your project settings.</CardDescription>
+                <CardDescription>{t('projectDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="projectName">{t('projectName')}</Label>
-                  <Input id="projectName" placeholder="My Brand" />
+                  <Input id="projectName" placeholder={t('projectNamePlaceholder')} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="domain">{t('domain')}</Label>
-                  <Input id="domain" placeholder="example.com" />
+                  <Input id="domain" placeholder={t('domainPlaceholder')} />
                 </div>
                 <Button>{t('save')}</Button>
               </CardContent>

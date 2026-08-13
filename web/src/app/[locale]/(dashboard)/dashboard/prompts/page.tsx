@@ -222,8 +222,6 @@ const PROMPT_EXPORT_HEADERS = [
   'last_run_at',
 ];
 
-const PROMPT_EXPORT_HINT = 'No prompts yet - add prompts first.';
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const VALID_TABS = ['all', 'fanout', 'insights'] as const;
@@ -322,11 +320,12 @@ function PromptFormFields({
   saving: boolean;
   autoFocus?: boolean;
 }) {
+  const t = useTranslations('prompts.dialog');
   return (
     <>
       <Input
         autoFocus={autoFocus}
-        placeholder="e.g. Best project management tools for startups"
+        placeholder={t('textPlaceholder')}
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
         onKeyDown={(e) => {
@@ -337,11 +336,13 @@ function PromptFormFields({
 
       {/* Topic */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Topic</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+          {t('topic')}
+        </label>
         {topics.length > 0 ? (
           <Select value={category || null} onValueChange={(v) => v && onCategoryChange(String(v))}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a topic" />
+              <SelectValue placeholder={t('selectTopic')} />
             </SelectTrigger>
             <SelectContent>
               {topics.map((topic) => (
@@ -352,16 +353,14 @@ function PromptFormFields({
             </SelectContent>
           </Select>
         ) : (
-          <p className="text-xs text-muted-foreground py-2">
-            No topics defined yet. Add topics in brand settings.
-          </p>
+          <p className="text-xs text-muted-foreground py-2">{t('noTopics')}</p>
         )}
       </div>
 
       {/* Platform & Models — combined select, same as brands/[id]/prompts */}
       <div>
         <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-          Platform & Models
+          {t('platformModels')}
         </label>
         <Select
           value="__placeholder__"
@@ -378,8 +377,8 @@ function PromptFormFields({
           <SelectTrigger className="w-full">
             <span className="truncate text-muted-foreground">
               {models.length + scrapers.length > 0
-                ? `${models.length + scrapers.length} selected`
-                : 'Select platform & models'}
+                ? t('selectedCount', { count: models.length + scrapers.length })
+                : t('selectPlatformModels')}
             </span>
           </SelectTrigger>
           <SelectContent>
@@ -484,6 +483,8 @@ function AddPromptDialog({
 }) {
   const { allowedScraperIds, allowedModelIds, visibleScrapers, visibleModels } =
     useAllowedEngines(shoppingEnabled);
+  const t = useTranslations('prompts.dialog');
+  const tc = useTranslations('common');
 
   const [text, setText] = useState('');
   const [category, setCategory] = useState('');
@@ -537,10 +538,10 @@ function AddPromptDialog({
         return;
       }
       onClose();
-      toast.success('Prompt added — it will be picked up by the next tracking run.');
+      toast.success(t('added'));
       onAdded();
     } catch {
-      setError('Failed to add prompt. Please try again.');
+      setError(t('addFailed'));
     } finally {
       setSaving(false);
     }
@@ -552,11 +553,9 @@ function AddPromptDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <Plus className="h-4 w-4" />
-            Add Prompt
+            {t('addTitle')}
           </DialogTitle>
-          <DialogDescription>
-            Track a new prompt for this brand across the selected platforms.
-          </DialogDescription>
+          <DialogDescription>{t('addDescription')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <PromptFormFields
@@ -583,7 +582,7 @@ function AddPromptDialog({
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleClose} disabled={saving}>
-            Cancel
+            {tc('cancel')}
           </Button>
           <Button
             type="button"
@@ -593,12 +592,12 @@ function AddPromptDialog({
             {saving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding…
+                {t('adding')}
               </>
             ) : (
               <>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Prompt
+                {t('addTitle')}
               </>
             )}
           </Button>
@@ -632,6 +631,8 @@ function EditPromptDialog({
 }) {
   const { allowedScraperIds, allowedModelIds, visibleScrapers, visibleModels } =
     useAllowedEngines(shoppingEnabled);
+  const t = useTranslations('prompts.dialog');
+  const tc = useTranslations('common');
 
   const [text, setText] = useState('');
   const [category, setCategory] = useState('');
@@ -692,10 +693,10 @@ function EditPromptDialog({
         isActive,
       });
       onClose();
-      toast.success('Prompt updated.');
+      toast.success(t('updated'));
       onChanged();
     } catch {
-      setError('Failed to update prompt. Please try again.');
+      setError(t('updateFailed'));
     } finally {
       setSaving(false);
     }
@@ -708,10 +709,10 @@ function EditPromptDialog({
     try {
       await deletePrompt(prompt.id);
       onClose();
-      toast.success('Prompt deleted.');
+      toast.success(t('deleted'));
       onChanged();
     } catch {
-      setError('Failed to delete prompt. Please try again.');
+      setError(t('deleteFailed'));
     } finally {
       setDeleting(false);
     }
@@ -723,11 +724,9 @@ function EditPromptDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <Pencil className="h-4 w-4" />
-            Edit Prompt
+            {t('editTitle')}
           </DialogTitle>
-          <DialogDescription>
-            Changes apply from the next tracking run; past results stay attached to this prompt.
-          </DialogDescription>
+          <DialogDescription>{t('editDescription')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <PromptFormFields
@@ -755,7 +754,7 @@ function EditPromptDialog({
               onCheckedChange={(v) => setIsActive(v === true)}
               disabled={busy}
             />
-            <span>Active — included in tracking runs</span>
+            <span>{t('activeLabel')}</span>
           </label>
 
           {error && <p className="text-xs text-red-500">{error}</p>}
@@ -763,7 +762,7 @@ function EditPromptDialog({
         <DialogFooter className="gap-2">
           {confirmingDelete ? (
             <div className="flex w-full flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-red-500">Delete this prompt and its tracking history?</p>
+              <p className="text-xs text-red-500">{t('deleteConfirm')}</p>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -772,7 +771,7 @@ function EditPromptDialog({
                   onClick={() => setConfirmingDelete(false)}
                   disabled={deleting}
                 >
-                  Keep it
+                  {t('keepIt')}
                 </Button>
                 <Button
                   type="button"
@@ -786,7 +785,7 @@ function EditPromptDialog({
                   ) : (
                     <Trash2 className="mr-2 h-4 w-4" />
                   )}
-                  Delete
+                  {tc('delete')}
                 </Button>
               </div>
             </div>
@@ -800,10 +799,10 @@ function EditPromptDialog({
                 disabled={busy}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {tc('delete')}
               </Button>
               <Button type="button" variant="outline" onClick={handleClose} disabled={busy}>
-                Cancel
+                {tc('cancel')}
               </Button>
               <Button
                 type="button"
@@ -813,10 +812,10 @@ function EditPromptDialog({
                 {saving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving…
+                    {t('saving')}
                   </>
                 ) : (
-                  'Save changes'
+                  t('saveChanges')
                 )}
               </Button>
             </>
@@ -870,6 +869,7 @@ function VolumePill({ value }: { value: number }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function PromptsPage() {
+  const t = useTranslations('prompts');
   const [search, setSearch] = useState('');
   const [volumes, setVolumes] = useState<PromptVolume[]>([]);
   const [allPrompts, setAllPrompts] = useState<Prompt[]>([]);
@@ -945,17 +945,17 @@ export default function PromptsPage() {
         setAllPrompts(prompts);
         setVisibility(page.visibility);
         if (page.volumesDegraded) {
-          toast.warning('Volume data is temporarily unavailable — showing prompts without it.');
+          toast.warning(t('toasts.volumesDegraded'));
         }
       } catch (err) {
         if (isCancelled?.()) return;
         console.error('Failed to load prompt data:', err);
-        toast.error('Failed to load prompt data');
+        toast.error(t('toasts.loadFailed'));
       } finally {
         if (!isCancelled?.()) setLoading(false);
       }
     },
-    [activeBrandId],
+    [activeBrandId, t],
   );
 
   useEffect(() => {
@@ -977,7 +977,7 @@ export default function PromptsPage() {
       promptsWithoutVolume.length > 0 ? promptsWithoutVolume : allPrompts.filter((p) => p.isActive);
 
     if (promptsToAnalyze.length === 0) {
-      toast.error('No active prompts to analyze. Add prompts to a brand first.');
+      toast.error(t('toasts.noActiveToAnalyze'));
       return;
     }
 
@@ -993,15 +993,15 @@ export default function PromptsPage() {
           used: quota.limit === -1 ? 0 : quota.limit - result.remaining,
         });
       }
-      toast.success(`Analyzed ${promptsToAnalyze.length} prompts`);
+      toast.success(t('toasts.analyzed', { count: promptsToAnalyze.length }));
       await loadData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Volume analysis failed';
       if (message.includes('limit reached')) {
-        toast.error('Monthly volume analysis limit reached. Upgrade your plan for more.');
+        toast.error(t('toasts.limitReached'));
       } else {
         console.error('Volume analysis failed:', err);
-        toast.error('Volume analysis failed');
+        toast.error(t('toasts.analysisFailed'));
       }
     } finally {
       setAnalyzing(false);
@@ -1021,15 +1021,15 @@ export default function PromptsPage() {
           used: quota.limit === -1 ? 0 : quota.limit - result.remaining,
         });
       }
-      toast.success(`Refreshed volumes for ${result.refreshed} prompts`);
+      toast.success(t('toasts.refreshed', { count: result.refreshed }));
       await loadData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Volume refresh failed';
       if (message.includes('limit reached')) {
-        toast.error('Monthly volume analysis limit reached. Upgrade your plan for more.');
+        toast.error(t('toasts.limitReached'));
       } else {
         console.error('Volume refresh failed:', err);
-        toast.error('Volume refresh failed');
+        toast.error(t('toasts.refreshFailed'));
       }
     } finally {
       setRefreshing(false);
@@ -1041,7 +1041,7 @@ export default function PromptsPage() {
 
     const activePrompts = allPrompts.filter((p) => p.isActive);
     if (activePrompts.length === 0) {
-      toast.error('No active prompts to analyze.');
+      toast.error(t('toasts.noActive'));
       return;
     }
 
@@ -1060,15 +1060,15 @@ export default function PromptsPage() {
           used: quota.limit === -1 ? 0 : quota.limit - result.remaining,
         });
       }
-      toast.success(`Re-analyzed ${activePrompts.length} prompts with new keywords`);
+      toast.success(t('toasts.reanalyzed', { count: activePrompts.length }));
       await loadData();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Re-analysis failed';
       if (message.includes('limit reached')) {
-        toast.error('Monthly volume analysis limit reached. Upgrade your plan for more.');
+        toast.error(t('toasts.limitReached'));
       } else {
         console.error('Re-analysis failed:', err);
-        toast.error('Re-analysis failed');
+        toast.error(t('toasts.reanalysisFailed'));
       }
     } finally {
       setAnalyzing(false);
@@ -1142,7 +1142,7 @@ export default function PromptsPage() {
   if (!activeBrandId) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Select a brand to view prompts.</p>
+        <p className="text-muted-foreground">{t('noBrand')}</p>
       </div>
     );
   }
@@ -1152,12 +1152,12 @@ export default function PromptsPage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Prompts</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('pageTitle')}</h1>
           <p className="text-muted-foreground text-sm">
-            Manage every tracked prompt and review estimated AI demand
+            {t('pageDescription')}
             <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground/70">
               <AlertCircle className="h-3 w-3" />
-              Volumes are estimates, not exact figures
+              {t('volumesEstimateNote')}
             </span>
           </p>
         </div>
@@ -1166,9 +1166,9 @@ export default function PromptsPage() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)}>
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <TabsList>
-            <TabsTrigger value="all">All Prompts</TabsTrigger>
-            <TabsTrigger value="fanout">Query Fan-out</TabsTrigger>
-            <TabsTrigger value="insights">Insights</TabsTrigger>
+            <TabsTrigger value="all">{t('tabs.all')}</TabsTrigger>
+            <TabsTrigger value="fanout">{t('tabs.fanout')}</TabsTrigger>
+            <TabsTrigger value="insights">{t('tabs.insights')}</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
             {tab === 'all' && canManage && (
@@ -1179,11 +1179,11 @@ export default function PromptsPage() {
                 onClick={() => setAddPromptOpen(true)}
               >
                 <Plus className="h-4 w-4" />
-                Add prompt
+                {t('addPrompt')}
               </Button>
             )}
             {tab === 'all' && (
-              <span title={!canExport ? PROMPT_EXPORT_HINT : undefined}>
+              <span title={!canExport ? t('exportHint') : undefined}>
                 <Button
                   type="button"
                   variant="outline"
@@ -1193,7 +1193,7 @@ export default function PromptsPage() {
                   disabled={!canExport}
                 >
                   <Download className="h-4 w-4" />
-                  Export CSV
+                  {t('exportCsv')}
                 </Button>
               </span>
             )}
@@ -1203,7 +1203,7 @@ export default function PromptsPage() {
               className={buttonVariants({ variant: 'outline', size: 'sm' })}
             >
               <Settings2 className="h-4 w-4" />
-              Manage prompts
+              {t('managePrompts')}
             </Link>
           </div>
         </div>
@@ -1218,13 +1218,10 @@ export default function PromptsPage() {
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" />
                 <div className="text-sm">
                   <p className="font-medium text-amber-900 dark:text-amber-200">
-                    {unanalyzedCount} prompt{unanalyzedCount === 1 ? '' : 's'} haven&apos;t been
-                    analyzed yet
+                    {t('banner.title', { count: unanalyzedCount })}
                   </p>
                   <p className="text-amber-800/80 dark:text-amber-300/80">
-                    {quotaExhausted
-                      ? 'Their Volume & Competition stay empty until analyzed — but your monthly volume analysis limit is reached. Upgrade your plan to analyze more.'
-                      : 'Run volume analysis to fill in their Volume & Competition.'}
+                    {quotaExhausted ? t('banner.bodyQuota') : t('banner.body')}
                   </p>
                 </div>
               </div>
@@ -1237,12 +1234,12 @@ export default function PromptsPage() {
                 {analyzing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
+                    {t('analyzing')}
                   </>
                 ) : (
                   <>
                     <BarChart3 className="mr-2 h-4 w-4" />
-                    Analyze {unanalyzedCount} prompt{unanalyzedCount === 1 ? '' : 's'}
+                    {t('banner.analyzeCta', { count: unanalyzedCount })}
                   </>
                 )}
               </Button>
@@ -1275,7 +1272,7 @@ export default function PromptsPage() {
                   quotaExhausted ? 'text-red-500' : 'text-muted-foreground',
                 )}
               >
-                {quota.remaining}/{quota.limit} analyses left
+                {t('quota.left', { remaining: quota.remaining, limit: quota.limit })}
               </span>
             )}
             {volumes.length > 0 && (
@@ -1292,7 +1289,7 @@ export default function PromptsPage() {
                   ) : (
                     <RefreshCw className="h-4 w-4" />
                   )}
-                  {refreshing ? 'Refreshing...' : 'Refresh Volumes'}
+                  {refreshing ? t('refreshing') : t('refreshVolumes')}
                 </Button>
                 <Button
                   onClick={handleReanalyzeAll}
@@ -1306,7 +1303,7 @@ export default function PromptsPage() {
                   ) : (
                     <BarChart3 className="h-4 w-4" />
                   )}
-                  {analyzing ? 'Analyzing...' : 'Re-analyze Keywords'}
+                  {analyzing ? t('analyzing') : t('reanalyzeKeywords')}
                 </Button>
               </>
             )}
@@ -1324,7 +1321,7 @@ export default function PromptsPage() {
                   ) : (
                     <BarChart3 className="h-4 w-4" />
                   )}
-                  {analyzing ? 'Analyzing...' : 'Analyze New Prompts'}
+                  {analyzing ? t('analyzing') : t('analyzeNewPrompts')}
                 </Button>
               )}
           </div>
@@ -1338,11 +1335,11 @@ export default function PromptsPage() {
               <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
                 <BarChart3 className="h-12 w-12 text-muted-foreground/40" />
                 <div className="text-center space-y-1">
-                  <p className="text-sm font-medium">No volume data yet</p>
+                  <p className="text-sm font-medium">{t('emptyVolumes.title')}</p>
                   <p className="text-xs text-muted-foreground">
                     {allPrompts.length > 0
-                      ? 'Click "Analyze Volumes" to fetch search volume data for your prompts.'
-                      : 'Add prompts to your brand first, then analyze their volumes.'}
+                      ? t('emptyVolumes.bodyHasPrompts')
+                      : t('emptyVolumes.bodyNoPrompts')}
                   </p>
                 </div>
                 {allPrompts.length > 0 && (
@@ -1358,16 +1355,17 @@ export default function PromptsPage() {
                       ) : (
                         <BarChart3 className="h-4 w-4" />
                       )}
-                      {analyzing ? 'Analyzing...' : 'Analyze Volumes'}
+                      {analyzing ? t('analyzing') : t('analyzeVolumes')}
                     </Button>
                     {quotaExhausted && (
-                      <p className="text-xs text-red-500">
-                        Monthly analysis limit reached. Resets when your subscription renews.
-                      </p>
+                      <p className="text-xs text-red-500">{t('quota.exhausted')}</p>
                     )}
                     {quota && quota.limit !== -1 && !quotaExhausted && (
                       <p className="text-xs text-muted-foreground">
-                        {quota.remaining}/{quota.limit} analyses remaining this month
+                        {t('quota.remainingMonth', {
+                          remaining: quota.remaining,
+                          limit: quota.limit,
+                        })}
                       </p>
                     )}
                   </>
@@ -1379,28 +1377,28 @@ export default function PromptsPage() {
               {/* KPI Cards */}
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <KpiCard
-                  title="Prompts Analyzed"
+                  title={t('kpi.analyzed')}
                   icon={Layers}
                   value={volumes.length}
-                  sub={`across ${totalKeywords} keywords`}
+                  sub={t('kpi.analyzedSub', { count: totalKeywords })}
                 />
                 <KpiCard
-                  title="Total Est. AI Volume"
+                  title={t('kpi.totalAiVolume')}
                   icon={BarChart3}
                   value={`~${formatCompactNumber(totalAiVol)}`}
-                  sub={`from ${formatCompactNumber(totalGoogleVol)} Google searches`}
+                  sub={t('kpi.totalAiVolumeSub', { value: formatCompactNumber(totalGoogleVol) })}
                 />
                 <KpiCard
-                  title="AI Adoption Rate"
+                  title={t('kpi.adoptionRate')}
                   icon={TrendingUp}
                   value={`${((volumes[0]?.aiVolumeMultiplier ?? 0.15) * 100).toFixed(0)}%`}
-                  sub="of Google search volume"
+                  sub={t('kpi.adoptionRateSub')}
                 />
                 <KpiCard
-                  title="Avg. AI Volume"
+                  title={t('kpi.avgAiVolume')}
                   icon={BarChart3}
                   value={`~${formatCompactNumber(totalAiVol / volumes.length)}`}
-                  sub="per prompt"
+                  sub={t('kpi.avgAiVolumeSub')}
                 />
               </div>
 
@@ -1408,12 +1406,8 @@ export default function PromptsPage() {
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Prompt Volumes</CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Total estimated AI-answered queries across all topic clusters, split by
-                      answer-engine share. Weights include Google AI Overview (~35% of Google
-                      searches), Google AI Mode, and standalone chatbots.
-                    </p>
+                    <CardTitle className="text-sm font-medium">{t('title')}</CardTitle>
+                    <p className="text-xs text-muted-foreground">{t('volumesCard.description')}</p>
                   </CardHeader>
                   <CardContent>
                     <PlatformVolumeChart totalVolume={totalAiVol} />
@@ -1424,16 +1418,18 @@ export default function PromptsPage() {
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <CardTitle className="text-sm font-medium">Similar Topics</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                          {t('similarTopics.title')}
+                        </CardTitle>
                         <p className="text-xs text-muted-foreground">
-                          Most-searched keyword clusters across all prompts
+                          {t('similarTopics.description')}
                         </p>
                       </div>
                       <Link
                         href="/dashboard/prompts/similar-topics"
                         className="shrink-0 text-xs font-medium text-primary underline-offset-2 hover:underline"
                       >
-                        See all
+                        {t('similarTopics.seeAll')}
                       </Link>
                     </div>
                   </CardHeader>
@@ -1447,11 +1443,11 @@ export default function PromptsPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <CardTitle className="text-sm font-medium">Prompt Volumes</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('title')}</CardTitle>
                     <div className="relative w-60">
                       <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                       <Input
-                        placeholder="Search prompts…"
+                        placeholder={t('allTable.searchPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="pl-8 h-8 text-xs"
@@ -1463,25 +1459,16 @@ export default function PromptsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="pl-6">Prompt</TableHead>
+                        <TableHead className="pl-6">{t('allTable.colPrompt')}</TableHead>
 
-                        <ColHead
-                          className="text-right"
-                          tooltip="Total monthly Google search volume across all extracted keywords."
-                        >
-                          Google Vol.
+                        <ColHead className="text-right" tooltip={t('volumeTable.googleVolTip')}>
+                          {t('volumeTable.googleVol')}
                         </ColHead>
-                        <ColHead
-                          className="text-right"
-                          tooltip="Estimated monthly AI prompt volume. Calculated as total Google volume multiplied by the AI adoption rate."
-                        >
-                          Est. AI Vol.
+                        <ColHead className="text-right" tooltip={t('volumeTable.estAiVolTip')}>
+                          {t('volumeTable.estAiVol')}
                         </ColHead>
-                        <ColHead
-                          className="text-center"
-                          tooltip="The search intent detected by AI analysis. Different intents indicate how users frame their queries."
-                        >
-                          Intent
+                        <ColHead className="text-center" tooltip={t('volumeTable.intentTip')}>
+                          {t('volumeTable.intent')}
                         </ColHead>
                       </TableRow>
                     </TableHeader>
@@ -1506,7 +1493,9 @@ export default function PromptsPage() {
                                 INTENT_COLORS[row.intent] || '',
                               )}
                             >
-                              {INTENT_LABELS[row.intent] || row.intent}
+                              {t.has(`intents.${row.intent}`)
+                                ? t(`intents.${row.intent}`)
+                                : INTENT_LABELS[row.intent] || row.intent}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -1515,14 +1504,11 @@ export default function PromptsPage() {
                   </Table>
                   {filtered.length === 0 && (
                     <div className="py-10 text-center text-sm text-muted-foreground">
-                      No prompts match your search.
+                      {t('noSearchMatch')}
                     </div>
                   )}
                   <div className="px-6 py-2 border-t">
-                    <p className="text-xs text-muted-foreground">
-                      * Est. AI Volume = Total Google search volume of extracted keywords × AI
-                      adoption rate. Figures are approximations for planning purposes.
-                    </p>
+                    <p className="text-xs text-muted-foreground">{t('volumeTable.footnote')}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1533,11 +1519,9 @@ export default function PromptsPage() {
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
                       <Eye className="h-4 w-4 text-emerald-500" />
-                      <CardTitle className="text-sm font-medium">
-                        High Opportunity Prompts
-                      </CardTitle>
+                      <CardTitle className="text-sm font-medium">{t('highOpp.title')}</CardTitle>
                       <span className="text-xs text-muted-foreground ml-1">
-                        Prompts with highest estimated AI search demand
+                        {t('highOpp.subtitle')}
                       </span>
                     </div>
                   </CardHeader>
@@ -1545,21 +1529,18 @@ export default function PromptsPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="pl-6">Prompt</TableHead>
-                          <ColHead
-                            className="text-right"
-                            tooltip="Estimated monthly AI prompt volume. Sorted by highest volume first."
-                          >
-                            Est. AI Volume
+                          <TableHead className="pl-6">{t('allTable.colPrompt')}</TableHead>
+                          <ColHead className="text-right" tooltip={t('highOpp.estAiVolumeTip')}>
+                            {t('highOpp.estAiVolume')}
                           </ColHead>
-                          <ColHead className="text-center" tooltip="The detected search intent.">
-                            Intent
+                          <ColHead className="text-center" tooltip={t('highOpp.intentTip')}>
+                            {t('volumeTable.intent')}
                           </ColHead>
                           <ColHead
                             className="text-right pr-6"
-                            tooltip="Opportunity level based on estimated AI volume. High = above 10k/mo, Medium = 5k–10k/mo."
+                            tooltip={t('highOpp.opportunityTip')}
                           >
-                            Opportunity
+                            {t('highOpp.opportunity')}
                           </ColHead>
                         </TableRow>
                       </TableHeader>
@@ -1580,7 +1561,9 @@ export default function PromptsPage() {
                                   variant="outline"
                                   className={cn('text-xs', INTENT_COLORS[row.intent] || '')}
                                 >
-                                  {INTENT_LABELS[row.intent] || row.intent}
+                                  {t.has(`intents.${row.intent}`)
+                                    ? t(`intents.${row.intent}`)
+                                    : INTENT_LABELS[row.intent] || row.intent}
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-right pr-6">
@@ -1593,7 +1576,9 @@ export default function PromptsPage() {
                                       : 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400',
                                   )}
                                 >
-                                  {row.estAiVolume >= 10000 ? 'High' : 'Medium'}
+                                  {row.estAiVolume >= 10000
+                                    ? t('highOpp.high')
+                                    : t('highOpp.medium')}
                                 </Badge>
                               </TableCell>
                             </TableRow>
@@ -2024,6 +2009,7 @@ function AllPromptsTab({
  * React keys and double-counted totals.
  */
 function SimilarTopicsList({ volumes }: { volumes: PromptVolume[] }) {
+  const t = useTranslations('prompts.similarTopics');
   const sorted = aggregatePromptVolumeClusters(volumes).slice(0, 8);
 
   const maxVol = sorted[0]?.volume || 1;
@@ -2036,7 +2022,11 @@ function SimilarTopicsList({ volumes }: { volumes: PromptVolume[] }) {
           <div key={key} className="flex items-center gap-2 text-xs">
             <span
               className="w-32 shrink-0 text-muted-foreground truncate"
-              title={`${item.keyword}${item.occurrences > 1 ? ` (in ${item.occurrences} prompts)` : ''}`}
+              title={
+                item.occurrences > 1
+                  ? t('inPrompts', { keyword: item.keyword, count: item.occurrences })
+                  : item.keyword
+              }
             >
               {item.keyword}
             </span>
@@ -2053,7 +2043,7 @@ function SimilarTopicsList({ volumes }: { volumes: PromptVolume[] }) {
         );
       })}
       {sorted.length === 0 && (
-        <p className="text-xs text-muted-foreground text-center py-4">No keyword data yet</p>
+        <p className="text-xs text-muted-foreground text-center py-4">{t('empty')}</p>
       )}
     </div>
   );

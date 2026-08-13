@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { getPlatformName } from './_charts';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -64,6 +65,8 @@ import {
 
 const PAGE_SIZE = 10;
 
+type Translator = ReturnType<typeof useTranslations>;
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function KpiCard({
@@ -107,13 +110,14 @@ function KpiCard({
 }
 
 function DeltaBadge({ current, previous }: { current: number; previous: number }) {
+  const t = useTranslations('traffic');
   if (previous === 0 && current === 0)
     return <span className="text-xs text-muted-foreground">—</span>;
   if (previous === 0)
     return (
       <span className="flex items-center gap-0.5 text-xs font-medium text-green-600 dark:text-green-400">
         <TrendingUp className="h-3 w-3" />
-        new
+        {t('deltaNew')}
       </span>
     );
   const delta = Math.round(((current - previous) / previous) * 100);
@@ -134,6 +138,7 @@ function DeltaBadge({ current, previous }: { current: number; previous: number }
 }
 
 function SnippetBanner({ trackingCode }: { trackingCode?: string }) {
+  const t = useTranslations('traffic');
   const [copied, setCopied] = useState(false);
   const apiUrl = getPublicApiBaseUrl();
   const snippet = `<script src="${apiUrl}/t.js" data-t="${trackingCode || 'YOUR_TRACKING_CODE'}" defer></script>`;
@@ -151,10 +156,12 @@ function SnippetBanner({ trackingCode }: { trackingCode?: string }) {
       <CardContent className="py-3 px-4 flex items-start gap-3">
         <Code className="h-4 w-4 mt-0.5 shrink-0 text-blue-500" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">Add this snippet to your website</p>
+          <p className="text-sm font-medium">{t('snippetTitle')}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Paste this before the closing <code className="text-[11px]">&lt;/head&gt;</code> tag to
-            track AI-referred visits.
+            {t.rich('snippetDescription', {
+              tag: '</head>',
+              code: (chunks) => <code className="text-[11px]">{chunks}</code>,
+            })}
           </p>
           <div className="mt-2 relative">
             <pre className="text-[11px] bg-muted/50 rounded-md px-3 py-2 overflow-x-auto font-mono">
@@ -167,7 +174,7 @@ function SnippetBanner({ trackingCode }: { trackingCode?: string }) {
           size="icon"
           className="shrink-0 h-8 w-8"
           onClick={handleCopy}
-          aria-label="Copy tracking script"
+          aria-label={t('snippetCopyAria')}
         >
           {copied ? (
             <Check className="h-3.5 w-3.5 text-green-500" />
@@ -180,15 +187,15 @@ function SnippetBanner({ trackingCode }: { trackingCode?: string }) {
   );
 }
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: Translator): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('timeAgo.justNow');
+  if (mins < 60) return t('timeAgo.minutesAgo', { count: mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return t('timeAgo.hoursAgo', { count: hrs });
   const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return t('timeAgo.daysAgo', { count: days });
 }
 
 // ─── Filter Bar ───────────────────────────────────────────────────────────────
@@ -213,6 +220,7 @@ function TrafficFilterBar({
   platforms: string[];
   isLoading: boolean;
 }) {
+  const t = useTranslations('traffic');
   const hasActiveFilters = filters.platform || filters.search;
 
   return (
@@ -221,7 +229,7 @@ function TrafficFilterBar({
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <Input
           type="text"
-          placeholder="Search by URL or path..."
+          placeholder={t('filters.searchPlaceholder')}
           value={searchInput}
           onChange={(e) => onSearchInputChange(e.target.value)}
           className="pl-9 h-9 text-sm"
@@ -230,13 +238,13 @@ function TrafficFilterBar({
 
       <Select value={filters.platform || ''} onValueChange={(v) => onChange({ platform: v || '' })}>
         <SelectTrigger className="w-40 h-9 text-sm">
-          <SelectValue placeholder="All platforms" />
+          <SelectValue placeholder={t('filters.allPlatforms')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All platforms</SelectItem>
+          <SelectItem value="">{t('filters.allPlatforms')}</SelectItem>
           {platforms.map((p) => (
             <SelectItem key={p} value={p}>
-              {getPlatformName(p)}
+              {getPlatformName(p, t('unknownPlatform'))}
             </SelectItem>
           ))}
         </SelectContent>
@@ -254,7 +262,7 @@ function TrafficFilterBar({
           disabled={isLoading}
         >
           <X className="h-3.5 w-3.5" />
-          Clear filters
+          {t('filters.clear')}
         </Button>
       )}
     </div>
@@ -280,12 +288,13 @@ function TablePager({
   onPage: (p: number) => void;
   isLoading: boolean;
 }) {
+  const t = useTranslations('traffic');
   if (totalPages <= 1) return null;
 
   return (
     <div className="flex items-center justify-between border-t px-4 py-3">
       <span className="text-xs text-muted-foreground tabular-nums">
-        {start + 1}–{end} of {total}
+        {t('pager.range', { start: start + 1, end, total })}
       </span>
       <div className="flex items-center gap-2">
         <Button
@@ -295,7 +304,7 @@ function TablePager({
           disabled={page === 0 || isLoading}
           onClick={() => onPage(page - 1)}
         >
-          Previous
+          {t('pager.previous')}
         </Button>
         <span className="text-xs text-muted-foreground tabular-nums">
           {page + 1} / {totalPages}
@@ -307,7 +316,7 @@ function TablePager({
           disabled={page >= totalPages - 1 || isLoading}
           onClick={() => onPage(page + 1)}
         >
-          Next
+          {t('pager.next')}
         </Button>
       </div>
     </div>
@@ -317,13 +326,14 @@ function TablePager({
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
 function EmptyLogsState({ hasFilters }: { hasFilters: boolean }) {
+  const t = useTranslations('traffic');
   if (hasFilters) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Search className="h-10 w-10 text-muted-foreground/40 mb-3" />
-        <h3 className="text-sm font-medium">No matching visits</h3>
+        <h3 className="text-sm font-medium">{t('emptyLogs.noMatchTitle')}</h3>
         <p className="text-xs text-muted-foreground mt-1 max-w-md">
-          Try adjusting your filters or search terms.
+          {t('emptyLogs.noMatchDescription')}
         </p>
       </div>
     );
@@ -331,10 +341,8 @@ function EmptyLogsState({ hasFilters }: { hasFilters: boolean }) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <LayoutList className="h-10 w-10 text-muted-foreground/40 mb-3" />
-        <h3 className="text-sm font-medium">No visits yet</h3>
-        <p className="text-xs text-muted-foreground mt-1 max-w-md">
-          Once visitors arrive from AI platforms, their visits will appear here.
-        </p>
+        <h3 className="text-sm font-medium">{t('emptyLogs.title')}</h3>
+        <p className="text-xs text-muted-foreground mt-1 max-w-md">{t('emptyLogs.description')}</p>
       </div>
     );
   }
@@ -365,41 +373,49 @@ function getDateRange(preset: DatePreset, custom: { from: string; to: string }):
   return { dateFrom: from.toISOString() };
 }
 
-function getRangeSubLabel(preset: DatePreset, custom: { from: string; to: string }): string {
+function getRangeSubLabel(
+  preset: DatePreset,
+  custom: { from: string; to: string },
+  t: Translator,
+): string {
   switch (preset) {
     case '24h':
-      return 'last 24 hours';
+      return t('range.last24h');
     case '7d':
-      return 'last 7 days';
+      return t('range.last7d');
     case '30d':
-      return 'last 30 days';
+      return t('range.last30d');
     case '90d':
-      return 'last 90 days';
+      return t('range.last90d');
     case 'all':
-      return 'all time';
+      return t('range.allTime');
     case 'custom':
-      if (custom.from && custom.to) return `${custom.from} – ${custom.to}`;
-      if (custom.from) return `from ${custom.from}`;
-      if (custom.to) return `through ${custom.to}`;
-      return 'selected period';
+      if (custom.from && custom.to) return t('range.between', { from: custom.from, to: custom.to });
+      if (custom.from) return t('range.from', { from: custom.from });
+      if (custom.to) return t('range.through', { to: custom.to });
+      return t('range.selected');
   }
 }
 
-function getTrendTitle(preset: DatePreset, custom: { from: string; to: string }): string {
+function getTrendTitle(
+  preset: DatePreset,
+  custom: { from: string; to: string },
+  t: Translator,
+): string {
   switch (preset) {
     case '24h':
-      return 'AI Referral Trend — Last 24 Hours';
+      return t('trend.last24h');
     case '7d':
-      return 'AI Referral Trend — Last 7 Days';
+      return t('trend.last7d');
     case '30d':
-      return 'AI Referral Trend — Last 30 Days';
+      return t('trend.last30d');
     case '90d':
-      return 'AI Referral Trend — Last 90 Days';
+      return t('trend.last90d');
     case 'all':
-      return 'AI Referral Trend — All Time';
+      return t('trend.allTime');
     case 'custom':
-      if (custom.from && custom.to) return `AI Referral Trend — ${custom.from} – ${custom.to}`;
-      return 'AI Referral Trend';
+      if (custom.from && custom.to) return t('trend.custom', { from: custom.from, to: custom.to });
+      return t('trend.title');
   }
 }
 
@@ -418,10 +434,13 @@ function DateRangePicker({
   onCustomFrom: (v: string) => void;
   onCustomTo: (v: string) => void;
 }) {
+  const t = useTranslations('traffic');
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div>
-        <label className="block mb-1.5 font-medium text-muted-foreground text-xs">Date Range</label>
+        <label className="block mb-1.5 font-medium text-muted-foreground text-xs">
+          {t('dateRange.label')}
+        </label>
         <div className="flex border rounded-md overflow-hidden">
           {DATE_PRESETS.map((p) => (
             <button
@@ -435,7 +454,11 @@ function DateRangePicker({
               )}
               onClick={() => onPreset(p)}
             >
-              {p === 'custom' ? 'Custom' : p === 'all' ? 'All' : p}
+              {p === 'custom'
+                ? t('dateRange.custom')
+                : p === 'all'
+                  ? t('dateRange.all')
+                  : t(`dateRange.preset.${p}`)}
             </button>
           ))}
         </div>
@@ -443,7 +466,9 @@ function DateRangePicker({
       {preset === 'custom' && (
         <>
           <div>
-            <label className="block mb-1.5 font-medium text-muted-foreground text-xs">From</label>
+            <label className="block mb-1.5 font-medium text-muted-foreground text-xs">
+              {t('dateRange.from')}
+            </label>
             <Input
               type="date"
               value={customFrom}
@@ -452,7 +477,9 @@ function DateRangePicker({
             />
           </div>
           <div>
-            <label className="block mb-1.5 font-medium text-muted-foreground text-xs">To</label>
+            <label className="block mb-1.5 font-medium text-muted-foreground text-xs">
+              {t('dateRange.to')}
+            </label>
             <Input
               type="date"
               value={customTo}
@@ -469,14 +496,13 @@ function DateRangePicker({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function TrafficPage() {
+  const t = useTranslations('traffic');
   const brand = useBrandStore((s) => s.getActiveBrand());
   if (!brand) {
     return (
       <div className="flex flex-col justify-center items-center py-20 text-center">
-        <h2 className="font-semibold text-lg">No brand selected</h2>
-        <p className="mt-1 text-muted-foreground text-sm">
-          Select a brand to view AI traffic analytics.
-        </p>
+        <h2 className="font-semibold text-lg">{t('noBrand.title')}</h2>
+        <p className="mt-1 text-muted-foreground text-sm">{t('noBrand.description')}</p>
       </div>
     );
   }
@@ -484,6 +510,7 @@ export default function TrafficPage() {
 }
 
 function TrafficPageContent({ brand }: { brand: Brand }) {
+  const t = useTranslations('traffic');
   const [datePreset, setDatePreset] = useState<DatePreset>('7d');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
@@ -491,8 +518,8 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
     () => getDateRange(datePreset, { from: customFrom, to: customTo }),
     [datePreset, customFrom, customTo],
   );
-  const rangeSubLabel = getRangeSubLabel(datePreset, { from: customFrom, to: customTo });
-  const trendTitle = getTrendTitle(datePreset, { from: customFrom, to: customTo });
+  const rangeSubLabel = getRangeSubLabel(datePreset, { from: customFrom, to: customTo }, t);
+  const trendTitle = getTrendTitle(datePreset, { from: customFrom, to: customTo }, t);
   const [summary, setSummary] = useState<TrafficSummary | null>(null);
   const [trend, setTrend] = useState<TrafficTrendPoint[]>([]);
   const [logs, setLogs] = useState<TrafficLog[]>([]);
@@ -524,12 +551,12 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
   const loadSummary = useCallback(async () => {
     setIsLoadingSummary(true);
     try {
-      const [s, t] = await Promise.all([
+      const [summaryData, trendData] = await Promise.all([
         getTrafficSummary(brand.id, dateWindow),
         getTrafficTrend(brand.id, dateWindow),
       ]);
-      setSummary(s);
-      setTrend(t);
+      setSummary(summaryData);
+      setTrend(trendData);
     } catch (err) {
       console.error('Failed to load traffic summary:', err);
     } finally {
@@ -612,6 +639,7 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
   const visitsDelta =
     totalVisitsPrev > 0 ? Math.round(((totalVisits - totalVisitsPrev) / totalVisitsPrev) * 100) : 0;
   const topPlatform = summary?.platformBreakdown[0];
+  const unknownLabel = t('unknownPlatform');
 
   const isEmpty = totalVisits === 0 && logs.length === 0;
 
@@ -620,9 +648,10 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">AI Traffic Analytics</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground text-sm">
-            {primaryDomain ? `${primaryDomain} · ` : ''}AI-referred visits to your website
+            {primaryDomain ? `${primaryDomain} · ` : ''}
+            {t('subtitle')}
           </p>
         </div>
         <DateRangePicker
@@ -642,11 +671,9 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
         <Card>
           <CardContent className="py-16 text-center">
             <Globe className="h-10 w-10 mx-auto text-muted-foreground/50" />
-            <h3 className="text-lg font-semibold mt-4">No traffic data yet</h3>
+            <h3 className="text-lg font-semibold mt-4">{t('empty.title')}</h3>
             <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-              {brand.trackingCode
-                ? 'Once visitors arrive from AI platforms, their visits will appear here.'
-                : 'Add the tracking snippet to your website to start collecting AI-referred traffic data.'}
+              {brand.trackingCode ? t('emptyLogs.description') : t('empty.addSnippet')}
             </p>
           </CardContent>
         </Card>
@@ -655,7 +682,7 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
           {/* KPI Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <KpiCard
-              title="AI-Referred Visits"
+              title={t('kpi.visits')}
               icon={Users}
               value={totalVisits.toLocaleString()}
               sub={
@@ -666,8 +693,9 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
                     ) : (
                       <TrendingDown className="h-3 w-3" />
                     )}
-                    {visitsDelta >= 0 ? '+' : ''}
-                    {visitsDelta}% vs previous period
+                    {t('kpi.vsPrevious', {
+                      delta: `${visitsDelta >= 0 ? '+' : ''}${visitsDelta}`,
+                    })}
                   </>
                 ) : (
                   rangeSubLabel
@@ -676,16 +704,18 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
               subPositive={visitsDelta > 0 ? true : visitsDelta < 0 ? false : undefined}
             />
             <KpiCard
-              title="Top Platform"
+              title={t('kpi.topPlatform')}
               icon={Globe}
-              value={topPlatform ? getPlatformName(topPlatform.platform) : '—'}
-              sub={topPlatform ? `${topPlatform.visits} visits` : 'no data'}
+              value={topPlatform ? getPlatformName(topPlatform.platform, unknownLabel) : '—'}
+              sub={
+                topPlatform ? t('kpi.visitCount', { count: topPlatform.visits }) : t('kpi.noData')
+              }
             />
             <KpiCard
-              title="Platforms"
+              title={t('kpi.platforms')}
               icon={Globe}
               value={summary?.platformBreakdown.length ?? 0}
-              sub="unique AI sources"
+              sub={t('kpi.uniqueSources')}
             />
           </div>
 
@@ -702,7 +732,7 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Platform Breakdown</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('platformBreakdown')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <PlatformBreakdownChart data={summary?.platformBreakdown ?? []} />
@@ -715,15 +745,15 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
             {/* Platform table */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Referrals by Platform</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('referralsByPlatform')}</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="pl-6">Platform</TableHead>
-                      <TableHead className="text-right">Visits</TableHead>
-                      <TableHead className="text-right pr-6">Change</TableHead>
+                      <TableHead className="pl-6">{t('table.platform')}</TableHead>
+                      <TableHead className="text-right">{t('table.visits')}</TableHead>
+                      <TableHead className="text-right pr-6">{t('table.change')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -731,7 +761,7 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
                       <TableRow key={row.platform} className="hover:bg-muted/50">
                         <TableCell className="pl-6">
                           <span className="font-medium text-sm">
-                            {getPlatformName(row.platform)}
+                            {getPlatformName(row.platform, unknownLabel)}
                           </span>
                         </TableCell>
                         <TableCell className="text-right font-semibold tabular-nums">
@@ -752,15 +782,15 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
             {/* Top Pages */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Top Landing Pages</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('topLandingPages')}</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="pl-6">Page</TableHead>
-                      <TableHead className="text-right">Visits</TableHead>
-                      <TableHead className="text-right pr-6">Change</TableHead>
+                      <TableHead className="pl-6">{t('table.page')}</TableHead>
+                      <TableHead className="text-right">{t('table.visits')}</TableHead>
+                      <TableHead className="text-right pr-6">{t('table.change')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -794,11 +824,11 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <LayoutList className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle className="text-sm font-medium">Recent AI Referral Visits</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('recentVisits')}</CardTitle>
                   </div>
                   {logsTotal > 0 && (
                     <Badge variant="secondary" className="text-xs">
-                      {logsTotal} total
+                      {t('totalBadge', { count: logsTotal })}
                     </Badge>
                   )}
                 </div>
@@ -826,21 +856,21 @@ function TrafficPageContent({ brand }: { brand: Brand }) {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="pl-6 w-[100px]">Time</TableHead>
-                        <TableHead>Platform</TableHead>
-                        <TableHead>Page</TableHead>
-                        <TableHead className="text-right pr-6">Country</TableHead>
+                        <TableHead className="pl-6 w-[100px]">{t('table.time')}</TableHead>
+                        <TableHead>{t('table.platform')}</TableHead>
+                        <TableHead>{t('table.page')}</TableHead>
+                        <TableHead className="text-right pr-6">{t('table.country')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {logs.map((row) => (
                         <TableRow key={row.id} className="hover:bg-muted/50">
                           <TableCell className="pl-6 text-xs text-muted-foreground whitespace-nowrap">
-                            {timeAgo(row.createdAt)}
+                            {timeAgo(row.createdAt, t)}
                           </TableCell>
                           <TableCell>
                             <span className="text-sm">
-                              {getPlatformName(row.sourcePlatform ?? 'unknown')}
+                              {getPlatformName(row.sourcePlatform ?? 'unknown', unknownLabel)}
                             </span>
                           </TableCell>
                           <TableCell>

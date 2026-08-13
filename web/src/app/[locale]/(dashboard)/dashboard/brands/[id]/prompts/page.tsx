@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -60,6 +61,8 @@ interface SuggestedPrompt {
 }
 
 export default function PromptsPage() {
+  const t = useTranslations('brands.managePrompts');
+  const tCommon = useTranslations('common');
   const params = useParams();
   const brandId = params.id as string;
   const router = useRouter();
@@ -151,13 +154,13 @@ export default function PromptsPage() {
         setPromptSets(sets);
       } catch {
         if (isCancelled?.()) return;
-        toast.error('Failed to load data');
+        toast.error(t('loadError'));
       } finally {
         if (!isCancelled?.()) setIsLoading(false);
       }
       fetchUnanalyzed();
     },
-    [brandId, manualCategory, fetchUnanalyzed],
+    [brandId, manualCategory, fetchUnanalyzed, t],
   );
 
   useEffect(() => {
@@ -171,7 +174,7 @@ export default function PromptsPage() {
   const handleGenerate = async () => {
     if (!brand) return;
     if (!generateTopics || generateTopics.length === 0) {
-      toast.error('Select at least one topic to generate prompts');
+      toast.error(t('selectTopicToGenerate'));
       return;
     }
 
@@ -183,7 +186,7 @@ export default function PromptsPage() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
+      if (!session) throw new Error(t('notAuthenticated'));
 
       const response = await fetch(`${AEO_SERVER_URL}/api/prompts/from-topics`, {
         method: 'POST',
@@ -202,7 +205,7 @@ export default function PromptsPage() {
 
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || `Server error (${response.status})`);
+        throw new Error(err.error || t('serverError', { status: response.status }));
       }
 
       const data = await response.json();
@@ -213,9 +216,9 @@ export default function PromptsPage() {
         }
       }
       setSuggestions(allPrompts);
-      toast.success(`${allPrompts.length} prompt suggestions generated!`);
+      toast.success(t('suggestionsGenerated', { count: allPrompts.length }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to generate suggestions');
+      toast.error(err instanceof Error ? err.message : t('generateError'));
     } finally {
       setIsGenerating(false);
     }
@@ -224,7 +227,7 @@ export default function PromptsPage() {
   const handleSaveSuggestions = async () => {
     const activePrompts = suggestions.filter((s) => s.isActive);
     if (activePrompts.length === 0) {
-      toast.error('Select at least one prompt to save');
+      toast.error(t('selectPromptToSave'));
       return;
     }
 
@@ -262,10 +265,10 @@ export default function PromptsPage() {
       }
 
       setSuggestions([]);
-      toast.success(`Saved ${activePrompts.length} prompts`);
+      toast.success(t('savedPrompts', { count: activePrompts.length }));
       await loadData();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to save prompts');
+      toast.error(err instanceof Error ? err.message : t('saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -301,10 +304,10 @@ export default function PromptsPage() {
       setManualText('');
       setManualModels(allowedModelIds);
       setManualScrapers(allowedScraperIds);
-      toast.success('Prompt added');
+      toast.success(t('promptAdded'));
       await loadData();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to add prompt');
+      toast.error(err instanceof Error ? err.message : t('addError'));
     } finally {
       setIsAddingManual(false);
     }
@@ -335,10 +338,10 @@ export default function PromptsPage() {
         await updatePrompt(prompt.id, { isActive: !prompt.isActive });
       } catch {
         updatePromptLocal(prompt.id, { isActive: prompt.isActive });
-        toast.error('Failed to update prompt');
+        toast.error(t('updateError'));
       }
     },
-    [updatePromptLocal],
+    [updatePromptLocal, t],
   );
 
   const handleEditPrompt = useCallback(
@@ -347,11 +350,11 @@ export default function PromptsPage() {
       try {
         await updatePrompt(promptId, { text });
       } catch {
-        toast.error('Failed to update prompt');
+        toast.error(t('updateError'));
         await loadData();
       }
     },
-    [updatePromptLocal, loadData],
+    [updatePromptLocal, loadData, t],
   );
 
   const handleCategoryChange = useCallback(
@@ -360,11 +363,11 @@ export default function PromptsPage() {
       try {
         await updatePrompt(promptId, { category });
       } catch {
-        toast.error('Failed to update topic');
+        toast.error(t('updateTopicError'));
         await loadData();
       }
     },
-    [updatePromptLocal, loadData],
+    [updatePromptLocal, loadData, t],
   );
 
   const handleModelsChange = useCallback(
@@ -373,11 +376,11 @@ export default function PromptsPage() {
       try {
         await updatePrompt(promptId, { models });
       } catch {
-        toast.error('Failed to update models');
+        toast.error(t('updateModelsError'));
         await loadData();
       }
     },
-    [updatePromptLocal, loadData],
+    [updatePromptLocal, loadData, t],
   );
 
   const handlePlatformsChange = useCallback(
@@ -386,11 +389,11 @@ export default function PromptsPage() {
       try {
         await updatePrompt(promptId, { platforms });
       } catch {
-        toast.error('Failed to update platforms');
+        toast.error(t('updatePlatformsError'));
         await loadData();
       }
     },
-    [updatePromptLocal, loadData],
+    [updatePromptLocal, loadData, t],
   );
 
   const handleDeletePrompt = useCallback(
@@ -399,11 +402,11 @@ export default function PromptsPage() {
       try {
         await deletePrompt(promptId);
       } catch {
-        toast.error('Failed to delete prompt');
+        toast.error(t('deleteError'));
         await loadData();
       }
     },
-    [removePromptLocal, loadData],
+    [removePromptLocal, loadData, t],
   );
 
   const openAnalyzeDialog = useCallback(async () => {
@@ -428,11 +431,11 @@ export default function PromptsPage() {
         setSelectedAnalyzeIds(new Set(prompts.map((p) => p.id)));
       }
     } catch {
-      toast.error('Failed to load unanalyzed prompts');
+      toast.error(t('loadUnanalyzedError'));
     } finally {
       setIsLoadingUnanalyzed(false);
     }
-  }, [brandId]);
+  }, [brandId, t]);
 
   const handleAnalyzeSelected = async () => {
     if (isAnalyzing || selectedAnalyzeIds.size === 0) return;
@@ -442,7 +445,7 @@ export default function PromptsPage() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
+      if (!session) throw new Error(t('notAuthenticated'));
 
       const resp = await fetch(`${AEO_SERVER_URL}/api/tracking/analyze-new`, {
         method: 'POST',
@@ -457,21 +460,21 @@ export default function PromptsPage() {
       const data = await resp.json();
 
       if (!resp.ok) {
-        toast.error(data.message || 'Failed to start analysis');
+        toast.error(data.message || t('analysisStartError'));
         return;
       }
 
       if (data.newCount === 0) {
-        toast.info(data.message || 'All prompts already analyzed');
+        toast.info(data.message || t('allAnalyzedInfo'));
       } else {
-        toast.success(data.message || `Analyzing ${data.newCount} new prompts`);
+        toast.success(data.message || t('analyzingNew', { count: data.newCount }));
         setUnanalyzedPrompts([]);
         setAnalyzeDialogOpen(false);
         saveTrackingJob({ jobId: data.jobId, brandId, startedAt: Date.now() });
         router.push('/dashboard/insights');
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to start analysis');
+      toast.error(err instanceof Error ? err.message : t('analysisStartError'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -489,7 +492,7 @@ export default function PromptsPage() {
   if (!brand) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-muted-foreground">Brand not found</p>
+        <p className="text-muted-foreground">{t('brandNotFound')}</p>
       </div>
     );
   }
@@ -504,11 +507,8 @@ export default function PromptsPage() {
         <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4 text-sm">
           <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
           <div>
-            <p className="font-medium">Read-only access</p>
-            <p className="mt-1 text-muted-foreground">
-              Your role can view tracked prompts but not add, edit, or delete them. Ask an admin or
-              manager to make changes.
-            </p>
+            <p className="font-medium">{t('readOnlyTitle')}</p>
+            <p className="mt-1 text-muted-foreground">{t('readOnlyBody')}</p>
           </div>
         </div>
       )}
@@ -521,13 +521,13 @@ export default function PromptsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Plus className="h-4 w-4" />
-                Add Prompt
+                {t('addPrompt')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <Input
-                  placeholder="e.g. Best project management tools for startups"
+                  placeholder={t('promptPlaceholder')}
                   value={manualText}
                   onChange={(e) => setManualText(e.target.value)}
                   onKeyDown={(e) => {
@@ -539,7 +539,7 @@ export default function PromptsPage() {
                   {/* Topic */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                      Topic
+                      {t('topicLabel')}
                     </label>
                     {topics.length > 0 ? (
                       <Select
@@ -547,7 +547,7 @@ export default function PromptsPage() {
                         onValueChange={(v) => v && setManualCategory(v)}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a topic" />
+                          <SelectValue placeholder={t('selectTopic')} />
                         </SelectTrigger>
                         <SelectContent>
                           {topics.map((topic) => (
@@ -558,16 +558,14 @@ export default function PromptsPage() {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <p className="text-xs text-muted-foreground py-2">
-                        No topics defined yet. Add topics in brand settings.
-                      </p>
+                      <p className="text-xs text-muted-foreground py-2">{t('noTopicsHint')}</p>
                     )}
                   </div>
 
                   {/* Platform & Models — combined select */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                      Platform & Models
+                      {t('platformModelsLabel')}
                     </label>
                     <Select
                       value="__placeholder__"
@@ -586,8 +584,10 @@ export default function PromptsPage() {
                       <SelectTrigger className="w-full">
                         <span className="truncate text-muted-foreground">
                           {manualModels.length + manualScrapers.length > 0
-                            ? `${manualModels.length + manualScrapers.length} selected`
-                            : 'Select platform & models'}
+                            ? t('selectedCount', {
+                                count: manualModels.length + manualScrapers.length,
+                              })
+                            : t('selectPlatformModels')}
                         </span>
                       </SelectTrigger>
                       <SelectContent>
@@ -599,7 +599,7 @@ export default function PromptsPage() {
                           return (
                             <div key={group.provider}>
                               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                {group.provider} (Scraper)
+                                {t('scraperGroup', { provider: group.provider })}
                               </div>
                               {scrapers.map((s) => (
                                 <SelectItem
@@ -626,7 +626,7 @@ export default function PromptsPage() {
                           return (
                             <div key={group.provider}>
                               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                {group.provider} (API)
+                                {t('apiGroup', { provider: group.provider })}
                               </div>
                               {groupModels.map((m) => (
                                 <SelectItem
@@ -696,7 +696,7 @@ export default function PromptsPage() {
                   ) : (
                     <Plus className="mr-2 h-4 w-4" />
                   )}
-                  Add Prompt
+                  {t('addPrompt')}
                 </Button>
               </div>
             </CardContent>
@@ -707,18 +707,16 @@ export default function PromptsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Sparkles className="h-4 w-4" />
-                AI Generate
+                {t('aiGenerate')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Select topics and generate 5 optimized search prompts per topic using AI.
-                </p>
+                <p className="text-sm text-muted-foreground">{t('aiGenerateDescription')}</p>
                 {topics.length > 0 ? (
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                      Topics
+                      {t('topicsLabel')}
                     </label>
                     <div className="flex flex-wrap gap-1.5">
                       {topics.map((topic) => {
@@ -743,15 +741,15 @@ export default function PromptsPage() {
                     </div>
                     {generateTopics && generateTopics.length > 0 && (
                       <p className="mt-1.5 text-xs text-muted-foreground">
-                        {generateTopics.length} topic{generateTopics.length !== 1 ? 's' : ''}{' '}
-                        selected — {generateTopics.length * 5} prompts will be generated
+                        {t('topicsSelectedSummary', {
+                          count: generateTopics.length,
+                          prompts: generateTopics.length * 5,
+                        })}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground py-2">
-                    No topics defined yet. Add topics in brand settings first.
-                  </p>
+                  <p className="text-xs text-muted-foreground py-2">{t('noTopicsGenerateHint')}</p>
                 )}
                 <Button
                   onClick={handleGenerate}
@@ -761,12 +759,12 @@ export default function PromptsPage() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
+                      {t('generating')}
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Prompts
+                      {t('generatePrompts')}
                     </>
                   )}
                 </Button>
@@ -780,10 +778,8 @@ export default function PromptsPage() {
       {canManage && suggestions.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Review AI Suggestions</CardTitle>
-            <CardDescription>
-              Toggle off prompts you don&apos;t want, edit text if needed, then save.
-            </CardDescription>
+            <CardTitle className="text-base">{t('reviewTitle')}</CardTitle>
+            <CardDescription>{t('reviewDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -813,7 +809,7 @@ export default function PromptsPage() {
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                Save Selected ({suggestions.filter((s) => s.isActive).length})
+                {t('saveSelected', { count: suggestions.filter((s) => s.isActive).length })}
               </Button>
               <Button variant="outline" onClick={handleGenerate} disabled={isGenerating}>
                 {isGenerating ? (
@@ -821,10 +817,10 @@ export default function PromptsPage() {
                 ) : (
                   <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                Regenerate
+                {t('regenerate')}
               </Button>
               <Button variant="ghost" onClick={() => setSuggestions([])}>
-                Dismiss
+                {t('dismiss')}
               </Button>
             </div>
           </CardContent>
@@ -835,17 +831,19 @@ export default function PromptsPage() {
       {allPrompts.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">All Prompts ({allPrompts.length})</h2>
+            <h2 className="text-lg font-semibold">
+              {t('allPromptsTitle', { count: allPrompts.length })}
+            </h2>
             <Button
               size="sm"
               variant={unanalyzedPrompts.length > 0 ? 'default' : 'outline'}
               onClick={openAnalyzeDialog}
             >
               <Search className="mr-2 h-3.5 w-3.5" />
-              Analyze Prompts
+              {t('analyzePrompts')}
               {unanalyzedPrompts.length > 0 && (
                 <Badge variant="secondary" className="ml-2 text-[10px]">
-                  {unanalyzedPrompts.length} new
+                  {t('newBadge', { count: unanalyzedPrompts.length })}
                 </Badge>
               )}
             </Button>
@@ -880,10 +878,8 @@ export default function PromptsPage() {
       {allPrompts.length === 0 && suggestions.length === 0 && (
         <div className="rounded-xl border border-dashed p-8 text-center">
           <Sparkles className="mx-auto h-8 w-8 text-muted-foreground/50" />
-          <h3 className="mt-3 text-sm font-medium">No prompts yet</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add prompts manually or generate them with AI above.
-          </p>
+          <h3 className="mt-3 text-sm font-medium">{t('emptyTitle')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{t('emptyBody')}</p>
         </div>
       )}
 
@@ -891,11 +887,9 @@ export default function PromptsPage() {
       <Dialog open={analyzeDialogOpen} onOpenChange={setAnalyzeDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Analyze Prompts</DialogTitle>
+            <DialogTitle>{t('analyzePrompts')}</DialogTitle>
             <DialogDescription>
-              {unanalyzedPrompts.length > 0
-                ? 'Select which prompts to analyze with AI platforms.'
-                : 'All prompts have already been analyzed.'}
+              {unanalyzedPrompts.length > 0 ? t('analyzeDialogDescription') : t('allAnalyzed')}
             </DialogDescription>
           </DialogHeader>
 
@@ -907,7 +901,10 @@ export default function PromptsPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  {selectedAnalyzeIds.size} of {unanalyzedPrompts.length} selected
+                  {t('selectedOfTotal', {
+                    selected: selectedAnalyzeIds.size,
+                    total: unanalyzedPrompts.length,
+                  })}
                 </span>
                 <Button
                   variant="ghost"
@@ -921,8 +918,8 @@ export default function PromptsPage() {
                   }}
                 >
                   {selectedAnalyzeIds.size === unanalyzedPrompts.length
-                    ? 'Deselect All'
-                    : 'Select All'}
+                    ? t('deselectAll')
+                    : t('selectAll')}
                 </Button>
               </div>
               <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-md border p-2">
@@ -959,15 +956,13 @@ export default function PromptsPage() {
           ) : (
             <div className="py-6 text-center">
               <Play className="mx-auto h-8 w-8 text-muted-foreground/40" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                All prompts have been analyzed. Add new prompts to analyze them.
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{t('allAnalyzedBody')}</p>
             </div>
           )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setAnalyzeDialogOpen(false)}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
             {unanalyzedPrompts.length > 0 && (
               <Button
@@ -979,7 +974,7 @@ export default function PromptsPage() {
                 ) : (
                   <Play className="mr-2 h-4 w-4" />
                 )}
-                Analyze ({selectedAnalyzeIds.size})
+                {t('analyzeCount', { count: selectedAnalyzeIds.size })}
               </Button>
             )}
           </DialogFooter>

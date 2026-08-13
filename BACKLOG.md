@@ -83,7 +83,7 @@
 - [ ] **Insumo pro Citabilidade v2**: o próprio polar.com/br não tem `llms.txt` (404) nem JSON-LD — evidência perfeita do valor dos snippets prontos (#15). `—`
 
 ### P1
-- [ ] **i18n páginas restantes** — Prompts, Tópicos, Configurações (verificar também Conteúdo, Auditoria, Tráfego, Shopping, Relatórios, Agent). `M` · mesmo método do Insights/Citações
+- [x] **i18n páginas restantes** — **feito (13/ago)**: mutirão de 9 agentes cobriu Tráfego, detalhe de Prompt, Fan-out, Tópicos, gestão de marca (990 linhas), breakdown do Insights, componentes de Configurações, PDF do relatório (via labels) e resquícios em 10 páginas (incl. o "Product Tour"). ~570 chaves novas por locale; 1.821 chaves espelhadas pt-BR/en. Resta: resquícios internos da tabela All Prompts (aria/empty states) e strings geradas no servidor (rootCause, briefs) — anotar como P2.
 - [ ] **Cache da landing no CDN** — HTML servido por SSR serverless a cada visita (TTFB ~0,6s, custo e latência à toa numa página estática). Avaliar `revalidate`/headers de cache. `P` · perf (Q&A)
 - [ ] **4 bugs do docx:**
   - [x] Login sem mensagem "conta já existe" — **feito** (PR #38)

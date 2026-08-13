@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useBrandStore } from '@/stores/use-brand-store';
 import { createReport, getReports, deleteReport, type ReportListItem } from '@/lib/actions/reports';
@@ -60,8 +60,8 @@ function getDateRange(preset: DatePreset, custom: { from: string; to: string }) 
   return { dateFrom: from.toISOString(), dateTo: to.toISOString() };
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -71,6 +71,7 @@ function formatDate(iso: string) {
 export default function ReportsPage() {
   const t = useTranslations('reports');
   const tc = useTranslations('common');
+  const locale = useLocale();
   const router = useRouter();
   const activeBrandId = useBrandStore((s) => s.activeBrandId);
   const brands = useBrandStore((s) => s.brands);
@@ -238,10 +239,10 @@ export default function ReportsPage() {
                         )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {formatDate(report.dateFrom)} — {formatDate(report.dateTo)}
+                      {formatDate(report.dateFrom, locale)} — {formatDate(report.dateTo, locale)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {formatDate(report.createdAt)}
+                      {formatDate(report.createdAt, locale)}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

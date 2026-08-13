@@ -7,9 +7,13 @@ import type { VisibilityTrendPoint } from '@/lib/actions/tracking';
 export function VisibilityTrendChartView({
   width,
   data,
+  brandLabel,
+  competitorsLabel,
 }: {
   width: number;
   data: VisibilityTrendPoint[];
+  brandLabel: string;
+  competitorsLabel: string;
 }) {
   return (
     <AreaChart
@@ -65,7 +69,7 @@ export function VisibilityTrendChartView({
         strokeOpacity={0.8}
         strokeWidth={1.5}
         fill="url(#compTopic)"
-        name="Competitors avg"
+        name={competitorsLabel}
         strokeDasharray="4 4"
         dot={false}
       />
@@ -76,7 +80,7 @@ export function VisibilityTrendChartView({
         stroke="#6366f1"
         strokeWidth={2}
         fill="url(#brandTopic)"
-        name="Brand"
+        name={brandLabel}
         dot={false}
         activeDot={{ r: 4 }}
       />

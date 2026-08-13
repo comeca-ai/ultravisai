@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ interface Props {
 const EXPANDED_KEY = 'aeo:prompt-suggestions-expanded';
 
 export function SuggestionsCard({ brandId, onAccepted }: Props) {
+  const t = useTranslations('prompts.suggestionsCard');
   const [suggestions, setSuggestions] = useState<PromptSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -109,9 +111,9 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
       const fresh = await refreshPromptSuggestions(brandId);
       setSuggestions(fresh);
       setLoaded(true);
-      toast.success('Suggestions refreshed');
+      toast.success(t('refreshedToast'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Refresh failed');
+      toast.error(err instanceof Error ? err.message : t('refreshFailed'));
     } finally {
       setRefreshing(false);
     }
@@ -124,9 +126,9 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
         await acceptSuggestion(s.id);
         setSuggestions((prev) => prev.filter((x) => x.id !== s.id));
         onAccepted?.();
-        toast.success('Prompt added to your tracked list');
+        toast.success(t('addedToast'));
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Failed to add');
+        toast.error(err instanceof Error ? err.message : t('addFailed'));
       } finally {
         setPendingId(null);
       }
@@ -140,7 +142,7 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
       .catch(() => {
         // Roll back on failure
         setSuggestions((prev) => [...prev, s]);
-        toast.error('Failed to dismiss');
+        toast.error(t('dismissFailed'));
       })
       .finally(() => setPendingId(null));
   };
@@ -161,15 +163,12 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             )}
             <Sparkles className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm font-medium">Prompt Suggestions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('title')}</CardTitle>
             <Info
               className="h-3.5 w-3.5 text-muted-foreground cursor-help"
-              aria-label="AI-generated prompt ideas based on your brand, existing tracked prompts, and competitors cited in AI answers."
+              aria-label={t('infoTip')}
             >
-              <title>
-                AI-generated prompt ideas based on your brand, existing tracked prompts, and
-                competitors cited in AI answers.
-              </title>
+              <title>{t('infoTip')}</title>
             </Info>
             {loading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
@@ -179,11 +178,11 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
               </Badge>
             ) : loaded ? (
               !expanded && (
-                <span className="text-xs text-muted-foreground">no new ideas — expand</span>
+                <span className="text-xs text-muted-foreground">{t('collapsedNoIdeas')}</span>
               )
             ) : (
               !expanded && (
-                <span className="text-xs text-muted-foreground">expand for AI prompt ideas</span>
+                <span className="text-xs text-muted-foreground">{t('collapsedHint')}</span>
               )
             )}
           </button>
@@ -200,7 +199,7 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
               ) : (
                 <RefreshCw className="h-3.5 w-3.5" />
               )}
-              {refreshing ? 'Generating…' : 'Refresh'}
+              {refreshing ? t('generating') : t('refresh')}
             </Button>
           )}
         </div>
@@ -214,18 +213,15 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
           ) : suggestions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <Sparkles className="h-8 w-8 text-muted-foreground/40 mb-2" />
-              <p className="text-sm font-medium mb-1">No suggestions right now</p>
-              <p className="text-xs text-muted-foreground mb-3 max-w-sm">
-                Click refresh to generate new prompt ideas tailored to your brand and competitor
-                activity.
-              </p>
+              <p className="text-sm font-medium mb-1">{t('emptyTitle')}</p>
+              <p className="text-xs text-muted-foreground mb-3 max-w-sm">{t('emptyBody')}</p>
               <Button onClick={handleRefresh} disabled={refreshing} size="sm" className="gap-2">
                 {refreshing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
                   <Sparkles className="h-3.5 w-3.5" />
                 )}
-                Generate Suggestions
+                {t('generate')}
               </Button>
             </div>
           ) : (
@@ -248,7 +244,8 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
                         )}
                         {s.estVolume != null && s.estVolume > 0 && (
                           <Badge variant="outline" className="gap-1 text-xs tabular-nums">
-                            <TrendingUp className="h-3 w-3" />~{s.estVolume.toLocaleString()}/mo
+                            <TrendingUp className="h-3 w-3" />
+                            {t('volumePerMonth', { volume: s.estVolume.toLocaleString() })}
                           </Badge>
                         )}
                       </div>
@@ -263,8 +260,8 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
                         className="h-8 w-8"
                         onClick={() => handleAccept(s)}
                         disabled={busy}
-                        title="Add to tracked prompts"
-                        aria-label="Add to tracked prompts"
+                        title={t('addAria')}
+                        aria-label={t('addAria')}
                       >
                         {busy ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -278,8 +275,8 @@ export function SuggestionsCard({ brandId, onAccepted }: Props) {
                         className="h-8 w-8 text-muted-foreground"
                         onClick={() => handleDismiss(s)}
                         disabled={busy}
-                        title="Dismiss suggestion"
-                        aria-label="Dismiss suggestion"
+                        title={t('dismissAria')}
+                        aria-label={t('dismissAria')}
                       >
                         <X className="h-3.5 w-3.5" />
                       </Button>

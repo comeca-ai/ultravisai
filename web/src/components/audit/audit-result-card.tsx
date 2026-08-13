@@ -1,11 +1,13 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { AgentAuditSpec } from '@/components/agent/agent-chart';
 import type { AuditRecommendation, CategoryScore } from '@/lib/actions/audits';
 import { CATEGORY_META, ScoreGauge, pct, barColor } from '@/components/audit/audit-report';
 import { cn } from '@/lib/utils';
 
 export function AuditResultCard({ audit }: { audit: AgentAuditSpec }) {
+  const t = useTranslations('audit');
   // The render_audit tool schema uses z.unknown(), so narrow the types here.
   const categoryScores = audit.categoryScores as Record<string, CategoryScore>;
   const recommendations = audit.recommendations as AuditRecommendation[];
@@ -17,19 +19,22 @@ export function AuditResultCard({ audit }: { audit: AgentAuditSpec }) {
         <ScoreGauge score={audit.totalScore} />
 
         <div className="min-w-0 flex-1 space-y-2">
-          <h3 className="text-sm font-semibold">Site Audit</h3>
+          <h3 className="text-sm font-semibold">{t('title')}</h3>
 
           <p className="break-all text-xs text-muted-foreground">{audit.url}</p>
 
           <p className="text-xs text-muted-foreground">
-            {audit.signalsEvaluated ?? '—'} / {audit.signalsTotal ?? '—'} signals evaluated
+            {t('resultCard.signalsEvaluated', {
+              evaluated: audit.signalsEvaluated ?? '—',
+              total: audit.signalsTotal ?? '—',
+            })}
           </p>
         </div>
       </div>
 
       {/* Category breakdown */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium">Category breakdown</h4>
+        <h4 className="text-sm font-medium">{t('categoryBreakdown')}</h4>
 
         {CATEGORY_META.map((category) => {
           const score = categoryScores[category.key]?.score ?? null;
@@ -38,10 +43,10 @@ export function AuditResultCard({ audit }: { audit: AgentAuditSpec }) {
           return (
             <div key={category.key}>
               <div className="mb-1 flex items-center justify-between text-xs">
-                <span>{category.label}</span>
+                <span>{t(`categories.${category.key}`)}</span>
 
                 <span className="text-muted-foreground">
-                  {percentage === null ? 'n/a' : `${percentage}/100`}
+                  {percentage === null ? t('resultCard.notAvailable') : `${percentage}/100`}
                 </span>
               </div>
 
@@ -61,7 +66,7 @@ export function AuditResultCard({ audit }: { audit: AgentAuditSpec }) {
       {/* Recommendations */}
       {recommendations.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium">Top recommendations</h4>
+          <h4 className="text-sm font-medium">{t('resultCard.topRecommendations')}</h4>
 
           <ul className="space-y-2 text-sm text-muted-foreground">
             {recommendations.slice(0, 3).map((rec, index) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   createTopic,
   deleteTopic,
@@ -33,6 +34,9 @@ interface PageProps {
 }
 
 export default function BrandTopicsPage({ params }: PageProps) {
+  const t = useTranslations('brands.manageTopics');
+  const tTopics = useTranslations('topics');
+  const tCommon = useTranslations('common');
   const { id: brandId } = use(params);
 
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -53,20 +57,20 @@ export default function BrandTopicsPage({ params }: PageProps) {
         setTopics(data);
         const counts: Record<string, number> = {};
         await Promise.all(
-          data.map(async (t) => {
-            counts[t.id] = await getPromptCountByTopic(brandId, t.name);
+          data.map(async (topic) => {
+            counts[topic.id] = await getPromptCountByTopic(brandId, topic.name);
           }),
         );
         if (isCancelled?.()) return;
         setPromptCounts(counts);
       } catch {
         if (isCancelled?.()) return;
-        toast.error('Failed to load topics');
+        toast.error(t('loadError'));
       } finally {
         if (!isCancelled?.()) setIsLoading(false);
       }
     },
-    [brandId],
+    [brandId, t],
   );
 
   useEffect(() => {
@@ -80,8 +84,8 @@ export default function BrandTopicsPage({ params }: PageProps) {
   const handleAdd = async () => {
     const name = newName.trim();
     if (!name) return;
-    if (topics.some((t) => t.name.toLowerCase() === name.toLowerCase())) {
-      toast.error('This topic already exists');
+    if (topics.some((topic) => topic.name.toLowerCase() === name.toLowerCase())) {
+      toast.error(tTopics('topicAlreadyExists'));
       return;
     }
     setIsAdding(true);
@@ -89,9 +93,9 @@ export default function BrandTopicsPage({ params }: PageProps) {
       const added = await createTopic(brandId, name);
       setTopics((prev) => [...prev, added]);
       setNewName('');
-      toast.success(`"${added.name}" topic added`);
+      toast.success(tTopics('topicAdded', { name: added.name }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to add topic');
+      toast.error(err instanceof Error ? err.message : tTopics('failedToAddTopic'));
     } finally {
       setIsAdding(false);
     }
@@ -100,27 +104,29 @@ export default function BrandTopicsPage({ params }: PageProps) {
   const handleEdit = async (id: string) => {
     const name = editName.trim();
     if (!name) return;
-    if (topics.some((t) => t.id !== id && t.name.toLowerCase() === name.toLowerCase())) {
-      toast.error('This topic already exists');
+    if (
+      topics.some((topic) => topic.id !== id && topic.name.toLowerCase() === name.toLowerCase())
+    ) {
+      toast.error(tTopics('topicAlreadyExists'));
       return;
     }
     try {
       const updated = await updateTopic(id, name);
-      setTopics((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      setTopics((prev) => prev.map((topic) => (topic.id === id ? updated : topic)));
       setEditingId(null);
-      toast.success('Topic updated');
+      toast.success(t('topicUpdated'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to update topic');
+      toast.error(err instanceof Error ? err.message : t('updateError'));
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteTopic(id);
-      setTopics((prev) => prev.filter((t) => t.id !== id));
-      toast.success('Topic removed');
+      setTopics((prev) => prev.filter((topic) => topic.id !== id));
+      toast.success(t('topicRemoved'));
     } catch {
-      toast.error('Failed to remove topic');
+      toast.error(t('removeError'));
     }
   };
 
@@ -129,12 +135,9 @@ export default function BrandTopicsPage({ params }: PageProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Tag className="h-4 w-4" />
-          Topics
+          {t('title')}
         </CardTitle>
-        <CardDescription>
-          Manage the topics used to categorize your prompts. Topics are assigned to prompts during
-          creation.
-        </CardDescription>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -169,7 +172,7 @@ export default function BrandTopicsPage({ params }: PageProps) {
                           size="icon"
                           className="h-7 w-7 shrink-0"
                           onClick={() => handleEdit(topic.id)}
-                          aria-label="Save topic changes"
+                          aria-label={t('saveAria')}
                         >
                           <Check className="h-3.5 w-3.5" />
                         </Button>
@@ -178,7 +181,7 @@ export default function BrandTopicsPage({ params }: PageProps) {
                           size="icon"
                           className="h-7 w-7 shrink-0"
                           onClick={() => setEditingId(null)}
-                          aria-label="Cancel edit"
+                          aria-label={t('cancelAria')}
                         >
                           <X className="h-3.5 w-3.5" />
                         </Button>
@@ -196,7 +199,7 @@ export default function BrandTopicsPage({ params }: PageProps) {
                                 setEditingId(topic.id);
                                 setEditName(topic.name);
                               }}
-                              aria-label="Edit topic"
+                              aria-label={t('editAria')}
                             >
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
@@ -207,7 +210,7 @@ export default function BrandTopicsPage({ params }: PageProps) {
                                     variant="ghost"
                                     size="icon"
                                     className="h-7 w-7 shrink-0 text-destructive hover:text-destructive"
-                                    aria-label="Delete topic"
+                                    aria-label={t('deleteAria')}
                                   />
                                 }
                               >
@@ -215,17 +218,17 @@ export default function BrandTopicsPage({ params }: PageProps) {
                               </DialogTrigger>
                               <DialogContent className="sm:max-w-sm">
                                 <DialogHeader>
-                                  <DialogTitle>Delete Topic</DialogTitle>
+                                  <DialogTitle>{t('deleteTitle')}</DialogTitle>
                                   <DialogDescription>
-                                    Are you sure you want to delete &quot;{topic.name}&quot;?
+                                    {t('deleteConfirm', { name: topic.name })}{' '}
                                     {(promptCounts[topic.id] ?? 0) > 0
-                                      ? ` ${promptCounts[topic.id]} prompt${promptCounts[topic.id] === 1 ? '' : 's'} using this topic will become uncategorized.`
-                                      : ' No prompts are using this topic.'}
+                                      ? t('deleteWithPrompts', { count: promptCounts[topic.id] })
+                                      : t('deleteNoPrompts')}
                                   </DialogDescription>
                                 </DialogHeader>
                                 <DialogFooter>
                                   <DialogClose render={<Button variant="outline" />}>
-                                    Cancel
+                                    {tCommon('cancel')}
                                   </DialogClose>
                                   <DialogClose
                                     render={
@@ -235,7 +238,7 @@ export default function BrandTopicsPage({ params }: PageProps) {
                                       />
                                     }
                                   >
-                                    Delete
+                                    {tCommon('delete')}
                                   </DialogClose>
                                 </DialogFooter>
                               </DialogContent>
@@ -251,9 +254,7 @@ export default function BrandTopicsPage({ params }: PageProps) {
 
             {topics.length === 0 && (
               <div className="rounded-lg border border-dashed py-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  No topics yet. Add your first topic below.
-                </p>
+                <p className="text-sm text-muted-foreground">{t('emptyState')}</p>
               </div>
             )}
 
@@ -262,10 +263,10 @@ export default function BrandTopicsPage({ params }: PageProps) {
                 <Separator />
 
                 <div id="add-topic" className="space-y-2 scroll-mt-24">
-                  <Label className="text-sm font-medium">Add Topic</Label>
+                  <Label className="text-sm font-medium">{tTopics('addTopic')}</Label>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="e.g. Industry, Comparison, How-to..."
+                      placeholder={t('addPlaceholder')}
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && newName.trim() && handleAdd()}
@@ -282,7 +283,7 @@ export default function BrandTopicsPage({ params }: PageProps) {
                       ) : (
                         <Plus className="h-4 w-4" />
                       )}
-                      Add
+                      {t('addButton')}
                     </Button>
                   </div>
                 </div>
@@ -295,11 +296,8 @@ export default function BrandTopicsPage({ params }: PageProps) {
               <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-3 text-sm">
                 <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Read-only access</p>
-                  <p className="mt-1 text-muted-foreground">
-                    Your role can view topics but not add, rename, or delete them. Ask an admin or
-                    manager to make changes.
-                  </p>
+                  <p className="font-medium">{t('readOnlyTitle')}</p>
+                  <p className="mt-1 text-muted-foreground">{t('readOnlyBody')}</p>
                 </div>
               </div>
             )}

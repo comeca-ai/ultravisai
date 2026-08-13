@@ -15,6 +15,9 @@ const TrendChart = dynamic(() => import('../../insights/_charts').then((m) => m.
 });
 import { toast } from 'sonner';
 import { getReport, type Report } from '@/lib/actions/reports';
+// Type-only import — erased at compile time, so the heavy PDF module itself
+// still only loads on demand via the dynamic import() in the handler.
+import type { ReportPdfLabels } from './_report-pdf';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -88,6 +91,9 @@ export default function ReportDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const t = useTranslations('reports');
+  // @react-pdf components render outside this React tree (no next-intl
+  // context), so the PDF gets all its strings as a plain labels object.
+  const tPdf = useTranslations('reports.pdf');
 
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
@@ -153,7 +159,69 @@ export default function ReportDetailPage() {
         import('@react-pdf/renderer'),
         import('./_report-pdf'),
       ]);
-      const blob = await pdf(<ReportPdfDocument report={report} />).toBlob();
+      // Every visible string in the PDF, resolved here with next-intl and
+      // handed over as plain props (the PDF component uses no i18n hooks).
+      const labels: ReportPdfLabels = {
+        generatedOn: tPdf('generatedOn'),
+        executiveSummary: tPdf('executiveSummary'),
+        kpiVisibilityRate: tPdf('kpiVisibilityRate'),
+        kpiAvgScore: tPdf('kpiAvgScore'),
+        kpiVisibility: tPdf('kpiVisibility'),
+        kpiMentions: tPdf('kpiMentions'),
+        kpiCitations: tPdf('kpiCitations'),
+        kpiSentiment: tPdf('kpiSentiment'),
+        kpiCitationsNote: tPdf('kpiCitationsNote'),
+        promptsSuffix: tPdf('promptsSuffix'),
+        deltaNew: tPdf('deltaNew'),
+        visibilityTrend: tPdf('visibilityTrend'),
+        legendYourBrand: tPdf('legendYourBrand'),
+        legendAvgCompetitor: tPdf('legendAvgCompetitor'),
+        shareOfVoice: tPdf('shareOfVoice'),
+        competitorLeaderboard: tPdf('competitorLeaderboard'),
+        columnBrand: tPdf('columnBrand'),
+        columnChange: tPdf('columnChange'),
+        columnMentions: tPdf('columnMentions'),
+        columnCitations: tPdf('columnCitations'),
+        you: tPdf('you'),
+        topicPerformance: tPdf('topicPerformance'),
+        columnTopic: tPdf('columnTopic'),
+        columnVisibility: tPdf('columnVisibility'),
+        columnResults: tPdf('columnResults'),
+        bestPrompts: tPdf('bestPrompts'),
+        worstPrompts: tPdf('worstPrompts'),
+        columnPrompt: tPdf('columnPrompt'),
+        columnRuns: tPdf('columnRuns'),
+        mentionEvidence: tPdf('mentionEvidence'),
+        columnPlatform: tPdf('columnPlatform'),
+        columnDate: tPdf('columnDate'),
+        columnExcerpt: tPdf('columnExcerpt'),
+        queryFanout: tPdf('queryFanout'),
+        columnQuery: tPdf('columnQuery'),
+        columnEngines: tPdf('columnEngines'),
+        columnSearched: tPdf('columnSearched'),
+        aiTraffic: tPdf('aiTraffic'),
+        visitsSuffix: tPdf('visitsSuffix'),
+        columnTopPage: tPdf('columnTopPage'),
+        columnVisits: tPdf('columnVisits'),
+        shoppingVisibility: tPdf('shoppingVisibility'),
+        shoppingSov: tPdf('shoppingSov'),
+        shoppingProducts: tPdf('shoppingProducts'),
+        shoppingCardRate: tPdf('shoppingCardRate'),
+        shoppingTopMerchant: tPdf('shoppingTopMerchant'),
+        auditScore: tPdf('auditScore'),
+        auditedOn: tPdf('auditedOn'),
+        topCitationSources: tPdf('topCitationSources'),
+        domainsSuffix: tPdf('domainsSuffix'),
+        citationsSuffix: tPdf('citationsSuffix'),
+        columnDomain: tPdf('columnDomain'),
+        columnSourceType: tPdf('columnSourceType'),
+        columnUsage: tPdf('columnUsage'),
+        citationEvidence: tPdf('citationEvidence'),
+        columnUrl: tPdf('columnUrl'),
+        columnCitedIn: tPdf('columnCitedIn'),
+        footerGeneratedWith: tPdf('footerGeneratedWith'),
+      };
+      const blob = await pdf(<ReportPdfDocument report={report} labels={labels} />).toBlob();
 
       const slug =
         payload.brandName

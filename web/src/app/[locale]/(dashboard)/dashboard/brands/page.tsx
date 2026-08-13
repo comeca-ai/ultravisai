@@ -30,7 +30,7 @@ function BrandsHeader({
           className={buttonVariants({ variant: 'outline', size: 'sm' })}
         >
           <Compass className="h-4 w-4 shrink-0" />
-          <span>Product Tour</span>
+          <span>{t('productTour')}</span>
           <ExternalLink className="h-4 w-4 shrink-0 opacity-50" />
         </a>
         {canAddBrand ? (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Layers, Search } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,8 @@ import type { PromptVolume } from '@/types';
 import { formatCompactNumber } from '@/lib/format';
 
 export default function SimilarTopicsPage() {
+  const t = useTranslations('prompts.similarTopics');
+  const tAll = useTranslations('prompts.allTable');
   const { getActiveBrand } = useBrandStore();
   const brand = getActiveBrand();
   const [volumes, setVolumes] = useState<PromptVolume[]>([]);
@@ -85,48 +88,46 @@ export default function SimilarTopicsPage() {
           })}
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Prompt Insights
+          {t('back')}
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Similar Topics</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Keyword clusters aggregated across analyzed prompts.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Topic Clusters</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('topicClusters')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold tabular-nums">
               {totals.clusters.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">unique keywords</p>
+            <p className="text-xs text-muted-foreground">{t('uniqueKeywords')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Google Volume</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('googleVolume')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold tabular-nums">
               {formatCompactNumber(totals.googleVolume)}
             </div>
-            <p className="text-xs text-muted-foreground">monthly searches</p>
+            <p className="text-xs text-muted-foreground">{t('monthlySearches')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Est. AI Volume</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('estAiVolume')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold tabular-nums">
               {formatCompactNumber(totals.aiVolume)}
             </div>
-            <p className="text-xs text-muted-foreground">monthly AI queries</p>
+            <p className="text-xs text-muted-foreground">{t('monthlyAiQueries')}</p>
           </CardContent>
         </Card>
       </div>
@@ -135,7 +136,7 @@ export default function SimilarTopicsPage() {
         <CardHeader className="pb-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">All Similar Topics</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('allTitle')}</CardTitle>
               <Badge variant="secondary">{clusters.length}</Badge>
             </div>
             <div className="relative w-full sm:w-60">
@@ -143,7 +144,7 @@ export default function SimilarTopicsPage() {
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search topics..."
+                placeholder={t('searchPlaceholder')}
                 className="h-8 pl-8 text-xs"
               />
             </div>
@@ -153,18 +154,18 @@ export default function SimilarTopicsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">Topic</TableHead>
-                <TableHead className="text-right">Google Vol.</TableHead>
-                <TableHead className="text-right">Est. AI Vol.</TableHead>
-                <TableHead className="text-center">Prompts</TableHead>
-                <TableHead>Top Prompt</TableHead>
+                <TableHead className="pl-6">{tAll('colTopic')}</TableHead>
+                <TableHead className="text-right">{t('colGoogleVol')}</TableHead>
+                <TableHead className="text-right">{t('colEstAiVol')}</TableHead>
+                <TableHead className="text-center">{t('colPrompts')}</TableHead>
+                <TableHead>{t('colTopPrompt')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading && (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center text-sm text-muted-foreground">
-                    Loading similar topics...
+                    {t('loading')}
                   </TableCell>
                 </TableRow>
               )}
@@ -207,7 +208,7 @@ export default function SimilarTopicsPage() {
               {!loading && clusters.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center text-sm text-muted-foreground">
-                    No similar topics found.
+                    {t('empty')}
                   </TableCell>
                 </TableRow>
               )}

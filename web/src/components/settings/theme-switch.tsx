@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore, useCallback } from 'react';
 import { useTheme } from 'next-themes';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,6 +10,7 @@ import { cn } from '@/lib/utils';
 const emptySubscribe = () => () => {};
 
 export function ThemeSwitch() {
+  const t = useTranslations('settings.themeSwitch');
   const { theme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
     emptySubscribe,
@@ -20,9 +22,11 @@ export function ThemeSwitch() {
     return (
       <div className="flex rounded-lg border bg-muted p-1">
         <div className="flex-1 rounded-md bg-muted/50 py-2 text-center text-sm text-muted-foreground">
-          Light
+          {t('light')}
         </div>
-        <div className="flex-1 rounded-md py-2 text-center text-sm text-muted-foreground">Dark</div>
+        <div className="flex-1 rounded-md py-2 text-center text-sm text-muted-foreground">
+          {t('dark')}
+        </div>
       </div>
     );
   }
@@ -40,7 +44,7 @@ export function ThemeSwitch() {
         onClick={() => setTheme('light')}
       >
         <Sun className="h-4 w-4" />
-        Light
+        {t('light')}
       </Button>
       <Button
         variant="ghost"
@@ -53,7 +57,7 @@ export function ThemeSwitch() {
         onClick={() => setTheme('dark')}
       >
         <Moon className="h-4 w-4" />
-        Dark
+        {t('dark')}
       </Button>
     </div>
   );

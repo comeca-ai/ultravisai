@@ -97,7 +97,28 @@
       "recommend": "Generating AI recommendations…"
     },
     "emptyTitle": "Audit any page for AI search readiness",
-    "emptyBody": "Enter a URL above to score it against 47 AEO/GEO signals and get AI-written fixes."
+    "emptyBody": "Enter a URL above to score it against 47 AEO/GEO signals and get AI-written fixes.",
+    "resultCard": {
+      "signalsEvaluated": "{evaluated} / {total} signals evaluated",
+      "topRecommendations": "Top recommendations",
+      "notAvailable": "n/a"
+    },
+    "categories": {
+      "structure": "Structure",
+      "content": "Content",
+      "authority": "Authority",
+      "eeat": "E-E-A-T",
+      "trust": "Trust"
+    },
+    "charts": {
+      "scoreLabel": "Score"
+    },
+    "rangeAll": "All",
+    "na": "n/a",
+    "listStatus": {
+      "running": "running",
+      "failed": "failed"
+    }
   },
   "auth": {
     "signIn": "Sign in",
@@ -158,7 +179,22 @@
     "activePlatforms": "Active Platforms",
     "recentActivity": "Recent Activity",
     "quickActions": "Quick Actions",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "promptSuggestions": {
+      "saveChanges": "Save changes",
+      "cancelEdit": "Cancel edit",
+      "topic": "Topic",
+      "selectTopic": "Select a topic",
+      "platformModels": "Platform & Models",
+      "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+      "selectPlatformModels": "Select platform & models",
+      "providerScraper": "{provider} (Scraper)",
+      "providerApi": "{provider} (API)",
+      "editPrompt": "Edit prompt",
+      "deletePrompt": "Delete prompt",
+      "deleteTitle": "Delete Prompt",
+      "deleteDescription": "Are you sure you want to delete this prompt? This action cannot be undone."
+    }
   },
   "insights": {
     "title": "AI Visibility Summary",
@@ -262,7 +298,41 @@
     "sovTooltip": "Share of Voice is your slice of brand mentions: your brand mentions ÷ (yours + competitors’) across the period’s AI answers. Answers with no mentions don’t count.",
     "overallSov": "Overall Share of Voice",
     "sovNoData": "No share of voice data available",
-    "sovZeroHint": "This zero is real: AI answers came back, but none mentioned your brand or competitors by name. Getting answers doesn’t score — being mentioned does."
+    "sovZeroHint": "This zero is real: AI answers came back, but none mentioned your brand or competitors by name. Getting answers doesn’t score — being mentioned does.",
+    "breakdown": {
+      "metricVisibility": "Visibility Score",
+      "sheetTitle": "{metric} Breakdown",
+      "windowCompare": "Last {days} days vs previous {days} days",
+      "windowCompareFallback": "Comparing the selected window with the previous equal-length window.",
+      "loadFailed": "Failed to load breakdown",
+      "currentWindow": "Current {days}d",
+      "vsPrevious": "vs previous:",
+      "tabPrompts": "Prompts",
+      "tabPlatforms": "Platforms",
+      "tabTopics": "Topics",
+      "biggestDrop": "Biggest drop",
+      "biggestGain": "Biggest gain",
+      "topPlatformDrop": "Top platform drop",
+      "topPlatformGain": "Top platform gain",
+      "emptyWindow": "No data in this window yet.",
+      "colName": "Name",
+      "colPrev": "Prev",
+      "colCur": "Cur",
+      "colChange": "Change",
+      "pts": "pts",
+      "rose": "rose {value} pts",
+      "dropped": "dropped {value} pts",
+      "gainedMentions": "{count, plural, one {gained # mention} other {gained # mentions}}",
+      "lostMentions": "{count, plural, one {lost # mention} other {lost # mentions}}"
+    },
+    "resultDetail": {
+      "notFoundTitle": "Result not found",
+      "notFoundBody": "This result may have been deleted or does not exist.",
+      "brandCitations": "Brand Citations",
+      "aiResponse": "AI Response",
+      "queryFanout": "Query fan-out ({count})",
+      "checked": "Checked: {date}"
+    }
   },
   "topics": {
     "addTopic": "Add Topic",
@@ -310,6 +380,63 @@
       "minutesAgo": "{m}m ago",
       "hoursAgo": "{h}h ago",
       "daysAgo": "{d}d ago"
+    },
+    "detail": {
+      "notFound": "Topic not found",
+      "noDataYet": "No data yet for this topic.",
+      "ptsSuffix": "pts",
+      "kpi": {
+        "avgVisibility": "Avg visibility",
+        "brandMentions": "Brand mentions",
+        "citations": "Citations",
+        "positiveSentiment": "Positive sentiment"
+      },
+      "visibilityTrend": {
+        "title": "Visibility trend",
+        "subtitle": "Daily average visibility for this topic vs. competitor average"
+      },
+      "sovByPlatform": {
+        "title": "Share of voice by platform",
+        "subtitle": "Brand vs. competitors on answer engines",
+        "empty": "No platform data yet."
+      },
+      "competitors": {
+        "title": "Competitor comparison",
+        "subtitle": "Your brand vs. direct competitors on this topic",
+        "you": "YOU",
+        "empty": "No competitor mentions yet."
+      },
+      "prompts": {
+        "title": "Prompt performance",
+        "subtitle": "Best & worst performing prompts in this topic (last 50 runs)",
+        "empty": "No prompt results yet.",
+        "top": "Top performers",
+        "weak": "Needs improvement",
+        "runs": "{count, plural, one {# run} other {# runs}}",
+        "viewAll": "View all prompt results for this topic →"
+      }
+    },
+    "charts": {
+      "brand": "Brand",
+      "competitorsAvg": "Competitors avg"
+    },
+    "suggestionsCard": {
+      "title": "Topic Suggestions",
+      "infoTooltip": "AI-generated topic ideas for your brand. Topics you already track and dismissed ideas never reappear.",
+      "noNewIdeas": "no new ideas — expand",
+      "expandHint": "expand for AI topic ideas",
+      "refresh": "Refresh",
+      "generating": "Generating…",
+      "refreshed": "Topic suggestions refreshed",
+      "refreshFailed": "Refresh failed",
+      "addFailed": "Failed to add",
+      "dismissFailed": "Failed to dismiss",
+      "emptyTitle": "No suggestions right now",
+      "emptyBodyManage": "Generate AI topic ideas tailored to your brand and industry. Topics you already track are excluded automatically.",
+      "emptyBodyReadOnly": "No topic suggestions have been generated for this brand yet.",
+      "generate": "Generate Suggestions",
+      "addAction": "Add to tracked topics",
+      "dismissAction": "Dismiss suggestion"
     }
   },
   "content": {
@@ -348,7 +475,11 @@
       "total": "Total Opportunities",
       "highImpact": "High Impact",
       "sentToWorkflow": "Sent to Workflow",
-      "avgScore": "Avg. Score"
+      "avgScore": "Avg. Score",
+      "shown": "{count} shown",
+      "subOpportunities": "opportunities",
+      "subOutOf100": "out of 100",
+      "subSent": "sent or in progress"
     },
     "filters": {
       "allStatuses": "All Statuses",
@@ -358,7 +489,8 @@
     "bulk": {
       "selected": "{count} selected",
       "sendAll": "Send All",
-      "dismissAll": "Dismiss All"
+      "dismissAll": "Dismiss All",
+      "markDone": "Done"
     },
     "table": {
       "action": "Action",
@@ -381,7 +513,21 @@
       "webhookStatus": "Webhook Status",
       "notSentYet": "Not sent to any workflow yet.",
       "sentAt": "Sent at {date}",
-      "webhookResponse": "Webhook Response"
+      "webhookResponse": "Webhook Response",
+      "score": "Score: {value}",
+      "volumePerMonth": "~{value}/mo",
+      "fanoutQueries": "Observed fan-out queries",
+      "searchedTimes": "Searched {count}× by answer engines",
+      "intents": {
+        "comparison": "Comparison",
+        "how-to": "How-to",
+        "what-is": "What is",
+        "best-top": "Best / Top",
+        "vs-review": "vs. / Review",
+        "recommendation": "Recommendation",
+        "problem-solving": "Problem Solving",
+        "other": "Other"
+      }
     },
     "webhook": {
       "title": "Webhook Settings",
@@ -401,6 +547,47 @@
       "inactive": "Inactive",
       "noWebhook": "No webhook configured",
       "setupFirst": "Set up a webhook to send opportunities to your workflow tools."
+    },
+    "noBrand": "Select a brand to view content opportunities.",
+    "notFound": "Opportunity not found.",
+    "searchPlaceholder": "Search...",
+    "send": "Send",
+    "noMatch": "No opportunities match your filters.",
+    "toasts": {
+      "loadFailed": "Failed to load content opportunities",
+      "loadOneFailed": "Failed to load opportunity",
+      "generated": "{count, plural, one {Generated # opportunity} other {Generated # opportunities}}",
+      "generationFailed": "Generation failed — please try again",
+      "generationTimeout": "Generation timed out — please try again",
+      "generateFailed": "Failed to generate opportunities",
+      "sentToWorkflow": "Sent to workflow!",
+      "sendFailed": "Failed to send",
+      "dismissed": "Opportunity dismissed",
+      "dismissFailed": "Failed to dismiss",
+      "bulkSent": "{count, plural, one {Sent # opportunity to workflow} other {Sent # opportunities to workflow}}",
+      "bulkSendFailedCount": "{count, plural, one {# failed to send} other {# failed to send}}",
+      "bulkSendFailed": "Failed to send opportunities.",
+      "bulkDone": "{count, plural, one {Marked # opportunity as done} other {Marked # opportunities as done}}",
+      "bulkUpdateFailed": "Bulk update failed",
+      "bulkDismissed": "{count, plural, one {Dismissed # opportunity} other {Dismissed # opportunities}}",
+      "bulkDismissFailed": "Bulk dismiss failed"
+    },
+    "brief": {
+      "title": "Content Brief",
+      "outline": "Brief Outline",
+      "competitorInsights": "Competitor Insights",
+      "keywords": "Keywords",
+      "words": "~{count} words",
+      "generate": "Generate Content Brief",
+      "generating": "Generating...",
+      "generated": "Content brief generated!",
+      "generateFailed": "Failed to generate brief",
+      "emptyTitle": "No Content Brief Yet",
+      "emptyBody": "Generate an AI-powered content brief with a suggested title, outline, target keywords, and competitor insights.",
+      "limitReachedTitle": "Monthly Brief Limit Reached",
+      "limitReachedBody": "You've used all {limit} content briefs included in your plan this month. Upgrade for a higher limit, or wait until the 1st when your quota resets.",
+      "upgrade": "Upgrade Plan",
+      "quotaRemaining": "{remaining}/{limit} briefs remaining this month"
     }
   },
   "traffic": {
@@ -409,7 +596,98 @@
     "totalCrawls": "Total Crawls",
     "uniqueBots": "Unique Bots",
     "referralTraffic": "AI Referral Traffic",
-    "topPages": "Top Crawled Pages"
+    "topPages": "Top Crawled Pages",
+    "subtitle": "AI-referred visits to your website",
+    "deltaNew": "new",
+    "unknownPlatform": "Unknown",
+    "snippetTitle": "Add this snippet to your website",
+    "snippetDescription": "Paste this before the closing <code>{tag}</code> tag to track AI-referred visits.",
+    "snippetCopyAria": "Copy tracking script",
+    "timeAgo": {
+      "justNow": "just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by URL or path...",
+      "allPlatforms": "All platforms",
+      "clear": "Clear filters"
+    },
+    "pager": {
+      "range": "{start}–{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "emptyLogs": {
+      "noMatchTitle": "No matching visits",
+      "noMatchDescription": "Try adjusting your filters or search terms.",
+      "title": "No visits yet",
+      "description": "Once visitors arrive from AI platforms, their visits will appear here."
+    },
+    "range": {
+      "last24h": "last 24 hours",
+      "last7d": "last 7 days",
+      "last30d": "last 30 days",
+      "last90d": "last 90 days",
+      "allTime": "all time",
+      "between": "{from} – {to}",
+      "from": "from {from}",
+      "through": "through {to}",
+      "selected": "selected period"
+    },
+    "trend": {
+      "title": "AI Referral Trend",
+      "last24h": "AI Referral Trend — Last 24 Hours",
+      "last7d": "AI Referral Trend — Last 7 Days",
+      "last30d": "AI Referral Trend — Last 30 Days",
+      "last90d": "AI Referral Trend — Last 90 Days",
+      "allTime": "AI Referral Trend — All Time",
+      "custom": "AI Referral Trend — {from} – {to}"
+    },
+    "dateRange": {
+      "label": "Date Range",
+      "custom": "Custom",
+      "all": "All",
+      "from": "From",
+      "to": "To",
+      "preset": {
+        "24h": "24h",
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d"
+      }
+    },
+    "noBrand": {
+      "title": "No brand selected",
+      "description": "Select a brand to view AI traffic analytics."
+    },
+    "empty": {
+      "title": "No traffic data yet",
+      "addSnippet": "Add the tracking snippet to your website to start collecting AI-referred traffic data."
+    },
+    "kpi": {
+      "visits": "AI-Referred Visits",
+      "vsPrevious": "{delta}% vs previous period",
+      "topPlatform": "Top Platform",
+      "visitCount": "{count, plural, one {# visit} other {# visits}}",
+      "noData": "no data",
+      "platforms": "Platforms",
+      "uniqueSources": "unique AI sources"
+    },
+    "platformBreakdown": "Platform Breakdown",
+    "referralsByPlatform": "Referrals by Platform",
+    "topLandingPages": "Top Landing Pages",
+    "recentVisits": "Recent AI Referral Visits",
+    "totalBadge": "{count} total",
+    "table": {
+      "platform": "Platform",
+      "visits": "Visits",
+      "change": "Change",
+      "page": "Page",
+      "time": "Time",
+      "country": "Country"
+    }
   },
   "prompts": {
     "title": "Prompt Volumes",
@@ -451,6 +729,273 @@
       "active": "Active",
       "paused": "Paused",
       "statusUpdateFailed": "Failed to update status"
+    },
+    "detail": {
+      "dateRange": "Date Range",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "datePresets": {
+        "24h": "24h",
+        "7d": "7d",
+        "30d": "30d",
+        "90d": "90d",
+        "all": "All",
+        "custom": "Custom"
+      },
+      "unknownModel": "Unknown",
+      "sentiment": {
+        "positive": "Positive",
+        "neutral": "Neutral",
+        "negative": "Negative"
+      },
+      "kpiVisibility": "Visibility Score",
+      "mentionsLabel": "Mentions",
+      "citationsLabel": "Citations",
+      "lastRun": "Last run: {time}",
+      "notFoundTitle": "Prompt not found",
+      "notFoundBody": "This prompt may have been deleted or does not exist.",
+      "platformResultsTitle": "Platform Results",
+      "platformResultsSubtitle": "{count, plural, one {# result grouped by platform and model.} other {# results grouped by platform and model.}}",
+      "emptyAll": "No tracking results yet for this prompt.",
+      "emptyRange": "No results in the selected date range.",
+      "showAllData": "Show all data",
+      "runsCount": "{count, plural, one {# run} other {# runs}}",
+      "runsHeading": "Runs",
+      "mentionsWord": "{count, plural, one {mention} other {mentions}}",
+      "citationsWord": "{count, plural, one {citation} other {citations}}",
+      "viewResponse": "View response details",
+      "showingRuns": "Showing latest {shown} of {total} runs for this platform.",
+      "topSourcesTitle": "Top Sources",
+      "topSourcesSubtitle": "Sources AI platforms cite when answering this prompt.",
+      "tabDomains": "Domains ({count})",
+      "tabUrls": "URLs ({count})"
+    },
+    "workflowCards": {
+      "notCited": "Not cited yet",
+      "citedBadge": "Cited ×{count}",
+      "citedTooltipCount": "{count, plural, one {Cited in # answer} other {Cited in # answers}}",
+      "citedTooltipFirst": "first {date}",
+      "citedTooltipLast": "last {date}",
+      "citedTooltipAlready": "was already cited before targeting",
+      "notes": {
+        "title": "Notes",
+        "subtitle": "Keep track of the work behind this prompt — what was published, planned or decided.",
+        "placeholder": "e.g. Published a comparison blog post targeting this prompt…",
+        "add": "Add note",
+        "empty": "No notes yet.",
+        "emptyManage": "No notes yet — add the first one above.",
+        "unknownAuthor": "Unknown",
+        "deleteAria": "Delete note",
+        "addFailed": "Failed to add note",
+        "deleteFailed": "Failed to delete note"
+      },
+      "urls": {
+        "title": "Target URLs",
+        "subtitle": "Pages you want AI answers to cite for this prompt. Citation status updates automatically as new tracking results arrive.",
+        "placeholder": "https://example.com/blog/comparison-post",
+        "add": "Add",
+        "empty": "No target URLs yet.",
+        "emptyManage": "No target URLs yet — add the pages you want cited.",
+        "removeAria": "Remove target URL",
+        "addFailed": "Failed to add URL",
+        "removeFailed": "Failed to remove URL"
+      }
+    },
+    "fanout": {
+      "title": "Query Fan-out",
+      "viewByPrompt": "By prompt",
+      "viewFrequency": "High frequency",
+      "descByPrompt": "Your tracked prompts grouped by the sub-queries their answers actually triggered — expand a prompt to see its observed fan-out.",
+      "descFrequency": "The sub-queries answer engines actually ran while building your answers (last 30 days) — observed, never predicted. Sorted by how often they were searched. Track any of them with the + to measure its own visibility.",
+      "loadError": "Failed to load query fan-out — please retry.",
+      "trackError": "Failed to track this query — please retry.",
+      "trackedToast": "Added as a tracked prompt",
+      "emptyTitle": "No fan-out captured yet",
+      "emptyBody": "Fan-out is emitted mostly by <b>Copilot</b> and <b>Perplexity</b>, and only for some queries. Once those platforms run for your prompts, the observed sub-queries will appear here.",
+      "colSubQuery": "Sub-query",
+      "colEngine": "Engine",
+      "colTimesSearched": "Times searched",
+      "colSourcedPrompts": "Sourced prompts",
+      "colIntent": "Intent",
+      "colTrack": "Track",
+      "colSubQueries": "Sub-queries",
+      "noSearchResults": "No prompts match your search",
+      "tracked": "Tracked",
+      "trackAria": "Track \"{query}\" as a prompt",
+      "pagerPrev": "Previous page",
+      "pagerNext": "Next page",
+      "intents": {
+        "comparison": "Comparison",
+        "how-to": "How-to",
+        "what-is": "What is",
+        "best-top": "Best / Top",
+        "vs-review": "vs. / Review",
+        "recommendation": "Recommendation",
+        "problem-solving": "Problem Solving",
+        "other": "Other"
+      }
+    },
+    "suggestionsCard": {
+      "title": "Prompt Suggestions",
+      "infoTip": "AI-generated prompt ideas based on your brand, existing tracked prompts, and competitors cited in AI answers.",
+      "collapsedNoIdeas": "no new ideas — expand",
+      "collapsedHint": "expand for AI prompt ideas",
+      "refresh": "Refresh",
+      "generating": "Generating…",
+      "refreshedToast": "Suggestions refreshed",
+      "refreshFailed": "Refresh failed",
+      "addedToast": "Prompt added to your tracked list",
+      "addFailed": "Failed to add",
+      "dismissFailed": "Failed to dismiss",
+      "emptyTitle": "No suggestions right now",
+      "emptyBody": "Click refresh to generate new prompt ideas tailored to your brand and competitor activity.",
+      "generate": "Generate Suggestions",
+      "volumePerMonth": "~{volume}/mo",
+      "addAria": "Add to tracked prompts",
+      "dismissAria": "Dismiss suggestion"
+    },
+    "charts": {
+      "noVolumeData": "No volume data available",
+      "estQueries": "Est. queries",
+      "share": "Share"
+    },
+    "similarTopics": {
+      "back": "Back to Prompt Insights",
+      "title": "Similar Topics",
+      "description": "Keyword clusters aggregated across analyzed prompts.",
+      "topicClusters": "Topic Clusters",
+      "uniqueKeywords": "unique keywords",
+      "googleVolume": "Google Volume",
+      "monthlySearches": "monthly searches",
+      "estAiVolume": "Est. AI Volume",
+      "monthlyAiQueries": "monthly AI queries",
+      "allTitle": "All Similar Topics",
+      "searchPlaceholder": "Search topics…",
+      "colGoogleVol": "Google Vol.",
+      "colEstAiVol": "Est. AI Vol.",
+      "colPrompts": "Prompts",
+      "colTopPrompt": "Top Prompt",
+      "loading": "Loading similar topics…",
+      "empty": "No similar topics found.",
+      "seeAll": "See all",
+      "inPrompts": "{keyword} (in {count} prompts)"
+    },
+    "pageTitle": "Prompts",
+    "pageDescription": "Manage every tracked prompt and review estimated AI demand",
+    "volumesEstimateNote": "Volumes are estimates, not exact figures",
+    "noBrand": "Select a brand to view prompts.",
+    "exportHint": "No prompts yet - add prompts first.",
+    "exportCsv": "Export CSV",
+    "addPrompt": "Add prompt",
+    "managePrompts": "Manage prompts",
+    "analyzing": "Analyzing...",
+    "refreshing": "Refreshing...",
+    "refreshVolumes": "Refresh Volumes",
+    "reanalyzeKeywords": "Re-analyze Keywords",
+    "analyzeNewPrompts": "Analyze New Prompts",
+    "analyzeVolumes": "Analyze Volumes",
+    "noSearchMatch": "No prompts match your search.",
+    "tabs": {
+      "all": "All Prompts",
+      "fanout": "Query Fan-out",
+      "insights": "Insights"
+    },
+    "toasts": {
+      "volumesDegraded": "Volume data is temporarily unavailable — showing prompts without it.",
+      "loadFailed": "Failed to load prompt data",
+      "noActiveToAnalyze": "No active prompts to analyze. Add prompts to a brand first.",
+      "noActive": "No active prompts to analyze.",
+      "analyzed": "{count, plural, one {Analyzed # prompt} other {Analyzed # prompts}}",
+      "refreshed": "{count, plural, one {Refreshed volumes for # prompt} other {Refreshed volumes for # prompts}}",
+      "reanalyzed": "{count, plural, one {Re-analyzed # prompt with new keywords} other {Re-analyzed # prompts with new keywords}}",
+      "limitReached": "Monthly volume analysis limit reached. Upgrade your plan for more.",
+      "analysisFailed": "Volume analysis failed",
+      "refreshFailed": "Volume refresh failed",
+      "reanalysisFailed": "Re-analysis failed"
+    },
+    "banner": {
+      "title": "{count, plural, one {# prompt hasn't been analyzed yet} other {# prompts haven't been analyzed yet}}",
+      "body": "Run volume analysis to fill in their Volume & Competition.",
+      "bodyQuota": "Their Volume & Competition stay empty until analyzed — but your monthly volume analysis limit is reached. Upgrade your plan to analyze more.",
+      "analyzeCta": "{count, plural, one {Analyze # prompt} other {Analyze # prompts}}"
+    },
+    "quota": {
+      "left": "{remaining}/{limit} analyses left",
+      "exhausted": "Monthly analysis limit reached. Resets when your subscription renews.",
+      "remainingMonth": "{remaining}/{limit} analyses remaining this month"
+    },
+    "emptyVolumes": {
+      "title": "No volume data yet",
+      "bodyHasPrompts": "Click \"Analyze Volumes\" to fetch search volume data for your prompts.",
+      "bodyNoPrompts": "Add prompts to your brand first, then analyze their volumes."
+    },
+    "kpi": {
+      "analyzed": "Prompts Analyzed",
+      "analyzedSub": "across {count} keywords",
+      "totalAiVolume": "Total Est. AI Volume",
+      "totalAiVolumeSub": "from {value} Google searches",
+      "adoptionRate": "AI Adoption Rate",
+      "adoptionRateSub": "of Google search volume",
+      "avgAiVolume": "Avg. AI Volume",
+      "avgAiVolumeSub": "per prompt"
+    },
+    "volumesCard": {
+      "description": "Total estimated AI-answered queries across all topic clusters, split by answer-engine share. Weights include Google AI Overview (~35% of Google searches), Google AI Mode, and standalone chatbots."
+    },
+    "volumeTable": {
+      "googleVol": "Google Vol.",
+      "googleVolTip": "Total monthly Google search volume across all extracted keywords.",
+      "estAiVol": "Est. AI Vol.",
+      "estAiVolTip": "Estimated monthly AI prompt volume. Calculated as total Google volume multiplied by the AI adoption rate.",
+      "intent": "Intent",
+      "intentTip": "The search intent detected by AI analysis. Different intents indicate how users frame their queries.",
+      "footnote": "* Est. AI Volume = Total Google search volume of extracted keywords × AI adoption rate. Figures are approximations for planning purposes."
+    },
+    "intents": {
+      "comparison": "Comparison",
+      "how-to": "How-to",
+      "what-is": "What is",
+      "best-top": "Best / Top",
+      "vs-review": "vs. / Review",
+      "recommendation": "Recommendation",
+      "problem-solving": "Problem Solving",
+      "other": "Other"
+    },
+    "highOpp": {
+      "title": "High Opportunity Prompts",
+      "subtitle": "Prompts with highest estimated AI search demand",
+      "estAiVolume": "Est. AI Volume",
+      "estAiVolumeTip": "Estimated monthly AI prompt volume. Sorted by highest volume first.",
+      "intentTip": "The detected search intent.",
+      "opportunity": "Opportunity",
+      "opportunityTip": "Opportunity level based on estimated AI volume. High = above 10k/mo, Medium = 5k–10k/mo.",
+      "high": "High",
+      "medium": "Medium"
+    },
+    "dialog": {
+      "textPlaceholder": "e.g. Best project management tools for startups",
+      "topic": "Topic",
+      "selectTopic": "Select a topic",
+      "noTopics": "No topics defined yet. Add topics in brand settings.",
+      "platformModels": "Platform & Models",
+      "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+      "selectPlatformModels": "Select platform & models",
+      "addTitle": "Add Prompt",
+      "addDescription": "Track a new prompt for this brand across the selected platforms.",
+      "adding": "Adding…",
+      "added": "Prompt added — it will be picked up by the next tracking run.",
+      "addFailed": "Failed to add prompt. Please try again.",
+      "editTitle": "Edit Prompt",
+      "editDescription": "Changes apply from the next tracking run; past results stay attached to this prompt.",
+      "activeLabel": "Active — included in tracking runs",
+      "deleteConfirm": "Delete this prompt and its tracking history?",
+      "keepIt": "Keep it",
+      "saving": "Saving…",
+      "saveChanges": "Save changes",
+      "updated": "Prompt updated.",
+      "updateFailed": "Failed to update prompt. Please try again.",
+      "deleted": "Prompt deleted.",
+      "deleteFailed": "Failed to delete prompt. Please try again."
     }
   },
   "competitors": {
@@ -792,7 +1337,17 @@
     "drawerTimestamp": "Timestamp",
     "drawerPlatform": "Platform",
     "drawerRegion": "Region",
-    "drawerCardsTitle": "Cards returned"
+    "drawerCardsTitle": "Cards returned",
+    "charts": {
+      "cardRate": "Card rate",
+      "yourCards": "Your cards",
+      "allCards": "All cards"
+    },
+    "loading": "Loading...",
+    "allPlatforms": "All platforms",
+    "allRegions": "All regions",
+    "noProductsFound": "No products found matching filters.",
+    "viewPromptDetails": "View prompt details"
   },
   "reports": {
     "title": "Reports",
@@ -924,7 +1479,67 @@
     "mentionEvidence": "Mention Evidence",
     "mentionEvidenceDescription": "The answers that mentioned you most in this period, with the passage around the mention.",
     "citationEvidence": "Citation Evidence",
-    "citationEvidenceDescription": "The URLs AI answers cited most in this period, and which tracked prompts surfaced them."
+    "citationEvidenceDescription": "The URLs AI answers cited most in this period, and which tracked prompts surfaced them.",
+    "pdf": {
+      "generatedOn": "Generated on",
+      "executiveSummary": "Executive Summary",
+      "kpiVisibilityRate": "Visibility Rate",
+      "kpiAvgScore": "Avg. Score",
+      "kpiVisibility": "Visibility",
+      "kpiMentions": "Mentions",
+      "kpiCitations": "Brand Citations",
+      "kpiSentiment": "Positive Sentiment",
+      "kpiCitationsNote": "\"Brand Citations\" counts citations of your own site in AI answers.",
+      "promptsSuffix": "prompts",
+      "deltaNew": "new",
+      "visibilityTrend": "Visibility Trend",
+      "legendYourBrand": "Your Brand",
+      "legendAvgCompetitor": "Avg. Competitor",
+      "shareOfVoice": "Share of Voice",
+      "competitorLeaderboard": "Competitor Leaderboard",
+      "columnBrand": "Brand",
+      "columnChange": "Change",
+      "columnMentions": "Mentions",
+      "columnCitations": "Citations",
+      "you": "(you)",
+      "topicPerformance": "Topic Performance",
+      "columnTopic": "Topic",
+      "columnVisibility": "Visibility",
+      "columnResults": "Results",
+      "bestPrompts": "Best Performing Prompts",
+      "worstPrompts": "Weakest Prompts",
+      "columnPrompt": "Prompt",
+      "columnRuns": "Runs",
+      "mentionEvidence": "Mention Evidence",
+      "columnPlatform": "Platform",
+      "columnDate": "Date",
+      "columnExcerpt": "How you were mentioned",
+      "queryFanout": "Query Fan-out",
+      "columnQuery": "Query",
+      "columnEngines": "Engines",
+      "columnSearched": "Searched",
+      "aiTraffic": "AI Traffic",
+      "visitsSuffix": "visits",
+      "columnTopPage": "Top Page",
+      "columnVisits": "Visits",
+      "shoppingVisibility": "Shopping Visibility",
+      "shoppingSov": "Shopping SoV",
+      "shoppingProducts": "Products Surfaced",
+      "shoppingCardRate": "Card Rate",
+      "shoppingTopMerchant": "Top Merchant",
+      "auditScore": "Site Audit Score",
+      "auditedOn": "audited",
+      "topCitationSources": "Top Citation Sources",
+      "domainsSuffix": "domains",
+      "citationsSuffix": "citations",
+      "columnDomain": "Domain",
+      "columnSourceType": "Source Type",
+      "columnUsage": "Usage",
+      "citationEvidence": "Citation Evidence",
+      "columnUrl": "URL",
+      "columnCitedIn": "Cited in",
+      "footerGeneratedWith": "Generated with Ultravis · www.ultravis.ai"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -997,7 +1612,68 @@
     "pulseNoBrands": "No active brands yet — add a brand to configure its Daily Pulse.",
     "pulseLoadFailed": "Could not load notification settings.",
     "pulseSaveFailed": "Could not save notification settings. Please try again.",
-    "pulseSaved": "Notification settings saved"
+    "pulseSaved": "Notification settings saved",
+    "themeSwitch": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "apiKeysSection": {
+      "title": "API Keys",
+      "description": "Long-lived tokens for the Ultravis MCP server and other external clients. Keys are shown once at creation — store them somewhere safe.",
+      "newKey": "New key",
+      "mcpEndpoint": "MCP endpoint",
+      "mcpInstructions": "Paste this URL + a key below into Claude Desktop / Claude Code / Cursor. See the",
+      "mcpGuide": "MCP guide",
+      "empty": "No API keys yet. Create one to connect the MCP server.",
+      "revokedBadge": "revoked",
+      "createdLastUsed": "Created {created} · Last used {lastUsed}",
+      "revokeConfirm": "Revoke this API key? Clients using it will lose access immediately.",
+      "keyRevoked": "Key revoked",
+      "copied": "Copied to clipboard",
+      "createTitle": "New API key",
+      "createDescription": "Give this key a memorable name (e.g. \"MCP — my laptop\").",
+      "nameLabel": "Name",
+      "namePlaceholder": "MCP — local",
+      "create": "Create",
+      "revealTitle": "Copy your API key",
+      "revealDescription": "You won't be able to see this again. Store it somewhere safe.",
+      "done": "Done",
+      "errors": {
+        "load": "Failed to load",
+        "create": "Failed to create",
+        "revoke": "Failed to revoke"
+      }
+    },
+    "agent": {
+      "title": "Agent",
+      "description": "Bring your own Anthropic API key. The in-product agent uses your key to call Claude directly — usage is billed to your Anthropic account, not to Ultravis.",
+      "keyConfigured": "Key configured",
+      "savedAt": "Saved {date}.",
+      "savedAtBy": "Saved {date} by {email}.",
+      "noKey": "No key configured. The agent will be locked for everyone in this organization until a key is saved.",
+      "keyLabel": "Anthropic API key",
+      "replaceKeyLabel": "Replace key",
+      "save": "Save",
+      "replace": "Replace",
+      "getKeyPrefix": "Get a key from",
+      "getKeySuffix": ". The key is encrypted at rest; Ultravis support cannot read it.",
+      "removeKey": "Remove key",
+      "removeConfirm": "Remove the Anthropic API key? Team members will lose access to the agent until a new key is saved.",
+      "keySaved": "Anthropic API key saved",
+      "keyRemoved": "Key removed",
+      "adminOnlyTitle": "Admin-only setting",
+      "adminOnlyBody": "Only org admins can add, replace, or remove the Anthropic API key. Ask an admin if you need it changed.",
+      "errors": {
+        "load": "Failed to load",
+        "save": "Failed to save",
+        "clear": "Failed to clear"
+      }
+    },
+    "displayNamePlaceholder": "Your name",
+    "projectDescription": "Configure your project settings.",
+    "projectNamePlaceholder": "My Brand",
+    "domainPlaceholder": "example.com",
+    "agentNav": "Agent"
   },
   "brands": {
     "title": "Brands",
@@ -1072,7 +1748,95 @@
       "viewInsights": "View Insights",
       "addTopic": "Add Topics",
       "addPrompt": "Add Prompts"
-    }
+    },
+    "managePrompts": {
+      "loadError": "Failed to load data",
+      "selectTopicToGenerate": "Select at least one topic to generate prompts",
+      "notAuthenticated": "Not authenticated",
+      "serverError": "Server error ({status})",
+      "suggestionsGenerated": "{count, plural, one {# prompt suggestion generated!} other {# prompt suggestions generated!}}",
+      "generateError": "Failed to generate suggestions",
+      "selectPromptToSave": "Select at least one prompt to save",
+      "savedPrompts": "{count, plural, one {Saved # prompt} other {Saved # prompts}}",
+      "saveError": "Failed to save prompts",
+      "promptAdded": "Prompt added",
+      "addError": "Failed to add prompt",
+      "updateError": "Failed to update prompt",
+      "updateTopicError": "Failed to update topic",
+      "updateModelsError": "Failed to update models",
+      "updatePlatformsError": "Failed to update platforms",
+      "deleteError": "Failed to delete prompt",
+      "loadUnanalyzedError": "Failed to load unanalyzed prompts",
+      "analysisStartError": "Failed to start analysis",
+      "allAnalyzedInfo": "All prompts already analyzed",
+      "analyzingNew": "{count, plural, one {Analyzing # new prompt} other {Analyzing # new prompts}}",
+      "brandNotFound": "Brand not found",
+      "readOnlyTitle": "Read-only access",
+      "readOnlyBody": "Your role can view tracked prompts but not add, edit, or delete them. Ask an admin or manager to make changes.",
+      "addPrompt": "Add Prompt",
+      "promptPlaceholder": "e.g. Best project management tools for startups",
+      "topicLabel": "Topic",
+      "selectTopic": "Select a topic",
+      "noTopicsHint": "No topics defined yet. Add topics in brand settings.",
+      "noTopicsGenerateHint": "No topics defined yet. Add topics in brand settings first.",
+      "platformModelsLabel": "Platform & Models",
+      "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+      "selectPlatformModels": "Select platform & models",
+      "scraperGroup": "{provider} (Scraper)",
+      "apiGroup": "{provider} (API)",
+      "aiGenerate": "AI Generate",
+      "aiGenerateDescription": "Select topics and generate 5 optimized search prompts per topic using AI.",
+      "topicsLabel": "Topics",
+      "topicsSelectedSummary": "{count, plural, one {# topic selected} other {# topics selected}} — {prompts} prompts will be generated",
+      "generating": "Generating...",
+      "generatePrompts": "Generate Prompts",
+      "reviewTitle": "Review AI Suggestions",
+      "reviewDescription": "Toggle off prompts you don't want, edit text if needed, then save.",
+      "saveSelected": "Save Selected ({count})",
+      "regenerate": "Regenerate",
+      "dismiss": "Dismiss",
+      "allPromptsTitle": "All Prompts ({count})",
+      "analyzePrompts": "Analyze Prompts",
+      "newBadge": "{count, plural, one {# new} other {# new}}",
+      "emptyTitle": "No prompts yet",
+      "emptyBody": "Add prompts manually or generate them with AI above.",
+      "analyzeDialogDescription": "Select which prompts to analyze with AI platforms.",
+      "allAnalyzed": "All prompts have already been analyzed.",
+      "selectedOfTotal": "{selected} of {total} selected",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "allAnalyzedBody": "All prompts have been analyzed. Add new prompts to analyze them.",
+      "analyzeCount": "Analyze ({count})"
+    },
+    "manageTopics": {
+      "title": "Topics",
+      "description": "Manage the topics used to categorize your prompts. Topics are assigned to prompts during creation.",
+      "loadError": "Failed to load topics",
+      "topicUpdated": "Topic updated",
+      "updateError": "Failed to update topic",
+      "topicRemoved": "Topic removed",
+      "removeError": "Failed to remove topic",
+      "saveAria": "Save topic changes",
+      "cancelAria": "Cancel edit",
+      "editAria": "Edit topic",
+      "deleteAria": "Delete topic",
+      "deleteTitle": "Delete Topic",
+      "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+      "deleteWithPrompts": "{count, plural, one {# prompt using this topic will become uncategorized.} other {# prompts using this topic will become uncategorized.}}",
+      "deleteNoPrompts": "No prompts are using this topic.",
+      "emptyState": "No topics yet. Add your first topic below.",
+      "addPlaceholder": "e.g. Industry, Comparison, How-to...",
+      "addButton": "Add",
+      "readOnlyTitle": "Read-only access",
+      "readOnlyBody": "Your role can view topics but not add, rename, or delete them. Ask an admin or manager to make changes."
+    },
+    "manageLayout": {
+      "navTopics": "Topics",
+      "navPrompts": "Prompts",
+      "navSettings": "Settings",
+      "backAria": "Back to brands list"
+    },
+    "productTour": "Product Tour"
   },
   "plans": {
     "free": "Free",

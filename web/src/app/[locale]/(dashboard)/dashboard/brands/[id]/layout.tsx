@@ -1,6 +1,7 @@
 'use client';
 
 import { use } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname, Link } from '@/i18n/navigation';
 import { useBrandStore } from '@/stores/use-brand-store';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,9 @@ import { cn } from '@/lib/utils';
 import { ArrowLeft, MessageSquareText, Settings, Tag } from 'lucide-react';
 
 const SUB_NAV = [
-  { href: 'topics', label: 'Topics', icon: Tag },
-  { href: 'prompts', label: 'Prompts', icon: MessageSquareText },
-  { href: 'settings', label: 'Settings', icon: Settings },
+  { href: 'topics', labelKey: 'navTopics', icon: Tag },
+  { href: 'prompts', labelKey: 'navPrompts', icon: MessageSquareText },
+  { href: 'settings', labelKey: 'navSettings', icon: Settings },
 ] as const;
 
 export default function BrandDetailLayout({
@@ -22,6 +23,7 @@ export default function BrandDetailLayout({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: any;
 }) {
+  const t = useTranslations('brands.manageLayout');
   const { id } = use(params) as { id: string };
   const pathname = usePathname();
   const { brands } = useBrandStore();
@@ -41,7 +43,7 @@ export default function BrandDetailLayout({
       {/* Brand header + back */}
       <div className="flex items-center gap-4">
         <Link href="/dashboard/brands">
-          <Button variant="ghost" size="icon" aria-label="Back to brands list">
+          <Button variant="ghost" size="icon" aria-label={t('backAria')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
@@ -80,7 +82,7 @@ export default function BrandDetailLayout({
                 )}
               >
                 <item.icon className="h-4 w-4" />
-                {item.label}
+                {t(item.labelKey)}
               </span>
             </Link>
           );

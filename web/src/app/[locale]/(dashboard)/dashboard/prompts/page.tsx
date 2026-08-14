@@ -174,6 +174,7 @@ function SortableHead({
   dir: SortDir;
   onSort: (key: AllPromptsSortKey) => void;
 }) {
+  const t = useTranslations('prompts.allTable');
   const active = activeSort === sortKey;
   return (
     <TableHead
@@ -184,7 +185,9 @@ function SortableHead({
         <button
           type="button"
           onClick={() => onSort(sortKey)}
-          aria-label={`Sort by ${typeof children === 'string' ? children : sortKey}`}
+          aria-label={t('sortByAria', {
+            column: typeof children === 'string' ? children : sortKey,
+          })}
           className={cn(
             'inline-flex items-center gap-1 transition-colors hover:text-foreground',
             active ? 'text-foreground' : 'text-muted-foreground',
@@ -227,16 +230,16 @@ const PROMPT_EXPORT_HEADERS = [
 const VALID_TABS = ['all', 'fanout', 'insights'] as const;
 type TabId = (typeof VALID_TABS)[number];
 
-function formatRelative(iso?: string): string {
+function formatRelative(iso: string | undefined, t: ReturnType<typeof useTranslations>): string {
   if (!iso) return '—';
   const diffMs = Date.now() - new Date(iso).getTime();
   const diffMin = Math.round(diffMs / 60000);
-  if (diffMin < 1) return 'Just now';
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 1) return t('justNow');
+  if (diffMin < 60) return t('minAgo', { count: diffMin });
   const diffHr = Math.round(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffHr < 24) return t('hoursAgo', { count: diffHr });
   const diffDay = Math.round(diffHr / 24);
-  if (diffDay < 30) return `${diffDay}d ago`;
+  if (diffDay < 30) return t('daysAgo', { count: diffDay });
   return new Date(iso).toLocaleDateString();
 }
 
@@ -1740,22 +1743,20 @@ function AllPromptsTab({
         <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
           <Layers className="h-12 w-12 text-muted-foreground/40" />
           <div className="text-center space-y-1">
-            <p className="text-sm font-medium">No prompts yet</p>
-            <p className="text-xs text-muted-foreground">
-              Add prompts to your brand to start tracking their AI visibility.
-            </p>
+            <p className="text-sm font-medium">{t('noPromptsYet')}</p>
+            <p className="text-xs text-muted-foreground">{t('noPromptsBody')}</p>
           </div>
           <div className="flex items-center gap-2">
             {onAddPrompt && (
               <Button size="sm" className="gap-2" onClick={onAddPrompt}>
                 <Plus className="h-4 w-4" />
-                Add prompt
+                {t('addPrompt')}
               </Button>
             )}
             <Link href={`/dashboard/brands/${activeBrandId}/prompts`}>
               <Button size="sm" variant={onAddPrompt ? 'outline' : 'default'} className="gap-2">
                 <Pencil className="h-4 w-4" />
-                Manage prompts
+                {t('managePrompts')}
               </Button>
             </Link>
           </div>
@@ -1913,9 +1914,12 @@ function AllPromptsTab({
                               ? 'text-emerald-600 dark:text-emerald-400'
                               : 'text-muted-foreground',
                           )}
-                          title={`${p.citedUrlCount} of ${p.targetUrlCount} target URLs cited in AI answers`}
+                          title={t('citedTitle', {
+                            cited: p.citedUrlCount,
+                            total: p.targetUrlCount,
+                          })}
                         >
-                          {p.citedUrlCount}/{p.targetUrlCount} cited
+                          {t('citedShort', { cited: p.citedUrlCount, total: p.targetUrlCount })}
                         </span>
                       )}
                     </div>
@@ -1970,7 +1974,7 @@ function AllPromptsTab({
                     </div>
                   </TableCell>
                   <TableCell className="text-right text-xs text-muted-foreground">
-                    {formatRelative(vis?.lastRunAt)}
+                    {formatRelative(vis?.lastRunAt, t)}
                   </TableCell>
                   {onEditPrompt && (
                     <TableCell className="text-right pr-6">
@@ -1978,7 +1982,7 @@ function AllPromptsTab({
                         size="sm"
                         variant="ghost"
                         className="h-7 w-7 p-0"
-                        aria-label="Edit prompt"
+                        aria-label={t('editAria')}
                         onClick={() => onEditPrompt(p)}
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -1991,9 +1995,7 @@ function AllPromptsTab({
           </TableBody>
         </Table>
         {filtered.length === 0 && (
-          <div className="py-10 text-center text-sm text-muted-foreground">
-            No prompts match your search.
-          </div>
+          <div className="py-10 text-center text-sm text-muted-foreground">{t('noMatch')}</div>
         )}
       </CardContent>
     </Card>

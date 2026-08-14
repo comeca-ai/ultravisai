@@ -15,7 +15,8 @@
     "export": "Exportar",
     "noData": "Nenhum dado disponível",
     "previous": "Anterior",
-    "pagerRange": "{start}–{end} de {total}"
+    "pagerRange": "{start}–{end} de {total}",
+    "language": "Idioma"
   },
   "nav": {
     "overview": "Visão geral",
@@ -206,7 +207,7 @@
     "mentions": "Menções",
     "citations": "Citações",
     "sentiment": "Sentimento",
-    "score": "Score",
+    "score": "Nota",
     "positive": "Positivo",
     "positiveSentiment": "Sentimento Positivo",
     "neutral": "Neutro",
@@ -446,7 +447,7 @@
     "generate": "Gerar Oportunidades",
     "regenerate": "Atualizar Oportunidades",
     "generating": "Analisando...",
-    "sendToWorkflow": "Enviar para o Workflow",
+    "sendToWorkflow": "Enviar para automação",
     "sending": "Enviando...",
     "dismiss": "Descartar",
     "viewDetails": "Ver Detalhes",
@@ -457,7 +458,7 @@
     "available": "{count} Disponíveis",
     "status": {
       "new": "Novo",
-      "sent": "Enviado ao Workflow",
+      "sent": "Enviado à automação",
       "in_progress": "Em Andamento",
       "done": "Concluído",
       "dismissed": "Descartado"
@@ -474,7 +475,7 @@
     "kpi": {
       "total": "Total de Oportunidades",
       "highImpact": "Alto Impacto",
-      "sentToWorkflow": "Enviadas ao Workflow",
+      "sentToWorkflow": "Enviadas à automação",
       "avgScore": "Score Médio",
       "shown": "{count} exibidas",
       "subOpportunities": "oportunidades",
@@ -496,7 +497,7 @@
       "action": "Ação",
       "type": "Tipo",
       "impact": "Impacto",
-      "score": "Score",
+      "score": "Nota",
       "status": "Status",
       "actions": "Ações"
     },
@@ -511,10 +512,10 @@
       "keywords": "Palavras-chave",
       "competitorsCited": "Concorrentes Citados",
       "webhookStatus": "Status do Webhook",
-      "notSentYet": "Ainda não enviado a nenhum workflow.",
+      "notSentYet": "Ainda não enviado a nenhuma automação.",
       "sentAt": "Enviado em {date}",
       "webhookResponse": "Resposta do Webhook",
-      "score": "Score: {value}",
+      "score": "Nota: {value}",
       "volumePerMonth": "~{value}/mês",
       "fanoutQueries": "Consultas de fan-out observadas",
       "searchedTimes": "Buscada {count}× pelos motores de resposta",
@@ -523,7 +524,7 @@
         "how-to": "Como fazer",
         "what-is": "O que é",
         "best-top": "Melhores / Top",
-        "vs-review": "vs. / Review",
+        "vs-review": "vs. / Avaliação",
         "recommendation": "Recomendação",
         "problem-solving": "Resolução de problema",
         "other": "Outro"
@@ -546,7 +547,7 @@
       "active": "Ativo",
       "inactive": "Inativo",
       "noWebhook": "Nenhum webhook configurado",
-      "setupFirst": "Configure um webhook para enviar oportunidades às suas ferramentas de workflow."
+      "setupFirst": "Configure um webhook para enviar oportunidades às suas ferramentas de automação (n8n, Zapier etc.)."
     },
     "noBrand": "Selecione uma marca para ver as oportunidades de conteúdo.",
     "notFound": "Oportunidade não encontrada.",
@@ -560,11 +561,11 @@
       "generationFailed": "A geração falhou — tente de novo",
       "generationTimeout": "A geração excedeu o tempo limite — tente de novo",
       "generateFailed": "Não foi possível gerar as oportunidades",
-      "sentToWorkflow": "Enviado ao workflow!",
+      "sentToWorkflow": "Enviado à automação!",
       "sendFailed": "Não foi possível enviar",
       "dismissed": "Oportunidade descartada",
       "dismissFailed": "Não foi possível descartar",
-      "bulkSent": "{count, plural, one {# oportunidade enviada ao workflow} other {# oportunidades enviadas ao workflow}}",
+      "bulkSent": "{count, plural, one {# oportunidade enviada à automação} other {# oportunidades enviadas à automação}}",
       "bulkSendFailedCount": "{count, plural, one {# falhou ao enviar} other {# falharam ao enviar}}",
       "bulkSendFailed": "Não foi possível enviar as oportunidades.",
       "bulkDone": "{count, plural, one {# oportunidade marcada como concluída} other {# oportunidades marcadas como concluídas}}",
@@ -728,7 +729,20 @@
       "colEdit": "Editar",
       "active": "Ativo",
       "paused": "Pausado",
-      "statusUpdateFailed": "Falha ao atualizar o status"
+      "statusUpdateFailed": "Falha ao atualizar o status",
+      "justNow": "agora mesmo",
+      "minAgo": "{count}min atrás",
+      "hoursAgo": "{count}h atrás",
+      "daysAgo": "{count}d atrás",
+      "noPromptsYet": "Nenhum prompt ainda",
+      "noPromptsBody": "Adicione prompts à sua marca para começar a rastrear a visibilidade em IA.",
+      "addPrompt": "Adicionar prompt",
+      "managePrompts": "Gerenciar prompts",
+      "editAria": "Editar prompt",
+      "sortByAria": "Ordenar por {column}",
+      "noMatch": "Nenhum prompt corresponde à sua busca.",
+      "citedTitle": "{cited} de {total} URLs-alvo citadas nas respostas de IA",
+      "citedShort": "{cited}/{total} citadas"
     },
     "detail": {
       "dateRange": "Período",
@@ -956,7 +970,7 @@
       "how-to": "Como fazer",
       "what-is": "O que é",
       "best-top": "Melhores / Top",
-      "vs-review": "vs. / Review",
+      "vs-review": "vs. / Avaliação",
       "recommendation": "Recomendação",
       "problem-solving": "Resolução de problema",
       "other": "Outro"
@@ -1225,13 +1239,13 @@
         "cta": "Ver oportunidades de conteúdo"
       },
       "dim3": {
-        "name": "Social Presence",
+        "name": "Presença Social",
         "action": "Ocupe os canais e publique recente",
         "desc": "Pegada multiplataforma e frescor — 4+ plataformas, YouTube em destaque.",
         "cta": "Mapear canais sociais"
       },
       "dim4": {
-        "name": "Customer Reviews",
+        "name": "Avaliações de Clientes",
         "action": "Domine as plataformas de review",
         "desc": "Prova social e voz do cliente — G2, Trustpilot, Reclame Aqui, Reddit.",
         "cta": "Mapear plataformas de review"
@@ -2411,7 +2425,7 @@
       "calls": "{count, plural, one {# chamada} other {# chamadas}}",
       "measured": "medido",
       "estimated": "estimado",
-      "freeTier": "free tier"
+      "freeTier": "faixa gratuita"
     },
     "notes": {
       "title": "Onde ver o número exato · premissas",
@@ -2609,6 +2623,42 @@
           ]
         }
       ]
+    }
+  },
+  "invite": {
+    "join": "Entrar em {org}",
+    "invitedAs": "Você foi convidado(a) para entrar como",
+    "roles": {
+      "admin": "Administrador",
+      "manager": "Gestor",
+      "analyst": "Analista",
+      "agency_partner": "Parceiro de Agência"
+    },
+    "invitedEmail": "E-mail convidado",
+    "signedInAs": "Conectado como",
+    "wrongAccount": "Este convite foi enviado para {email}, mas você está conectado como {current}. Troque de conta para continuar.",
+    "switching": "Trocando...",
+    "switchAccount": "Sair e usar a conta correta",
+    "fullName": "Nome completo",
+    "fullNamePlaceholder": "Seu nome",
+    "setPassword": "Defina uma senha",
+    "passwordPlaceholder": "Pelo menos 8 caracteres",
+    "confirmPassword": "Confirme a senha",
+    "confirmPlaceholder": "Repita a senha",
+    "joining": "Entrando...",
+    "acceptAndJoin": "Aceitar e entrar em {org}",
+    "passwordNote": "Você usará esta senha no próximo acesso.",
+    "welcome": "Bem-vindo(a) a {org}!",
+    "acceptFailed": "Não foi possível aceitar o convite.",
+    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres.",
+    "passwordMismatch": "As senhas não conferem."
+  },
+  "billing": {
+    "expired": {
+      "title": "Assinatura necessária",
+      "bodyWithOwner": "A assinatura desta conta terminou, então o rastreamento e o acesso ao painel estão pausados. Fale com o responsável pela conta ({owner}) para renová-la.",
+      "bodyNoOwner": "A assinatura desta conta terminou, então o rastreamento e o acesso ao painel estão pausados. Fale com o responsável pela conta ou um administrador para renová-la.",
+      "note": "Você não tem acesso ao faturamento desta conta, então não consegue renovar nem fazer alterações até ela estar ativa de novo."
     }
   }
 }

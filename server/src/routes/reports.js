@@ -16,6 +16,7 @@ import { Router } from 'express';
 import { generateText } from 'ai';
 import { resolveModel } from '../lib/ai-provider.js';
 import { assertBrandAccess } from '../lib/access.js';
+import { getLanguageName } from '../lib/languages.js';
 import supabaseAdmin from '../config/supabase.js';
 
 const router = Router();
@@ -26,7 +27,7 @@ You will receive a JSON snapshot of the brand's metrics for the report period. D
 
 For insights KPIs, mentionsChange and citationsChange are percentage changes, never raw counts. A null change with prevMentions or prevCitations equal to 0 means there is no meaningful percentage base: describe the current total as new growth from zero (for example, "354 new mentions"), not as a percentage. A null previous count means comparison data is unavailable. visibilityChange and sentimentChange are percentage-point changes.
 
-Write a 1-2 paragraph executive summary in English for a marketing executive. It must tell the CHANGE STORY of the period, not describe a static snapshot:
+Write a 1-2 paragraph executive summary for a marketing executive. It must tell the CHANGE STORY of the period, not describe a static snapshot:
 - Open with the headline movement as an arc — e.g. "Visibility climbed from 42 to 48" — using the trend's first/last points or the KPI deltas. When the snapshot includes visibilityRate.ratePct, that — not insights.avgVisibilityScore — is the headline visibility number: the report's KPI section leads with it, so the summary must agree with it. visibilityRate has no previous-period value in the snapshot, so state its ratePct as a plain current fact and never invent a change or percentage-point delta for it — do not subtract or compare it against insights.avgVisibilityScore or insights.visibilityChange, which describe a different metric's history. Draw the period's change story from metrics that do carry real deltas: mentions, citations, sentiment, share of voice, competitor movement.
 - Name the DRIVER behind that movement when the data shows one: the platform, topic or prompt that moved most (share-of-voice shifts, best/weakest prompts, topic deltas).
 - Name the biggest RISK when the data shows one: a competitor gaining ground, a topic or platform sliding, or citation share concentrating away from the brand.
@@ -62,10 +63,13 @@ router.post('/summary', async (req, res) => {
 
     const { data: brandRow } = await supabaseAdmin
       .from('brands')
-      .select('name')
+      .select('name, language')
       .eq('id', brandId)
       .single();
     const brandName = brandRow?.name || 'the brand';
+    // Ultravis fix: write the summary in the brand's language — a pt-BR
+    // client was getting an English executive summary baked into the report.
+    const langName = getLanguageName(brandRow?.language || 'en');
 
     const userPrompt = `Brand: ${brandName}
 Report period: ${dateFrom || 'unknown'} to ${dateTo || 'unknown'}
@@ -73,7 +77,7 @@ Report period: ${dateFrom || 'unknown'} to ${dateTo || 'unknown'}
 Metric snapshot (JSON):
 ${JSON.stringify(snapshot, null, 2)}
 
-Write the executive summary.`;
+Write the executive summary in ${langName}.`;
 
     const flavor = TEMPLATE_FLAVOR[template] || '';
     const { text: summary } = await generateText({

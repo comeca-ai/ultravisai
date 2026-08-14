@@ -15,7 +15,8 @@
     "export": "Export",
     "noData": "No data available",
     "previous": "Previous",
-    "pagerRange": "{start}–{end} of {total}"
+    "pagerRange": "{start}–{end} of {total}",
+    "language": "Language"
   },
   "nav": {
     "overview": "Overview",
@@ -728,7 +729,20 @@
       "colEdit": "Edit",
       "active": "Active",
       "paused": "Paused",
-      "statusUpdateFailed": "Failed to update status"
+      "statusUpdateFailed": "Failed to update status",
+      "justNow": "Just now",
+      "minAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago",
+      "noPromptsYet": "No prompts yet",
+      "noPromptsBody": "Add prompts to your brand to start tracking their AI visibility.",
+      "addPrompt": "Add prompt",
+      "managePrompts": "Manage prompts",
+      "editAria": "Edit prompt",
+      "sortByAria": "Sort by {column}",
+      "noMatch": "No prompts match your search.",
+      "citedTitle": "{cited} of {total} target URLs cited in AI answers",
+      "citedShort": "{cited}/{total} cited"
     },
     "detail": {
       "dateRange": "Date Range",
@@ -2609,6 +2623,42 @@
           ]
         }
       ]
+    }
+  },
+  "invite": {
+    "join": "Join {org}",
+    "invitedAs": "You've been invited to join as",
+    "roles": {
+      "admin": "Admin",
+      "manager": "Manager",
+      "analyst": "Analyst",
+      "agency_partner": "Agency Partner"
+    },
+    "invitedEmail": "Invited email",
+    "signedInAs": "Signed in as",
+    "wrongAccount": "This invitation was sent to {email}, but you're signed in as {current}. Please switch accounts to continue.",
+    "switching": "Switching...",
+    "switchAccount": "Sign out and use correct account",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "Your name",
+    "setPassword": "Set a password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm password",
+    "confirmPlaceholder": "Repeat the password",
+    "joining": "Joining...",
+    "acceptAndJoin": "Accept and join {org}",
+    "passwordNote": "You'll use this password the next time you sign in.",
+    "welcome": "Welcome to {org}!",
+    "acceptFailed": "Failed to accept invitation.",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords do not match."
+  },
+  "billing": {
+    "expired": {
+      "title": "Subscription required",
+      "bodyWithOwner": "This account's subscription has ended, so tracking and dashboard access are paused. Please contact your account owner ({owner}) to renew it.",
+      "bodyNoOwner": "This account's subscription has ended, so tracking and dashboard access are paused. Please contact your account owner or an admin to renew it.",
+      "note": "You don't have billing access on this account, so you can't renew it or make changes until it's active again."
     }
   }
 }

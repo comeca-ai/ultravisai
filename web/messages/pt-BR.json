@@ -1234,8 +1234,8 @@
       "directional": "Direcional — amostra baixa ({count, plural, one {# citação} other {# citações}} na categoria).",
       "evPresence": "Você aparece em {withBrand} de {citing} respostas que usam essas fontes",
       "dim1": {
-        "name": "Site técnico",
-        "brief": "Mede se as IAs conseguem ler seu site: schema, llms.txt, texto em HTML.",
+        "name": "Legibilidade do Site",
+        "brief": "Prontidão técnica e entidade — schema/JSON-LD, llms.txt, sitemap, Wikidata/Wikipedia, headings e resposta no topo.",
         "sourcesNote": "Nota do último Site Audit do domínio principal — mesma fonte da página Auditoria.",
         "cta": "O que fazer → Auditoria de Site",
         "copyLlms": "Copiar llms.txt pronto",
@@ -1247,40 +1247,90 @@
         "llmsSectionOptional": "Conteúdo opcional",
         "llmsOptionalHint": "Liste aqui páginas de produto, FAQ e comparativos.",
         "evAudit": "Auditoria de {date}: nota {score} — detalhes e correções na página Auditoria",
-        "evNoAudit": "Nenhuma auditoria do site ainda — rode a primeira para medir esta dimensão"
+        "evNoAudit": "Nenhuma auditoria do site ainda — rode a primeira para medir esta dimensão",
+        "signal": "Cobertura de JSON-LD válido, llms.txt+sitemap, headings, entidade (Wikidata/Wikipedia) e nome/aliases consistentes",
+        "criteria": [
+          "Sem schema, sem llms.txt/sitemap, headings caóticos, sem entidade — a máquina não lê nem te identifica",
+          "Só sitemap; schema ausente ou inválido em poucas páginas; sem entidade",
+          "Organization schema válido nas páginas-chave, sitemap ok, headings razoáveis; sem Product/FAQ, sem llms.txt, entidade fraca",
+          "Schema Org+Product+FAQ na maioria das páginas, llms.txt presente, headings limpos + resposta-no-topo; entidade com nome/aliases inconsistentes",
+          "JSON-LD completo e validado (Org/Product/FAQ/Review), llms.txt+sitemap, resposta-no-topo impecável, entidade no Wikidata/Wikipedia com aliases consistentes"
+        ]
       },
       "dim2": {
-        "name": "Conteúdo próprio",
-        "brief": "Mede se as respostas de IA citam páginas do seu próprio site como fonte.",
+        "name": "Conteúdo",
+        "brief": "Cobertura + qualidade GEO por tópico — página própria e extraível: resposta no topo, estatísticas com fonte, blocos curtos.",
         "sourcesNote": "Seus domínios cadastrados. Medição provisória pela citação própria (10% das respostas = nota 100; melhor caso real 7,4%) — régua definitiva (cobertura de tópicos × qualidade GEO) em construção.",
         "cta": "O que fazer → tópicos e onde publicar",
         "evOwn": "{citing} de {total} respostas citam seu domínio ({pct}%)",
-        "evRuler": "Régua: 10% de citação própria = nota 100 — melhor caso real observado: 7,4%."
+        "evRuler": "Régua: 10% de citação própria = nota 100 — melhor caso real observado: 7,4%.",
+        "signal": "Cobertura (% dos tópicos com página própria) × qualidade GEO (resposta nos ~30% iniciais, estatística com fonte, tabelas, blocos 50-150 palavras, <12 meses)",
+        "criteria": [
+          "<20% dos tópicos com página; páginas não extraíveis (paredão de texto, sem dados/fonte, resposta enterrada)",
+          "20-40% cobertos; qualidade GEO fraca",
+          "40-60% cobertos; algumas páginas front-load a resposta, estatísticas ocasionais com fonte",
+          "60-80% cobertos; maioria resposta-no-topo, cita estatística/fonte, algumas tabelas, majoritariamente fresco",
+          "≥80% com página dedicada; resposta nos ~30% iniciais, dados com fonte, citações de especialista, tabelas, blocos 50-150 palavras, <12 meses"
+        ]
       },
       "dim3": {
-        "name": "Presença social",
-        "brief": "Mede sua presença nos canais sociais que as IAs citam no seu setor.",
+        "name": "Presença Social",
+        "brief": "Pegada multiplataforma e frescor — presença ativa em 4+ canais (destaque YouTube) e cadência recente.",
         "sourcesNote": "Canais sociais mais citados pelas IAs nos seus prompts. Medição provisória pelas citações — régua definitiva (canais ativos + cadência) em construção. TikTok ainda não lemos (declarado).",
-        "cta": "O que fazer → canais a reivindicar"
+        "cta": "O que fazer → canais a reivindicar",
+        "signal": "Nº de plataformas ativas (satura em 5), recência/cadência, bônus YouTube",
+        "criteria": [
+          "0-1 plataforma, dormente",
+          "2 plataformas, posts esporádicos (>3 meses parado)",
+          "3 plataformas ativas, cadência mensal, sem YouTube",
+          "4 plataformas, recente (últimas semanas), inclui YouTube",
+          "5 plataformas consistentemente ativas, cadência semanal+, YouTube forte, conteúdo do site reaproveitado"
+        ]
       },
       "dim4": {
-        "name": "Avaliações de clientes",
-        "brief": "Mede sua presença nas plataformas de avaliação e fóruns que aparecem nas respostas de IA.",
+        "name": "Avaliações de Clientes",
+        "brief": "Prova social e voz do cliente — G2, Trustpilot, Capterra, Reclame Aqui, Google Reviews e menções em Reddit/Quora.",
         "sourcesNote": "Medição provisória pelas citações das IAs (amostra baixa por natureza) — régua definitiva por checagem direta das plataformas do seu segmento (Reclame Aqui etc.) em construção.",
-        "cta": "O que fazer → fluxo de avaliações"
+        "cta": "O que fazer → fluxo de avaliações",
+        "signal": "Presença/nota/volume/recência nas plataformas do seu mercado + menções em Reddit/Quora",
+        "criteria": [
+          "Sem perfis reivindicados; sem reviews ou negativos sem resposta",
+          "Perfil em 1 plataforma, volume baixo, datado, nota <3,5",
+          "Perfis em 2-3 plataformas relevantes, volume moderado, nota ~4,0, algumas respostas",
+          "Perfis completos nas plataformas-chave, nota ≥4,2, reviews recentes constantes, reclamações respondidas, alguma presença Reddit/Quora",
+          "Presença forte + nota ≥4,5 + alto volume recente em G2/Trustpilot/etc + threads ativas e positivas em Reddit/Quora"
+        ]
       },
       "dim5": {
-        "name": "Mídia aberta",
-        "brief": "Mede se você aparece nos veículos e sites que as IAs usam como fonte no seu tema.",
+        "name": "Mídia Aberta & Fontes de IA",
+        "brief": "Presença nos domínios que as IAs citam — mídia earned, editorial, fóruns, diretórios e listagens do setor.",
         "sourcesNote": "Top domínios editoriais citados pelas IAs nos seus prompts — o gabarito a perseguir.",
-        "cta": "O que fazer → onde conquistar menção"
+        "cta": "O que fazer → onde conquistar menção",
+        "signal": "% dos domínios que as IAs citam no seu mercado onde você aparece (ponderado pela frequência de citação) + refdomains",
+        "criteria": [
+          "Presente em <10% dos domínios citados; poucos refdomains",
+          "10-25% dos domínios citados",
+          "25-50% — presente em fontes de frequência média",
+          "50-75%, incluindo vários domínios de alta frequência de citação; refdomains saudáveis",
+          "≥75% ponderado pela frequência; presente nos domínios mais citados; grande footprint de refdomains"
+        ]
       },
       "dim6": {
-        "name": "Verticais e reguladores",
-        "brief": "Mede sua autoridade no segmento: fontes institucionais e perguntas de categoria.",
+        "name": "Verticais & Reguladores",
+        "brief": "Autoridade na vertical — reguladores e referências do setor, associações, listas “melhores/alternativas a” e demanda de marca.",
         "sourcesNote": "Domínios institucionais citados pelas IAs nos seus prompts. Medição provisória — régua definitiva (demanda de marca, listas do setor, Wikipedia) em construção.",
-        "cta": "O que fazer → presença setorial"
-      }
+        "cta": "O que fazer → presença setorial",
+        "signal": "Demanda de marca (volume de busca — correlato mais forte, r≈0,334), presença em reguladores/associações/listas “melhores/alternativas a”, Wikipedia",
+        "criteria": [
+          "Marca desconhecida (busca de marca ~0), ausente de reguladores/associações/listas",
+          "Pequena busca de marca, sem listagens de vertical",
+          "Demanda de marca moderada, em algumas listas “melhores/alternativas a”",
+          "Busca de marca sólida, membro de associações-chave, aparece em várias listas/referências da vertical",
+          "Forte demanda de marca + reguladores/normas + associações + Wikipedia + listas “top do setor”"
+        ]
+      },
+      "criteriaTitle": "Critérios da nota (0–100)",
+      "signalLabel": "Sinal medido:"
     },
     "share": {
       "title": "Share de resposta nos prompts",

@@ -21,6 +21,7 @@
 > em desenvolvimento sem decisão conjunta registrada no `DECISOES.md`.
 > **Última varredura:** 13/ago/2026 — release 0.2.0 do upstream (09/ago) + commits até 13/ago.
 
+- [ ] **Watchdog: check de drift de deploy do web** — comparar o commit do último deploy de produção da Vercel com o HEAD da `main` (API Vercel pelo server, que tem egress aberto); alertar se divergir por mais de 1h. Motivo: web ficou 9 dias congelado sem ninguém notar (incidente 17/ago). `P1`
 - [x] `[ansvisor]` **Daily Pulse** — **lado servidor PORTADO (13/ago)**: engine+metrics+email+webhook-dispatch com todos os fixes (#654 catch-up adaptado pra tabela `jobs`, #690 drain do pulse, #701 dedupe por janela — migration 00038 aplicada). E-mail sai por Resend OU pelo SMTP do watchdog (self-host incluído); sem transporte configurado, dispara só o webhook `daily_pulse.created`. **Follow-ups:** tela Configurações→Notificações (frequência/destinatários) e tradução do e-mail pra pt-BR **antes de ligar o envio**.
 - [ ] `[ansvisor]` **AI Visibility Score** — nova métrica central 0-100 (60% menção · 25% citação · 15% posição da menção), idêntica em todas as superfícies; cobertura vira linha secundária. *Nosso ângulo: responde exatamente a confusão do cliente com a nota; mas muda migrations/core (00041-00042) — sync grande.*
 - [ ] `[ansvisor]` **Integração Google Search Console** — sugestões de prompt alimentadas por demanda real de busca (queries que a marca ranqueia e não rastreia), via Composio. *Nosso ângulo: casa com "grounding de prompts" do P1; nós usaríamos Semrush ou GSC direto.*

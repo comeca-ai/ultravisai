@@ -41,6 +41,7 @@ import { PLATFORM_LABELS } from '@/config/platform-labels';
 import {
   INDEX_DIMENSIONS,
   INDEX_LOW_SAMPLE_THRESHOLD,
+  INDEX_SCORE_BANDS,
   INDEX_ZONE_COLORS,
   INDEX_ZONES,
   indexScoreBand,
@@ -632,6 +633,48 @@ export default function CitabilityPage() {
                         {t(`dims.${dim.key}.sourcesNote`)}
                       </p>
                     </div>
+
+                    {/* Critérios da nota — réguas do doc de lógica (17/ago),
+                        sempre disponíveis; a faixa atual da marca é destacada */}
+                    <details className="rounded-md border">
+                      <summary className="cursor-pointer select-none px-2.5 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground">
+                        {t('dims.criteriaTitle')}
+                      </summary>
+                      <div className="space-y-1.5 px-2.5 pb-2.5">
+                        <p className="text-[11px] text-muted-foreground">
+                          <span className="font-semibold">{t('dims.signalLabel')}</span>{' '}
+                          {t(`dims.${dim.key}.signal`)}
+                        </p>
+                        <ul className="space-y-1">
+                          {(t.raw(`dims.${dim.key}.criteria`) as string[]).map((text, i) => {
+                            const lo = i === 0 ? 0 : INDEX_SCORE_BANDS[i - 1].max + 1;
+                            const hi = INDEX_SCORE_BANDS[i].max;
+                            const current = score !== null && score >= lo && score <= hi;
+                            return (
+                              <li
+                                key={hi}
+                                className={cn(
+                                  'flex gap-2 rounded-sm border-l-2 py-0.5 pl-2 text-[11px]',
+                                  current
+                                    ? 'bg-muted/60 font-medium text-foreground'
+                                    : 'border-transparent text-muted-foreground',
+                                )}
+                                style={
+                                  current
+                                    ? { borderLeftColor: INDEX_ZONE_COLORS[dim.zone] }
+                                    : undefined
+                                }
+                              >
+                                <span className="w-12 shrink-0 tabular-nums">
+                                  {lo}–{hi}
+                                </span>
+                                <span>{text}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    </details>
 
                     {/* CTAs */}
                     <div className="mt-auto flex flex-wrap gap-2">

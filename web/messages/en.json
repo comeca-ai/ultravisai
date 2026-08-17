@@ -1234,8 +1234,8 @@
       "directional": "Directional — low sample ({count, plural, one {# citation} other {# citations}} in the category).",
       "evPresence": "You appear in {withBrand} of {citing} answers that use these sources",
       "dim1": {
-        "name": "Technical site",
-        "brief": "Measures whether AIs can read your site: schema, llms.txt, text in HTML.",
+        "name": "Site Readability",
+        "brief": "Technical readiness and entity — schema/JSON-LD, llms.txt, sitemap, Wikidata/Wikipedia, headings and answer-on-top.",
         "sourcesNote": "Latest Site Audit score of the primary domain — same source as the Audit page.",
         "cta": "What to do → Site Audit",
         "copyLlms": "Copy ready llms.txt",
@@ -1247,40 +1247,90 @@
         "llmsSectionOptional": "Optional content",
         "llmsOptionalHint": "List product pages, FAQs and comparisons here.",
         "evAudit": "Audit of {date}: score {score} — details and fixes on the Audit page",
-        "evNoAudit": "No site audit yet — run the first one to measure this dimension"
+        "evNoAudit": "No site audit yet — run the first one to measure this dimension",
+        "signal": "Coverage of valid JSON-LD, llms.txt+sitemap, headings, entity (Wikidata/Wikipedia) and consistent name/aliases",
+        "criteria": [
+          "No schema, no llms.txt/sitemap, chaotic headings, no entity — machines can't read or identify you",
+          "Sitemap only; schema missing or invalid on few pages; no entity",
+          "Valid Organization schema on key pages, sitemap ok, reasonable headings; no Product/FAQ, no llms.txt, weak entity",
+          "Org+Product+FAQ schema on most pages, llms.txt present, clean headings + answer-on-top; entity with inconsistent name/aliases",
+          "Complete validated JSON-LD (Org/Product/FAQ/Review), llms.txt+sitemap, impeccable answer-on-top, Wikidata/Wikipedia entity with consistent aliases"
+        ]
       },
       "dim2": {
-        "name": "Own content",
-        "brief": "Measures whether AI answers cite pages of your own site as a source.",
+        "name": "Content",
+        "brief": "Coverage + GEO quality per topic — own, extractable page: answer on top, sourced statistics, short blocks.",
         "sourcesNote": "Your registered domains. Provisional measurement via own-citation share (10% of answers = score 100; best real case 7.4%) — definitive ruler (topic coverage × GEO quality) under construction.",
         "cta": "What to do → topics and where to publish",
         "evOwn": "{citing} of {total} answers cite your domain ({pct}%)",
-        "evRuler": "Ruler: 10% own-citation = score 100 — best real case observed: 7.4%."
+        "evRuler": "Ruler: 10% own-citation = score 100 — best real case observed: 7.4%.",
+        "signal": "Coverage (% of topics with own page) × GEO quality (answer in first ~30%, sourced statistics, tables, 50-150 word blocks, <12 months)",
+        "criteria": [
+          "<20% of topics with a page; non-extractable pages (walls of text, no data/source, buried answer)",
+          "20-40% covered; weak GEO quality",
+          "40-60% covered; some pages front-load the answer, occasional sourced statistics",
+          "60-80% covered; most answer-on-top, cites statistics/sources, some tables, mostly fresh",
+          "≥80% with dedicated page; answer in first ~30%, sourced data, expert quotes, tables, 50-150 word blocks, <12 months"
+        ]
       },
       "dim3": {
-        "name": "Social presence",
-        "brief": "Measures your presence on the social channels AIs cite in your sector.",
+        "name": "Social Presence",
+        "brief": "Multi-platform footprint and freshness — active presence on 4+ channels (YouTube highlighted) and recent cadence.",
         "sourcesNote": "Social channels most cited by AIs in your prompts. Provisional measurement via citations — definitive ruler (active channels + cadence) under construction. TikTok not read yet (declared).",
-        "cta": "What to do → channels to claim"
+        "cta": "What to do → channels to claim",
+        "signal": "Number of active platforms (saturates at 5), recency/cadence, YouTube bonus",
+        "criteria": [
+          "0-1 platform, dormant",
+          "2 platforms, sporadic posts (>3 months idle)",
+          "3 active platforms, monthly cadence, no YouTube",
+          "4 platforms, recent (last weeks), includes YouTube",
+          "5 consistently active platforms, weekly+ cadence, strong YouTube, site content repurposed"
+        ]
       },
       "dim4": {
-        "name": "Customer reviews",
-        "brief": "Measures your presence on the review platforms and forums that appear in AI answers.",
+        "name": "Customer Reviews",
+        "brief": "Social proof and customer voice — G2, Trustpilot, Capterra, Reclame Aqui, Google Reviews and Reddit/Quora mentions.",
         "sourcesNote": "Provisional measurement via AI citations (inherently low sample) — definitive ruler via direct checks of your segment's platforms (Reclame Aqui etc.) under construction.",
-        "cta": "What to do → review flow"
+        "cta": "What to do → review flow",
+        "signal": "Presence/rating/volume/recency on your market's platforms + Reddit/Quora mentions",
+        "criteria": [
+          "No claimed profiles; no reviews or unanswered negatives",
+          "Profile on 1 platform, low volume, dated, rating <3.5",
+          "Profiles on 2-3 relevant platforms, moderate volume, rating ~4.0, some replies",
+          "Complete profiles on key platforms, rating ≥4.2, steady recent reviews, complaints answered, some Reddit/Quora presence",
+          "Strong presence + rating ≥4.5 + high recent volume on G2/Trustpilot/etc + active positive Reddit/Quora threads"
+        ]
       },
       "dim5": {
-        "name": "Open media",
-        "brief": "Measures whether you appear in the outlets and sites AIs use as sources on your topic.",
+        "name": "Open Media & AI Sources",
+        "brief": "Presence on the domains AIs cite — earned media, editorial, forums, directories and sector listings.",
         "sourcesNote": "Top editorial domains cited by AIs in your prompts — the benchmark to chase.",
-        "cta": "What to do → where to earn mentions"
+        "cta": "What to do → where to earn mentions",
+        "signal": "% of the domains AIs cite in your market where you appear (weighted by citation frequency) + refdomains",
+        "criteria": [
+          "Present in <10% of cited domains; few refdomains",
+          "10-25% of cited domains",
+          "25-50% — present in medium-frequency sources",
+          "50-75%, including several high-citation-frequency domains; healthy refdomains",
+          "≥75% frequency-weighted; present in the most-cited domains; large refdomain footprint"
+        ]
       },
       "dim6": {
-        "name": "Verticals & regulators",
-        "brief": "Measures your authority in the segment: institutional sources and category questions.",
+        "name": "Verticals & Regulators",
+        "brief": "Vertical authority — sector regulators and references, associations, “best/alternatives to” lists and brand demand.",
         "sourcesNote": "Institutional domains cited by AIs in your prompts. Provisional measurement — definitive ruler (brand demand, sector lists, Wikipedia) under construction.",
-        "cta": "What to do → sector presence"
-      }
+        "cta": "What to do → sector presence",
+        "signal": "Brand demand (search volume — strongest correlate, r≈0.334), presence in regulators/associations/“best/alternatives to” lists, Wikipedia",
+        "criteria": [
+          "Unknown brand (~0 brand searches), absent from regulators/associations/lists",
+          "Small brand-search volume, no vertical listings",
+          "Moderate brand demand, on some “best/alternatives to” lists",
+          "Solid brand searches, member of key associations, appears in several vertical lists/references",
+          "Strong brand demand + regulators/standards + associations + Wikipedia + “top of sector” lists"
+        ]
+      },
+      "criteriaTitle": "Score criteria (0–100)",
+      "signalLabel": "Measured signal:"
     },
     "share": {
       "title": "Answer share across prompts",

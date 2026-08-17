@@ -3,7 +3,7 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 11/ago/2026.**
+> `BACKLOG.md` (o que vem). **Atualizado: 15/ago/2026.**
 
 ## A aplicação está no ar e saudável ✅
 
@@ -34,6 +34,7 @@
 9. **Base limpa**: contas de teste apagadas; marcas Datarisk/Polar/Accenture apagadas **com arquivo** (515/567/488 resultados preservados); sobrou 1 cliente real ativo + 1 marca sua pausada.
 10. **Painel /ops ganhou Saúde (watchdog ao vivo) + Clientes × Marcas** (PR #47) — acesso: `api.ultravis.ai/ops` (credenciais `OPS_USER`/`OPS_PASS` no Railway).
 11. **Bugs #28/#29/#30 resolvidos** (PR #48): rebranding residual completo (agente, nomes de export `ansvisor_*`, /pricing indo pro site do upstream, mailto de vendas), relatório não aborta mais quando o resumo por IA falha (causa do "relatório não gerado"), login honra `redirectTo`. **18 de 30 itens do feedback respondidos.**
+12. **Índice de Visibilidade v2 no ar (15/ago)** — a tela "Citabilidade" virou **Índice de Visibilidade** (decisão da reunião de 14/ago com o Igor): as 6 dimensões sempre têm nota, a fórmula aparece aberta e a conta fecha, cada card mostra breve explicação + evidências + **fontes pesquisadas** (incluindo o que não lemos, declarado), a "visibilidade" antiga virou "share de resposta nos prompts" com linha de conferência, e há botão "Copiar llms.txt pronto". Réguas v1 calibradas com dados reais (citação própria máx. 7,4%; review ≈ 0 nas citações → checagem direta na fase 2). Pauta de segunda 15h: doc de lógica do Igor calibra pesos e réguas.
 
 ## Onde cada coisa fica
 

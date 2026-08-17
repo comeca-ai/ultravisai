@@ -32,7 +32,7 @@
     "shopping": "Shopping",
     "reports": "Reports",
     "settings": "Settings",
-    "citability": "Citability",
+    "citability": "Visibility Index",
     "badgeNew": "New",
     "costs": "Costs & Usage"
   },
@@ -1180,106 +1180,12 @@
     "exportFailed": "Failed to export CSV"
   },
   "citability": {
-    "title": "Citability",
-    "subtitle": "The Citability Index (CI) organizes the 6 levers that make a brand citable by AI engines — with weight, action zone, and the real answer key of sources AIs cite for your prompts.",
-    "kpis": {
-      "icTitle": "Partial CI",
-      "d1Title": "01 · AI Readability",
-      "d1Hint": "Latest Site Audit score for the primary domain.",
-      "d2Title": "02 · Content Coverage",
-      "d2Hint": "% of AI answers citing your domain.",
-      "icNoData": "Run a Site Audit and a tracking run to start measuring.",
-      "icCoverage": "score based on {coverage}% of the index weight — measured dimensions only",
-      "icRecalc": "The score recalculates as more dimensions are measured.",
-      "coverageBarAria": "Index coverage: measured and unmeasured dimensions, sized by weight",
-      "runTrackingCta": "Run tracking",
-      "d2Zero": "No AI answer cites your domain yet — this zero is real, not missing data.",
-      "dimsActive": "{active} of 6 dimensions active"
-    },
-    "matrix": {
-      "title": "Citability Matrix",
-      "subtitle": "Position = where the lever lives and how much it depends on third parties · Bubble = CI weight · Color = action zone",
-      "ariaLabel": "Matrix of the 6 Citability Index dimensions",
-      "xAxis": "Internal ← lever → External",
-      "yAxis": "Third-party dependency",
-      "zoneA": "Act now — you control it, it's fast",
-      "zoneB": "Claim — third-party, but you activate it",
-      "zoneC": "Earn — depends on third parties, it's slow"
-    },
-    "zones": {
-      "A": {
-        "name": "Act now",
-        "desc": "You control it and it's fast — your own site and content. It unlocks everything else: AIs only cite what they can read."
-      },
-      "B": {
-        "name": "Claim",
-        "desc": "Third-party surfaces you can activate — claim profiles, request reviews, publish. Medium return, low effort."
-      },
-      "C": {
-        "name": "Earn",
-        "desc": "Depends on third parties and is slow — earned media and vertical authority. The CI's biggest single weight; pays off once the \"Act now\" and \"Claim\" zones are done."
-      }
-    },
-    "dims": {
-      "weight": "{weight}% of CI",
-      "answerKey": "Answer key — sources AIs cite in your sector:",
-      "citationCount": "{count, plural, one {# citation} other {# citations}}",
-      "noCitations": "No citations in this category from your tracking runs yet.",
-      "runAuditCta": "Run Site Audit",
-      "dim1": {
-        "name": "AI Readability",
-        "action": "Make your site readable for AIs",
-        "desc": "Technical and <entity>entity</entity> readiness — schema/JSON-LD, <llms>llms.txt</llms>, <wikidata>Wikidata</wikidata>. Measured by the latest Site Audit of the primary domain.",
-        "cta": "Run Site Audit"
-      },
-      "dim2": {
-        "name": "Content Coverage",
-        "action": "Answer every question on your site",
-        "desc": "<geo>GEO</geo> coverage and quality per topic — an own, <ext>extractable</ext> page. Measured by the share of AI answers citing your domain.",
-        "cta": "See content opportunities"
-      },
-      "dim3": {
-        "name": "Social Presence",
-        "action": "Occupy the channels and publish recently",
-        "desc": "Multi-platform footprint and freshness — 4+ platforms, YouTube first.",
-        "cta": "Map social channels"
-      },
-      "dim4": {
-        "name": "Customer Reviews",
-        "action": "Own the review platforms",
-        "desc": "Social proof and customer voice — G2, Trustpilot, Reclame Aqui, Reddit.",
-        "cta": "Map review platforms"
-      },
-      "dim5": {
-        "name": "Open Media & AI Sources",
-        "action": "Show up in the sources AIs cite",
-        "desc": "Earned media, editorial, directories and sector listings — the CI's biggest single lever.",
-        "cta": "See the sources AIs cite"
-      },
-      "dim6": {
-        "name": "Verticals & Regulators",
-        "action": "Become the reference in your vertical",
-        "desc": "Segment authority — regulators, associations and brand demand.",
-        "cta": "Map sector associations and regulators"
-      },
-      "comingSoon": "Coming soon",
-      "presenceUnknown": "no data",
-      "lowSample": "Small sample ({count, plural, one {# citation} other {# citations}} in this category) — treat as direction, not decision.",
-      "lockedHint": "Counts toward the index as soon as this dimension has data."
-    },
-    "notMeasured": "Not measured",
-    "howItWorks": "How the CI works",
-    "windowNote": "Considers all tracked time",
-    "glossary": {
-      "geo": "GEO (Generative Engine Optimization): optimizing content to be cited by AI answer engines.",
-      "llms": "llms.txt: a file on your site that tells AIs which pages to read and how to interpret them.",
-      "wikidata": "Wikidata: the public entity database AIs use to confirm who your brand is.",
-      "entity": "Entity: the brand identity AIs recognize — consistent name, site and data across sources.",
-      "extractable": "Extractable page: structured so an AI can lift the answer from it (clear headings, lists, a direct answer)."
-    },
-    "status": {
-      "active": "Active",
-      "locked": "To unlock"
+    "title": "Visibility Index",
+    "subtitle": "Your 0–100 AI-visibility score, composed of 6 dimensions — the math is always open.",
+    "period": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "all": "All time"
     },
     "bands": {
       "undesirable": "Undesirable",
@@ -1287,6 +1193,112 @@
       "good": "Good",
       "great": "Great",
       "best": "Best in class"
+    },
+    "hero": {
+      "label": "Visibility Index",
+      "noData": "No tracking runs yet",
+      "noDataHint": "Run a tracking round to compute your score — all 6 dimensions are derived from real AI answers.",
+      "noAuditNote": "01 · Technical site not audited yet — run a Site Audit to complete the math (weights renormalized until then).",
+      "contributionTitle": "Contribution by dimension",
+      "contributionAria": "Bar showing each dimension's contribution to the index, in points",
+      "pts": "{pts} pts",
+      "evolutionTitle": "Evolution — weekly censuses",
+      "evolutionAria": "Visibility Index evolution across weeks",
+      "evolutionEmpty": "Evolution appears from the second weekly census onward."
+    },
+    "zones": {
+      "zoneLabel": "Zone {zone}",
+      "weightShare": "{weight}% of the index",
+      "A": {
+        "name": "Act now",
+        "desc": "You control it and it's fast — your own site and content. It unlocks the rest: AIs only cite what they can read."
+      },
+      "B": {
+        "name": "Claim",
+        "desc": "Third-party surfaces you can activate — profiles, reviews, publishing. Medium return, low effort."
+      },
+      "C": {
+        "name": "Earn",
+        "desc": "Depends on third parties and takes time — earned media and vertical authority. The index's largest single weight."
+      }
+    },
+    "dims": {
+      "weight": "weight {weight}%",
+      "why": "Why {score}",
+      "whyNone": "Why",
+      "sources": "Sources researched",
+      "youAppear": "you appear",
+      "youDontAppear": "you don't appear",
+      "noSources": "No sources recorded in this category for the period.",
+      "notMeasured": "not measured",
+      "directional": "Directional — low sample ({count, plural, one {# citation} other {# citations}} in the category).",
+      "evPresence": "You appear in {withBrand} of {citing} answers that use these sources",
+      "dim1": {
+        "name": "Technical site",
+        "brief": "Measures whether AIs can read your site: schema, llms.txt, text in HTML.",
+        "sourcesNote": "Latest Site Audit score of the primary domain — same source as the Audit page.",
+        "cta": "What to do → Site Audit",
+        "copyLlms": "Copy ready llms.txt",
+        "llmsCopied": "llms.txt copied — review and publish it at your site root (e.g. yoursite.com/llms.txt).",
+        "llmsCopyFailed": "Couldn't copy. Try again.",
+        "llmsDescriptionPlaceholder": "Describe your brand in one sentence.",
+        "llmsSectionMain": "Main pages",
+        "llmsHomeHint": "homepage and brand overview",
+        "llmsSectionOptional": "Optional content",
+        "llmsOptionalHint": "List product pages, FAQs and comparisons here.",
+        "evAudit": "Audit of {date}: score {score} — details and fixes on the Audit page",
+        "evNoAudit": "No site audit yet — run the first one to measure this dimension"
+      },
+      "dim2": {
+        "name": "Own content",
+        "brief": "Measures whether AI answers cite pages of your own site as a source.",
+        "sourcesNote": "Your registered domains. Ruler: 10% of answers citing your site = score 100 (best real case: 7.4%).",
+        "cta": "What to do → topics and where to publish",
+        "evOwn": "{citing} of {total} answers cite your domain ({pct}%)",
+        "evRuler": "Ruler: 10% own-citation = score 100 — best real case observed: 7.4%."
+      },
+      "dim3": {
+        "name": "Social presence",
+        "brief": "Measures your presence on the social channels AIs cite in your sector.",
+        "sourcesNote": "Social channels most cited by AIs in your prompts. TikTok not read yet (declared).",
+        "cta": "What to do → channels to claim"
+      },
+      "dim4": {
+        "name": "Customer reviews",
+        "brief": "Measures your presence on the review platforms and forums that appear in AI answers.",
+        "sourcesNote": "Direct per-segment platform checks (Reclame Aqui etc.) under development — today we measure what AIs cite (declared).",
+        "cta": "What to do → review flow"
+      },
+      "dim5": {
+        "name": "Open media",
+        "brief": "Measures whether you appear in the outlets and sites AIs use as sources on your topic.",
+        "sourcesNote": "Top editorial domains cited by AIs in your prompts — the benchmark to chase.",
+        "cta": "What to do → where to earn mentions"
+      },
+      "dim6": {
+        "name": "Verticals & regulators",
+        "brief": "Measures your authority in the segment: institutional sources and category questions.",
+        "sourcesNote": "Institutional domains (associations, agencies, references) cited by AIs in your prompts.",
+        "cta": "What to do → sector presence"
+      }
+    },
+    "share": {
+      "title": "Answer share across prompts",
+      "oldName": "Visibility",
+      "chip": "a monitoring component — not the index",
+      "headline": "· {mentioned} of {total} answers",
+      "reconciliation": "Check: ({sums}) ÷ {total} = {mentioned} ÷ {total} = {pct}% — the platform sum IS the total",
+      "empty": "No answers in the selected period."
+    },
+    "phase2": {
+      "title": "Phase 2:",
+      "items": [
+        "“What the AI knows / doesn't know about your brand”",
+        "Organic × direct share",
+        "Top 15 consulted sources",
+        "Prompt-by-prompt gaps",
+        "Frozen sources (auditable)"
+      ]
     }
   },
   "shopping": {

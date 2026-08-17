@@ -1,0 +1,351 @@
+'use server';
+
+/**
+ * Ultravis addition (fork layer — additive file, no core changes).
+ *
+ * Índice de Visibilidade — data source for the /dashboard/citability page v2.
+ * Computes, from `prompt_results` alone (no new collection pipelines):
+ *
+ * - D2 (Conteúdo próprio): share of AI answers citing the brand's own domain,
+ *   normalized against the 10% ceiling observed across real censuses
+ *   (best real-world case measured: 7.4% — see DECISOES 15/ago).
+ * - D3–D6 (Social / Avaliações / Mídia aberta / Verticais): scored RELATIVE
+ *   to the sector's "gabarito" — among the answers that cite sources of that
+ *   category, in how many is the brand present (mentioned or cited)?
+ * - Share de resposta per platform, with the totals that let the UI print the
+ *   reconciliation line (the per-platform sum IS the overall share).
+ * - Weekly evolution of every dimension, so the page can chart the index
+ *   over the censuses.
+ *
+ * D1 (Site técnico) comes from the Site Audit trend (`getAuditTrend`), same
+ * source as the Auditoria page — the page combines both.
+ *
+ * Formula weights live in `web/src/config/visibility-index.ts` and are
+ * deliberately configurable: the framework owner may recalibrate them
+ * (estrategia/indice-citabilidade.md is the canonical source).
+ */
+
+import { createClient } from '@/lib/supabase/server';
+import type { Citation } from '@/types';
+import {
+  classifyDomain,
+  extractHostname,
+  normalizeDomain,
+  type SourceCategory,
+} from '@/lib/citations/classify';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type VisibilityIndexPreset = '7d' | '30d' | 'all';
+
+/** Category groups feeding dims 03–06 (classifier categories → dimension). */
+export type IndexCategoryKey = 'social' | 'reviews' | 'media' | 'verticals';
+
+export interface IndexSourceRow {
+  domain: string;
+  citations: number;
+  /** True when the brand appears in at least one answer citing this domain. */
+  youAppear: boolean;
+}
+
+export interface IndexCategoryData {
+  /** 0–100 — share of gabarito answers where the brand is present. */
+  score: number;
+  /** Citations in this category in the window (directional badge when < 10). */
+  sampleCitations: number;
+  /** Answers citing ≥1 source of this category. */
+  answersCiting: number;
+  /** Of those, answers where the brand is present. */
+  answersWithBrand: number;
+  /** Top cited domains of the category — the visible "fontes pesquisadas". */
+  topSources: IndexSourceRow[];
+}
+
+export interface VisibilityIndexData {
+  totals: { results: number; citations: number };
+  d2: {
+    /** 0–100 — own-citation share normalized (10% of answers ⇒ 100). */
+    score: number;
+    pctOwn: number;
+    resultsCitingOwn: number;
+    ownDomains: string[];
+  };
+  categories: Record<IndexCategoryKey, IndexCategoryData>;
+  share: {
+    mentioned: number;
+    total: number;
+    byPlatform: Array<{ platform: string; mentioned: number; total: number }>;
+  };
+  /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
+  evolution: Array<{
+    weekStart: string;
+    d2: number;
+    social: number;
+    reviews: number;
+    media: number;
+    verticals: number;
+  }>;
+}
+
+// ─── Scoring rules (v1 — decided 15/ago, pending Igor's logic doc) ───────────
+
+/** Own-citation % that maps to a 100 score (real-world best observed: 7.4%). */
+const OWN_CITATION_CEILING_PCT = 10;
+
+/** Classifier categories feeding each dimension. */
+const CATEGORY_GROUPS: Record<IndexCategoryKey, SourceCategory[]> = {
+  social: ['social'],
+  reviews: ['review', 'forum'],
+  media: ['editorial', 'other'],
+  verticals: ['institutional'],
+};
+
+const TOP_SOURCES_LIMIT = 4;
+const SCAN_PAGE_SIZE = 1000;
+const SCAN_MAX_ROWS = 50_000;
+
+function ownCitationScore(pctOwn: number): number {
+  return Math.min(100, Math.round((pctOwn / OWN_CITATION_CEILING_PCT) * 100));
+}
+
+function gabaritoScore(answersWithBrand: number, answersCiting: number): number {
+  if (answersCiting === 0) return 0;
+  return Math.round((answersWithBrand / answersCiting) * 100);
+}
+
+/** Monday of the week of `iso`, as YYYY-MM-DD. */
+function weekStartOf(iso: string): string {
+  const d = new Date(iso);
+  const day = (d.getUTCDay() + 6) % 7; // Monday = 0
+  d.setUTCDate(d.getUTCDate() - day);
+  return d.toISOString().slice(0, 10);
+}
+
+// ─── Main action ──────────────────────────────────────────────────────────────
+
+interface ResultRow {
+  id: string;
+  platform: string | null;
+  mention_count: number | null;
+  created_at: string;
+  citations: Citation[] | null;
+}
+
+export async function getVisibilityIndex(
+  brandId: string,
+  preset: VisibilityIndexPreset,
+): Promise<VisibilityIndexData> {
+  const supabase = await createClient();
+
+  const [{ data: brandDomainRows }, { data: competitorRows }] = await Promise.all([
+    supabase.from('brand_domains').select('domain').eq('brand_id', brandId),
+    supabase.from('competitors').select('domain').eq('brand_id', brandId),
+  ]);
+  const brandDomains = (brandDomainRows ?? [])
+    .map((r) => normalizeDomain((r as { domain: string }).domain))
+    .filter(Boolean);
+  const competitorDomains = (competitorRows ?? [])
+    .map((r) => normalizeDomain((r as { domain: string }).domain))
+    .filter(Boolean);
+  const classifyCtx = { brandDomains, competitorDomains };
+
+  const from =
+    preset === 'all'
+      ? null
+      : new Date(Date.now() - (preset === '7d' ? 7 : 30) * 24 * 3600 * 1000).toISOString();
+
+  // Aggregation state. The window aggregates feed the scores; the weekly
+  // aggregates (always over full history) feed the evolution chart.
+  interface CatAgg {
+    citations: number;
+    answersCiting: number;
+    answersWithBrand: number;
+    domains: Map<string, { citations: number; youAppear: boolean }>;
+  }
+  const emptyCat = (): CatAgg => ({
+    citations: 0,
+    answersCiting: 0,
+    answersWithBrand: 0,
+    domains: new Map(),
+  });
+  const cats: Record<IndexCategoryKey, CatAgg> = {
+    social: emptyCat(),
+    reviews: emptyCat(),
+    media: emptyCat(),
+    verticals: emptyCat(),
+  };
+  let winResults = 0;
+  let winCitations = 0;
+  let winCitingOwn = 0;
+  const platformAgg = new Map<string, { mentioned: number; total: number }>();
+
+  interface WeekAgg {
+    results: number;
+    citingOwn: number;
+    cat: Record<IndexCategoryKey, { answersCiting: number; answersWithBrand: number }>;
+  }
+  const weeks = new Map<string, WeekAgg>();
+  const domainClassCache = new Map<string, SourceCategory>();
+
+  const groupOf = (category: SourceCategory): IndexCategoryKey | null => {
+    for (const key of Object.keys(CATEGORY_GROUPS) as IndexCategoryKey[]) {
+      if (CATEGORY_GROUPS[key].includes(category)) return key;
+    }
+    return null;
+  };
+
+  const aggregate = (r: ResultRow) => {
+    const citations = Array.isArray(r.citations) ? r.citations : [];
+    const inWindow = !from || r.created_at >= from;
+
+    // Distinct domains cited by this answer, with their category.
+    const domainCat = new Map<string, SourceCategory>();
+    let citationCount = 0;
+    for (const cite of citations) {
+      const host = extractHostname(cite.url);
+      if (!host) continue;
+      citationCount += 1;
+      if (!domainCat.has(host)) {
+        let cat = domainClassCache.get(host);
+        if (cat === undefined) {
+          cat = classifyDomain(host, classifyCtx);
+          domainClassCache.set(host, cat);
+        }
+        domainCat.set(host, cat);
+      }
+    }
+    const ownCited = Array.from(domainCat.values()).some((c) => c === 'you');
+    const brandPresent = (r.mention_count ?? 0) > 0 || ownCited;
+
+    // Category groups touched by this answer.
+    const touched = new Set<IndexCategoryKey>();
+    for (const cat of domainCat.values()) {
+      const g = groupOf(cat);
+      if (g) touched.add(g);
+    }
+
+    // Weekly aggregates — always over the full history.
+    const wk = weekStartOf(r.created_at);
+    const w = weeks.get(wk) ?? {
+      results: 0,
+      citingOwn: 0,
+      cat: {
+        social: { answersCiting: 0, answersWithBrand: 0 },
+        reviews: { answersCiting: 0, answersWithBrand: 0 },
+        media: { answersCiting: 0, answersWithBrand: 0 },
+        verticals: { answersCiting: 0, answersWithBrand: 0 },
+      },
+    };
+    w.results += 1;
+    if (ownCited) w.citingOwn += 1;
+    for (const g of touched) {
+      w.cat[g].answersCiting += 1;
+      if (brandPresent) w.cat[g].answersWithBrand += 1;
+    }
+    weeks.set(wk, w);
+
+    if (!inWindow) return;
+
+    // Windowed aggregates.
+    winResults += 1;
+    winCitations += citationCount;
+    if (ownCited) winCitingOwn += 1;
+
+    const platform = r.platform || 'other';
+    const p = platformAgg.get(platform) ?? { mentioned: 0, total: 0 };
+    p.total += 1;
+    if ((r.mention_count ?? 0) > 0) p.mentioned += 1;
+    platformAgg.set(platform, p);
+
+    for (const g of touched) {
+      cats[g].answersCiting += 1;
+      if (brandPresent) cats[g].answersWithBrand += 1;
+    }
+    for (const [host, cat] of domainCat) {
+      const g = groupOf(cat);
+      if (!g) continue;
+      const d = cats[g].domains.get(host) ?? { citations: 0, youAppear: false };
+      if (brandPresent) d.youAppear = true;
+      cats[g].domains.set(host, d);
+    }
+    // Citation counts per category (sample size uses citations, not answers).
+    for (const cite of citations) {
+      const host = extractHostname(cite.url);
+      if (!host) continue;
+      const cat = domainCat.get(host);
+      const g = cat ? groupOf(cat) : null;
+      if (!g) continue;
+      cats[g].citations += 1;
+      const d = cats[g].domains.get(host);
+      if (d) d.citations += 1;
+    }
+  };
+
+  // Page through all results for the brand (full history — weekly evolution
+  // needs it; the window filter is applied in-memory per row).
+  for (let offset = 0; offset < SCAN_MAX_ROWS; offset += SCAN_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('prompt_results')
+      .select('id, platform, mention_count, created_at, citations')
+      .eq('brand_id', brandId)
+      .neq('platform', 'chatgpt-shopping')
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, offset + SCAN_PAGE_SIZE - 1);
+    if (error) throw new Error(error.message);
+    const batch = (data ?? []) as unknown as ResultRow[];
+    for (const r of batch) aggregate(r);
+    if (batch.length < SCAN_PAGE_SIZE) break;
+  }
+
+  const pctOwn = winResults > 0 ? Math.round((winCitingOwn / winResults) * 1000) / 10 : 0;
+
+  const categoryOut = (key: IndexCategoryKey): IndexCategoryData => {
+    const c = cats[key];
+    const topSources = Array.from(c.domains.entries())
+      .map(([domain, d]) => ({ domain, citations: d.citations, youAppear: d.youAppear }))
+      .sort((a, b) => b.citations - a.citations)
+      .slice(0, TOP_SOURCES_LIMIT);
+    return {
+      score: gabaritoScore(c.answersWithBrand, c.answersCiting),
+      sampleCitations: c.citations,
+      answersCiting: c.answersCiting,
+      answersWithBrand: c.answersWithBrand,
+      topSources,
+    };
+  };
+
+  const byPlatform = Array.from(platformAgg.entries())
+    .map(([platform, v]) => ({ platform, ...v }))
+    .sort((a, b) => b.total - a.total);
+  const mentioned = byPlatform.reduce((s, p) => s + p.mentioned, 0);
+
+  const evolution = Array.from(weeks.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([weekStart, w]) => ({
+      weekStart,
+      d2: ownCitationScore(w.results > 0 ? (w.citingOwn / w.results) * 100 : 0),
+      social: gabaritoScore(w.cat.social.answersWithBrand, w.cat.social.answersCiting),
+      reviews: gabaritoScore(w.cat.reviews.answersWithBrand, w.cat.reviews.answersCiting),
+      media: gabaritoScore(w.cat.media.answersWithBrand, w.cat.media.answersCiting),
+      verticals: gabaritoScore(w.cat.verticals.answersWithBrand, w.cat.verticals.answersCiting),
+    }));
+
+  return {
+    totals: { results: winResults, citations: winCitations },
+    d2: {
+      score: ownCitationScore(pctOwn),
+      pctOwn,
+      resultsCitingOwn: winCitingOwn,
+      ownDomains: brandDomains,
+    },
+    categories: {
+      social: categoryOut('social'),
+      reviews: categoryOut('reviews'),
+      media: categoryOut('media'),
+      verticals: categoryOut('verticals'),
+    },
+    share: { mentioned, total: winResults, byPlatform },
+    evolution,
+  };
+}

@@ -33,6 +33,13 @@ const STUCK_TASK_HOURS = 2;
 const SENTIMENT_MIN_SAMPLE = 20;
 /** Weekly cron cadence + 1 day of slack. */
 const SILENCE_DAYS = 8;
+/**
+ * Web/server deploy mismatch older than this fires the drift alert. Covers
+ * the 17/ago incident (Vercel×GitHub integration silently dead for 9 days);
+ * the reverse direction (Railway behind) is covered by Railway's own
+ * build-failed emails plus the age growing while web keeps advancing.
+ */
+const DEPLOY_DRIFT_GRACE_MIN = 90;
 
 /**
  * Pure evaluation of the health snapshot. Returns a list of alerts:
@@ -103,6 +110,24 @@ export function evaluateChecks(snap, now) {
     });
   }
 
+  // Incidente 17/ago: o web de produção serviu um build de 9 dias atrás sem
+  // ninguém notar (integração Vercel×GitHub morta). Compara o commit do último
+  // deploy de produção da Vercel com o commit que ESTE server está rodando —
+  // ambos seguem a main, então divergência persistente = pipeline quebrado.
+  if (snap.deployDrift) {
+    const { webSha, ourSha, webDeployAgeMin } = snap.deployDrift;
+    if (webSha && ourSha && webSha !== ourSha && webDeployAgeMin > DEPLOY_DRIFT_GRACE_MIN) {
+      alerts.push({
+        key: 'deploy-drift',
+        severity: 'critical',
+        message:
+          `Deploy do web (Vercel ${webSha.slice(0, 7)}, há ${Math.round(webDeployAgeMin)}min) ` +
+          `difere do commit do server (${ourSha.slice(0, 7)}) — integração de deploy ` +
+          `possivelmente quebrada (vide incidente de 17/ago). Verifique Vercel ⇄ GitHub.`,
+      });
+    }
+  }
+
   return alerts;
 }
 
@@ -124,6 +149,7 @@ async function collectSnapshot(intervalMin) {
     recentResults: { total: 0, neutral: 0 },
     lastResultAt: null,
     orphanBrands: 0,
+    deployDrift: null,
   };
 
   try {
@@ -185,6 +211,38 @@ async function collectSnapshot(intervalMin) {
     }
     const { count } = await query;
     snap.orphanBrands = count ?? 0;
+  } catch {
+    /* best-effort */
+  }
+
+  try {
+    // Drift web×server (config opcional): exige VERCEL_TOKEN + VERCEL_PROJECT_ID
+    // no Railway (criar token direto no painel da Vercel — nunca via chat) e o
+    // RAILWAY_GIT_COMMIT_SHA que a própria Railway injeta em todo deploy.
+    const token = process.env.VERCEL_TOKEN;
+    const projectId = process.env.VERCEL_PROJECT_ID;
+    const ourSha = process.env.RAILWAY_GIT_COMMIT_SHA;
+    if (token && projectId && ourSha) {
+      const teamId = process.env.VERCEL_TEAM_ID;
+      const url =
+        `https://api.vercel.com/v6/deployments?projectId=${encodeURIComponent(projectId)}` +
+        `&target=production&state=READY&limit=1` +
+        (teamId ? `&teamId=${encodeURIComponent(teamId)}` : '');
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (res.ok) {
+        const dep = (await res.json())?.deployments?.[0];
+        if (dep) {
+          snap.deployDrift = {
+            webSha: dep.meta?.githubCommitSha ?? null,
+            ourSha,
+            webDeployAgeMin: (now - dep.created) / 60_000,
+          };
+        }
+      }
+    }
   } catch {
     /* best-effort */
   }

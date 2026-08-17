@@ -30,6 +30,21 @@ function resolveModelPlatform(model) {
  * @param {{ brandId: string, promptId?: string, promptIds?: string[], job?: { progress: function, signal?: AbortSignal } }} opts
  */
 export async function processTrackingJob({ brandId, promptId, promptIds, job }) {
+  // Bugfix (17/ago): o botão "Parar" marcava o job como cancelled e disparava
+  // o abort(), mas este worker nunca lia o sinal — a execução seguia inteira
+  // em segundo plano. Checkpoints nos limites de fase/loop: paramos de
+  // submeter tarefas novas e saímos do drain em até um ciclo de poll.
+  // Tarefas já enviadas ao Cloro ainda entregam pelo webhook (dado pago não
+  // se perde); o que o cancelamento corta é trabalho novo.
+  const aborted = () => Boolean(job?.signal?.aborted);
+  const throwIfAborted = () => {
+    if (aborted()) {
+      const err = new Error('Job cancelled');
+      err.name = 'AbortError';
+      throw err;
+    }
+  };
+
   // 1. Fetch brand info with domains
   const { data: brand, error: brandErr } = await supabaseAdmin
     .from('brands')
@@ -168,6 +183,7 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
   const webhookUrl = process.env.CLORO_WEBHOOK_URL;
 
   if (scraperTasks.length > 0) {
+    throwIfAborted();
     logger.info(
       { brandId, count: scraperTasks.length, mode: webhookUrl ? 'webhook' : 'polling' },
       'submitting scraper tasks to cloro',
@@ -279,6 +295,10 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
         let finalPending = 0;
 
         for (;;) {
+          if (aborted()) {
+            exitReason = 'cancelled';
+            break;
+          }
           const budget = drainBudgetExceeded({
             now: Date.now(),
             drainStartedAt,
@@ -370,6 +390,10 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
         }
       }
 
+      // Cancelamento durante o drain: as tarefas pendentes continuam com o
+      // webhook (dado pago não se perde), mas o job encerra aqui.
+      throwIfAborted();
+
       completedTasks += expectedSubmitted;
     } else {
       logger.info(
@@ -380,6 +404,7 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
       // Polling fallback: wait for each task inline (legacy behavior)
       await Promise.allSettled(
         submitted.map(async ({ taskId, scraperId, meta }) => {
+          if (aborted()) return;
           try {
             logger.debug({ taskId, scraperId }, 'polling scraper task');
             const aiResponse = await pollScraperResult(taskId, scraperId);
@@ -449,10 +474,12 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
   }
 
   if (modelTasks.length > 0) {
+    throwIfAborted();
     logger.info({ count: modelTasks.length }, 'running ai model tasks concurrently');
 
     await Promise.allSettled(
       modelTasks.map(async ({ prompt, modelName, region }) => {
+        if (aborted()) return;
         if (job) {
           job.progress({
             current: completedTasks,

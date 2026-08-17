@@ -106,3 +106,64 @@ describe('watchdog formatAlertEmail', () => {
     expect(subject).not.toContain('crítico');
   });
 });
+
+describe('watchdog deploy-drift (incidente 17/ago)', () => {
+  const NOW = new Date('2026-08-17T12:00:00Z');
+  const healthy = {
+    failedJobs: [],
+    stuckTasks: 0,
+    recentResults: { total: 100, neutral: 40 },
+    lastResultAt: '2026-08-17T10:00:00Z',
+    orphanBrands: 0,
+    deployDrift: null,
+  };
+
+  it('stays quiet when drift data is not configured', () => {
+    expect(evaluateChecks(healthy, NOW)).toEqual([]);
+  });
+
+  it('stays quiet when web and server run the same commit', () => {
+    const alerts = evaluateChecks(
+      {
+        ...healthy,
+        deployDrift: { webSha: 'abc1234def', ourSha: 'abc1234def', webDeployAgeMin: 5000 },
+      },
+      NOW,
+    );
+    expect(alerts).toEqual([]);
+  });
+
+  it('tolerates a fresh mismatch inside the grace window (deploy in flight)', () => {
+    const alerts = evaluateChecks(
+      {
+        ...healthy,
+        deployDrift: { webSha: 'aaaaaaa1111', ourSha: 'bbbbbbb2222', webDeployAgeMin: 12 },
+      },
+      NOW,
+    );
+    expect(alerts).toEqual([]);
+  });
+
+  it('fires critical when the mismatch outlives the grace window', () => {
+    const alerts = evaluateChecks(
+      {
+        ...healthy,
+        deployDrift: { webSha: 'aaaaaaa1111', ourSha: 'bbbbbbb2222', webDeployAgeMin: 60 * 24 * 9 },
+      },
+      NOW,
+    );
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0].key).toBe('deploy-drift');
+    expect(alerts[0].severity).toBe('critical');
+    expect(alerts[0].message).toContain('aaaaaaa');
+    expect(alerts[0].message).toContain('bbbbbbb');
+  });
+
+  it('stays quiet when the Vercel deployment has no commit metadata', () => {
+    const alerts = evaluateChecks(
+      { ...healthy, deployDrift: { webSha: null, ourSha: 'bbbbbbb2222', webDeployAgeMin: 5000 } },
+      NOW,
+    );
+    expect(alerts).toEqual([]);
+  });
+});

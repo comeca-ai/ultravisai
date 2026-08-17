@@ -32,7 +32,7 @@
     "shopping": "Shopping",
     "reports": "Relatórios",
     "settings": "Configurações",
-    "citability": "Índice de Visibilidade",
+    "citability": "Índice de Citabilidade",
     "badgeNew": "Novo",
     "costs": "Custos & Consumo"
   },
@@ -1180,8 +1180,8 @@
     "exportFailed": "Falha ao exportar CSV"
   },
   "citability": {
-    "title": "Índice de Visibilidade",
-    "subtitle": "Sua nota 0–100 de visibilidade nas IAs, composta por 6 dimensões — a conta está sempre aberta.",
+    "title": "Índice de Citabilidade",
+    "subtitle": "Sua nota 0–100 de citabilidade — o que você já construiu para ser citado pelas IAs. É a alavanca que dirige o Score de Visibilidade (resultado). A conta está sempre aberta.",
     "period": {
       "7d": "7 dias",
       "30d": "30 dias",
@@ -1195,7 +1195,7 @@
       "best": "Excelente"
     },
     "hero": {
-      "label": "Índice de Visibilidade",
+      "label": "Índice de Citabilidade",
       "noData": "Sem rastreamentos ainda",
       "noDataHint": "Rode um rastreamento para calcular sua nota — as 6 dimensões nascem dos dados reais das respostas de IA.",
       "noAuditNote": "01 · Site técnico sem auditoria — rode a Auditoria de Site para completar a conta (pesos renormalizados até lá).",
@@ -1252,7 +1252,7 @@
       "dim2": {
         "name": "Conteúdo próprio",
         "brief": "Mede se as respostas de IA citam páginas do seu próprio site como fonte.",
-        "sourcesNote": "Seus domínios cadastrados. Régua: 10% das respostas citando seu site = nota 100 (melhor caso real: 7,4%).",
+        "sourcesNote": "Seus domínios cadastrados. Medição provisória pela citação própria (10% das respostas = nota 100; melhor caso real 7,4%) — régua definitiva (cobertura de tópicos × qualidade GEO) em construção.",
         "cta": "O que fazer → tópicos e onde publicar",
         "evOwn": "{citing} de {total} respostas citam seu domínio ({pct}%)",
         "evRuler": "Régua: 10% de citação própria = nota 100 — melhor caso real observado: 7,4%."

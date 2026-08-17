@@ -41,12 +41,16 @@ export const INDEX_ZONES: IndexZone[] = ['A', 'B', 'C'];
 /** Below this many citations in a category the score is directional only. */
 export const INDEX_LOW_SAMPLE_THRESHOLD = 10;
 
-/** Score bands (faixas) — requested by the pilot client (10/ago doc). */
+/**
+ * Score bands (faixas) — quintis, alinhados às réguas por dimensão do
+ * documento de lógica de 17/ago (que são escritas em 0-20/21-40/.../81-100).
+ * Substitui as faixas do doc de 10/ago por decisão registrada em 17/ago.
+ */
 export const INDEX_SCORE_BANDS = [
-  { max: 30, key: 'undesirable' },
-  { max: 50, key: 'regular' },
-  { max: 70, key: 'good' },
-  { max: 90, key: 'great' },
+  { max: 20, key: 'undesirable' },
+  { max: 40, key: 'regular' },
+  { max: 60, key: 'good' },
+  { max: 80, key: 'great' },
   { max: 100, key: 'best' },
 ] as const;
 

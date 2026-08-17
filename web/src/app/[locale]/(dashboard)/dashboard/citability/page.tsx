@@ -3,296 +3,148 @@
 /**
  * Ultravis addition (fork layer — additive page, no core changes).
  *
- * Citability Index (Índice de Citabilidade) — the prescriptive counterpart
- * to the Insights page: Insights is the scoreboard, this is the playbook.
- * Framework source of truth: `estrategia/indice-citabilidade.md`.
+ * Índice de Visibilidade v2 — implements the template approved 15/ago
+ * (meeting of 14/ago): every dimension scored, the math always open and
+ * reconciling, a plain-language explanation and the researched sources
+ * ALWAYS visible on every card, and the old "visibility" demoted to
+ * "share de resposta nos prompts" with an explicit reconciliation line.
  *
- * Scoring is deliberately partial and honest: only dimensions the platform
- * already measures feed the index (D1 from the latest Site Audit of the
- * primary domain, D2 from owned-citation coverage). The page is framed as a
- * PROGRESSIVE UNLOCK: measured dimensions read as "Ativo" (they count toward
- * your IC); the rest read as "A desbloquear" with the concrete path — and
- * still show the category's "answer key" (who the AIs cite there) as the
- * benchmark to chase, so the page is a roadmap, never half a grey screen.
- *
- * The bubble matrix is a CONCEPTUAL diagram of the framework (positions are
- * fixed by the methodology, not driven by the brand's data), so it lives
- * inside a collapsible "how it works" section without chart framing.
+ * Scoring rules v1 (weights in `web/src/config/visibility-index.ts`,
+ * framework in `estrategia/indice-citabilidade.md`):
+ * - D1  ← latest Site Audit of the primary domain (same as Auditoria page).
+ * - D2  ← own-citation share normalized (10% ⇒ 100; real best case 7.4%).
+ * - D3–D6 ← relative to the sector gabarito: among answers citing that
+ *   category's sources, share where the brand is present. Low samples are
+ *   scored anyway and flagged "direcional" (owner decision, 15/ago).
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { ArrowRight, ChevronDown, Eye, Lock, Check } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { ArrowRight, Copy, Eye } from 'lucide-react';
+import { toast } from 'sonner';
 import { Link } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBrandStore } from '@/stores/use-brand-store';
 import { getAuditTrend, type AuditTrend } from '@/lib/actions/audits';
-import { getCitationsOverview, type CitationsOverview } from '@/lib/actions/citations';
+import {
+  getVisibilityIndex,
+  type IndexCategoryData,
+  type VisibilityIndexData,
+  type VisibilityIndexPreset,
+} from '@/lib/actions/visibility-index';
 import { pct } from '@/components/audit/audit-report';
 import { DomainFavicon } from '@/components/citations/source-cells';
-import type { SourceCategory } from '@/lib/citations/classify';
+import { PLATFORM_LABELS } from '@/config/platform-labels';
+import {
+  INDEX_DIMENSIONS,
+  INDEX_LOW_SAMPLE_THRESHOLD,
+  INDEX_ZONE_COLORS,
+  INDEX_ZONES,
+  indexScoreBand,
+  type IndexDimKey,
+} from '@/config/visibility-index';
 import { cn } from '@/lib/utils';
 
-// ─── Framework constants (mirror estrategia/indice-citabilidade.md) ─────────
+// ─── Score semantics ─────────────────────────────────────────────────────────
 
-type Zone = 'A' | 'B' | 'C';
+function scoreColorClass(score: number): string {
+  if (score >= 50) return 'text-emerald-600 dark:text-emerald-400';
+  if (score >= 30) return 'text-amber-600 dark:text-amber-400';
+  return 'text-red-600 dark:text-red-400';
+}
 
-const ZONE_COLORS: Record<Zone, string> = {
-  A: '#2a78d6',
-  B: '#eb6834',
-  C: '#1baf7a',
+function scoreBarClass(score: number): string {
+  if (score >= 50) return 'bg-emerald-500';
+  if (score >= 30) return 'bg-amber-500';
+  return 'bg-red-500';
+}
+
+const BAND_CLASSES: Record<string, string> = {
+  undesirable: 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
+  regular: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  good: 'border-lime-600/30 bg-lime-500/10 text-lime-700 dark:text-lime-400',
+  great: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  best: 'border-emerald-600/40 bg-emerald-600/15 text-emerald-700 dark:text-emerald-300',
 };
 
-// Score bands requested by the pilot client (feedback item #9): a label next
-// to the number so a reader knows instantly whether the score is good.
-const SCORE_BANDS = [
-  {
-    max: 30,
-    key: 'undesirable',
-    className: 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
-  },
-  {
-    max: 50,
-    key: 'regular',
-    className: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  },
-  {
-    max: 70,
-    key: 'good',
-    className: 'border-lime-600/30 bg-lime-500/10 text-lime-700 dark:text-lime-400',
-  },
-  {
-    max: 90,
-    key: 'great',
-    className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-  },
-  {
-    max: 100,
-    key: 'best',
-    className: 'border-emerald-600/40 bg-emerald-600/15 text-emerald-700 dark:text-emerald-300',
-  },
-] as const;
+const CATEGORY_BY_DIM: Partial<Record<IndexDimKey, keyof VisibilityIndexData['categories']>> = {
+  dim3: 'social',
+  dim4: 'reviews',
+  dim5: 'media',
+  dim6: 'verticals',
+};
 
-function scoreBand(score: number) {
-  return SCORE_BANDS.find((b) => score <= b.max) ?? SCORE_BANDS[SCORE_BANDS.length - 1];
-}
+// ─── Small pieces ────────────────────────────────────────────────────────────
 
-type DimKey = 'dim1' | 'dim2' | 'dim3' | 'dim4' | 'dim5' | 'dim6';
-
-interface Dimension {
-  n: string;
-  key: DimKey;
-  weight: number;
-  zone: Zone;
-  /** Conceptual diagram position: x = internal↔external, y = dependency. */
-  x: number;
-  y: number;
-  /** Citation source categories that feed this dimension's "answer key". */
-  categories?: SourceCategory[];
-  /** Where the card's CTA leads; undefined = destination doesn't exist yet. */
-  ctaHref?: string;
-}
-
-const DIMENSIONS: Dimension[] = [
-  { n: '01', key: 'dim1', weight: 15, zone: 'A', x: 12, y: 12, ctaHref: '/dashboard/audit' },
-  { n: '02', key: 'dim2', weight: 20, zone: 'A', x: 22, y: 24, ctaHref: '/dashboard/content' },
-  { n: '03', key: 'dim3', weight: 12, zone: 'B', x: 56, y: 30, categories: ['social'] },
-  { n: '04', key: 'dim4', weight: 18, zone: 'B', x: 70, y: 48, categories: ['review', 'forum'] },
-  {
-    n: '05',
-    key: 'dim5',
-    weight: 22,
-    zone: 'C',
-    x: 84,
-    y: 72,
-    categories: ['editorial', 'other'],
-    ctaHref: '/dashboard/citations',
-  },
-  { n: '06', key: 'dim6', weight: 13, zone: 'C', x: 92, y: 87, categories: ['institutional'] },
-];
-
-const ZONES: Zone[] = ['A', 'B', 'C'];
-
-/** A dimension is either measured (score 0–100, zero included) or not. */
-type DimStatus = { measured: true; score: number } | { measured: false };
-
-/** Below this many citations, a category's answer key is directional only. */
-const LOW_SAMPLE_THRESHOLD = 10;
-
-// ─── Conceptual diagram (no chart framing — it is not data-driven) ──────────
-
-function CitabilityDiagram({ dimLabel }: { dimLabel: (key: DimKey) => string }) {
-  const t = useTranslations('citability');
-  const W = 560;
-  const H = 280;
-  const M = { l: 40, r: 16, t: 12, b: 36 };
-  const PW = W - M.l - M.r;
-  const PH = H - M.t - M.b;
-  const px = (x: number) => M.l + (x / 100) * PW;
-  const py = (y: number) => M.t + (y / 100) * PH;
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t('matrix.ariaLabel')}>
-      {/* Directional captions only — no plot frame, this is a concept map */}
-      <text
-        x={M.l + PW / 2}
-        y={H - 6}
-        textAnchor="middle"
-        className="fill-muted-foreground text-[11px]"
-      >
-        {t('matrix.xAxis')}
-      </text>
-      <text
-        x={12}
-        y={M.t + PH / 2}
-        textAnchor="middle"
-        transform={`rotate(-90 12 ${M.t + PH / 2})`}
-        className="fill-muted-foreground text-[11px]"
-      >
-        {t('matrix.yAxis')}
-      </text>
-      {DIMENSIONS.map((d) => (
-        <g key={d.n}>
-          <circle
-            cx={px(d.x)}
-            cy={py(d.y)}
-            r={d.weight * 1.0}
-            fill={ZONE_COLORS[d.zone]}
-            fillOpacity={0.9}
-            className="stroke-background"
-            strokeWidth={2}
-          >
-            <title>{`${d.n} · ${dimLabel(d.key)} · ${d.weight}%`}</title>
-          </circle>
-          <text
-            x={px(d.x)}
-            y={py(d.y) + 4}
-            textAnchor="middle"
-            className="pointer-events-none fill-white text-[11px] font-semibold"
-          >
-            {d.n}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-// ─── Active / locked status pill (the progressive-unlock affordance) ────────
-
-function StatusPill({ active }: { active: boolean }) {
-  const t = useTranslations('citability');
-  return active ? (
-    <Badge
-      variant="outline"
-      className="gap-1 border-emerald-500/40 bg-emerald-500/10 text-[10px] font-medium text-emerald-700 dark:text-emerald-300"
-    >
-      <Check className="h-3 w-3" />
-      {t('status.active')}
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="gap-1 text-[10px] font-medium text-muted-foreground">
-      <Lock className="h-3 w-3" />
-      {t('status.locked')}
-    </Badge>
-  );
-}
-
-// ─── Standardized dimension CTA ─────────────────────────────────────────────
-
-function DimensionCta({ href, label }: { href?: string; label: string }) {
-  const t = useTranslations('citability');
-  if (!href) {
-    return (
-      <span
-        className={cn(
-          buttonVariants({ variant: 'outline', size: 'sm' }),
-          'pointer-events-none w-full opacity-60',
-        )}
-        aria-disabled
-      >
-        {label} · {t('dims.comingSoon')}
-      </span>
-    );
-  }
-  return (
-    <Link href={href} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full')}>
-      {label}
-      <ArrowRight className="ml-2 h-3.5 w-3.5" />
-    </Link>
-  );
-}
-
-// ─── Coverage bar: which dimensions already feed the partial IC ─────────────
-
-function CoverageBar({ statuses }: { statuses: Record<DimKey, DimStatus> }) {
-  const t = useTranslations('citability');
-  return (
-    <div
-      className="flex h-2 w-full overflow-hidden rounded-full"
-      role="img"
-      aria-label={t('kpis.coverageBarAria')}
-    >
-      {DIMENSIONS.map((d) => (
-        <div
-          key={d.n}
-          className={cn('h-full', !statuses[d.key].measured && 'bg-muted')}
-          style={{
-            width: `${d.weight}%`,
-            backgroundColor: statuses[d.key].measured ? ZONE_COLORS[d.zone] : undefined,
-          }}
-          title={`${d.n} · ${d.weight}%${statuses[d.key].measured ? '' : ` · ${t('status.locked')}`}`}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ─── Answer-key table (favicon, clickable domain, citations) ────────────────
-
-interface AnswerKeyRow {
+function SourceChip({
+  domain,
+  youAppear,
+  appearLabel,
+  absentLabel,
+}: {
   domain: string;
-  totalCitations: number;
+  youAppear: boolean;
+  appearLabel: string;
+  absentLabel: string;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-[11px]">
+      <span className="shrink-0 [&>*]:h-3.5 [&>*]:w-3.5">
+        <DomainFavicon domain={domain} />
+      </span>
+      <span className="max-w-[150px] truncate">{domain}</span>
+      {youAppear ? (
+        <span className="font-medium text-emerald-600 dark:text-emerald-400">✓</span>
+      ) : (
+        <span
+          className="font-medium text-red-600 dark:text-red-400"
+          title={absentLabel}
+          aria-label={`${domain}: ${absentLabel}`}
+        >
+          ✗
+        </span>
+      )}
+      <span className="sr-only">{youAppear ? appearLabel : absentLabel}</span>
+    </span>
+  );
 }
 
-function AnswerKeyTable({ rows, categoryTotal }: { rows: AnswerKeyRow[]; categoryTotal: number }) {
-  const t = useTranslations('citability');
+function EvolutionSparkline({
+  points,
+  ariaLabel,
+}: {
+  points: Array<{ weekStart: string; index: number }>;
+  ariaLabel: string;
+}) {
+  const W = 320;
+  const H = 90;
+  const PAD = 14;
+  if (points.length === 0) return null;
+  const xs = points.map((_, i) =>
+    points.length === 1 ? W / 2 : PAD + (i * (W - PAD * 2)) / (points.length - 1),
+  );
+  const ys = points.map((p) => H - PAD - (p.index / 100) * (H - PAD * 2));
+  const line = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
+  const last = points[points.length - 1];
   return (
-    <div className="rounded-md border bg-muted/30 p-2.5">
-      <p className="mb-1.5 text-[11px] font-medium text-foreground">{t('dims.answerKey')}</p>
-      <table className="w-full text-xs">
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.domain} className="border-t border-border/50 first:border-t-0">
-              <td className="py-1.5 pr-2">
-                <a
-                  href={`https://${row.domain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex max-w-full items-center gap-1.5 hover:underline"
-                >
-                  <span className="shrink-0 [&>*]:h-4 [&>*]:w-4">
-                    <DomainFavicon domain={row.domain} />
-                  </span>
-                  <span className="truncate text-foreground">{row.domain}</span>
-                </a>
-              </td>
-              <td className="whitespace-nowrap py-1.5 text-right tabular-nums text-muted-foreground">
-                {t('dims.citationCount', { count: row.totalCitations })}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {categoryTotal < LOW_SAMPLE_THRESHOLD && (
-        <p className="mt-2 border-t border-border/50 pt-2 text-[11px] italic text-muted-foreground">
-          {t('dims.lowSample', { count: categoryTotal })}
-        </p>
-      )}
-    </div>
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={ariaLabel}>
+      <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} className="stroke-border" />
+      <polyline points={line} fill="none" stroke="#D8452F" strokeWidth={2} strokeLinejoin="round" />
+      {xs.map((x, i) => (
+        <circle key={points[i].weekStart} cx={x} cy={ys[i]} r={2.5} fill="#D8452F" />
+      ))}
+      <text
+        x={xs[xs.length - 1]}
+        y={Math.max(10, ys[ys.length - 1] - 8)}
+        textAnchor="end"
+        className="fill-foreground text-[11px] font-semibold"
+      >
+        {last.index}
+      </text>
+    </svg>
   );
 }
 
@@ -300,11 +152,13 @@ function AnswerKeyTable({ rows, categoryTotal }: { rows: AnswerKeyRow[]; categor
 
 export default function CitabilityPage() {
   const t = useTranslations('citability');
+  const locale = useLocale();
   const activeBrandId = useBrandStore((s) => s.activeBrandId);
+  const activeBrand = useBrandStore((s) => s.brands.find((b) => b.id === s.activeBrandId) ?? null);
+  const [preset, setPreset] = useState<VisibilityIndexPreset>('30d');
+  const [data, setData] = useState<VisibilityIndexData | null>(null);
   const [auditTrend, setAuditTrend] = useState<AuditTrend | null>(null);
-  const [overview, setOverview] = useState<CitationsOverview | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showHow, setShowHow] = useState(false);
 
   useEffect(() => {
     if (!activeBrandId) return;
@@ -312,16 +166,16 @@ export default function CitabilityPage() {
     setLoading(true);
     (async () => {
       try {
-        const [trendData, citationData] = await Promise.all([
+        const [indexData, trendData] = await Promise.all([
+          getVisibilityIndex(activeBrandId, preset),
           getAuditTrend(activeBrandId),
-          getCitationsOverview(activeBrandId, { datePreset: 'all' }),
         ]);
         if (!cancelled) {
+          setData(indexData);
           setAuditTrend(trendData);
-          setOverview(citationData);
         }
       } catch (err) {
-        console.error('Failed to load citability data:', err);
+        console.error('Failed to load visibility index:', err);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -329,88 +183,135 @@ export default function CitabilityPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeBrandId]);
+  }, [activeBrandId, preset]);
 
-  // D1 — latest Site Audit score for the brand's PRIMARY domain (0–100).
-  // Same source as the Site Audit page's headline (getAuditTrend), so both
-  // pages always show the same number. Not measured until an audit ran.
-  const d1: DimStatus = useMemo(() => {
+  // D1 — latest Site Audit score of the primary domain (null = never audited).
+  const d1 = useMemo(() => {
     const points = auditTrend?.points ?? [];
     for (let i = points.length - 1; i >= 0; i--) {
       const score = points[i].totalScore;
-      if (score !== null) return { measured: true, score: pct(score) ?? 0 };
+      if (score !== null) {
+        return { score: pct(score) ?? 0, date: points[i].createdAt.slice(0, 10) };
+      }
     }
-    return { measured: false };
+    return null;
   }, [auditTrend]);
 
-  // D2 — owned-citation coverage: share of tracked AI answers citing the
-  // brand's own domain. Measured as soon as at least one tracking result
-  // exists — a genuine 0 ("no AI answer cites you") is a real, meaningful
-  // score, distinct from "never tracked".
-  const d2: DimStatus = useMemo(() => {
-    if (!overview || overview.totals.results === 0) return { measured: false };
-    const ownedResults = overview.rows
-      .filter((r) => r.category === 'you')
-      .reduce((sum, r) => sum + r.resultsCiting, 0);
-    return {
-      measured: true,
-      score: Math.min(100, Math.round((ownedResults / overview.totals.results) * 100)),
+  const scores = useMemo(() => {
+    if (!data) return null;
+    const map: Record<IndexDimKey, number | null> = {
+      dim1: d1 ? d1.score : null,
+      dim2: data.d2.score,
+      dim3: data.categories.social.score,
+      dim4: data.categories.reviews.score,
+      dim5: data.categories.media.score,
+      dim6: data.categories.verticals.score,
     };
-  }, [overview]);
+    return map;
+  }, [data, d1]);
 
-  const statuses: Record<DimKey, DimStatus> = useMemo(
-    () => ({
-      dim1: d1,
-      dim2: d2,
-      dim3: { measured: false },
-      dim4: { measured: false },
-      dim5: { measured: false },
-      dim6: { measured: false },
-    }),
-    [d1, d2],
-  );
-
-  const activeCount = useMemo(
-    () => DIMENSIONS.filter((d) => statuses[d.key].measured).length,
-    [statuses],
-  );
-
-  // Coverage: how much of the index's total weight is actually measured.
-  const coverage = useMemo(
-    () => DIMENSIONS.reduce((sum, d) => sum + (statuses[d.key].measured ? d.weight : 0), 0),
-    [statuses],
-  );
-
-  // Partial IC: weighted average over measured dimensions, weights
-  // renormalized. Displayed attenuated while coverage is below 50%.
-  const partialScore = useMemo(() => {
-    const parts = DIMENSIONS.flatMap((d) => {
-      const s = statuses[d.key];
-      return s.measured ? [{ score: s.score, weight: d.weight }] : [];
+  // Index = weighted average over measured dimensions (only D1 can be
+  // missing — before the first audit). Weights renormalized in that case.
+  const index = useMemo(() => {
+    if (!scores) return null;
+    const parts = INDEX_DIMENSIONS.flatMap((dim) => {
+      const s = scores[dim.key];
+      return s === null ? [] : [{ key: dim.key, weight: dim.weight, score: s }];
     });
     if (parts.length === 0) return null;
     const totalWeight = parts.reduce((s, p) => s + p.weight, 0);
-    return Math.round(parts.reduce((s, p) => s + p.score * (p.weight / totalWeight), 0));
-  }, [statuses]);
+    const value = Math.round(parts.reduce((s, p) => s + p.score * (p.weight / totalWeight), 0));
+    return { value, parts, totalWeight };
+  }, [scores]);
 
-  // "Answer key" per dimension: top cited domains in that dimension's
-  // source categories, plus the category's citation total (for the
-  // low-sample warning).
-  const answerKey = useMemo(() => {
-    const map = new Map<DimKey, { rows: AnswerKeyRow[]; categoryTotal: number }>();
-    if (!overview) return map;
-    for (const dim of DIMENSIONS) {
-      if (!dim.categories) continue;
-      const inCategory = overview.rows.filter((r) => dim.categories!.includes(r.category));
-      const rows = [...inCategory]
-        .sort((a, b) => b.totalCitations - a.totalCitations)
-        .slice(0, 3)
-        .map((r) => ({ domain: r.domain, totalCitations: r.totalCitations }));
-      const categoryTotal = inCategory.reduce((sum, r) => sum + r.totalCitations, 0);
-      map.set(dim.key, { rows, categoryTotal });
+  const dec = locale === 'en' ? '.' : ',';
+  const formula = useMemo(() => {
+    if (!index) return '';
+    const terms = index.parts.map((p) => `0${dec}${String(p.weight).padStart(2, '0')}×${p.score}`);
+    return `${terms.join(' + ')} = ${index.value}`;
+  }, [index, dec]);
+
+  // Contribution of each measured dimension, in index points.
+  const contributions = useMemo(() => {
+    if (!index) return [];
+    return index.parts.map((p) => {
+      const dim = INDEX_DIMENSIONS.find((d) => d.key === p.key)!;
+      return {
+        key: p.key,
+        n: dim.n,
+        zone: dim.zone,
+        pts: Math.round(((p.score * p.weight) / index.totalWeight) * 10) / 10,
+      };
+    });
+  }, [index]);
+  const contributionTotal = contributions.reduce((s, c) => s + c.pts, 0);
+
+  // Weekly index evolution: dims 2–6 from the action, D1 carried forward from
+  // the audit trend (latest audit at or before each week).
+  const evolution = useMemo(() => {
+    if (!data) return [];
+    const auditPoints = (auditTrend?.points ?? [])
+      .filter((p) => p.totalScore !== null)
+      .map((p) => ({ date: p.createdAt.slice(0, 10), score: pct(p.totalScore) ?? 0 }));
+    return data.evolution.map((w) => {
+      let d1Score: number | null = null;
+      for (const a of auditPoints) {
+        if (a.date <= w.weekStart) d1Score = a.score;
+      }
+      const dimScores: Record<IndexDimKey, number | null> = {
+        dim1: d1Score,
+        dim2: w.d2,
+        dim3: w.social,
+        dim4: w.reviews,
+        dim5: w.media,
+        dim6: w.verticals,
+      };
+      const parts = INDEX_DIMENSIONS.flatMap((dim) => {
+        const s = dimScores[dim.key];
+        return s === null ? [] : [{ weight: dim.weight, score: s }];
+      });
+      const totalWeight = parts.reduce((s, p) => s + p.weight, 0);
+      const value =
+        totalWeight > 0
+          ? Math.round(parts.reduce((s, p) => s + p.score * (p.weight / totalWeight), 0))
+          : 0;
+      return { weekStart: w.weekStart, index: value };
+    });
+  }, [data, auditTrend]);
+
+  const handleCopyLlms = async () => {
+    const name = activeBrand?.name ?? '';
+    const domains = data?.d2.ownDomains ?? [];
+    const content = [
+      `# ${name}`,
+      '',
+      `> ${activeBrand?.description ?? t('dims.dim1.llmsDescriptionPlaceholder')}`,
+      '',
+      `## ${t('dims.dim1.llmsSectionMain')}`,
+      ...domains.map((d) => `- [${name}](https://${d}): ${t('dims.dim1.llmsHomeHint')}`),
+      '',
+      `## ${t('dims.dim1.llmsSectionOptional')}`,
+      `- ${t('dims.dim1.llmsOptionalHint')}`,
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(content);
+      toast.success(t('dims.dim1.llmsCopied'));
+    } catch {
+      toast.error(t('dims.dim1.llmsCopyFailed'));
     }
-    return map;
-  }, [overview]);
+  };
+
+  const sharePct =
+    data && data.share.total > 0 ? Math.round((data.share.mentioned / data.share.total) * 100) : 0;
+  const maxPlatformPct = useMemo(() => {
+    if (!data) return 0;
+    return Math.max(
+      1,
+      ...data.share.byPlatform.map((p) => (p.total > 0 ? (p.mentioned / p.total) * 100 : 0)),
+    );
+  }, [data]);
+
+  const hasData = (data?.totals.results ?? 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -418,126 +319,342 @@ export default function CitabilityPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-          <p className="text-muted-foreground text-sm mt-1 max-w-2xl">{t('subtitle')}</p>
+          <p className="text-muted-foreground mt-1 max-w-2xl text-sm">{t('subtitle')}</p>
         </div>
-        {/* Single mention of the data window, instead of repeating it per card */}
-        <p className="text-xs text-muted-foreground">{t('windowNote')}</p>
+        <div className="flex items-center gap-1 rounded-lg border p-1">
+          {(['7d', '30d', 'all'] as VisibilityIndexPreset[]).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPreset(p)}
+              className={cn(
+                'rounded-md px-3 py-1 text-xs font-medium transition-colors',
+                preset === p
+                  ? 'bg-foreground text-background'
+                  : 'text-muted-foreground hover:bg-muted',
+              )}
+            >
+              {t(`period.${p}`)}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* IC hero — the single headline. D1/D2 detail lives in their cards
-          below (no duplicate KPI row). */}
-      <Card className="border-primary/20">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {t('kpis.icTitle')}
-          </CardTitle>
-          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {loading ? (
-            <Skeleton className="h-11 w-40" />
-          ) : partialScore === null ? (
-            <div>
-              <span className="text-xl font-medium italic text-muted-foreground">
-                {t('notMeasured')}
-              </span>
-              <p className="text-xs mt-1 text-muted-foreground">{t('kpis.icNoData')}</p>
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span
-                  className={cn(
-                    'font-bold tabular-nums',
-                    coverage < 50 ? 'text-3xl text-muted-foreground' : 'text-5xl',
-                  )}
-                >
-                  {partialScore}
-                  <span className="text-sm font-normal text-muted-foreground">/100</span>
-                </span>
-                <Badge
-                  variant="outline"
-                  className={cn('translate-y-[-2px] text-xs', scoreBand(partialScore).className)}
-                >
-                  {t(`bands.${scoreBand(partialScore).key}`)}
-                </Badge>
-                <span className="text-sm font-medium text-muted-foreground">
-                  {t('kpis.icCoverage', { coverage })}
-                </span>
+      {/* Hero — the score with the math always open */}
+      <Card className="overflow-hidden border-primary/20">
+        <div className="border-l-4" style={{ borderColor: '#D8452F' }}>
+          <CardContent className="flex flex-wrap gap-8 p-6">
+            {loading ? (
+              <Skeleton className="h-28 w-full" />
+            ) : !hasData || index === null ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t('hero.label')}
+                </p>
+                <p className="mt-2 text-xl font-medium italic text-muted-foreground">
+                  {t('hero.noData')}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t('hero.noDataHint')}</p>
               </div>
-              <CoverageBar statuses={statuses} />
-              <p className="text-xs text-muted-foreground">
-                {t('kpis.dimsActive', { active: activeCount })} · {t('kpis.icRecalc')}
-              </p>
-            </>
-          )}
-        </CardContent>
+            ) : (
+              <>
+                <div className="min-w-[240px]">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t('hero.label')}
+                  </p>
+                  <div className="mt-1 flex items-baseline gap-3">
+                    <span className="text-5xl font-bold tabular-nums">
+                      {index.value}
+                      <span className="text-base font-normal text-muted-foreground">/100</span>
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={cn('text-xs', BAND_CLASSES[indexScoreBand(index.value)])}
+                    >
+                      {t(`bands.${indexScoreBand(index.value)}`)}
+                    </Badge>
+                  </div>
+                  <p className="mt-3 rounded-md border border-dashed bg-muted/40 px-3 py-2 font-mono text-xs text-muted-foreground">
+                    {formula}
+                  </p>
+                  {scores?.dim1 === null && (
+                    <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
+                      {t('hero.noAuditNote')}
+                    </p>
+                  )}
+                </div>
+
+                <div className="min-w-[260px] flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t('hero.contributionTitle')}
+                  </p>
+                  <div
+                    className="mt-2 flex h-4 w-full overflow-hidden rounded-full border"
+                    role="img"
+                    aria-label={t('hero.contributionAria')}
+                  >
+                    {contributions.map((c) => (
+                      <div
+                        key={c.key}
+                        style={{
+                          width: `${contributionTotal > 0 ? (c.pts / contributionTotal) * 100 : 0}%`,
+                          backgroundColor: INDEX_ZONE_COLORS[c.zone],
+                        }}
+                        title={`${c.n} · ${t('hero.pts', { pts: c.pts })}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+                    {contributions.map((c) => (
+                      <span key={c.key} className="inline-flex items-center gap-1.5">
+                        <span
+                          className="h-2 w-2 rounded-sm"
+                          style={{ backgroundColor: INDEX_ZONE_COLORS[c.zone] }}
+                        />
+                        {c.n} {t(`dims.${c.key}.name`)} · {t('hero.pts', { pts: c.pts })}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="min-w-[240px] max-w-[340px] flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t('hero.evolutionTitle')}
+                  </p>
+                  {evolution.length > 1 ? (
+                    <EvolutionSparkline points={evolution} ariaLabel={t('hero.evolutionAria')} />
+                  ) : (
+                    <p className="mt-3 text-xs italic text-muted-foreground">
+                      {t('hero.evolutionEmpty')}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </div>
       </Card>
 
-      {/* Dimension cards, grouped by zone. Each is Active (feeds your IC) or
-          To-unlock (with the path + the category's benchmark). */}
-      {ZONES.map((zone) => (
+      {/* Dimension cards grouped by zone */}
+      {INDEX_ZONES.map((zone) => (
         <section key={zone} className="space-y-3">
-          <div>
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: ZONE_COLORS[zone] }}
-              />
-              {t(`zones.${zone}.name`)}
-            </h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">{t(`zones.${zone}.desc`)}</p>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: INDEX_ZONE_COLORS[zone] }}
+                />
+                {t(`zones.${zone}.name`)}
+                <Badge variant="outline" className="text-[10px] font-medium">
+                  {t('zones.zoneLabel', { zone })}
+                </Badge>
+              </h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t(`zones.${zone}.desc`)}</p>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {t('zones.weightShare', {
+                weight: INDEX_DIMENSIONS.filter((d) => d.zone === zone).reduce(
+                  (s, d) => s + d.weight,
+                  0,
+                ),
+              })}
+            </span>
           </div>
+
           <div className="grid gap-4 md:grid-cols-2">
-            {DIMENSIONS.filter((d) => d.zone === zone).map((dim) => {
-              const status = statuses[dim.key];
-              const key = answerKey.get(dim.key);
+            {INDEX_DIMENSIONS.filter((d) => d.zone === zone).map((dim) => {
+              const score = scores?.[dim.key] ?? null;
+              const catKey = CATEGORY_BY_DIM[dim.key];
+              const cat: IndexCategoryData | null = catKey && data ? data.categories[catKey] : null;
+              const directional = cat !== null && cat.sampleCitations < INDEX_LOW_SAMPLE_THRESHOLD;
+
               return (
                 <Card
                   key={dim.n}
-                  className={cn('flex flex-col', !status.measured && 'bg-muted/20')}
+                  className="flex flex-col overflow-hidden border-l-4"
+                  style={{ borderLeftColor: INDEX_ZONE_COLORS[dim.zone] }}
                 >
-                  <CardHeader className="space-y-1.5 pb-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className="text-xs font-semibold"
-                        style={{ color: ZONE_COLORS[dim.zone] }}
-                      >
-                        {dim.n}
-                        <span className="ml-1.5 font-normal text-muted-foreground">
-                          {t('dims.weight', { weight: dim.weight })}
-                        </span>
-                      </span>
-                      <StatusPill active={status.measured} />
-                    </div>
-                    <CardTitle className="text-sm">{t(`dims.${dim.key}.name`)}</CardTitle>
-                    <p className="text-xs font-medium text-primary">
-                      {t(`dims.${dim.key}.action`)}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="flex flex-1 flex-col gap-3 pt-0 text-xs text-muted-foreground">
-                    <div className="flex-1">
-                      {loading ? (
-                        <Skeleton className="h-8 w-full" />
-                      ) : status.measured ? (
-                        <div>
-                          <span className="text-3xl font-bold tabular-nums text-foreground">
-                            {status.score}
-                            <span className="text-sm font-normal text-muted-foreground">/100</span>
+                  <CardHeader className="space-y-2 pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                          <span
+                            className="font-bold"
+                            style={{ color: INDEX_ZONE_COLORS[dim.zone] }}
+                          >
+                            {dim.n}
                           </span>
-                          {dim.key === 'dim2' && status.score === 0 && (
-                            <p className="mt-0.5">{t('kpis.d2Zero')}</p>
-                          )}
-                        </div>
-                      ) : dim.categories && key && key.rows.length > 0 ? (
-                        <AnswerKeyTable rows={key.rows} categoryTotal={key.categoryTotal} />
-                      ) : (
-                        <p className="italic">
-                          {dim.categories ? t('dims.noCitations') : t('dims.lockedHint')}
+                          {t(`dims.${dim.key}.name`)}
+                          <Badge variant="outline" className="text-[10px] font-normal">
+                            {t('dims.weight', { weight: dim.weight })}
+                          </Badge>
+                        </CardTitle>
+                        <p className="mt-1.5 text-xs text-muted-foreground">
+                          {t(`dims.${dim.key}.brief`)}
                         </p>
+                      </div>
+                      {loading ? (
+                        <Skeleton className="h-9 w-16" />
+                      ) : score === null ? (
+                        <span className="text-sm font-medium italic text-muted-foreground">
+                          {t('dims.notMeasured')}
+                        </span>
+                      ) : (
+                        <span
+                          className={cn('text-3xl font-bold tabular-nums', scoreColorClass(score))}
+                        >
+                          {score}
+                          <span className="text-xs font-normal text-muted-foreground">/100</span>
+                        </span>
                       )}
                     </div>
-                    <DimensionCta href={dim.ctaHref} label={t(`dims.${dim.key}.cta`)} />
+                    {score !== null && (
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={cn('h-full', scoreBarClass(score))}
+                          style={{ width: `${score}%` }}
+                        />
+                      </div>
+                    )}
+                  </CardHeader>
+
+                  <CardContent className="flex flex-1 flex-col gap-3 pt-0 text-xs">
+                    {/* Por quê */}
+                    <div>
+                      <p className="mb-1 font-semibold uppercase tracking-wide text-[10px] text-muted-foreground">
+                        {score === null ? t('dims.whyNone') : t('dims.why', { score })}
+                      </p>
+                      <ul className="space-y-1 text-muted-foreground">
+                        {dim.key === 'dim1' &&
+                          (d1 ? (
+                            <li>
+                              <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                                ✓
+                              </span>{' '}
+                              {t('dims.dim1.evAudit', { date: d1.date, score: d1.score })}
+                            </li>
+                          ) : (
+                            <li>
+                              <span className="font-medium text-red-600 dark:text-red-400">✗</span>{' '}
+                              {t('dims.dim1.evNoAudit')}
+                            </li>
+                          ))}
+                        {dim.key === 'dim2' && data && (
+                          <>
+                            <li>
+                              <span
+                                className={cn(
+                                  'font-medium',
+                                  data.d2.score >= 50
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400',
+                                )}
+                              >
+                                {data.d2.score >= 50 ? '✓' : '✗'}
+                              </span>{' '}
+                              {t('dims.dim2.evOwn', {
+                                citing: data.d2.resultsCitingOwn,
+                                total: data.totals.results,
+                                pct: data.d2.pctOwn,
+                              })}
+                            </li>
+                            <li className="italic">{t('dims.dim2.evRuler')}</li>
+                          </>
+                        )}
+                        {cat && (
+                          <>
+                            <li>
+                              <span
+                                className={cn(
+                                  'font-medium',
+                                  cat.score >= 50
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400',
+                                )}
+                              >
+                                {cat.score >= 50 ? '✓' : '✗'}
+                              </span>{' '}
+                              {t('dims.evPresence', {
+                                withBrand: cat.answersWithBrand,
+                                citing: cat.answersCiting,
+                              })}
+                            </li>
+                            {directional && (
+                              <li className="italic">
+                                {t('dims.directional', { count: cat.sampleCitations })}
+                              </li>
+                            )}
+                          </>
+                        )}
+                      </ul>
+                    </div>
+
+                    {/* Fontes pesquisadas — always visible */}
+                    <div className="rounded-md border bg-muted/30 p-2.5">
+                      <p className="mb-1.5 font-semibold uppercase tracking-wide text-[10px] text-muted-foreground">
+                        {t('dims.sources')}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {dim.key === 'dim1' || dim.key === 'dim2' ? (
+                          (data?.d2.ownDomains ?? []).length > 0 ? (
+                            (data?.d2.ownDomains ?? []).map((domain) => (
+                              <SourceChip
+                                key={domain}
+                                domain={domain}
+                                youAppear
+                                appearLabel={t('dims.youAppear')}
+                                absentLabel={t('dims.youDontAppear')}
+                              />
+                            ))
+                          ) : (
+                            <span className="italic text-muted-foreground">
+                              {t('dims.noSources')}
+                            </span>
+                          )
+                        ) : cat && cat.topSources.length > 0 ? (
+                          cat.topSources.map((s) => (
+                            <SourceChip
+                              key={s.domain}
+                              domain={s.domain}
+                              youAppear={s.youAppear}
+                              appearLabel={t('dims.youAppear')}
+                              absentLabel={t('dims.youDontAppear')}
+                            />
+                          ))
+                        ) : (
+                          <span className="italic text-muted-foreground">
+                            {t('dims.noSources')}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1.5 text-[10px] text-muted-foreground">
+                        {t(`dims.${dim.key}.sourcesNote`)}
+                      </p>
+                    </div>
+
+                    {/* CTAs */}
+                    <div className="mt-auto flex flex-wrap gap-2">
+                      <Link
+                        href={dim.ctaHref}
+                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'flex-1')}
+                      >
+                        {t(`dims.${dim.key}.cta`)}
+                        <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                      </Link>
+                      {dim.key === 'dim1' && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="border-[#D8452F]/40 text-[#D8452F] hover:bg-[#D8452F]/10 hover:text-[#D8452F]"
+                          onClick={handleCopyLlms}
+                        >
+                          <Copy className="mr-2 h-3.5 w-3.5" />
+                          {t('dims.dim1.copyLlms')}
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -546,42 +663,87 @@ export default function CitabilityPage() {
         </section>
       ))}
 
-      {/* How the IC works — collapsible, holds the conceptual diagram. Kept
-          last so the page leads with score + actions, not theory. */}
+      {/* Share de resposta nos prompts (formerly "Visibilidade") */}
       <Card>
-        <button
-          type="button"
-          onClick={() => setShowHow((v) => !v)}
-          aria-expanded={showHow}
-          className="flex w-full items-center justify-between rounded-xl px-6 py-4 text-left text-sm font-semibold transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {t('howItWorks')}
-          <ChevronDown
-            className={cn('h-4 w-4 text-muted-foreground transition-transform', {
-              'rotate-180': showHow,
-            })}
-          />
-        </button>
-        {showHow && (
-          <CardContent className="pt-0">
-            <p className="mb-3 text-xs text-muted-foreground">{t('matrix.subtitle')}</p>
-            <div className="mx-auto max-w-xl">
-              <CitabilityDiagram dimLabel={(key) => t(`dims.${key}.name`)} />
-            </div>
-            <div className="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              {ZONES.map((zone) => (
-                <span key={zone} className="inline-flex items-center gap-1.5">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: ZONE_COLORS[zone] }}
-                  />
-                  {t(`matrix.zone${zone}`)}
+        <CardHeader className="pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
+              {t('share.title')}
+              <span className="text-xs font-normal text-muted-foreground line-through">
+                {t('share.oldName')}
+              </span>
+              <Badge variant="outline" className="text-[10px] font-normal">
+                {t('share.chip')}
+              </Badge>
+            </CardTitle>
+            {!loading && hasData && (
+              <span className="text-2xl font-bold tabular-nums">
+                {sharePct}%
+                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                  {t('share.headline', {
+                    mentioned: data?.share.mentioned ?? 0,
+                    total: data?.share.total ?? 0,
+                  })}
                 </span>
-              ))}
-            </div>
-          </CardContent>
-        )}
+              </span>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3 pt-0">
+          {loading ? (
+            <Skeleton className="h-24 w-full" />
+          ) : !hasData ? (
+            <p className="text-sm italic text-muted-foreground">{t('share.empty')}</p>
+          ) : (
+            <>
+              <table className="w-full max-w-2xl text-xs">
+                <tbody>
+                  {data?.share.byPlatform.map((p) => {
+                    const platformPct = p.total > 0 ? Math.round((p.mentioned / p.total) * 100) : 0;
+                    return (
+                      <tr key={p.platform} className="border-t border-border/50 first:border-t-0">
+                        <td className="w-36 py-1.5 pr-2 font-medium">
+                          {PLATFORM_LABELS[p.platform] ?? p.platform}
+                        </td>
+                        <td className="py-1.5 pr-3">
+                          <div className="h-2.5 w-full overflow-hidden rounded-sm bg-muted">
+                            <div
+                              className="h-full rounded-sm bg-foreground/60"
+                              style={{ width: `${(platformPct / maxPlatformPct) * 100}%` }}
+                            />
+                          </div>
+                        </td>
+                        <td className="w-28 whitespace-nowrap py-1.5 text-right tabular-nums text-muted-foreground">
+                          {platformPct}% · {p.mentioned}/{p.total}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <p className="inline-block rounded-md border border-dashed bg-muted/40 px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                {t('share.reconciliation', {
+                  sums: data?.share.byPlatform.map((p) => p.mentioned).join('+') ?? '',
+                  mentioned: data?.share.mentioned ?? 0,
+                  total: data?.share.total ?? 0,
+                  pct: sharePct,
+                })}
+              </p>
+            </>
+          )}
+        </CardContent>
       </Card>
+
+      {/* Fase 2 — visible, out of scope */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-lg border border-dashed px-4 py-3 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 font-semibold">
+          <Eye className="h-3.5 w-3.5" />
+          {t('phase2.title')}
+        </span>
+        {(t.raw('phase2.items') as string[]).map((item) => (
+          <span key={item}>{item}</span>
+        ))}
+      </div>
     </div>
   );
 }

@@ -32,7 +32,7 @@
     "shopping": "Shopping",
     "reports": "Relatórios",
     "settings": "Configurações",
-    "citability": "Citabilidade",
+    "citability": "Índice de Visibilidade",
     "badgeNew": "Novo",
     "costs": "Custos & Consumo"
   },
@@ -1180,113 +1180,125 @@
     "exportFailed": "Falha ao exportar CSV"
   },
   "citability": {
-    "title": "Citabilidade",
-    "subtitle": "O Índice de Citabilidade (IC) organiza as 6 frentes que fazem uma marca ser citada pelas IAs — com peso, zona de ação e o gabarito real das fontes que as IAs citam nos seus prompts.",
-    "kpis": {
-      "icTitle": "IC parcial",
-      "d1Title": "01 · Legibilidade para IAs",
-      "d1Hint": "Score da última Auditoria de Site do domínio principal.",
-      "d2Title": "02 · Cobertura de Conteúdo",
-      "d2Hint": "% das respostas de IA que citam o seu domínio.",
-      "icNoData": "Rode uma Auditoria de Site e um rastreamento para começar a medir.",
-      "icCoverage": "nota calculada sobre {coverage}% do peso do índice — só as dimensões já medidas",
-      "icRecalc": "A nota se recalcula conforme novas dimensões forem medidas.",
-      "coverageBarAria": "Cobertura do índice: dimensões medidas e não medidas, proporcionais ao peso",
-      "runTrackingCta": "Rodar rastreamento",
-      "d2Zero": "Nenhuma resposta de IA cita o seu domínio ainda — esse zero é real, não falta de dado.",
-      "dimsActive": "{active} de 6 dimensões ativas"
-    },
-    "matrix": {
-      "title": "Matriz de Citabilidade",
-      "subtitle": "Posição = onde a alavanca vive e quanto depende de terceiros · Bolha = peso no IC · Cor = zona de ação",
-      "ariaLabel": "Matriz das 6 dimensões do Índice de Citabilidade",
-      "xAxis": "Interno ← alavanca → Externo",
-      "yAxis": "Dependência de terceiros",
-      "zoneA": "Faça agora — você controla, é rápido",
-      "zoneB": "Reivindique — de terceiros, mas você ativa",
-      "zoneC": "Conquiste — depende de terceiros, é lento"
-    },
-    "zones": {
-      "A": {
-        "name": "Faça agora",
-        "desc": "Você controla, é rápido — site e conteúdo próprios. É o que destrava o resto: IA só cita quem consegue ler."
-      },
-      "B": {
-        "name": "Reivindique",
-        "desc": "É de terceiros, mas você ativa — reivindique perfis, peça avaliações, publique. Retorno médio, esforço baixo."
-      },
-      "C": {
-        "name": "Conquiste",
-        "desc": "Depende de terceiros e é lento — mídia earned e autoridade de vertical. Maior peso isolado do IC; colhe quem já fez as zonas \"Faça agora\" e \"Reivindique\"."
-      }
-    },
-    "dims": {
-      "weight": "{weight}% do IC",
-      "answerKey": "Gabarito — fontes que as IAs citam no seu setor:",
-      "citationCount": "{count, plural, one {# citação} other {# citações}}",
-      "noCitations": "Nenhuma citação dessa categoria nos seus rastreamentos ainda.",
-      "runAuditCta": "Rodar Auditoria de Site",
-      "dim1": {
-        "name": "Legibilidade para IAs",
-        "action": "Deixe o site legível para as IAs",
-        "desc": "Prontidão técnica e <entity>entidade</entity> — schema/JSON-LD, <llms>llms.txt</llms>, <wikidata>Wikidata</wikidata>. Medida pela Auditoria de Site mais recente do domínio principal.",
-        "cta": "Rodar Auditoria de Site"
-      },
-      "dim2": {
-        "name": "Cobertura de Conteúdo",
-        "action": "Responda cada pergunta no seu site",
-        "desc": "Cobertura e qualidade <geo>GEO</geo> por tópico — página própria e <ext>extraível</ext>. Medida pela fração das respostas de IA que citam o seu domínio.",
-        "cta": "Ver oportunidades de conteúdo"
-      },
-      "dim3": {
-        "name": "Presença Social",
-        "action": "Ocupe os canais e publique recente",
-        "desc": "Pegada multiplataforma e frescor — 4+ plataformas, YouTube em destaque.",
-        "cta": "Mapear canais sociais"
-      },
-      "dim4": {
-        "name": "Avaliações de Clientes",
-        "action": "Domine as plataformas de review",
-        "desc": "Prova social e voz do cliente — G2, Trustpilot, Reclame Aqui, Reddit.",
-        "cta": "Mapear plataformas de review"
-      },
-      "dim5": {
-        "name": "Open Media & Fontes de IA",
-        "action": "Apareça nas fontes que as IAs citam",
-        "desc": "Mídia earned, editorial, diretórios e listagens do setor — a maior alavanca isolada do IC.",
-        "cta": "Ver fontes que as IAs citam"
-      },
-      "dim6": {
-        "name": "Verticais e Reguladores",
-        "action": "Seja referência na sua vertical",
-        "desc": "Autoridade de segmento — reguladores, associações e demanda de marca.",
-        "cta": "Mapear associações e reguladores"
-      },
-      "comingSoon": "Em breve",
-      "presenceUnknown": "sem dado",
-      "lowSample": "Amostra pequena ({count, plural, one {# citação} other {# citações}} na categoria) — use como direção, não como decisão.",
-      "lockedHint": "Entra no índice assim que esta dimensão tiver dado."
-    },
-    "notMeasured": "Não medido",
-    "howItWorks": "Como funciona o IC",
-    "windowNote": "Considera todo o período rastreado",
-    "glossary": {
-      "geo": "GEO (Generative Engine Optimization): otimizar conteúdo para ser citado por motores de resposta de IA.",
-      "llms": "llms.txt: arquivo no seu site que orienta as IAs sobre quais páginas ler e como interpretá-las.",
-      "wikidata": "Wikidata: base pública de entidades que as IAs usam para confirmar quem é a sua marca.",
-      "entity": "Entidade: a identidade da marca reconhecida pelas IAs — nome, site e dados consistentes entre fontes.",
-      "extractable": "Página extraível: estruturada de forma que a IA consiga recortar a resposta dela (títulos claros, listas, resposta direta)."
-    },
-    "status": {
-      "active": "Ativo",
-      "locked": "A desbloquear"
+    "title": "Índice de Visibilidade",
+    "subtitle": "Sua nota 0–100 de visibilidade nas IAs, composta por 6 dimensões — a conta está sempre aberta.",
+    "period": {
+      "7d": "7 dias",
+      "30d": "30 dias",
+      "all": "Tudo"
     },
     "bands": {
       "undesirable": "Indesejável",
       "regular": "Regular",
-      "good": "Boa",
-      "great": "Ótima",
-      "best": "Best in class"
+      "good": "Bom",
+      "great": "Ótimo",
+      "best": "Excelente"
+    },
+    "hero": {
+      "label": "Índice de Visibilidade",
+      "noData": "Sem rastreamentos ainda",
+      "noDataHint": "Rode um rastreamento para calcular sua nota — as 6 dimensões nascem dos dados reais das respostas de IA.",
+      "noAuditNote": "01 · Site técnico sem auditoria — rode a Auditoria de Site para completar a conta (pesos renormalizados até lá).",
+      "contributionTitle": "Contribuição por dimensão",
+      "contributionAria": "Barra de contribuição de cada dimensão para o índice, em pontos",
+      "pts": "{pts} pts",
+      "evolutionTitle": "Evolução — censos semanais",
+      "evolutionAria": "Evolução do Índice de Visibilidade ao longo das semanas",
+      "evolutionEmpty": "A evolução aparece a partir do segundo censo semanal."
+    },
+    "zones": {
+      "zoneLabel": "Zona {zone}",
+      "weightShare": "{weight}% do índice",
+      "A": {
+        "name": "Faça agora",
+        "desc": "Você controla e é rápido — site e conteúdo próprios. É o que destrava o resto: IA só cita quem consegue ler."
+      },
+      "B": {
+        "name": "Reivindique",
+        "desc": "É de terceiros, mas a ativação é sua — perfis, avaliações, publicações. Retorno médio, esforço baixo."
+      },
+      "C": {
+        "name": "Conquiste",
+        "desc": "Depende de terceiros e leva tempo — mídia earned e autoridade de vertical. Maior peso isolado do índice."
+      }
+    },
+    "dims": {
+      "weight": "peso {weight}%",
+      "why": "Por quê {score}",
+      "whyNone": "Por quê",
+      "sources": "Fontes pesquisadas",
+      "youAppear": "você aparece",
+      "youDontAppear": "você não aparece",
+      "noSources": "Nenhuma fonte registrada nessa categoria no período.",
+      "notMeasured": "sem medição",
+      "directional": "Direcional — amostra baixa ({count, plural, one {# citação} other {# citações}} na categoria).",
+      "evPresence": "Você aparece em {withBrand} de {citing} respostas que usam essas fontes",
+      "dim1": {
+        "name": "Site técnico",
+        "brief": "Mede se as IAs conseguem ler seu site: schema, llms.txt, texto em HTML.",
+        "sourcesNote": "Nota do último Site Audit do domínio principal — mesma fonte da página Auditoria.",
+        "cta": "O que fazer → Auditoria de Site",
+        "copyLlms": "Copiar llms.txt pronto",
+        "llmsCopied": "llms.txt copiado — revise e publique na raiz do site (ex.: seusite.com/llms.txt).",
+        "llmsCopyFailed": "Não foi possível copiar. Tente de novo.",
+        "llmsDescriptionPlaceholder": "Descreva sua marca em uma frase.",
+        "llmsSectionMain": "Páginas principais",
+        "llmsHomeHint": "página inicial e visão geral da marca",
+        "llmsSectionOptional": "Conteúdo opcional",
+        "llmsOptionalHint": "Liste aqui páginas de produto, FAQ e comparativos.",
+        "evAudit": "Auditoria de {date}: nota {score} — detalhes e correções na página Auditoria",
+        "evNoAudit": "Nenhuma auditoria do site ainda — rode a primeira para medir esta dimensão"
+      },
+      "dim2": {
+        "name": "Conteúdo próprio",
+        "brief": "Mede se as respostas de IA citam páginas do seu próprio site como fonte.",
+        "sourcesNote": "Seus domínios cadastrados. Régua: 10% das respostas citando seu site = nota 100 (melhor caso real: 7,4%).",
+        "cta": "O que fazer → tópicos e onde publicar",
+        "evOwn": "{citing} de {total} respostas citam seu domínio ({pct}%)",
+        "evRuler": "Régua: 10% de citação própria = nota 100 — melhor caso real observado: 7,4%."
+      },
+      "dim3": {
+        "name": "Presença social",
+        "brief": "Mede sua presença nos canais sociais que as IAs citam no seu setor.",
+        "sourcesNote": "Canais sociais mais citados pelas IAs nos seus prompts. TikTok ainda não lemos (declarado).",
+        "cta": "O que fazer → canais a reivindicar"
+      },
+      "dim4": {
+        "name": "Avaliações de clientes",
+        "brief": "Mede sua presença nas plataformas de avaliação e fóruns que aparecem nas respostas de IA.",
+        "sourcesNote": "Checagem direta das plataformas por segmento (Reclame Aqui etc.) em desenvolvimento — hoje medimos pelo que as IAs citam (declarado).",
+        "cta": "O que fazer → fluxo de avaliações"
+      },
+      "dim5": {
+        "name": "Mídia aberta",
+        "brief": "Mede se você aparece nos veículos e sites que as IAs usam como fonte no seu tema.",
+        "sourcesNote": "Top domínios editoriais citados pelas IAs nos seus prompts — o gabarito a perseguir.",
+        "cta": "O que fazer → onde conquistar menção"
+      },
+      "dim6": {
+        "name": "Verticais e reguladores",
+        "brief": "Mede sua autoridade no segmento: fontes institucionais e perguntas de categoria.",
+        "sourcesNote": "Domínios institucionais (associações, órgãos, referências) citados pelas IAs nos seus prompts.",
+        "cta": "O que fazer → presença setorial"
+      }
+    },
+    "share": {
+      "title": "Share de resposta nos prompts",
+      "oldName": "Visibilidade",
+      "chip": "componente do monitoramento — não é o índice",
+      "headline": "· {mentioned} de {total} respostas",
+      "reconciliation": "Conferência: ({sums}) ÷ {total} = {mentioned} ÷ {total} = {pct}% — a soma das plataformas É o total",
+      "empty": "Sem respostas no período selecionado."
+    },
+    "phase2": {
+      "title": "Fase 2:",
+      "items": [
+        "“O que a IA sabe / não sabe da sua marca”",
+        "Share orgânico × direto",
+        "Top 15 fontes consultadas",
+        "Lacunas prompt a prompt",
+        "Fonte congelada (auditável)"
+      ]
     }
   },
   "shopping": {

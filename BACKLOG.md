@@ -46,7 +46,7 @@
 ### P1 — Próximo
 - [ ] **UI de aliases de marca** — campo em Settings/onboarding pros apelidos (backend pronto: migration 00036 + parser + backfill; hoje configura-se via banco). Sugerir alias automaticamente quando o nome tiver 2+ palavras. `P` · caso Polar Electro
 - [ ] **Grader grátis sem login** — "qual sua citabilidade?" (reusa `describe-from-site` + 1 run enxuto + IC parcial). Funil de topo. `M` · `D3` · Onda 0
-- [ ] **Citabilidade v2 (o herói)** — plano de ação sequenciado + táticas do curso (4 verbos) + âncora do paper (+41%). `M` · `D2` · Onda 1
+- [x] **Citabilidade v2 → Índice de Visibilidade (fase 1 entregue 15/ago)** — 6 dimensões sempre com nota, fórmula aberta, fontes pesquisadas visíveis, share de resposta com conferência, copiar llms.txt. Fase 2: blend cobertura de tópicos no D2, checagem direta de reviews (motor por segmento), prompts de marca (share direto), "o que a IA sabe/não sabe", fonte congelada. `M` · `D2` · Onda 1
 - [ ] **Grounding de prompts em perguntas reais** — Semrush `phrase_questions` no onboarding/adicionar-marca (volume + intenção). `P` · `D4` · Onda 1
 - [ ] **Money-prompts por intenção** — auto-etiquetar/priorizar prompts que compram (cadência por prompt; personas). `M` · `D2/D4` · Onda 1
 - [ ] **Enriquecer D1/D5 com Ahrefs** — Domain Rating, backlinks, domínios que citam → tira dimensões do "não medido". `M` · `D2/D4` · Onda 1

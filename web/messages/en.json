@@ -1260,13 +1260,13 @@
       "dim3": {
         "name": "Social presence",
         "brief": "Measures your presence on the social channels AIs cite in your sector.",
-        "sourcesNote": "Social channels most cited by AIs in your prompts. TikTok not read yet (declared).",
+        "sourcesNote": "Social channels most cited by AIs in your prompts. Provisional measurement via citations — definitive ruler (active channels + cadence) under construction. TikTok not read yet (declared).",
         "cta": "What to do → channels to claim"
       },
       "dim4": {
         "name": "Customer reviews",
         "brief": "Measures your presence on the review platforms and forums that appear in AI answers.",
-        "sourcesNote": "Direct per-segment platform checks (Reclame Aqui etc.) under development — today we measure what AIs cite (declared).",
+        "sourcesNote": "Provisional measurement via AI citations (inherently low sample) — definitive ruler via direct checks of your segment's platforms (Reclame Aqui etc.) under construction.",
         "cta": "What to do → review flow"
       },
       "dim5": {
@@ -1278,7 +1278,7 @@
       "dim6": {
         "name": "Verticals & regulators",
         "brief": "Measures your authority in the segment: institutional sources and category questions.",
-        "sourcesNote": "Institutional domains (associations, agencies, references) cited by AIs in your prompts.",
+        "sourcesNote": "Institutional domains cited by AIs in your prompts. Provisional measurement — definitive ruler (brand demand, sector lists, Wikipedia) under construction.",
         "cta": "What to do → sector presence"
       }
     },

@@ -1260,13 +1260,13 @@
       "dim3": {
         "name": "Presença social",
         "brief": "Mede sua presença nos canais sociais que as IAs citam no seu setor.",
-        "sourcesNote": "Canais sociais mais citados pelas IAs nos seus prompts. TikTok ainda não lemos (declarado).",
+        "sourcesNote": "Canais sociais mais citados pelas IAs nos seus prompts. Medição provisória pelas citações — régua definitiva (canais ativos + cadência) em construção. TikTok ainda não lemos (declarado).",
         "cta": "O que fazer → canais a reivindicar"
       },
       "dim4": {
         "name": "Avaliações de clientes",
         "brief": "Mede sua presença nas plataformas de avaliação e fóruns que aparecem nas respostas de IA.",
-        "sourcesNote": "Checagem direta das plataformas por segmento (Reclame Aqui etc.) em desenvolvimento — hoje medimos pelo que as IAs citam (declarado).",
+        "sourcesNote": "Medição provisória pelas citações das IAs (amostra baixa por natureza) — régua definitiva por checagem direta das plataformas do seu segmento (Reclame Aqui etc.) em construção.",
         "cta": "O que fazer → fluxo de avaliações"
       },
       "dim5": {
@@ -1278,7 +1278,7 @@
       "dim6": {
         "name": "Verticais e reguladores",
         "brief": "Mede sua autoridade no segmento: fontes institucionais e perguntas de categoria.",
-        "sourcesNote": "Domínios institucionais (associações, órgãos, referências) citados pelas IAs nos seus prompts.",
+        "sourcesNote": "Domínios institucionais citados pelas IAs nos seus prompts. Medição provisória — régua definitiva (demanda de marca, listas do setor, Wikipedia) em construção.",
         "cta": "O que fazer → presença setorial"
       }
     },

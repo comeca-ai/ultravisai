@@ -46,8 +46,8 @@
 > das respostas de IA). Tudo abaixo é o que AINDA NÃO EXISTE na plataforma.
 
 ### Decisões pendentes (travam o resto — bater o martelo com o Igor)
-- [ ] **Nomenclatura dos dois índices**: tela atual volta a ser "Índice de Citabilidade" (alavanca) e nasce a irmã "Score de Visibilidade" (resultado)? Os docs dizem sim; a reunião de 14/ago disse "padroniza tudo em visibilidade". `P0` · `D0`
-- [ ] **Faixas de nota**: quintis do doc novo (0-20/21-40/41-60/61-80/81-100) vs faixas de 10/ago já implementadas (0-30/31-50/51-70/71-90/91-100). `P0` · `D0`
+- [x] **Nomenclatura dos dois índices** — DECIDIDO 17/ago (registro): duas notas; tela atual renomeada "Índice de Citabilidade" (feito); página "Score de Visibilidade" na fila abaixo.
+- [x] **Faixas de nota** — DECIDIDO 17/ago (registro): quintis 0-20/21-40/41-60/61-80/81-100 (feito).
 
 ### Réguas do IC por ATIVOS (planilha "Critérios de Nota" — exigem coleta nova)
 - [ ] **D1 estendida**: crawl de schema/llms.txt/sitemap + entidade (Wikidata/Wikipedia) + consistência nome/aliases — hoje o site audit cobre parte; mapear pros critérios da régua. `M`

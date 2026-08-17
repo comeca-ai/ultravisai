@@ -32,7 +32,7 @@
     "shopping": "Shopping",
     "reports": "Reports",
     "settings": "Settings",
-    "citability": "Visibility Index",
+    "citability": "Citability Index",
     "badgeNew": "New",
     "costs": "Costs & Usage"
   },
@@ -1180,8 +1180,8 @@
     "exportFailed": "Failed to export CSV"
   },
   "citability": {
-    "title": "Visibility Index",
-    "subtitle": "Your 0–100 AI-visibility score, composed of 6 dimensions — the math is always open.",
+    "title": "Citability Index",
+    "subtitle": "Your 0–100 citability score — what you have already built to be cited by AIs. It is the lever that drives the Visibility Score (the outcome). The math is always open.",
     "period": {
       "7d": "7 days",
       "30d": "30 days",
@@ -1195,7 +1195,7 @@
       "best": "Best in class"
     },
     "hero": {
-      "label": "Visibility Index",
+      "label": "Citability Index",
       "noData": "No tracking runs yet",
       "noDataHint": "Run a tracking round to compute your score — all 6 dimensions are derived from real AI answers.",
       "noAuditNote": "01 · Technical site not audited yet — run a Site Audit to complete the math (weights renormalized until then).",
@@ -1252,7 +1252,7 @@
       "dim2": {
         "name": "Own content",
         "brief": "Measures whether AI answers cite pages of your own site as a source.",
-        "sourcesNote": "Your registered domains. Ruler: 10% of answers citing your site = score 100 (best real case: 7.4%).",
+        "sourcesNote": "Your registered domains. Provisional measurement via own-citation share (10% of answers = score 100; best real case 7.4%) — definitive ruler (topic coverage × GEO quality) under construction.",
         "cta": "What to do → topics and where to publish",
         "evOwn": "{citing} of {total} answers cite your domain ({pct}%)",
         "evRuler": "Ruler: 10% own-citation = score 100 — best real case observed: 7.4%."

@@ -37,6 +37,53 @@
 
 ---
 
+## 📐 Reconciliação IC × Score — docs de lógica do Igor (17/ago)
+
+> Fonte: `NewCo_Visao_Preliminar_Produto_e_Pacotes_v260817.xlsx` (4 abas) +
+> `Ultravis_Citabilidade_Score_Reconciliacao_v20260817.pptx` (9 slides).
+> Arquitetura definida: **dois índices que não se somam** — IC (alavanca,
+> medido dos ATIVOS da marca) dirige o Score/Visibilidade (resultado, lido
+> das respostas de IA). Tudo abaixo é o que AINDA NÃO EXISTE na plataforma.
+
+### Decisões pendentes (travam o resto — bater o martelo com o Igor)
+- [ ] **Nomenclatura dos dois índices**: tela atual volta a ser "Índice de Citabilidade" (alavanca) e nasce a irmã "Score de Visibilidade" (resultado)? Os docs dizem sim; a reunião de 14/ago disse "padroniza tudo em visibilidade". `P0` · `D0`
+- [ ] **Faixas de nota**: quintis do doc novo (0-20/21-40/41-60/61-80/81-100) vs faixas de 10/ago já implementadas (0-30/31-50/51-70/71-90/91-100). `P0` · `D0`
+
+### Réguas do IC por ATIVOS (planilha "Critérios de Nota" — exigem coleta nova)
+- [ ] **D1 estendida**: crawl de schema/llms.txt/sitemap + entidade (Wikidata/Wikipedia) + consistência nome/aliases — hoje o site audit cobre parte; mapear pros critérios da régua. `M`
+- [ ] **D2 cobertura × qualidade GEO**: % dos tópicos com página própria × front-load/estatística com fonte/tabelas/blocos 50-150p/frescor <12m (LLM judge sobre o crawl). `M`
+- [ ] **D3 checagem de canais sociais**: nº de plataformas ativas (satura em 5), cadência/recência, bônus YouTube. Exige leitura dos perfis (declarar o que não lemos). `M`
+- [ ] **D4 checagem direta de reviews** (motor por segmento): perfis reivindicados, nota, volume, recência, respostas — G2/Trustpilot/Capterra/Reclame Aqui/Google Reviews + Reddit/Quora. Dados de 15/ago provam: citações ≈ 0, só checagem direta mede isso. `M` ⭐
+- [ ] **D6 demanda de marca**: volume de busca da marca (DataForSEO — correlato r≈0,334), presença em listas "melhores/alternativas a", reguladores/associações, Wikipedia. `M`
+- [ ] **Campo Evidência por dimensão** na tela (padrão do simulador da planilha: toda nota registra a fonte). `P`
+- [ ] **Calibração com histórico**: regressão regularizada das dimensões do IC contra a Visibilidade observada — pesos deixam de ser prior e viram contribuição medida (slide 9, "fiz → melhorou"). `G` · depois de ~8 censos
+
+### Score/Visibilidade (resultado) — índice novo com 6 dimensões próprias
+- [ ] **Página "Score de Visibilidade"**: Citação 20% · Presença 20% · Autoridade 20% · Posição 15% · Acurácia 15% · Sentimento 10%, com réguas do slide 8. Presença/Sentimento já temos; Posição derivar da resposta. `M`
+- [ ] **Autoridade** (profundidade do contexto quando citada) — LLM judge sobre as respostas. `M`
+- [ ] **Acurácia** (alucinação sobre a marca) — LLM judge respostas × fatos da marca. `M`
+- [ ] **Nível de citação** (não cita → cita → recomenda → lidera) por prompt×motor. `M`
+- [ ] **Diagnóstico de gap 2×2 IC × Score** (slide 6: frágil/saudável/roadmap limpo/lag) — tela barata quando os dois índices existirem. `P`
+- [ ] **Crosswalk alavanca → dimensão do Score** (aba "Ponte": quais ● cada alavanca move) como explicação na UI. `P`
+
+### Pacotes e features comerciais (aba "Draft-Estrutura e Comparativo" — priorizar juntos)
+- [ ] **Pacotes Sinal R$15k · Alcance R$20k · Domínio R$30k/mês** — página de pricing + gates por plano (frequência mensal/semanal/diária, 4/6/9 motores). `G` ⭐
+- [ ] **9 motores de IA** (hoje ~6): completar com Grok, Copilot, DeepMind, Minimax. `M`
+- [ ] **Alertas de variação de ±5 pontos** no score (e-mail/WhatsApp) — o Daily Pulse portado é a base; falta régua de ±5 e canal WhatsApp. `P` ⭐
+- [ ] **"Fale com o Orin"** — agente ganhou nome; rename + posicionamento de suporte 24x7. `P`
+- [ ] **Estimativa de potencial de retorno em vendas** (range + racional a partir do impacto em visibilidade). `M`
+- [ ] **Rede de Conhecimento** — mapa visual de por onde as IAs passam (marca × concorrentes). `G`
+- [ ] **Kit Press Release** — conteúdo de autoridade (headline, corpo, referência, canal). `M`
+- [ ] **Briefing customizado até 100 prompts** (plano Domínio) + relatórios a partir de briefing. `M`
+- [ ] **Relatório executivo C-level**. `P` (one-pager de 08/ago é o embrião)
+- [ ] **Teste em tempo real** — digite uma pergunta e veja cada IA responder ao vivo. `M`
+- [ ] **Concorrentes**: comparação das 6 dimensões com o líder do segmento · tabela técnica você vs concorrentes (JSON/Schema/llms.txt/FAQ) · comparativo de produtos com sentimento. `M`
+- [ ] **Auditoria em 8 dimensões do site** (rendering, schema, FAQ/editorial, llms.txt, idioma/país, página de produto, meta tags sociais, trust) — mapear o site audit atual pras 8. `P`
+- [ ] **Social GEO Score** + auditoria de presença em fontes citadas. `M`
+- [ ] **Scan de comércio agêntico** (limitadores do site a agentes de compra; catálogo/preço marcados "futuro"). `G`
+- [ ] **Priorização de problemas**: severidade (já temos no audit) + estimativa de impacto no score por problema + quick wins destacados. `M`
+- [ ] **Plano de ação em sprints de 30 dias** + guia por responsável. `M`
+
 ## 🚀 Produto (features)
 
 ### P0 — Agora

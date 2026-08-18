@@ -114,6 +114,17 @@ export interface VisibilityIndexData {
     coverage: Record<string, { pass: number; evaluated: number }>;
     createdAt: string;
   } | null;
+  /**
+   * Score de Visibilidade (resultado) — dimensões medidas das respostas de
+   * IA na janela. Autoridade e Acurácia (juiz LLM) ainda não existem e a
+   * página declara isso. Posição/Sentimento: null = marca nunca apareceu.
+   */
+  resultScore: {
+    citation: number;
+    presence: number;
+    position: { score: number | null; samples: number };
+    sentiment: { score: number | null; pos: number; neu: number; neg: number };
+  };
   /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
   evolution: Array<{
     weekStart: string;
@@ -194,6 +205,8 @@ interface ResultRow {
   mention_count: number | null;
   created_at: string;
   citations: Citation[] | null;
+  sentiment: string | null;
+  competitor_mentions: Array<{ mention_count?: number | null }> | null;
 }
 
 export async function getVisibilityIndex(
@@ -316,6 +329,11 @@ export async function getVisibilityIndex(
   const platformAgg = new Map<string, { mentioned: number; total: number }>();
   const directAgg = { mentioned: 0, total: 0 };
   const organicAgg = { mentioned: 0, total: 0 };
+  // Score de Visibilidade (resultado) — Posição e Sentimento medem só as
+  // respostas em que a marca aparece ("quando aparece, como aparece").
+  const sentAgg = { pos: 0, neu: 0, neg: 0 };
+  let posSum = 0;
+  let posSamples = 0;
 
   interface WeekAgg {
     results: number;
@@ -399,6 +417,21 @@ export async function getVisibilityIndex(
     bucket.total += 1;
     if ((r.mention_count ?? 0) > 0) bucket.mentioned += 1;
 
+    // Posição + Sentimento (Score de Visibilidade) — só respostas com a marca.
+    const mc = r.mention_count ?? 0;
+    if (mc > 0) {
+      if (r.sentiment === 'positive') sentAgg.pos += 1;
+      else if (r.sentiment === 'negative') sentAgg.neg += 1;
+      else sentAgg.neu += 1;
+
+      const comps = Array.isArray(r.competitor_mentions) ? r.competitor_mentions : [];
+      const rivals = comps.filter((c) => (c?.mention_count ?? 0) > 0);
+      const better = rivals.filter((c) => (c.mention_count ?? 0) > mc).length;
+      const n = rivals.length + 1;
+      posSum += n > 1 ? ((n - 1 - better) / (n - 1)) * 100 : 100;
+      posSamples += 1;
+    }
+
     for (const g of touched) {
       cats[g].answersCiting += 1;
       if (brandPresent) cats[g].answersWithBrand += 1;
@@ -428,7 +461,9 @@ export async function getVisibilityIndex(
   for (let offset = 0; offset < SCAN_MAX_ROWS; offset += SCAN_PAGE_SIZE) {
     const { data, error } = await supabase
       .from('prompt_results')
-      .select('id, prompt_id, platform, mention_count, created_at, citations')
+      .select(
+        'id, prompt_id, platform, mention_count, created_at, citations, sentiment, competitor_mentions',
+      )
       .eq('brand_id', brandId)
       .neq('platform', 'chatgpt-shopping')
       .order('created_at', { ascending: true })
@@ -491,6 +526,23 @@ export async function getVisibilityIndex(
     weights,
     reviewCheck,
     siteCrawl,
+    resultScore: {
+      citation: ownCitationScore(pctOwn),
+      presence: winResults > 0 ? Math.round((mentioned / winResults) * 100) : 0,
+      position:
+        posSamples > 0
+          ? { score: Math.round(posSum / posSamples), samples: posSamples }
+          : { score: null, samples: 0 },
+      sentiment:
+        sentAgg.pos + sentAgg.neu + sentAgg.neg > 0
+          ? {
+              score: Math.round(
+                (sentAgg.pos * 100 + sentAgg.neu * 50) / (sentAgg.pos + sentAgg.neu + sentAgg.neg),
+              ),
+              ...sentAgg,
+            }
+          : { score: null, pos: 0, neu: 0, neg: 0 },
+    },
     evolution,
   };
 }

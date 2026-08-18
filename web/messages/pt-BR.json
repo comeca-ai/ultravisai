@@ -33,6 +33,7 @@
     "reports": "Relatórios",
     "settings": "Configurações",
     "citability": "Índice de Citabilidade",
+    "score": "Score de Visibilidade",
     "badgeNew": "Novo",
     "costs": "Custos & Consumo"
   },
@@ -1178,6 +1179,75 @@
     "exportCsv": "Exportar CSV",
     "exporting": "Exportando...",
     "exportFailed": "Falha ao exportar CSV"
+  },
+  "visibilityScore": {
+    "title": "Score de Visibilidade",
+    "subtitle": "O índice de RESULTADO: como sua marca aparece nas respostas das IAs — citada, presente, bem posicionada e bem falada. Quem move este número é o Índice de Citabilidade.",
+    "twoIndexNote": "Dois índices, papéis diferentes: o Score de Visibilidade mede o RESULTADO nas respostas de IA; o Índice de Citabilidade mede a ALAVANCA (seus ativos). Eles não se somam — um dirige o outro.",
+    "twoIndexLink": "Ver o Índice de Citabilidade",
+    "period": {
+      "7d": "7 dias",
+      "30d": "30 dias",
+      "all": "Tudo"
+    },
+    "bands": {
+      "undesirable": "Indesejável",
+      "regular": "Regular",
+      "good": "Bom",
+      "great": "Ótimo",
+      "best": "Excelente"
+    },
+    "hero": {
+      "label": "Score de Visibilidade",
+      "noData": "Sem respostas de IA na janela.",
+      "noDataHint": "Rode um rastreamento para medir o Score — os números nascem das respostas coletadas.",
+      "sample": "Medido de {results} respostas de IA na janela selecionada",
+      "formulaLabel": "A conta, aberta",
+      "renormNote": "Autoridade e Acurácia ainda não são medidas (juiz LLM em construção) — os pesos são renormalizados sobre as dimensões medidas."
+    },
+    "dims": {
+      "weight": "peso {weight}%",
+      "noSample": "sem amostra",
+      "building": "em construção",
+      "citation": {
+        "name": "Citação",
+        "brief": "As IAs citam suas fontes (seu site) como referência nas respostas.",
+        "ev": "{citing} de {total} respostas citam seu domínio ({pct}% — régua: 10% = 100)",
+        "how": "Medido dos links citados em cada resposta coletada."
+      },
+      "presence": {
+        "name": "Presença",
+        "brief": "Sua marca é mencionada nas respostas, com nome ou domínio.",
+        "ev": "Mencionada em {mentioned} de {total} respostas",
+        "how": "Percentual direto de respostas com menção à marca."
+      },
+      "authority": {
+        "name": "Autoridade",
+        "brief": "Quando citada, a marca aparece com profundidade e contexto — não só de passagem.",
+        "buildingNote": "Exige juiz LLM lendo as respostas (piloto planejado). Entra com peso 20% quando estiver no ar; até lá o peso é redistribuído."
+      },
+      "position": {
+        "name": "Posição",
+        "brief": "Quando a resposta compara marcas, a sua aparece à frente dos concorrentes.",
+        "ev": "Posição média vs concorrentes em {samples} respostas em que você aparece",
+        "noSample": "A marca ainda não apareceu em nenhuma resposta da janela.",
+        "how": "Rank da marca por nº de menções vs concorrentes, resposta a resposta."
+      },
+      "accuracy": {
+        "name": "Acurácia",
+        "brief": "O que as IAs dizem sobre a marca está correto — sem alucinação.",
+        "buildingNote": "Exige juiz LLM comparando respostas com os fatos da marca (piloto planejado). Entra com peso 15% quando estiver no ar; até lá o peso é redistribuído."
+      },
+      "sentiment": {
+        "name": "Sentimento",
+        "brief": "Quando falam de você, falam bem.",
+        "ev": "{pos} positivas · {neu} neutras · {neg} negativas (entre respostas com a marca)",
+        "noSample": "A marca ainda não apareceu em nenhuma resposta da janela.",
+        "how": "Positiva = 100 · neutra = 50 · negativa = 0, na média das respostas com a marca."
+      }
+    },
+    "gapNote": "Próximo passo da arquitetura: o diagnóstico de gap 2×2 (Citabilidade × Score) — alavanca alta com resultado baixo é atraso de colheita; alavanca baixa com resultado alto é fragilidade.",
+    "gapLink": "Comparar com o Índice de Citabilidade"
   },
   "citability": {
     "title": "Índice de Citabilidade",

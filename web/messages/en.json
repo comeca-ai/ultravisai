@@ -33,6 +33,7 @@
     "reports": "Reports",
     "settings": "Settings",
     "citability": "Citability Index",
+    "score": "Visibility Score",
     "badgeNew": "New",
     "costs": "Costs & Usage"
   },
@@ -1178,6 +1179,75 @@
     "exportCsv": "Export CSV",
     "exporting": "Exporting...",
     "exportFailed": "Failed to export CSV"
+  },
+  "visibilityScore": {
+    "title": "Visibility Score",
+    "subtitle": "The RESULT index: how your brand shows up in AI answers — cited, present, well positioned and well spoken of. What moves this number is the Citability Index.",
+    "twoIndexNote": "Two indexes, different roles: the Visibility Score measures the RESULT in AI answers; the Citability Index measures the LEVER (your assets). They are never added together — one drives the other.",
+    "twoIndexLink": "See the Citability Index",
+    "period": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "all": "All"
+    },
+    "bands": {
+      "undesirable": "Undesirable",
+      "regular": "Regular",
+      "good": "Good",
+      "great": "Great",
+      "best": "Best in class"
+    },
+    "hero": {
+      "label": "Visibility Score",
+      "noData": "No AI answers in this window.",
+      "noDataHint": "Run a tracking to measure the Score — the numbers come from collected answers.",
+      "sample": "Measured from {results} AI answers in the selected window",
+      "formulaLabel": "The math, in the open",
+      "renormNote": "Authority and Accuracy are not measured yet (LLM judge under construction) — weights are renormalized over the measured dimensions."
+    },
+    "dims": {
+      "weight": "weight {weight}%",
+      "noSample": "no sample",
+      "building": "under construction",
+      "citation": {
+        "name": "Citation",
+        "brief": "AIs cite your sources (your site) as a reference in their answers.",
+        "ev": "{citing} of {total} answers cite your domain ({pct}% — ruler: 10% = 100)",
+        "how": "Measured from the links cited in each collected answer."
+      },
+      "presence": {
+        "name": "Presence",
+        "brief": "Your brand is mentioned in answers, by name or domain.",
+        "ev": "Mentioned in {mentioned} of {total} answers",
+        "how": "Direct percentage of answers mentioning the brand."
+      },
+      "authority": {
+        "name": "Authority",
+        "brief": "When cited, the brand appears with depth and context — not just in passing.",
+        "buildingNote": "Requires an LLM judge reading the answers (pilot planned). Enters at 20% weight once live; until then the weight is redistributed."
+      },
+      "position": {
+        "name": "Position",
+        "brief": "When an answer compares brands, yours comes ahead of competitors.",
+        "ev": "Average position vs competitors across {samples} answers where you appear",
+        "noSample": "The brand has not appeared in any answer in this window yet.",
+        "how": "Brand rank by mention count vs competitors, answer by answer."
+      },
+      "accuracy": {
+        "name": "Accuracy",
+        "brief": "What AIs say about the brand is correct — no hallucination.",
+        "buildingNote": "Requires an LLM judge comparing answers against brand facts (pilot planned). Enters at 15% weight once live; until then the weight is redistributed."
+      },
+      "sentiment": {
+        "name": "Sentiment",
+        "brief": "When they talk about you, they speak well.",
+        "ev": "{pos} positive · {neu} neutral · {neg} negative (among answers with the brand)",
+        "noSample": "The brand has not appeared in any answer in this window yet.",
+        "how": "Positive = 100 · neutral = 50 · negative = 0, averaged over answers with the brand."
+      }
+    },
+    "gapNote": "Next step of the architecture: the 2×2 gap diagnosis (Citability × Score) — high lever with low result is a harvest lag; low lever with high result is fragility.",
+    "gapLink": "Compare with the Citability Index"
   },
   "citability": {
     "title": "Citability Index",

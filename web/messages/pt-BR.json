@@ -1248,6 +1248,10 @@
         "llmsOptionalHint": "Liste aqui páginas de produto, FAQ e comparativos.",
         "evAudit": "Auditoria de {date}: nota {score} — detalhes e correções na página Auditoria",
         "evNoAudit": "Nenhuma auditoria do site ainda — rode a primeira para medir esta dimensão",
+        "evCrawl": "Varredura de {date}: {scored} de {total} páginas-chave do site avaliadas (nota = média das páginas)",
+        "evCrawlSchema": "Schema.org presente em {pass} de {evaluated} páginas",
+        "evCrawlFaq": "FAQ estruturado em {pass} de {evaluated} páginas",
+        "evCrawlH1": "Título H1 adequado em {pass} de {evaluated} páginas",
         "signal": "Cobertura de JSON-LD válido, llms.txt+sitemap, headings, entidade (Wikidata/Wikipedia) e nome/aliases consistentes",
         "criteria": [
           "Sem schema, sem llms.txt/sitemap, headings caóticos, sem entidade — a máquina não lê nem te identifica",

@@ -336,6 +336,44 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Ultravis addition (migration 00042): varredura multi-página do site
+      // (D1 do IC); escrita só pelo server.
+      site_crawls: {
+        Row: {
+          id: string;
+          brand_id: string;
+          origin: string;
+          page_count: number | null;
+          pages_scored: number | null;
+          score: number | null;
+          pages: Json | null;
+          coverage: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          brand_id: string;
+          origin: string;
+          page_count?: number | null;
+          pages_scored?: number | null;
+          score?: number | null;
+          pages?: Json | null;
+          coverage?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          brand_id?: string;
+          origin?: string;
+          page_count?: number | null;
+          pages_scored?: number | null;
+          score?: number | null;
+          pages?: Json | null;
+          coverage?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       brands: {
         Row: {
           created_at: string;

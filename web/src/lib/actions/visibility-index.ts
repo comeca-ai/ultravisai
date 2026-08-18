@@ -100,6 +100,20 @@ export interface VisibilityIndexData {
    * (a UI mantém o proxy declarado).
    */
   reviewCheck: { score: number | null; rows: ReviewCheckRow[]; checkedAt: string | null } | null;
+  /**
+   * Varredura multi-página do site (migration 00042) — quando existe, é ela
+   * que dá a nota do D1 (média das páginas-chave); sem varredura a UI usa o
+   * Site Audit single-page como antes. `coverage` = "Schema.org em 8/10
+   * páginas" por sinal.
+   */
+  siteCrawl: {
+    score: number | null;
+    pageCount: number;
+    pagesScored: number;
+    origin: string;
+    coverage: Record<string, { pass: number; evaluated: number }>;
+    createdAt: string;
+  } | null;
   /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
   evolution: Array<{
     weekStart: string;
@@ -251,6 +265,25 @@ export async function getVisibilityIndex(
           checkedAt: reviewRows[0]?.checked_at ?? null,
         }
       : null;
+
+  // Varredura multi-página (D1) — última varredura da marca, se houver.
+  const { data: crawlRows } = await supabase
+    .from('site_crawls')
+    .select('origin, page_count, pages_scored, score, coverage, created_at')
+    .eq('brand_id', brandId)
+    .order('created_at', { ascending: false })
+    .limit(1);
+  const crawlRow = crawlRows?.[0] ?? null;
+  const siteCrawl = crawlRow
+    ? {
+        score: crawlRow.score === null ? null : Math.round(Number(crawlRow.score)),
+        pageCount: crawlRow.page_count ?? 0,
+        pagesScored: crawlRow.pages_scored ?? 0,
+        origin: crawlRow.origin,
+        coverage: (crawlRow.coverage ?? {}) as Record<string, { pass: number; evaluated: number }>,
+        createdAt: crawlRow.created_at,
+      }
+    : null;
 
   const from =
     preset === 'all'
@@ -457,6 +490,7 @@ export async function getVisibilityIndex(
     share: { mentioned, total: winResults, byPlatform, direct: directAgg, organic: organicAgg },
     weights,
     reviewCheck,
+    siteCrawl,
     evolution,
   };
 }

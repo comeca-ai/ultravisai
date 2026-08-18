@@ -15,6 +15,13 @@
  * Google Reviews exige API paga → BACKLOG. Lista por segmento via LLM é a
  * evolução v1.1 (registrada no BACKLOG §Reconciliação).
  *
+ * Mecanismo (18/ago): as 4 plataformas devolvem 403 para IP de datacenter
+ * (anti-bot) — o fetch direto não funciona do Railway. O mecanismo primário
+ * é a SERP API do DataForSEO (fornecedor já usado p/ volume de busca):
+ * consulta `"marca" site:plataforma` no Google BR e lê URL do perfil + nota
+ * em estrela do resultado orgânico. O fetch direto fica como fallback para
+ * ambientes sem DataForSEO (ex.: self-host em IP residencial).
+ *
  * Agenda: semanal (REVIEW_CHECK_CRON, default seg 08:30 UTC) + warm-up no
  * boot quando a marca ainda não tem nenhuma checagem.
  */
@@ -53,6 +60,98 @@ async function fetchPage(url) {
 /** "found: null" precisa de motivo nos logs — sem isso não dá pra diagnosticar. */
 function logUnverifiable(platform, url, info) {
   logger.warn({ platform, url, ...info }, 'review-check: not verifiable');
+}
+
+// ---------------------------------------------------------------------------
+// Mecanismo primário: SERP do Google BR via DataForSEO (sem 403 de anti-bot)
+// ---------------------------------------------------------------------------
+
+const SERP_URL = 'https://api.dataforseo.com/v3/serp/google/organic/live/advanced';
+const BRAZIL_LOCATION_CODE = 2076;
+
+/** Perfil típico de cada plataforma na SERP. `query(ctx)` monta a busca. */
+const SERP_PLATFORMS = [
+  {
+    platform: 'reclame_aqui',
+    profileRe: /reclameaqui\.com\.br\/empresa\//i,
+    query: ({ name }) => `"${name}" site:reclameaqui.com.br`,
+  },
+  {
+    platform: 'trustpilot',
+    profileRe: /trustpilot\.com\/review\//i,
+    // Perfis do Trustpilot são por domínio; nome fica de fallback.
+    query: ({ name, domain }) => `"${domain || name}" site:trustpilot.com`,
+  },
+  {
+    platform: 'g2',
+    profileRe: /g2\.com\/products\//i,
+    query: ({ name }) => `"${name}" site:g2.com`,
+  },
+  {
+    platform: 'capterra',
+    profileRe: /capterra\.com(\.br)?\/(p\/|reviews\/)/i,
+    query: ({ name }) => `"${name}" (site:capterra.com OR site:capterra.com.br)`,
+  },
+];
+
+function dataForSeoAuth() {
+  const login = process.env.DATAFORSEO_LOGIN;
+  const password = process.env.DATAFORSEO_PASSWORD;
+  if (!login || !password) return null;
+  return 'Basic ' + Buffer.from(`${login}:${password}`).toString('base64');
+}
+
+/** Normaliza a nota da SERP para a escala 0-5 (RA aparece em 0-10). Pura. */
+export function normalizeSerpRating(rating) {
+  const value = Number.parseFloat(rating?.value ?? '');
+  if (!Number.isFinite(value)) return null;
+  const max = Number.parseFloat(rating?.rating_max ?? '') || 5;
+  return Math.min(5, Math.round(((value * 5) / max) * 10) / 10);
+}
+
+/** Primeiro resultado orgânico cuja URL bate com o padrão de perfil. Pura. */
+export function pickProfileHit(items, profileRe) {
+  return (items || []).find((i) => i?.type === 'organic' && profileRe.test(i?.url || '')) || null;
+}
+
+/** Busca no Google BR; devolve os itens da SERP ou null (erro/sem config). */
+async function serpSearch(query) {
+  const auth = dataForSeoAuth();
+  if (!auth) return null;
+  const res = await fetch(SERP_URL, {
+    method: 'POST',
+    headers: { Authorization: auth, 'Content-Type': 'application/json' },
+    body: JSON.stringify([
+      { keyword: query, location_code: BRAZIL_LOCATION_CODE, language_code: 'pt', depth: 10 },
+    ]),
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!res.ok) throw new Error(`DataForSEO HTTP ${res.status}`);
+  const data = await res.json();
+  const task = data?.tasks?.[0];
+  if (data?.status_code !== 20000 || task?.status_code !== 20000) {
+    throw new Error(`DataForSEO: ${task?.status_message || data?.status_message || 'erro'}`);
+  }
+  return task?.result?.[0]?.items ?? [];
+}
+
+async function checkViaSerp(ctx, cfg) {
+  const query = cfg.query(ctx);
+  try {
+    const items = await serpSearch(query);
+    const hit = pickProfileHit(items, cfg.profileRe);
+    if (!hit) return { platform: cfg.platform, url: null, found: false };
+    return {
+      platform: cfg.platform,
+      url: hit.url,
+      found: true,
+      rating: normalizeSerpRating(hit.rating),
+      review_count: Number.parseInt(hit.rating?.votes_count ?? '', 10) || null,
+    };
+  } catch (err) {
+    logUnverifiable(cfg.platform, query, { err: err?.message, via: 'serp' });
+    return { platform: cfg.platform, url: null, found: null };
+  }
 }
 
 /** Extract aggregateRating from JSON-LD blocks in an HTML page. */
@@ -219,12 +318,16 @@ export async function runReviewChecksForBrand(brandId) {
     .replace(/\/.*$/, '');
   const ctx = { name: brand.name, domain };
 
-  const rows = await Promise.all([
-    checkReclameAqui(ctx),
-    checkTrustpilot(ctx),
-    checkG2(ctx),
-    checkCapterra(ctx),
-  ]);
+  // SERP via DataForSEO quando configurado (Railway = IP de datacenter,
+  // as plataformas devolvem 403 no fetch direto); senão, fetch direto.
+  const rows = dataForSeoAuth()
+    ? await Promise.all(SERP_PLATFORMS.map((cfg) => checkViaSerp(ctx, cfg)))
+    : await Promise.all([
+        checkReclameAqui(ctx),
+        checkTrustpilot(ctx),
+        checkG2(ctx),
+        checkCapterra(ctx),
+      ]);
 
   const now = new Date().toISOString();
   const upserts = rows.map((r) => ({

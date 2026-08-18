@@ -212,14 +212,34 @@ async function checkTrustpilot({ domain }) {
   }
 }
 
+/**
+ * A API do Reclame Aqui recusa o proxy datacenter comum (502 via Scrape.do).
+ * Retry no modo residencial BR do Scrape.do (`super=true&geoCode=br`) — mais
+ * caro em créditos, por isso só para o RA e só quando a via normal falha.
+ */
+async function fetchRaViaResidential(url) {
+  const token = process.env.SCRAPEDO_API_KEY;
+  if (!token) return null;
+  const params = new URLSearchParams({ token, url, super: 'true', geoCode: 'br' });
+  const res = await fetch(`https://api.scrape.do/?${params.toString()}`, {
+    signal: AbortSignal.timeout(45_000),
+  });
+  if (!res.ok) return null;
+  return res.text();
+}
+
 /** Reclame Aqui: API pública de busca de empresas; melhor match pelo nome. */
 async function checkReclameAqui({ name }) {
   const searchUrl = `https://iosearch.reclameaqui.com.br/raichu-io-site-search-v1/query/companiesSearch/${encodeURIComponent(name)}`;
   try {
-    const res = await fetchPage(searchUrl);
+    let res = await fetchPage(searchUrl);
     if (!res.ok) {
-      logUnverifiable('reclame_aqui', searchUrl, { status: res.status });
-      return { platform: 'reclame_aqui', url: null, found: null };
+      const body = await fetchRaViaResidential(searchUrl);
+      if (body === null) {
+        logUnverifiable('reclame_aqui', searchUrl, { status: res.status });
+        return { platform: 'reclame_aqui', url: null, found: null };
+      }
+      res = { ok: true, status: 200, json: async () => JSON.parse(body) };
     }
     const data = await res.json();
     const companies = data?.companies ?? data?.data?.companies ?? [];

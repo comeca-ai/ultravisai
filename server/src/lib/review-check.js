@@ -16,11 +16,12 @@
  * evolução v1.1 (registrada no BACKLOG §Reconciliação).
  *
  * Mecanismo (18/ago): as 4 plataformas devolvem 403 para IP de datacenter
- * (anti-bot) — o fetch direto não funciona do Railway. O mecanismo primário
- * é a SERP API do DataForSEO (fornecedor já usado p/ volume de busca):
- * consulta `"marca" site:plataforma` no Google BR e lê URL do perfil + nota
- * em estrela do resultado orgânico. O fetch direto fica como fallback para
- * ambientes sem DataForSEO (ex.: self-host em IP residencial).
+ * (anti-bot) — o fetch direto puro não funciona do Railway. Ordem de
+ * mecanismos: (1) SERP do DataForSEO quando configurado (consulta
+ * `"marca" site:plataforma` no Google BR e lê perfil + nota do resultado
+ * orgânico); (2) checagem direta via Scrape.do (mesmo proxy do Site Audit,
+ * `SCRAPEDO_API_KEY` — já configurado em produção); (3) fetch direto puro
+ * (só funciona de IP residencial, ex. self-host).
  *
  * Agenda: semanal (REVIEW_CHECK_CRON, default seg 08:30 UTC) + warm-up no
  * boot quando a marca ainda não tem nenhuma checagem.
@@ -28,6 +29,7 @@
 
 import cron from 'node-cron';
 import logger from './logger.js';
+import { fetchViaScrapeDo } from './audit/fetcher.js';
 
 const FETCH_TIMEOUT_MS = 12_000;
 const BETWEEN_BRANDS_MS = 3_000;
@@ -45,6 +47,17 @@ function slugify(name) {
 }
 
 async function fetchPage(url) {
+  // Via Scrape.do quando configurado — as plataformas de review bloqueiam
+  // IP de datacenter com 403; o proxy do Site Audit resolve isso.
+  if (process.env.SCRAPEDO_API_KEY) {
+    const res = await fetchViaScrapeDo(url, { render: false, retries: 1 });
+    return {
+      ok: res.ok,
+      status: res.status,
+      text: async () => res.html,
+      json: async () => JSON.parse(res.html),
+    };
+  }
   const res = await fetch(url, {
     headers: {
       'User-Agent': UA,

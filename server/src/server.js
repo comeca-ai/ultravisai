@@ -16,6 +16,7 @@ import trafficRoutes from './routes/traffic.js';
 import opsRoutes from './routes/ops.js';
 import { startWatchdog } from './lib/watchdog.js';
 import { startUpstreamWatch } from './lib/upstream-watch.js';
+import { startReviewChecks } from './lib/review-check.js';
 import { runPendingMentionBackfillFromEnv } from './lib/backfill-mentions.js';
 import {
   createJob,
@@ -549,6 +550,10 @@ server.listen(PORT, async () => {
   // Ultravis addition: watches the upstream project (ansvisor.com + GitHub)
   // every 3 days for news; surfaced in the /ops panel. See lib/upstream-watch.js.
   startUpstreamWatch();
+
+  // Ultravis addition: weekly direct check of review platforms per brand —
+  // feeds dimension 04 of the Citability Index. See lib/review-check.js.
+  startReviewChecks();
 
   // Ultravis addition: one-shot mention/sentiment backfill when
   // BACKFILL_MENTIONS_BRAND_ID is set (see lib/backfill-mentions.js).

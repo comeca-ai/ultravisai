@@ -301,6 +301,41 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Ultravis addition (migration 00041): checagem direta de plataformas
+      // de review por marca (D4 do IC); escrita só pelo server.
+      brand_review_checks: {
+        Row: {
+          id: string;
+          brand_id: string;
+          platform: string;
+          url: string | null;
+          found: boolean | null;
+          rating: number | null;
+          review_count: number | null;
+          checked_at: string;
+        };
+        Insert: {
+          id?: string;
+          brand_id: string;
+          platform: string;
+          url?: string | null;
+          found?: boolean | null;
+          rating?: number | null;
+          review_count?: number | null;
+          checked_at?: string;
+        };
+        Update: {
+          id?: string;
+          brand_id?: string;
+          platform?: string;
+          url?: string | null;
+          found?: boolean | null;
+          rating?: number | null;
+          review_count?: number | null;
+          checked_at?: string;
+        };
+        Relationships: [];
+      };
       brands: {
         Row: {
           created_at: string;

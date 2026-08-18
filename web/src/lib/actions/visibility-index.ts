@@ -62,6 +62,14 @@ export interface IndexCategoryData {
   topSources: IndexSourceRow[];
 }
 
+export interface ReviewCheckRow {
+  platform: string;
+  url: string | null;
+  found: boolean | null;
+  rating: number | null;
+  reviewCount: number | null;
+}
+
 export interface VisibilityIndexData {
   totals: { results: number; citations: number };
   d2: {
@@ -86,6 +94,12 @@ export interface VisibilityIndexData {
    * (edited only via the /ops panel) over the framework defaults.
    */
   weights: Record<IndexDimKey, number>;
+  /**
+   * Checagem direta de plataformas de review (migration 00041) — quando
+   * existe, é ela que dá a nota do D4; score null = nada verificável
+   * (a UI mantém o proxy declarado).
+   */
+  reviewCheck: { score: number | null; rows: ReviewCheckRow[]; checkedAt: string | null } | null;
   /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
   evolution: Array<{
     weekStart: string;
@@ -121,6 +135,32 @@ function ownCitationScore(pctOwn: number): number {
 function gabaritoScore(answersWithBrand: number, answersCiting: number): number {
   if (answersCiting === 0) return 0;
   return Math.round((answersWithBrand / answersCiting) * 100);
+}
+
+/**
+ * Nota v1 do D4 a partir das checagens diretas — ESPELHO de
+ * `server/src/lib/review-check.js#reviewScoreFrom` (mesma régua, mesmos
+ * números; mudanças devem ser feitas nos dois). null = nada verificável.
+ */
+function reviewScoreFrom(rows: ReviewCheckRow[]): number | null {
+  const known = rows.filter((r) => r.found === true || r.found === false);
+  if (known.length === 0) return null;
+  const confirmed = rows.filter((r) => r.found === true);
+  let score: number;
+  if (confirmed.length === 0) score = 10;
+  else if (confirmed.length === 1) score = 30;
+  else if (confirmed.length <= 3) score = 50;
+  else score = 65;
+  const ratings = confirmed
+    .map((r) => r.rating)
+    .filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+  if (ratings.length > 0) {
+    const avg = ratings.reduce((s, v) => s + v, 0) / ratings.length;
+    if (avg >= 4.5) score += 20;
+    else if (avg >= 4.2) score += 10;
+    else if (avg < 3.5) score -= 10;
+  }
+  return Math.max(0, Math.min(100, score));
 }
 
 /** Monday of the week of `iso`, as YYYY-MM-DD. */
@@ -183,6 +223,34 @@ export async function getVisibilityIndex(
       .eq('is_brand_prompt', true);
     for (const r of bpRows ?? []) brandPromptIds.add(r.id);
   }
+
+  // Checagem direta de reviews (D4) — coletada semanalmente pelo server.
+  const { data: reviewRows } = await supabase
+    .from('brand_review_checks')
+    .select('platform, url, found, rating, review_count, checked_at')
+    .eq('brand_id', brandId);
+  const reviewCheck =
+    reviewRows && reviewRows.length > 0
+      ? {
+          rows: reviewRows.map((r) => ({
+            platform: r.platform,
+            url: r.url,
+            found: r.found,
+            rating: r.rating,
+            reviewCount: r.review_count,
+          })),
+          score: reviewScoreFrom(
+            reviewRows.map((r) => ({
+              platform: r.platform,
+              url: r.url,
+              found: r.found,
+              rating: r.rating,
+              reviewCount: r.review_count,
+            })),
+          ),
+          checkedAt: reviewRows[0]?.checked_at ?? null,
+        }
+      : null;
 
   const from =
     preset === 'all'
@@ -388,6 +456,7 @@ export async function getVisibilityIndex(
     },
     share: { mentioned, total: winResults, byPlatform, direct: directAgg, organic: organicAgg },
     weights,
+    reviewCheck,
     evolution,
   };
 }

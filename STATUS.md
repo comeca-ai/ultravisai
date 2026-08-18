@@ -3,15 +3,15 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 15/ago/2026.**
+> `BACKLOG.md` (o que vem). **Atualizado: 18/ago/2026.**
 
 ## A aplicação está no ar e saudável ✅
 
 | Camada | Estado |
 |---|---|
 | Site + app (Vercel, ultravis.ai) | ✅ No ar e ATUALIZADO (17/ago) — esteve congelado em build de 8/ago por integração GitHub quebrada na migração do repo; reconectada em 17/ago |
-| Server de rastreamento (Railway) | ✅ No ar (último deploy SUCCESS, 11/ago) |
-| Banco (Supabase) | ✅ Ok — 37 migrations, RLS ativo, **arquivo-morto de marcas** ligado |
+| Server de rastreamento (Railway) | ✅ No ar (último deploy SUCCESS, 18/ago) |
+| Banco (Supabase) | ✅ Ok — 41 migrations, RLS ativo, **arquivo-morto de marcas** ligado |
 | Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 5 checks (incl. marca órfã) — alertas por e-mail **desligados** até você configurar um e-mail dedicado |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |
 
@@ -35,7 +35,8 @@
 10. **Painel /ops ganhou Saúde (watchdog ao vivo) + Clientes × Marcas** (PR #47) — acesso: `api.ultravis.ai/ops` (credenciais `OPS_USER`/`OPS_PASS` no Railway).
 11. **Bugs #28/#29/#30 resolvidos** (PR #48): rebranding residual completo (agente, nomes de export `ansvisor_*`, /pricing indo pro site do upstream, mailto de vendas), relatório não aborta mais quando o resumo por IA falha (causa do "relatório não gerado"), login honra `redirectTo`. **18 de 30 itens do feedback respondidos.**
 12. **Índice de Visibilidade v2 no ar (15/ago)** — a tela "Citabilidade" virou **Índice de Visibilidade** (decisão da reunião de 14/ago com o Igor): as 6 dimensões sempre têm nota, a fórmula aparece aberta e a conta fecha, cada card mostra breve explicação + evidências + **fontes pesquisadas** (incluindo o que não lemos, declarado), a "visibilidade" antiga virou "share de resposta nos prompts" com linha de conferência, e há botão "Copiar llms.txt pronto". Réguas v1 calibradas com dados reais (citação própria máx. 7,4%; review ≈ 0 nas citações → checagem direta na fase 2). Pauta de segunda 15h: doc de lógica do Igor calibra pesos e réguas.
-13. **Incidente resolvido (17/ago):** o site web esteve congelado no build de 8/ago — a integração Vercel×GitHub morreu quando o repo antigo foi deletado, e nenhum merge chegava ao ar (por isso "o inglês voltou"). Reconectado; deploy atual serve tudo acumulado, incluindo o Índice de Visibilidade v2. Próximo passo: check de drift de deploy no watchdog (BACKLOG P1).
+13. **Fila aprovada em execução (18/ago):** itens 1 e 2 prontos — **prompts de marca** (PR #65: 4 perguntas × 8 marcas; share Direto × Orgânico começa a contar no próximo censo) e **coletor direto de reviews** (PRs #66-#71: Trustpilot/G2/Capterra checados semanalmente via Scrape.do; D4 deixou de ser proxy). 1ª varredura real: Polar com Trustpilot **1,4★/709 avaliações** + G2 + Capterra (D4=40); Polar Electro D4=20; demais marcas ausência confirmada (D4=10). Reclame Aqui "não verificável" (bloqueia até proxy residencial) — configurar DataForSEO no Railway ativa a saída via SERP já implementada. Também no ar: **calibração de pesos do IC no /ops** (PR #64) e **botão Parar consertado** (PR #63). Próximos da fila: varredura multi-página do site (D1) e página do Score de Visibilidade.
+14. **Incidente resolvido (17/ago):** o site web esteve congelado no build de 8/ago — a integração Vercel×GitHub morreu quando o repo antigo foi deletado, e nenhum merge chegava ao ar (por isso "o inglês voltou"). Reconectado; deploy atual serve tudo acumulado, incluindo o Índice de Visibilidade v2. Próximo passo: check de drift de deploy no watchdog (BACKLOG P1).
 
 ## Onde cada coisa fica
 

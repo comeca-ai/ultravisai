@@ -1299,7 +1299,18 @@
           "Profiles on 2-3 relevant platforms, moderate volume, rating ~4.0, some replies",
           "Complete profiles on key platforms, rating ≥4.2, steady recent reviews, complaints answered, some Reddit/Quora presence",
           "Strong presence + rating ≥4.5 + high recent volume on G2/Trustpilot/etc + active positive Reddit/Quora threads"
-        ]
+        ],
+        "evDirect": "{confirmed} of {total} platforms with a confirmed profile",
+        "evRating": "average rating {rating} across confirmed platforms",
+        "evUnknown": "{count, plural, one {# platform not verifiable (declared)} other {# platforms not verifiable (declared)}}",
+        "unknownMark": "— not verifiable",
+        "directNote": "Weekly direct check of the brand's profiles — the D4 score now comes from here, not from citations.",
+        "platforms": {
+          "reclame_aqui": "Reclame Aqui",
+          "trustpilot": "Trustpilot",
+          "g2": "G2",
+          "capterra": "Capterra"
+        }
       },
       "dim5": {
         "name": "Open Media & AI Sources",

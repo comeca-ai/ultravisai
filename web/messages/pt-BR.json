@@ -1299,7 +1299,18 @@
           "Perfis em 2-3 plataformas relevantes, volume moderado, nota ~4,0, algumas respostas",
           "Perfis completos nas plataformas-chave, nota ≥4,2, reviews recentes constantes, reclamações respondidas, alguma presença Reddit/Quora",
           "Presença forte + nota ≥4,5 + alto volume recente em G2/Trustpilot/etc + threads ativas e positivas em Reddit/Quora"
-        ]
+        ],
+        "evDirect": "{confirmed} de {total} plataformas com perfil confirmado",
+        "evRating": "nota média {rating} nas plataformas confirmadas",
+        "evUnknown": "{count, plural, one {# plataforma não verificável (declarado)} other {# plataformas não verificáveis (declarado)}}",
+        "unknownMark": "— não verificável",
+        "directNote": "Checagem direta semanal dos perfis da marca — a nota do D4 vem daqui, não mais das citações.",
+        "platforms": {
+          "reclame_aqui": "Reclame Aqui",
+          "trustpilot": "Trustpilot",
+          "g2": "G2",
+          "capterra": "Capterra"
+        }
       },
       "dim5": {
         "name": "Mídia Aberta & Fontes de IA",

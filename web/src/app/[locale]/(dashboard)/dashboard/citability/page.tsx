@@ -215,7 +215,9 @@ export default function CitabilityPage() {
       dim1: d1 ? d1.score : null,
       dim2: data.d2.score,
       dim3: data.categories.social.score,
-      dim4: data.categories.reviews.score,
+      // D4: checagem direta de plataformas (migration 00041) quando existe;
+      // score null da checagem = nada verificável → mantém o proxy declarado.
+      dim4: data.reviewCheck?.score ?? data.categories.reviews.score,
       dim5: data.categories.media.score,
       dim6: data.categories.verticals.score,
     };
@@ -479,7 +481,24 @@ export default function CitabilityPage() {
               const score = scores?.[dim.key] ?? null;
               const catKey = CATEGORY_BY_DIM[dim.key];
               const cat: IndexCategoryData | null = catKey && data ? data.categories[catKey] : null;
-              const directional = cat !== null && cat.sampleCitations < INDEX_LOW_SAMPLE_THRESHOLD;
+              // D4 com checagem direta ativa substitui o proxy de citações.
+              const review =
+                dim.key === 'dim4' && data?.reviewCheck && data.reviewCheck.score !== null
+                  ? data.reviewCheck
+                  : null;
+              const directional =
+                review === null && cat !== null && cat.sampleCitations < INDEX_LOW_SAMPLE_THRESHOLD;
+              const reviewConfirmed = review?.rows.filter((r) => r.found === true) ?? [];
+              const reviewUnknown = review?.rows.filter((r) => r.found === null) ?? [];
+              const reviewRatings = reviewConfirmed
+                .map((r) => r.rating)
+                .filter((v): v is number => typeof v === 'number');
+              const reviewAvg =
+                reviewRatings.length > 0
+                  ? Math.round(
+                      (reviewRatings.reduce((s, v) => s + v, 0) / reviewRatings.length) * 10,
+                    ) / 10
+                  : null;
 
               return (
                 <Card
@@ -574,7 +593,47 @@ export default function CitabilityPage() {
                             <li className="italic">{t('dims.dim2.evRuler')}</li>
                           </>
                         )}
-                        {cat && (
+                        {review && (
+                          <>
+                            <li>
+                              <span
+                                className={cn(
+                                  'font-medium',
+                                  reviewConfirmed.length >= 2
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400',
+                                )}
+                              >
+                                {reviewConfirmed.length >= 2 ? '✓' : '✗'}
+                              </span>{' '}
+                              {t('dims.dim4.evDirect', {
+                                confirmed: reviewConfirmed.length,
+                                total: review.rows.length,
+                              })}
+                            </li>
+                            {reviewAvg !== null && (
+                              <li>
+                                <span
+                                  className={cn(
+                                    'font-medium',
+                                    reviewAvg >= 4.2
+                                      ? 'text-emerald-600 dark:text-emerald-400'
+                                      : 'text-amber-600 dark:text-amber-400',
+                                  )}
+                                >
+                                  {reviewAvg >= 4.2 ? '✓' : '~'}
+                                </span>{' '}
+                                {t('dims.dim4.evRating', { rating: reviewAvg })}
+                              </li>
+                            )}
+                            {reviewUnknown.length > 0 && (
+                              <li className="italic">
+                                {t('dims.dim4.evUnknown', { count: reviewUnknown.length })}
+                              </li>
+                            )}
+                          </>
+                        )}
+                        {!review && cat && (
                           <>
                             <li>
                               <span
@@ -624,6 +683,29 @@ export default function CitabilityPage() {
                               {t('dims.noSources')}
                             </span>
                           )
+                        ) : review ? (
+                          review.rows.map((r) => (
+                            <span
+                              key={r.platform}
+                              className={cn(
+                                'inline-flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-[11px]',
+                                r.found === null && 'opacity-60',
+                              )}
+                            >
+                              <span>{t(`dims.dim4.platforms.${r.platform}`)}</span>
+                              {r.found === true && (
+                                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                                  ✓{typeof r.rating === 'number' ? ` ${r.rating}` : ''}
+                                </span>
+                              )}
+                              {r.found === false && (
+                                <span className="font-medium text-red-600 dark:text-red-400">
+                                  ✗
+                                </span>
+                              )}
+                              {r.found === null && <span>{t('dims.dim4.unknownMark')}</span>}
+                            </span>
+                          ))
                         ) : cat && cat.topSources.length > 0 ? (
                           cat.topSources.map((s) => (
                             <SourceChip
@@ -641,7 +723,7 @@ export default function CitabilityPage() {
                         )}
                       </div>
                       <p className="mt-1.5 text-[10px] text-muted-foreground">
-                        {t(`dims.${dim.key}.sourcesNote`)}
+                        {review ? t('dims.dim4.directNote') : t(`dims.${dim.key}.sourcesNote`)}
                       </p>
                     </div>
 

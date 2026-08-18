@@ -1338,7 +1338,10 @@
       "chip": "componente do monitoramento — não é o índice",
       "headline": "· {mentioned} de {total} respostas",
       "reconciliation": "Conferência: ({sums}) ÷ {total} = {mentioned} ÷ {total} = {pct}% — a soma das plataformas É o total",
-      "empty": "Sem respostas no período selecionado."
+      "empty": "Sem respostas no período selecionado.",
+      "direct": "Direto (perguntas com sua marca)",
+      "organic": "Orgânico (perguntas de categoria)",
+      "directPending": "Prompts de marca criados — o share Direto × Orgânico começa a contar no próximo censo."
     },
     "phase2": {
       "title": "Fase 2:",

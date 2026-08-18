@@ -1338,7 +1338,10 @@
       "chip": "a monitoring component — not the index",
       "headline": "· {mentioned} of {total} answers",
       "reconciliation": "Check: ({sums}) ÷ {total} = {mentioned} ÷ {total} = {pct}% — the platform sum IS the total",
-      "empty": "No answers in the selected period."
+      "empty": "No answers in the selected period.",
+      "direct": "Direct (questions naming your brand)",
+      "organic": "Organic (category questions)",
+      "directPending": "Brand prompts created — the Direct × Organic split starts counting on the next census."
     },
     "phase2": {
       "title": "Phase 2:",

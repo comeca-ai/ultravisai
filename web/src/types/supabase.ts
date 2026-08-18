@@ -1000,6 +1000,7 @@ export type Database = {
       };
       prompts: {
         Row: {
+          is_brand_prompt: boolean;
           category: string | null;
           created_at: string;
           id: string;
@@ -1013,6 +1014,7 @@ export type Database = {
           work_status: string | null;
         };
         Insert: {
+          is_brand_prompt?: boolean;
           category?: string | null;
           created_at?: string;
           id?: string;
@@ -1025,6 +1027,7 @@ export type Database = {
           work_status?: string | null;
         };
         Update: {
+          is_brand_prompt?: boolean;
           category?: string | null;
           created_at?: string;
           id?: string;

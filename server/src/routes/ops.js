@@ -444,6 +444,18 @@ function render(d) {
     }
   </div>
 
+  <div class="card" style="margin-top:14px"><h2>Motores × Pacotes comerciais</h2>
+    <div class="ovf"><table>
+      <thead><tr><th>Pacote</th><th>Motores (tag do menor pacote que inclui)</th><th>Lógica comercial</th></tr></thead>
+      <tbody>
+        <tr><td><b>4 motores</b></td><td>ChatGPT · Google AI Overviews · Gemini · Google AI Mode</td><td>Máxima exposição BR + aposta do Google; consumidor de massa</td></tr>
+        <tr><td><b>6 motores</b></td><td>+ Copilot · Perplexity</td><td>Camada corporativa + early-adopter/citações</td></tr>
+        <tr><td><b>9 motores</b></td><td>+ Claude · Grok · <span class="muted">1 slot aberto (validar DeepMind/Minimax)</span></td><td>Cobertura total</td></tr>
+      </tbody>
+    </table></div>
+    <div class="muted" style="margin-top:8px">Tabela do dono (18/ago) — fonte canônica no código: web/src/config/engine-tiers.ts (mudanças lá e aqui juntas). Base do futuro gate por plano; clientes ainda não veem tags.</div>
+  </div>
+
   <div class="card" style="margin-top:14px"><h2>Providers configurados</h2>
     <div class="chips">${Object.entries(d.providers)
       .map(([k, v]) => chip(k, v))

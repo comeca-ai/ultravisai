@@ -1625,6 +1625,16 @@ export async function getCompetitorComparison(
 
   entries.sort((a, b) => b.visibilityRate - a.visibilityRate || b.totalMentions - a.totalMentions);
 
+  // Ultravis bugfix (18/ago): registros homônimos aparecem uma única vez no
+  // leaderboard/legenda — fica o de maior taxa (pós-sort, o primeiro visto).
+  const seenNames = new Set<string>();
+  const dedupedEntries = entries.filter((e) => {
+    if (e.isOwnBrand) return true;
+    if (seenNames.has(e.name)) return false;
+    seenNames.add(e.name);
+    return true;
+  });
+
   // --- Per-provider breakdown ---
   // resolveProvider stays in JS so we don't keep a SQL copy of the mapping
   // table in sync — fold the (model_used, platform) groups into provider
@@ -1646,13 +1656,22 @@ export async function getCompetitorComparison(
   // name used in entries[] above so the providerRows column headers line up
   // with the table rows (empty/null names fall back to competitor_id). No
   // denominator here — competitors divide by the brand's provider bucket.
-  const compByProvider = new Map<string, Map<string, number>>();
+  //
+  // Ultravis bugfix (18/ago, documentado): dois REGISTROS de concorrente com
+  // o MESMO nome (ex.: "Garmin" cadastrado 2× com domínios diferentes) usam o
+  // mesmo termo de matching e enxergam as mesmas respostas — somá-los conta
+  // cada prompt em dobro e a barra passa de 100%. Regra: soma por motor só
+  // DENTRO do mesmo registro (engines de um provider); ENTRE registros de
+  // mesmo nome vale o MAIOR, nunca a soma.
+  const compByProvider = new Map<string, Map<string, Map<string, number>>>();
   for (const cp of agg.by_competitor_provider) {
     const provider = resolveProvider(cp.model_used, cp.platform);
     const name = competitorDisplayName(cp.competitor_name, cp.competitor_id);
     if (!compByProvider.has(name)) compByProvider.set(name, new Map());
     const pm = compByProvider.get(name)!;
-    pm.set(provider, (pm.get(provider) ?? 0) + cp.visible_prompts);
+    const byId = pm.get(provider) ?? new Map<string, number>();
+    byId.set(cp.competitor_id, (byId.get(cp.competitor_id) ?? 0) + cp.visible_prompts);
+    pm.set(provider, byId);
   }
 
   const allProviders = new Set<string>();
@@ -1671,13 +1690,16 @@ export async function getCompetitorComparison(
     const denom = bp?.promptCount ?? 0;
     row[brandName] = bp && denom > 0 ? Math.round((bp.visiblePrompts / denom) * 1000) / 10 : 0;
     for (const [compName, pm] of compByProvider) {
-      const visible = pm.get(provider) ?? 0;
+      const byId = pm.get(provider);
+      // Máximo entre registros homônimos (ver bugfix acima), soma já feita
+      // por registro dentro do provider.
+      const visible = byId && byId.size > 0 ? Math.max(...byId.values()) : 0;
       row[compName] = denom > 0 ? Math.round((visible / denom) * 1000) / 10 : 0;
     }
     return row;
   });
 
-  return { brands: entries, providerRows };
+  return { brands: dedupedEntries, providerRows };
 }
 
 // ─── Share of Voice ─────────────────────────────────────────────────────────

@@ -783,6 +783,9 @@ export type Database = {
       };
       prompt_results: {
         Row: {
+          // Ultravis (migration 00043): posição por ordem de aparição.
+          appearance_rank: number | null;
+          appearance_rivals: number | null;
           brand_id: string;
           citation_count: number;
           citations: Json;
@@ -802,6 +805,8 @@ export type Database = {
           visibility_score: number;
         };
         Insert: {
+          appearance_rank?: number | null;
+          appearance_rivals?: number | null;
           brand_id: string;
           citation_count?: number;
           citations?: Json;
@@ -821,6 +826,8 @@ export type Database = {
           visibility_score?: number;
         };
         Update: {
+          appearance_rank?: number | null;
+          appearance_rivals?: number | null;
           brand_id?: string;
           citation_count?: number;
           citations?: Json;

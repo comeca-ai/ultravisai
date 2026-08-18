@@ -18,6 +18,7 @@ import { startWatchdog } from './lib/watchdog.js';
 import { startUpstreamWatch } from './lib/upstream-watch.js';
 import { startReviewChecks } from './lib/review-check.js';
 import { startSiteCrawl } from './lib/site-crawl.js';
+import { startAppearanceRank } from './lib/appearance-rank.js';
 import { runPendingMentionBackfillFromEnv } from './lib/backfill-mentions.js';
 import {
   createJob,
@@ -559,6 +560,11 @@ server.listen(PORT, async () => {
   // Ultravis addition: monthly multi-page site crawl per brand — feeds
   // dimension 01 of the Citability Index. See lib/site-crawl.js.
   startSiteCrawl();
+
+  // Ultravis addition: enriches prompt_results with the brand's appearance
+  // rank (order of first mention in the answer text) — feeds the Position
+  // dimension of the Visibility Score. See lib/appearance-rank.js.
+  startAppearanceRank();
 
   // Ultravis addition: one-shot mention/sentiment backfill when
   // BACKFILL_MENTIONS_BRAND_ID is set (see lib/backfill-mentions.js).

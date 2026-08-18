@@ -76,6 +76,10 @@ export interface VisibilityIndexData {
     mentioned: number;
     total: number;
     byPlatform: Array<{ platform: string; mentioned: number; total: number }>;
+    /** Share direto: respostas a prompts que citam a marca pelo nome. */
+    direct: { mentioned: number; total: number };
+    /** Share orgânico: respostas a prompts de categoria. */
+    organic: { mentioned: number; total: number };
   };
   /**
    * Effective dimension weights (%): calibrated values from `index_weights`
@@ -131,6 +135,7 @@ function weekStartOf(iso: string): string {
 
 interface ResultRow {
   id: string;
+  prompt_id: string;
   platform: string | null;
   mention_count: number | null;
   created_at: string;
@@ -165,6 +170,20 @@ export async function getVisibilityIndex(
     .filter(Boolean);
   const classifyCtx = { brandDomains, competitorDomains };
 
+  // Prompts de marca (share direto × orgânico — migration 00040). Dois passos
+  // simples em vez de join para manter a tipagem direta.
+  const { data: setRows } = await supabase.from('prompt_sets').select('id').eq('brand_id', brandId);
+  const setIds = (setRows ?? []).map((s) => s.id);
+  const brandPromptIds = new Set<string>();
+  if (setIds.length > 0) {
+    const { data: bpRows } = await supabase
+      .from('prompts')
+      .select('id')
+      .in('prompt_set_id', setIds)
+      .eq('is_brand_prompt', true);
+    for (const r of bpRows ?? []) brandPromptIds.add(r.id);
+  }
+
   const from =
     preset === 'all'
       ? null
@@ -194,6 +213,8 @@ export async function getVisibilityIndex(
   let winCitations = 0;
   let winCitingOwn = 0;
   const platformAgg = new Map<string, { mentioned: number; total: number }>();
+  const directAgg = { mentioned: 0, total: 0 };
+  const organicAgg = { mentioned: 0, total: 0 };
 
   interface WeekAgg {
     results: number;
@@ -273,6 +294,10 @@ export async function getVisibilityIndex(
     if ((r.mention_count ?? 0) > 0) p.mentioned += 1;
     platformAgg.set(platform, p);
 
+    const bucket = brandPromptIds.has(r.prompt_id) ? directAgg : organicAgg;
+    bucket.total += 1;
+    if ((r.mention_count ?? 0) > 0) bucket.mentioned += 1;
+
     for (const g of touched) {
       cats[g].answersCiting += 1;
       if (brandPresent) cats[g].answersWithBrand += 1;
@@ -302,7 +327,7 @@ export async function getVisibilityIndex(
   for (let offset = 0; offset < SCAN_MAX_ROWS; offset += SCAN_PAGE_SIZE) {
     const { data, error } = await supabase
       .from('prompt_results')
-      .select('id, platform, mention_count, created_at, citations')
+      .select('id, prompt_id, platform, mention_count, created_at, citations')
       .eq('brand_id', brandId)
       .neq('platform', 'chatgpt-shopping')
       .order('created_at', { ascending: true })
@@ -361,7 +386,7 @@ export async function getVisibilityIndex(
       media: categoryOut('media'),
       verticals: categoryOut('verticals'),
     },
-    share: { mentioned, total: winResults, byPlatform },
+    share: { mentioned, total: winResults, byPlatform, direct: directAgg, organic: organicAgg },
     weights,
     evolution,
   };

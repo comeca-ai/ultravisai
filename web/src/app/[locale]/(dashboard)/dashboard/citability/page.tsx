@@ -775,6 +775,30 @@ export default function CitabilityPage() {
                   })}
                 </tbody>
               </table>
+              {/* Share direto × orgânico (prompts de marca — migration 00040) */}
+              <p className="text-xs text-muted-foreground">
+                {data && data.share.direct.total > 0 ? (
+                  <>
+                    <span className="font-medium text-foreground">
+                      {t('share.direct')}:{' '}
+                      {Math.round((data.share.direct.mentioned / data.share.direct.total) * 100)}%
+                    </span>{' '}
+                    · {data.share.direct.mentioned}/{data.share.direct.total} ·{' '}
+                    <span className="font-medium text-foreground">
+                      {t('share.organic')}:{' '}
+                      {data.share.organic.total > 0
+                        ? Math.round(
+                            (data.share.organic.mentioned / data.share.organic.total) * 100,
+                          )
+                        : 0}
+                      %
+                    </span>{' '}
+                    · {data.share.organic.mentioned}/{data.share.organic.total}
+                  </>
+                ) : (
+                  <em>{t('share.directPending')}</em>
+                )}
+              </p>
               <p className="inline-block rounded-md border border-dashed bg-muted/40 px-3 py-2 font-mono text-[11px] text-muted-foreground">
                 {t('share.reconciliation', {
                   sums: data?.share.byPlatform.map((p) => p.mentioned).join('+') ?? '',

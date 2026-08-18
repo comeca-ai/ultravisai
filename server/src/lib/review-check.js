@@ -214,10 +214,16 @@ async function checkTrustpilot({ domain }) {
 
 /**
  * A API do Reclame Aqui recusa o proxy datacenter comum (502 via Scrape.do).
- * Retry no modo residencial BR do Scrape.do (`super=true&geoCode=br`) — mais
- * caro em créditos, por isso só para o RA e só quando a via normal falha.
+ * Retry no modo residencial BR do Scrape.do (`super=true&geoCode=br`).
+ *
+ * DESLIGADO POR PADRÃO (incidente de 18/ago): cada requisição residencial
+ * custa ~25 créditos e uma tarde de varreduras esgotou o plano mensal do
+ * Scrape.do — derrubando o RENDER do Site Audit junto (mesmo saldo). Ligue
+ * conscientemente com REVIEW_CHECK_RESIDENTIAL=true; a saída barata pro RA
+ * é a SERP do DataForSEO (mecanismo 1, já implementado).
  */
 async function fetchRaViaResidential(url) {
+  if (process.env.REVIEW_CHECK_RESIDENTIAL !== 'true') return null;
   const token = process.env.SCRAPEDO_API_KEY;
   if (!token) return null;
   const params = new URLSearchParams({ token, url, super: 'true', geoCode: 'br' });

@@ -77,11 +77,11 @@ export const dashboardNav: NavGroup[] = [
       },
       // Ultravis addition (fork layer): result index of the two-index
       // architecture (17/ago logic docs) — driven by the Citability Index.
+      // Sem badge: rótulo longo + selo espremiam o item no menu (18/ago).
       {
         title: 'Visibility Score',
         href: '/dashboard/score',
         icon: Gauge,
-        badge: 'New',
       },
       {
         title: 'Prompts',

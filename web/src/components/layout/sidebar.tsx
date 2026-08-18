@@ -161,7 +161,7 @@ export function Sidebar() {
                         <item.icon className="h-4 w-4 shrink-0" />
                         {!isCollapsed && (
                           <>
-                            <span className="flex-1 truncate">{label}</span>
+                            <span className="min-w-0 flex-1 truncate">{label}</span>
                             <Badge
                               variant="outline"
                               className="ml-auto h-5 shrink-0 gap-0.5 px-1.5 text-[10px] font-normal"
@@ -199,7 +199,7 @@ export function Sidebar() {
                         <item.icon className="h-4 w-4 shrink-0" />
                         {!isCollapsed && (
                           <>
-                            <span className="flex-1 truncate">{label}</span>
+                            <span className="min-w-0 flex-1 truncate">{label}</span>
                             {effectiveBadge && (
                               <Badge
                                 variant="secondary"

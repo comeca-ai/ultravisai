@@ -39,11 +39,20 @@ function slugify(name) {
 
 async function fetchPage(url) {
   const res = await fetch(url, {
-    headers: { 'User-Agent': UA, Accept: 'text/html,application/json' },
+    headers: {
+      'User-Agent': UA,
+      Accept: 'text/html,application/json',
+      'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+    },
     redirect: 'follow',
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   return res;
+}
+
+/** "found: null" precisa de motivo nos logs — sem isso não dá pra diagnosticar. */
+function logUnverifiable(platform, url, info) {
+  logger.warn({ platform, url, ...info }, 'review-check: not verifiable');
 }
 
 /** Extract aggregateRating from JSON-LD blocks in an HTML page. */
@@ -78,11 +87,15 @@ async function checkTrustpilot({ domain }) {
   try {
     const res = await fetchPage(url);
     if (res.status === 404) return { platform: 'trustpilot', url, found: false };
-    if (!res.ok) return { platform: 'trustpilot', url, found: null };
+    if (!res.ok) {
+      logUnverifiable('trustpilot', url, { status: res.status });
+      return { platform: 'trustpilot', url, found: null };
+    }
     const html = await res.text();
     const { rating, reviewCount } = ratingFromJsonLd(html);
     return { platform: 'trustpilot', url, found: true, rating, review_count: reviewCount };
-  } catch {
+  } catch (err) {
+    logUnverifiable('trustpilot', url, { err: err?.message });
     return { platform: 'trustpilot', url, found: null };
   }
 }
@@ -92,7 +105,10 @@ async function checkReclameAqui({ name }) {
   const searchUrl = `https://iosearch.reclameaqui.com.br/raichu-io-site-search-v1/query/companiesSearch/${encodeURIComponent(name)}`;
   try {
     const res = await fetchPage(searchUrl);
-    if (!res.ok) return { platform: 'reclame_aqui', url: null, found: null };
+    if (!res.ok) {
+      logUnverifiable('reclame_aqui', searchUrl, { status: res.status });
+      return { platform: 'reclame_aqui', url: null, found: null };
+    }
     const data = await res.json();
     const companies = data?.companies ?? data?.data?.companies ?? [];
     if (!Array.isArray(companies) || companies.length === 0) {
@@ -113,7 +129,8 @@ async function checkReclameAqui({ name }) {
       rating: Number.isFinite(score10) ? Math.round((score10 / 2) * 10) / 10 : null,
       review_count: Number.parseInt(best.complainsCount ?? best.totalComplains ?? '', 10) || null,
     };
-  } catch {
+  } catch (err) {
+    logUnverifiable('reclame_aqui', searchUrl, { err: err?.message });
     return { platform: 'reclame_aqui', url: null, found: null };
   }
 }
@@ -124,11 +141,15 @@ async function checkG2({ name }) {
   try {
     const res = await fetchPage(url);
     if (res.status === 404) return { platform: 'g2', url, found: false };
-    if (!res.ok) return { platform: 'g2', url, found: null };
+    if (!res.ok) {
+      logUnverifiable('g2', url, { status: res.status });
+      return { platform: 'g2', url, found: null };
+    }
     const html = await res.text();
     const { rating, reviewCount } = ratingFromJsonLd(html);
     return { platform: 'g2', url, found: true, rating, review_count: reviewCount };
-  } catch {
+  } catch (err) {
+    logUnverifiable('g2', url, { err: err?.message });
     return { platform: 'g2', url, found: null };
   }
 }
@@ -138,12 +159,16 @@ async function checkCapterra({ name }) {
   const url = `https://www.capterra.com/search/?query=${encodeURIComponent(name)}`;
   try {
     const res = await fetchPage(url);
-    if (!res.ok) return { platform: 'capterra', url, found: null };
+    if (!res.ok) {
+      logUnverifiable('capterra', url, { status: res.status });
+      return { platform: 'capterra', url, found: null };
+    }
     const html = await res.text();
     const target = slugify(name);
     const hasProduct = new RegExp(`/p/\\d+/[^"']*${target}`, 'i').test(html);
     return { platform: 'capterra', url, found: hasProduct ? true : false };
-  } catch {
+  } catch (err) {
+    logUnverifiable('capterra', url, { err: err?.message });
     return { platform: 'capterra', url, found: null };
   }
 }

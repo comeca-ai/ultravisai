@@ -33,6 +33,7 @@ import {
   normalizeDomain,
   type SourceCategory,
 } from '@/lib/citations/classify';
+import { INDEX_DIMENSIONS, type IndexDimKey } from '@/config/visibility-index';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -76,6 +77,11 @@ export interface VisibilityIndexData {
     total: number;
     byPlatform: Array<{ platform: string; mentioned: number; total: number }>;
   };
+  /**
+   * Effective dimension weights (%): calibrated values from `index_weights`
+   * (edited only via the /ops panel) over the framework defaults.
+   */
+  weights: Record<IndexDimKey, number>;
   /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
   evolution: Array<{
     weekStart: string;
@@ -137,10 +143,20 @@ export async function getVisibilityIndex(
 ): Promise<VisibilityIndexData> {
   const supabase = await createClient();
 
-  const [{ data: brandDomainRows }, { data: competitorRows }] = await Promise.all([
-    supabase.from('brand_domains').select('domain').eq('brand_id', brandId),
-    supabase.from('competitors').select('domain').eq('brand_id', brandId),
-  ]);
+  const [{ data: brandDomainRows }, { data: competitorRows }, { data: weightRows }] =
+    await Promise.all([
+      supabase.from('brand_domains').select('domain').eq('brand_id', brandId),
+      supabase.from('competitors').select('domain').eq('brand_id', brandId),
+      supabase.from('index_weights').select('dim_key, weight'),
+    ]);
+
+  const weights = Object.fromEntries(INDEX_DIMENSIONS.map((d) => [d.key, d.weight])) as Record<
+    IndexDimKey,
+    number
+  >;
+  for (const r of weightRows ?? []) {
+    if (r.dim_key in weights) weights[r.dim_key as IndexDimKey] = r.weight;
+  }
   const brandDomains = (brandDomainRows ?? [])
     .map((r) => normalizeDomain((r as { domain: string }).domain))
     .filter(Boolean);
@@ -346,6 +362,7 @@ export async function getVisibilityIndex(
       verticals: categoryOut('verticals'),
     },
     share: { mentioned, total: winResults, byPlatform },
+    weights,
     evolution,
   };
 }

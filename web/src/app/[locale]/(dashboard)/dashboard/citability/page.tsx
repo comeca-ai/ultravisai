@@ -198,6 +198,17 @@ export default function CitabilityPage() {
     return null;
   }, [auditTrend]);
 
+  // Pesos efetivos: calibrados no /ops (tabela index_weights) sobre os
+  // defaults do framework — a fórmula, as contribuições e a evolução usam
+  // sempre o mesmo conjunto.
+  const effWeights = useMemo(() => {
+    const map = {} as Record<IndexDimKey, number>;
+    for (const dim of INDEX_DIMENSIONS) {
+      map[dim.key] = data?.weights?.[dim.key] ?? dim.weight;
+    }
+    return map;
+  }, [data]);
+
   const scores = useMemo(() => {
     if (!data) return null;
     const map: Record<IndexDimKey, number | null> = {
@@ -217,13 +228,13 @@ export default function CitabilityPage() {
     if (!scores) return null;
     const parts = INDEX_DIMENSIONS.flatMap((dim) => {
       const s = scores[dim.key];
-      return s === null ? [] : [{ key: dim.key, weight: dim.weight, score: s }];
+      return s === null ? [] : [{ key: dim.key, weight: effWeights[dim.key], score: s }];
     });
     if (parts.length === 0) return null;
     const totalWeight = parts.reduce((s, p) => s + p.weight, 0);
     const value = Math.round(parts.reduce((s, p) => s + p.score * (p.weight / totalWeight), 0));
     return { value, parts, totalWeight };
-  }, [scores]);
+  }, [scores, effWeights]);
 
   const dec = locale === 'en' ? '.' : ',';
   const formula = useMemo(() => {
@@ -269,7 +280,7 @@ export default function CitabilityPage() {
       };
       const parts = INDEX_DIMENSIONS.flatMap((dim) => {
         const s = dimScores[dim.key];
-        return s === null ? [] : [{ weight: dim.weight, score: s }];
+        return s === null ? [] : [{ weight: effWeights[dim.key], score: s }];
       });
       const totalWeight = parts.reduce((s, p) => s + p.weight, 0);
       const value =
@@ -278,7 +289,7 @@ export default function CitabilityPage() {
           : 0;
       return { weekStart: w.weekStart, index: value };
     });
-  }, [data, auditTrend]);
+  }, [data, auditTrend, effWeights]);
 
   const handleCopyLlms = async () => {
     const name = activeBrand?.name ?? '';
@@ -456,7 +467,7 @@ export default function CitabilityPage() {
             <span className="text-xs text-muted-foreground">
               {t('zones.weightShare', {
                 weight: INDEX_DIMENSIONS.filter((d) => d.zone === zone).reduce(
-                  (s, d) => s + d.weight,
+                  (s, d) => s + effWeights[d.key],
                   0,
                 ),
               })}
@@ -488,7 +499,7 @@ export default function CitabilityPage() {
                           </span>
                           {t(`dims.${dim.key}.name`)}
                           <Badge variant="outline" className="text-[10px] font-normal">
-                            {t('dims.weight', { weight: dim.weight })}
+                            {t('dims.weight', { weight: effWeights[dim.key] })}
                           </Badge>
                         </CardTitle>
                         <p className="mt-1.5 text-xs text-muted-foreground">

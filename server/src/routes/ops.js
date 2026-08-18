@@ -192,6 +192,19 @@ async function collect() {
     q.in('status', ['failed', 'cancelled']).gte('created_at', since24h),
   );
 
+  // Pesos calibráveis do Índice de Citabilidade (migration 00039) — o
+  // formulário deste painel é o ÚNICO lugar de edição (service role).
+  let indexWeights = null;
+  try {
+    const { data } = await supabaseAdmin
+      .from('index_weights')
+      .select('dim_key, weight, updated_at')
+      .order('dim_key');
+    if (data && data.length > 0) indexWeights = data;
+  } catch {
+    indexWeights = null;
+  }
+
   return {
     machine,
     providers,
@@ -202,9 +215,20 @@ async function collect() {
     health,
     clients,
     upstream,
+    indexWeights,
     now: new Date().toISOString(),
   };
 }
+
+/** Rótulos das dimensões do IC (espelham o doc de lógica de 17/ago). */
+const IC_DIM_LABELS = {
+  dim1: '01 · Legibilidade do Site',
+  dim2: '02 · Conteúdo',
+  dim3: '03 · Presença Social',
+  dim4: '04 · Avaliações de Clientes',
+  dim5: '05 · Mídia Aberta & Fontes de IA',
+  dim6: '06 · Verticais & Reguladores',
+};
 
 function render(d) {
   const row = (label, value) =>
@@ -398,6 +422,28 @@ function render(d) {
     }
   </div>
 
+  <div class="card" style="margin-top:14px"><h2>Pesos do Índice de Citabilidade · calibração</h2>
+    ${
+      !d.indexWeights
+        ? '<div class="muted">tabela index_weights vazia ou inacessível — o app usa os pesos padrão do framework</div>'
+        : `<form method="POST" action="/ops/weights">
+      <div class="ovf"><table>
+        <thead><tr><th>Dimensão</th><th>Peso (%)</th><th>Atualizado</th></tr></thead>
+        <tbody>${d.indexWeights
+          .map(
+            (w) =>
+              `<tr><td>${esc(IC_DIM_LABELS[w.dim_key] || w.dim_key)}</td>
+               <td><input type="number" name="${esc(w.dim_key)}" value="${w.weight}" min="0" max="100" step="1" required style="width:70px;background:#111;color:#eee;border:1px solid #444;border-radius:6px;padding:4px 8px"></td>
+               <td class="mono">${dt(w.updated_at)}</td></tr>`,
+          )
+          .join('')}</tbody>
+      </table></div>
+      <div class="muted" style="margin-top:8px">A soma deve dar 100. A tela do índice recalcula na próxima carga — sem deploy. Registre a mudança no DECISOES.</div>
+      <button type="submit" style="margin-top:10px;background:#D8452F;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">Salvar pesos</button>
+    </form>`
+    }
+  </div>
+
   <div class="card" style="margin-top:14px"><h2>Providers configurados</h2>
     <div class="chips">${Object.entries(d.providers)
       .map(([k, v]) => chip(k, v))
@@ -419,6 +465,32 @@ router.get('/ops', basicAuth, async (req, res) => {
     res.type('html').send(render(data));
   } catch {
     res.status(500).send('ops error');
+  }
+});
+
+// Salvar pesos do IC — mesma Basic Auth; validação: 6 inteiros somando 100.
+router.post('/ops/weights', basicAuth, async (req, res) => {
+  const keys = ['dim1', 'dim2', 'dim3', 'dim4', 'dim5', 'dim6'];
+  const weights = keys.map((k) => Number.parseInt(req.body?.[k], 10));
+  if (weights.some((w) => !Number.isInteger(w) || w < 0 || w > 100)) {
+    return res
+      .status(400)
+      .send('Pesos inválidos — use inteiros de 0 a 100. <a href="/ops">voltar</a>');
+  }
+  const sum = weights.reduce((s, w) => s + w, 0);
+  if (sum !== 100) {
+    return res
+      .status(400)
+      .send(`A soma deu ${sum} — os pesos precisam somar 100. <a href="/ops">voltar</a>`);
+  }
+  try {
+    const now = new Date().toISOString();
+    const rows = keys.map((k, i) => ({ dim_key: k, weight: weights[i], updated_at: now }));
+    const { error } = await supabaseAdmin.from('index_weights').upsert(rows);
+    if (error) throw error;
+    return res.redirect(303, '/ops');
+  } catch {
+    return res.status(500).send('Falha ao salvar os pesos. <a href="/ops">voltar</a>');
   }
 });
 

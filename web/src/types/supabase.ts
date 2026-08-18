@@ -281,6 +281,26 @@ export type Database = {
           },
         ];
       };
+      // Ultravis addition (migration 00039): pesos calibráveis do IC,
+      // editados só pelo /ops (service role); leitura autenticada.
+      index_weights: {
+        Row: {
+          dim_key: string;
+          weight: number;
+          updated_at: string;
+        };
+        Insert: {
+          dim_key: string;
+          weight: number;
+          updated_at?: string;
+        };
+        Update: {
+          dim_key?: string;
+          weight?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       brands: {
         Row: {
           created_at: string;

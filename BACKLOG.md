@@ -53,7 +53,10 @@
 - [ ] **D1 estendida**: crawl de schema/llms.txt/sitemap + entidade (Wikidata/Wikipedia) + consistência nome/aliases — hoje o site audit cobre parte; mapear pros critérios da régua. `M`
 - [ ] **D2 cobertura × qualidade GEO**: % dos tópicos com página própria × front-load/estatística com fonte/tabelas/blocos 50-150p/frescor <12m (LLM judge sobre o crawl). `M`
 - [ ] **D3 checagem de canais sociais**: nº de plataformas ativas (satura em 5), cadência/recência, bônus YouTube. Exige leitura dos perfis (declarar o que não lemos). `M`
-- [ ] **D4 checagem direta de reviews** (motor por segmento): perfis reivindicados, nota, volume, recência, respostas — G2/Trustpilot/Capterra/Reclame Aqui/Google Reviews + Reddit/Quora. Dados de 15/ago provam: citações ≈ 0, só checagem direta mede isso. `M` ⭐
+- [x] **D4 checagem direta de reviews** — FEITO 18/ago (PRs #66-#71): Trustpilot/G2/Capterra checados semanalmente via Scrape.do (cron `REVIEW_CHECK_CRON` + warm-up), régua v1 aplicada, card da tela mostra medição direta. Ficam pra frente:
+  - [ ] **Reclame Aqui**: a API de busca deles devolve 502 até por proxy residencial — fica "não verificável" (declarado). Saída já implementada: mecanismo SERP via DataForSEO entra sozinho quando `DATAFORSEO_LOGIN`/`PASSWORD` forem configurados no Railway (pendência do dono). `P`
+  - [ ] Nota/volume do G2 e Capterra (páginas encontradas mas sem JSON-LD legível) — a SERP do DataForSEO também resolve. `P`
+  - [ ] Google Reviews (API paga) + Reddit/Quora + lista por segmento via LLM (v1.1). `M`
 - [ ] **D6 demanda de marca**: volume de busca da marca (DataForSEO — correlato r≈0,334), presença em listas "melhores/alternativas a", reguladores/associações, Wikipedia. `M`
 - [ ] **Campo Evidência por dimensão** na tela (padrão do simulador da planilha: toda nota registra a fonte). `P`
 - [ ] **Calibração com histórico**: regressão regularizada das dimensões do IC contra a Visibilidade observada — pesos deixam de ser prior e viram contribuição medida (slide 9, "fiz → melhorou"). `G` · depois de ~8 censos

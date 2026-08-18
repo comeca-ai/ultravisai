@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { reviewScoreFrom } from './review-check.js';
+import { reviewScoreFrom, normalizeSerpRating, pickProfileHit } from './review-check.js';
 
 // A régua v1 do D4 (mapeamento dos quintis do doc de 17/ago): presença
 // confirmada dá a base, a nota média ajusta, e "tudo unknown" NÃO pontua —
@@ -34,5 +34,40 @@ describe('reviewScoreFrom (régua v1 do D4)', () => {
 
   it('unknowns não impedem a nota quando há pelo menos uma verificação', () => {
     expect(reviewScoreFrom([row(true, 4.6), row(null), row(null), row(null)])).toBe(50);
+  });
+});
+
+describe('normalizeSerpRating (nota da SERP → escala 0-5)', () => {
+  it('mantém escala Max5 como está', () => {
+    expect(normalizeSerpRating({ value: 4.6, rating_max: 5 })).toBe(4.6);
+  });
+
+  it('normaliza escala 0-10 (Reclame Aqui) para 0-5', () => {
+    expect(normalizeSerpRating({ value: 7.8, rating_max: 10 })).toBe(3.9);
+  });
+
+  it('sem rating_max assume 5; sem value devolve null', () => {
+    expect(normalizeSerpRating({ value: 4.2 })).toBe(4.2);
+    expect(normalizeSerpRating(undefined)).toBeNull();
+    expect(normalizeSerpRating({ value: 'n/a' })).toBeNull();
+  });
+});
+
+describe('pickProfileHit (URL de perfil na SERP)', () => {
+  const re = /reclameaqui\.com\.br\/empresa\//i;
+
+  it('acha o primeiro orgânico que bate com o padrão de perfil', () => {
+    const items = [
+      { type: 'paid', url: 'https://www.reclameaqui.com.br/empresa/anuncio/' },
+      { type: 'organic', url: 'https://www.reclameaqui.com.br/categoria/eletronicos/' },
+      { type: 'organic', url: 'https://www.reclameaqui.com.br/empresa/polar/' },
+    ];
+    expect(pickProfileHit(items, re)?.url).toContain('/empresa/polar');
+  });
+
+  it('devolve null quando nenhum resultado é perfil', () => {
+    expect(pickProfileHit([{ type: 'organic', url: 'https://blog.exemplo.com/' }], re)).toBeNull();
+    expect(pickProfileHit([], re)).toBeNull();
+    expect(pickProfileHit(undefined, re)).toBeNull();
   });
 });

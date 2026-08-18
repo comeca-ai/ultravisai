@@ -75,6 +75,14 @@ export const dashboardNav: NavGroup[] = [
         icon: Eye,
         badge: 'New',
       },
+      // Ultravis addition (fork layer): result index of the two-index
+      // architecture (17/ago logic docs) — driven by the Citability Index.
+      {
+        title: 'Visibility Score',
+        href: '/dashboard/score',
+        icon: Gauge,
+        badge: 'New',
+      },
       {
         title: 'Prompts',
         href: '/dashboard/prompts',

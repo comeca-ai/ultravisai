@@ -221,8 +221,9 @@ async function fetchRaViaResidential(url) {
   const token = process.env.SCRAPEDO_API_KEY;
   if (!token) return null;
   const params = new URLSearchParams({ token, url, super: 'true', geoCode: 'br' });
+  // Proxy residencial é lento (60-90s não é raro) — timeout folgado.
   const res = await fetch(`https://api.scrape.do/?${params.toString()}`, {
-    signal: AbortSignal.timeout(45_000),
+    signal: AbortSignal.timeout(90_000),
   });
   if (!res.ok) return null;
   return res.text();

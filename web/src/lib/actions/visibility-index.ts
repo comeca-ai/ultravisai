@@ -122,7 +122,17 @@ export interface VisibilityIndexData {
   resultScore: {
     citation: number;
     presence: number;
-    position: { score: number | null; samples: number };
+    /**
+     * Posição por ordem de aparição (premissa 18/ago): distribuição de
+     * respostas em que a marca foi citada em 1º/2º/3º/4º+ lugar, e nota B
+     * (pódio ponderado: 1º=100 · 2º=60 · 3º=30 · 4º+=0). samples = respostas
+     * com rank calculado; null = nenhuma ainda.
+     */
+    position: {
+      score: number | null;
+      samples: number;
+      dist: { p1: number; p2: number; p3: number; p4: number };
+    };
     sentiment: { score: number | null; pos: number; neu: number; neg: number };
   };
   /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
@@ -206,7 +216,8 @@ interface ResultRow {
   created_at: string;
   citations: Citation[] | null;
   sentiment: string | null;
-  competitor_mentions: Array<{ mention_count?: number | null }> | null;
+  /** Rank por ordem de aparição (migration 00043): 1 = citada primeiro; 0 = não computável; null = enriquecimento pendente. */
+  appearance_rank: number | null;
 }
 
 export async function getVisibilityIndex(
@@ -331,9 +342,10 @@ export async function getVisibilityIndex(
   const organicAgg = { mentioned: 0, total: 0 };
   // Score de Visibilidade (resultado) — Posição e Sentimento medem só as
   // respostas em que a marca aparece ("quando aparece, como aparece").
+  // Posição = ORDEM DE APARIÇÃO no texto (premissa de 18/ago): distribuição
+  // de 1º/2º/3º/4º+ pré-calculada pelo server (appearance_rank).
   const sentAgg = { pos: 0, neu: 0, neg: 0 };
-  let posSum = 0;
-  let posSamples = 0;
+  const posDist = { p1: 0, p2: 0, p3: 0, p4: 0 };
 
   interface WeekAgg {
     results: number;
@@ -424,12 +436,15 @@ export async function getVisibilityIndex(
       else if (r.sentiment === 'negative') sentAgg.neg += 1;
       else sentAgg.neu += 1;
 
-      const comps = Array.isArray(r.competitor_mentions) ? r.competitor_mentions : [];
-      const rivals = comps.filter((c) => (c?.mention_count ?? 0) > 0);
-      const better = rivals.filter((c) => (c.mention_count ?? 0) > mc).length;
-      const n = rivals.length + 1;
-      posSum += n > 1 ? ((n - 1 - better) / (n - 1)) * 100 : 100;
-      posSamples += 1;
+      // rank >= 1 = calculado; 0 = não computável; null = pendente (o
+      // enriquecimento do server preenche em até 30 min).
+      const rank = r.appearance_rank;
+      if (typeof rank === 'number' && rank >= 1) {
+        if (rank === 1) posDist.p1 += 1;
+        else if (rank === 2) posDist.p2 += 1;
+        else if (rank === 3) posDist.p3 += 1;
+        else posDist.p4 += 1;
+      }
     }
 
     for (const g of touched) {
@@ -462,7 +477,7 @@ export async function getVisibilityIndex(
     const { data, error } = await supabase
       .from('prompt_results')
       .select(
-        'id, prompt_id, platform, mention_count, created_at, citations, sentiment, competitor_mentions',
+        'id, prompt_id, platform, mention_count, created_at, citations, sentiment, appearance_rank',
       )
       .eq('brand_id', brandId)
       .neq('platform', 'chatgpt-shopping')
@@ -529,10 +544,13 @@ export async function getVisibilityIndex(
     resultScore: {
       citation: ownCitationScore(pctOwn),
       presence: winResults > 0 ? Math.round((mentioned / winResults) * 100) : 0,
-      position:
-        posSamples > 0
-          ? { score: Math.round(posSum / posSamples), samples: posSamples }
-          : { score: null, samples: 0 },
+      position: (() => {
+        const samples = posDist.p1 + posDist.p2 + posDist.p3 + posDist.p4;
+        if (samples === 0) return { score: null, samples: 0, dist: posDist };
+        // Nota B (decisão do dono, 18/ago): pódio ponderado por degrau.
+        const score = Math.round((posDist.p1 * 100 + posDist.p2 * 60 + posDist.p3 * 30) / samples);
+        return { score, samples, dist: posDist };
+      })(),
       sentiment:
         sentAgg.pos + sentAgg.neu + sentAgg.neg > 0
           ? {

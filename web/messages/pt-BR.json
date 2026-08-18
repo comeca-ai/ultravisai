@@ -1228,10 +1228,14 @@
       },
       "position": {
         "name": "Posição",
-        "brief": "Quando a resposta compara marcas, a sua aparece à frente dos concorrentes.",
-        "ev": "Posição média vs concorrentes em {samples} respostas em que você aparece",
-        "noSample": "A marca ainda não apareceu em nenhuma resposta da janela.",
-        "how": "Rank da marca por nº de menções vs concorrentes, resposta a resposta."
+        "brief": "Quando a IA cita várias marcas, a sua é citada primeiro na resposta.",
+        "ev": "Ordem de aparição no texto, em {samples} respostas em que você aparece:",
+        "noSample": "A marca ainda não apareceu em nenhuma resposta da janela (ou o cálculo de posição está em andamento — leva até 30 min).",
+        "how": "Posição = ordem da 1ª menção no texto da resposta. Nota: 1º=100 · 2º=60 · 3º=30 · 4º+=0, na média das respostas.",
+        "p1": "1º lugar",
+        "p2": "2º lugar",
+        "p3": "3º lugar",
+        "p4": "4º ou pior"
       },
       "accuracy": {
         "name": "Acurácia",

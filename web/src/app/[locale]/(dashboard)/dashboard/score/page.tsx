@@ -272,7 +272,40 @@ export default function VisibilityScorePage() {
                     {dim.key === 'position' &&
                       rs &&
                       (rs.position.score !== null ? (
-                        <li>{t('dims.position.ev', { samples: rs.position.samples })}</li>
+                        <>
+                          <li>{t('dims.position.ev', { samples: rs.position.samples })}</li>
+                          {/* Distribuição da premissa de 18/ago: 1º/2º/3º/4º+ por ordem de aparição. */}
+                          <li>
+                            <span className="mt-1 flex flex-col gap-1">
+                              {(
+                                [
+                                  ['p1', rs.position.dist.p1, 'bg-emerald-500'],
+                                  ['p2', rs.position.dist.p2, 'bg-lime-500'],
+                                  ['p3', rs.position.dist.p3, 'bg-amber-500'],
+                                  ['p4', rs.position.dist.p4, 'bg-red-500'],
+                                ] as const
+                              ).map(([key, count, color]) => {
+                                const pctVal = Math.round((count / rs.position.samples) * 100);
+                                return (
+                                  <span key={key} className="flex items-center gap-2">
+                                    <span className="w-16 shrink-0 text-[11px]">
+                                      {t(`dims.position.${key}`)}
+                                    </span>
+                                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                      <span
+                                        className={cn('block h-full', color)}
+                                        style={{ width: `${pctVal}%` }}
+                                      />
+                                    </span>
+                                    <span className="w-14 shrink-0 text-right tabular-nums text-[11px]">
+                                      {pctVal}% ({count})
+                                    </span>
+                                  </span>
+                                );
+                              })}
+                            </span>
+                          </li>
+                        </>
                       ) : (
                         <li className="italic">{t('dims.position.noSample')}</li>
                       ))}

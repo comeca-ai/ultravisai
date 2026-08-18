@@ -1228,10 +1228,14 @@
       },
       "position": {
         "name": "Position",
-        "brief": "When an answer compares brands, yours comes ahead of competitors.",
-        "ev": "Average position vs competitors across {samples} answers where you appear",
-        "noSample": "The brand has not appeared in any answer in this window yet.",
-        "how": "Brand rank by mention count vs competitors, answer by answer."
+        "brief": "When the AI cites several brands, yours is mentioned first in the answer.",
+        "ev": "Order of appearance in the text, across {samples} answers where you appear:",
+        "noSample": "The brand has not appeared in any answer in this window yet (or position enrichment is still running — up to 30 min).",
+        "how": "Position = order of the first mention in the answer text. Score: 1st=100 · 2nd=60 · 3rd=30 · 4th+=0, averaged over answers.",
+        "p1": "1st place",
+        "p2": "2nd place",
+        "p3": "3rd place",
+        "p4": "4th or worse"
       },
       "accuracy": {
         "name": "Accuracy",

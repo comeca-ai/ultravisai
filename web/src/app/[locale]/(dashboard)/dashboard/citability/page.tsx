@@ -11,7 +11,8 @@
  *
  * Scoring rules v1 (weights in `web/src/config/visibility-index.ts`,
  * framework in `estrategia/indice-citabilidade.md`):
- * - D1  ← latest Site Audit of the primary domain (same as Auditoria page).
+ * - D1  ← multi-page site crawl (migration 00042) when available; else the
+ *   latest single-page Site Audit of the primary domain.
  * - D2  ← own-citation share normalized (10% ⇒ 100; real best case 7.4%).
  * - D3–D6 ← relative to the sector gabarito: among answers citing that
  *   category's sources, share where the brand is present. Low samples are
@@ -212,7 +213,9 @@ export default function CitabilityPage() {
   const scores = useMemo(() => {
     if (!data) return null;
     const map: Record<IndexDimKey, number | null> = {
-      dim1: d1 ? d1.score : null,
+      // D1: varredura multi-página (migration 00042) quando existe; senão o
+      // Site Audit single-page como antes.
+      dim1: data.siteCrawl?.score ?? (d1 ? d1.score : null),
       dim2: data.d2.score,
       dim3: data.categories.social.score,
       // D4: checagem direta de plataformas (migration 00041) quando existe;
@@ -486,6 +489,23 @@ export default function CitabilityPage() {
                 dim.key === 'dim4' && data?.reviewCheck && data.reviewCheck.score !== null
                   ? data.reviewCheck
                   : null;
+              // D1 com varredura multi-página ativa substitui o audit de 1 página.
+              const crawl =
+                dim.key === 'dim1' && data?.siteCrawl && data.siteCrawl.score !== null
+                  ? data.siteCrawl
+                  : null;
+              const crawlSignals = crawl
+                ? (
+                    [
+                      ['json-ld-presence', 'evCrawlSchema'],
+                      ['faq-schema', 'evCrawlFaq'],
+                      ['h1-quality', 'evCrawlH1'],
+                    ] as const
+                  ).flatMap(([key, label]) => {
+                    const cov = crawl.coverage[key];
+                    return cov && cov.evaluated > 0 ? [{ label, ...cov }] : [];
+                  })
+                : [];
               const directional =
                 review === null && cat !== null && cat.sampleCitations < INDEX_LOW_SAMPLE_THRESHOLD;
               const reviewConfirmed = review?.rows.filter((r) => r.found === true) ?? [];
@@ -557,7 +577,40 @@ export default function CitabilityPage() {
                         {score === null ? t('dims.whyNone') : t('dims.why', { score })}
                       </p>
                       <ul className="space-y-1 text-muted-foreground">
+                        {crawl && (
+                          <>
+                            <li>
+                              <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                                ✓
+                              </span>{' '}
+                              {t('dims.dim1.evCrawl', {
+                                date: crawl.createdAt.slice(0, 10),
+                                scored: crawl.pagesScored,
+                                total: crawl.pageCount,
+                              })}
+                            </li>
+                            {crawlSignals.map((s) => (
+                              <li key={s.label}>
+                                <span
+                                  className={cn(
+                                    'font-medium',
+                                    s.pass / s.evaluated >= 0.7
+                                      ? 'text-emerald-600 dark:text-emerald-400'
+                                      : 'text-red-600 dark:text-red-400',
+                                  )}
+                                >
+                                  {s.pass / s.evaluated >= 0.7 ? '✓' : '✗'}
+                                </span>{' '}
+                                {t(`dims.dim1.${s.label}`, {
+                                  pass: s.pass,
+                                  evaluated: s.evaluated,
+                                })}
+                              </li>
+                            ))}
+                          </>
+                        )}
                         {dim.key === 'dim1' &&
+                          !crawl &&
                           (d1 ? (
                             <li>
                               <span className="font-medium text-emerald-600 dark:text-emerald-400">

@@ -80,6 +80,7 @@ claros que significam uma condição só".
 | 4.13 | Inteligência de otimização de prompts é **do cliente e segregada** — dado da marca A nunca alimenta a marca B | 17:06–19:28 | 📋 princípio de arquitetura registrado |
 | 4.14 | Label "54 de 172 rastreados" confunde — clarificar o fan-out (1 prompt → micro-perguntas) na tela | 38:14–39:43 | 🔨 próxima tela |
 | 4.15 | Igor vai **rever o nome "citabilidade"** (post-it no deck: "Rever o nome citabilidade") | deck slide 5 | ⏳ Igor |
+| 4.16 | **Matriz "você controla · você ativa · você conquista" aplicada às zonas do IC** — o deck carimba a tríade na capa e taguea cada dimensão no slide 3 (Legibilidade+Conteúdo = controla · Social+Reviews = ativa · Open Media+Verticais = conquista); zonas A/B/C da tela renomeadas para a tríade, com o framing do slide 2 no subtítulo ("aqui você AGE; lá você MEDE") | deck slides 1–3 · 48:54 | ✅ |
 
 ---
 

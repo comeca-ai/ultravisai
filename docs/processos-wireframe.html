@@ -1,0 +1,285 @@
+<title>Processos Ultravis</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --ink: #1f2933;
+    --muted: #5b6b7a;
+    --line: #d4dae1;
+    --accent: #0e9f6e;
+    --accent-soft: rgba(14, 159, 110, 0.1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #14181d;
+      --surface: #1c2229;
+      --ink: #e7ebef;
+      --muted: #93a1ae;
+      --line: #39434d;
+      --accent: #2fbe8a;
+      --accent-soft: rgba(47, 190, 138, 0.14);
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #14181d;
+    --surface: #1c2229;
+    --ink: #e7ebef;
+    --muted: #93a1ae;
+    --line: #39434d;
+    --accent: #2fbe8a;
+    --accent-soft: rgba(47, 190, 138, 0.14);
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+  }
+  h1 {
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+  .sub {
+    color: var(--muted);
+    margin: 0 0 28px;
+    max-width: 62ch;
+  }
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    overflow-x: auto;
+  }
+  figure svg {
+    display: block;
+    min-width: 900px;
+    max-width: 100%;
+    height: auto;
+    color: var(--ink);
+  }
+  figcaption {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    max-width: 78ch;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 20px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .sw {
+    width: 26px;
+    height: 0;
+    border-top: 2.5px solid var(--accent);
+    display: inline-block;
+  }
+  .sw.plain {
+    border-top: 1.5px solid currentColor;
+    opacity: 0.75;
+  }
+  .sw.dash {
+    border-top: 1.5px dashed currentColor;
+    opacity: 0.75;
+  }
+</style>
+<main>
+  <h1>Ultravis — processos e como se interligam</h1>
+  <p class="sub">
+    Wireframe da cadeia combinada nas sessões de 14–19/ago: a coleta grava os dados, o Índice de
+    Citabilidade é a alavanca onde o cliente <strong>age</strong>, o Score de Visibilidade é o
+    resultado que ele <strong>mede</strong>, e o Insights resume em três números — sem nota
+    ponderada. A Auditoria fecha o loop: indica o que fazer a partir do que foi lido do site.
+  </p>
+
+  <figure>
+    <svg
+      viewBox="0 0 1180 660"
+      role="img"
+      aria-label="Fluxo: coleta no server grava dados no Supabase; o app lê e monta o Índice de Citabilidade (alavanca) que dirige o Score de Visibilidade (resultado), resumido no Insights; a Auditoria indica ações lidas do site e o cliente executa, realimentando a próxima coleta; os vigias conferem tudo a cada 15 minutos e reportam no /ops."
+      fill="none"
+      stroke-linecap="round"
+    >
+      <defs>
+        <marker id="arr" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 4 L0 8 z" fill="currentColor" stroke="none" />
+        </marker>
+        <marker id="arrAcc" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="9" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0 0 L10 4 L0 8 z" fill="var(--accent)" stroke="none" />
+        </marker>
+      </defs>
+
+      <!-- ── Cabeçalhos de coluna ── -->
+      <g font-size="12" font-weight="700" fill="currentColor" stroke="none" letter-spacing="0.08em">
+        <text x="145" y="34" text-anchor="middle">COLETA · SERVER</text>
+        <text x="445" y="34" text-anchor="middle">DADOS · SUPABASE</text>
+        <text x="885" y="34" text-anchor="middle">ÍNDICES &amp; TELAS · APP</text>
+      </g>
+      <g stroke="currentColor" opacity="0.18">
+        <line x1="30" y1="44" x2="260" y2="44" />
+        <line x1="330" y1="44" x2="560" y2="44" />
+        <line x1="640" y1="44" x2="1130" y2="44" />
+      </g>
+
+      <!-- ── Coluna 1: processos de coleta ── -->
+      <g stroke="currentColor" stroke-width="1.3">
+        <rect x="30" y="64" width="230" height="58" rx="8" />
+        <rect x="30" y="142" width="230" height="58" rx="8" />
+        <rect x="30" y="220" width="230" height="58" rx="8" />
+        <rect x="30" y="298" width="230" height="58" rx="8" />
+      </g>
+      <g stroke="none" fill="currentColor" font-size="13" font-weight="600">
+        <text x="44" y="87">Censo de respostas de IA</text>
+        <text x="44" y="165">Ranking (ordem de aparição)</text>
+        <text x="44" y="243">Checagem de reviews</text>
+        <text x="44" y="321">Varredura do site</text>
+      </g>
+      <g stroke="none" fill="currentColor" opacity="0.62" font-size="11.5">
+        <text x="44" y="105">semanal · 6 motores via Cloro + APIs</text>
+        <text x="44" y="183">a cada 30 min · lê o texto salvo</text>
+        <text x="44" y="261">semanal · RA · Trustpilot · G2 · Capterra</text>
+        <text x="44" y="339">mensal · até 10 páginas-chave</text>
+      </g>
+
+      <!-- setas coleta → dados -->
+      <g stroke="currentColor" stroke-width="1.3" marker-end="url(#arr)">
+        <line x1="260" y1="93" x2="330" y2="105" />
+        <line x1="260" y1="171" x2="330" y2="135" />
+        <line x1="260" y1="249" x2="330" y2="249" />
+        <line x1="260" y1="327" x2="330" y2="327" />
+      </g>
+      <text x="288" y="80" font-size="11" fill="currentColor" opacity="0.62" stroke="none" text-anchor="middle">grava</text>
+
+      <!-- ── Coluna 2: dados ── -->
+      <g stroke="currentColor" stroke-width="1.3">
+        <rect x="330" y="64" width="230" height="120" rx="8" />
+        <rect x="330" y="220" width="230" height="58" rx="8" />
+        <rect x="330" y="298" width="230" height="58" rx="8" />
+        <rect x="330" y="376" width="230" height="52" rx="8" />
+      </g>
+      <g stroke="none" fill="currentColor" font-size="13" font-weight="600">
+        <text x="344" y="87">Respostas (prompt_results)</text>
+        <text x="344" y="243">Reviews verificados</text>
+        <text x="344" y="321">Leituras do site</text>
+        <text x="344" y="398">Pesos do IC</text>
+      </g>
+      <g stroke="none" fill="currentColor" opacity="0.62" font-size="11.5">
+        <text x="344" y="106">menções · citações · sentimento</text>
+        <text x="344" y="122">ranking · por prompt × motor</text>
+        <text x="344" y="140">1 prompt → micro-perguntas (fan-out)</text>
+        <text x="344" y="261">presença · nota · volume</text>
+        <text x="344" y="339">sinais por página (JSON-LD, FAQ…)</text>
+        <text x="344" y="414">calibráveis no /ops · somam 100</text>
+      </g>
+
+      <!-- setas dados → telas -->
+      <g stroke="currentColor" stroke-width="1.3" marker-end="url(#arr)">
+        <line x1="560" y1="124" x2="700" y2="88" />
+        <line x1="560" y1="150" x2="640" y2="300" />
+        <line x1="560" y1="249" x2="640" y2="322" />
+        <line x1="560" y1="327" x2="640" y2="344" />
+        <line x1="560" y1="400" x2="640" y2="366" />
+      </g>
+      <text x="600" y="96" font-size="11" fill="currentColor" opacity="0.62" stroke="none" text-anchor="middle">lê</text>
+
+      <!-- ── Coluna 3: cadeia alavanca → resultado → resumo ── -->
+      <!-- Insights (topo) -->
+      <rect x="700" y="58" width="430" height="86" rx="8" stroke="var(--accent)" stroke-width="2" fill="var(--accent-soft)" />
+      <g stroke="none" fill="currentColor">
+        <text x="716" y="82" font-size="13.5" font-weight="700">INSIGHTS — resumo de visibilidade</text>
+        <text x="716" y="102" font-size="12">Presença “X de N prompts” · Ranking médio (#1…#4+) · Sentimento</text>
+        <text x="716" y="121" font-size="11.5" opacity="0.62">três números, sem nota ponderada · + marca × concorrentes por motor</text>
+      </g>
+
+      <!-- Score -->
+      <rect x="700" y="196" width="430" height="86" rx="8" stroke="currentColor" stroke-width="1.5" />
+      <g stroke="none" fill="currentColor">
+        <text x="716" y="220" font-size="13.5" font-weight="700">SCORE DE VISIBILIDADE — resultado · você MEDE</text>
+        <text x="716" y="240" font-size="12">Leitura · Presença · Ranking · Sentimento (+ onde falam de você)</text>
+        <text x="716" y="259" font-size="11.5" opacity="0.62">lido das respostas · reage semanas depois da alavanca</text>
+      </g>
+
+      <!-- IC -->
+      <rect x="700" y="334" width="430" height="86" rx="8" stroke="currentColor" stroke-width="1.5" />
+      <g stroke="none" fill="currentColor">
+        <text x="716" y="358" font-size="13.5" font-weight="700">ÍNDICE DE CITABILIDADE — alavanca · você AGE</text>
+        <text x="716" y="378" font-size="12">6 alavancas em 3 zonas: você controla · você ativa · você conquista</text>
+        <text x="716" y="397" font-size="11.5" opacity="0.62">medido dos seus ativos · cada ponto é ação desta semana</text>
+      </g>
+
+      <!-- Auditoria -->
+      <rect x="700" y="472" width="430" height="78" rx="8" stroke="currentColor" stroke-width="1.5" />
+      <g stroke="none" fill="currentColor">
+        <text x="716" y="496" font-size="13.5" font-weight="700">AUDITORIA DO SITE — “o que fazer”, lido do site</text>
+        <text x="716" y="516" font-size="12">encontramos X, falta Y — JSON-LD primeiro · FAQ · título · OG · llms.txt</text>
+        <text x="716" y="534" font-size="11.5" opacity="0.62">indicação por evidência + copy-paste onde couber</text>
+      </g>
+
+      <!-- cadeia causal (acento) -->
+      <g stroke="var(--accent)" stroke-width="2.5" marker-end="url(#arrAcc)">
+        <line x1="915" y1="334" x2="915" y2="288" />
+        <line x1="915" y1="196" x2="915" y2="150" />
+      </g>
+      <g stroke="none" fill="var(--accent)" font-size="11.5" font-weight="600">
+        <text x="928" y="315">dirige (semanas depois)</text>
+        <text x="928" y="177">resume em 3 números</text>
+      </g>
+
+      <!-- IC → Auditoria -->
+      <line x1="810" y1="420" x2="810" y2="472" stroke="currentColor" stroke-width="1.3" marker-end="url(#arr)" />
+      <text x="822" y="450" font-size="11" fill="currentColor" opacity="0.62" stroke="none">alavancas “você controla” → indica</text>
+
+      <!-- loop de ação: auditoria → site do cliente → próxima coleta -->
+      <path d="M 700 522 L 145 522 L 145 356" stroke="var(--accent)" stroke-width="2" stroke-dasharray="7 5" fill="none" marker-end="url(#arrAcc)" />
+      <g stroke="none" fill="var(--accent)" font-size="11.5" font-weight="600">
+        <text x="422" y="512" text-anchor="middle">cliente executa no site → a próxima leitura melhora a alavanca</text>
+      </g>
+
+      <!-- ── Vigias (faixa inferior) ── -->
+      <rect x="30" y="576" width="700" height="60" rx="8" stroke="currentColor" stroke-width="1.3" stroke-dasharray="5 4" />
+      <g stroke="none" fill="currentColor">
+        <text x="46" y="600" font-size="13" font-weight="600">Vigias — watchdog + consistência · a cada 15 min</text>
+        <text x="46" y="619" font-size="11.5" opacity="0.62">contas que fecham · duplicatas · motores calados · recontagem independente</text>
+      </g>
+      <rect x="790" y="576" width="340" height="60" rx="8" stroke="currentColor" stroke-width="1.3" stroke-dasharray="5 4" />
+      <g stroke="none" fill="currentColor">
+        <text x="806" y="600" font-size="13" font-weight="600">/ops — painel do operador</text>
+        <text x="806" y="619" font-size="11.5" opacity="0.62">saúde · alertas · custos &amp; consumo · pesos do IC</text>
+      </g>
+      <line x1="730" y1="606" x2="790" y2="606" stroke="currentColor" stroke-width="1.3" marker-end="url(#arr)" />
+      <line x1="445" y1="428" x2="445" y2="576" stroke="currentColor" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arr)" />
+      <text x="457" y="500" font-size="11" fill="currentColor" opacity="0.62" stroke="none">confere dados e processos</text>
+    </svg>
+    <figcaption>
+      A cadeia verde é a tese do produto: a alavanca (Citabilidade) dirige o resultado (Score),
+      que o Insights resume em três números sem nota ponderada. A linha tracejada verde é o loop
+      de valor — a Auditoria diz o que fazer a partir do que leu do site, o cliente executa, e a
+      coleta seguinte registra a melhora. Os vigias conferem contas e nomes a cada 15 minutos e
+      reportam no /ops, que só o operador vê.
+    </figcaption>
+  </figure>
+
+  <div class="legend">
+    <span><span class="sw"></span> cadeia alavanca → resultado → resumo</span>
+    <span><span class="sw" style="border-top-style: dashed"></span> loop de ação do cliente</span>
+    <span><span class="sw plain"></span> fluxo de dados</span>
+    <span><span class="sw dash"></span> vigilância / admin</span>
+  </div>
+</main>

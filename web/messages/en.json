@@ -1210,19 +1210,19 @@
       "noSample": "no sample",
       "citation": {
         "name": "Reading",
-        "brief": "How your proprietary sources (site, blog, content) are read and cited by AI in answers.",
+        "brief": "How are my proprietary sources (site, blog, content) read by AI?",
         "ev": "{citing} of {total} answers cite your domain ({pct}% — ruler: 10% = 100)",
         "how": "Measured from the links cited in each collected answer."
       },
       "presence": {
         "name": "Presence",
-        "brief": "Your brand is mentioned in answers, by name or domain.",
+        "brief": "In what % of answers do I appear?",
         "ev": "Mentioned in {mentioned} of {total} answers",
         "how": "Direct percentage of answers mentioning the brand."
       },
       "position": {
         "name": "Ranking",
-        "brief": "When the AI cites several brands, yours is mentioned first in the answer.",
+        "brief": "In which position do I appear in the answers I am in?",
         "ev": "Order of appearance in the text, across {samples} answers where you appear:",
         "noSample": "The brand has not appeared in any answer in this window yet (or ranking enrichment is still running — up to 30 min).",
         "how": "Ranking = order of the first mention in the answer text. Score: 1st=100 · 2nd=60 · 3rd=30 · 4th+=0, averaged over answers.",
@@ -1233,11 +1233,12 @@
       },
       "sentiment": {
         "name": "Sentiment",
-        "brief": "When they talk about you, they speak well.",
+        "brief": "How do customers/consumers evaluate my brand?",
         "ev": "{pos} positive · {neu} neutral · {neg} negative (among answers with the brand)",
         "noSample": "The brand has not appeared in any answer in this window yet.",
         "how": "Positive = 100 · neutral = 50 · negative = 0, averaged over answers with the brand.",
-        "sourcesLabel": "Sources searched — answers with the brand, per engine (+positive · ~neutral · −negative)"
+        "sourcesLabel": "Sources searched — answers with the brand, per engine (+positive · ~neutral · −negative)",
+        "domainsLabel": "Where they talk about you — domains cited in answers with the brand, with the answer sentiment (top 10; act where they speak badly)"
       }
     },
     "gapNote": "Next step of the architecture: the 2×2 gap diagnosis (Citability × Score) — high lever with low result is a harvest lag; low lever with high result is fragility.",

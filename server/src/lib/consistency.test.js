@@ -29,12 +29,14 @@ const healthy = {
     {
       brandId: 'b1',
       platforms: ['chatgpt-web', 'gemini-web'],
+      models: [],
       text: 'O que é a Polar?',
       isBrandPrompt: true,
     },
     {
       brandId: 'b1',
       platforms: ['chatgpt-web', 'gemini-web'],
+      models: [],
       text: 'melhores relógios esportivos',
       isBrandPrompt: false,
     },
@@ -181,7 +183,7 @@ describe('evaluateConsistency', () => {
     );
     const hit = alerts.find((a) => a.key === 'consistency-index-weights-sum');
     expect(hit?.severity).toBe('critical');
-    expect(hit?.message).toContain('110');
+    expect(hit?.message).toContain('175');
   });
 
   it('stays quiet when index weights are absent (table not readable)', () => {
@@ -306,6 +308,85 @@ describe('evaluateConsistency', () => {
     const alerts = evaluateConsistency({ ...healthy, stalledRankRows: 42 }, NOW);
     const hit = alerts.find((a) => a.key === 'consistency-rank-backlog');
     expect(hit?.message).toContain('42');
+  });
+
+  it('detects a silent API engine configured via prompt.models (caso Claude real)', () => {
+    const alerts = evaluateConsistency(
+      {
+        ...healthy,
+        prompts: healthy.prompts.map((p) => ({ ...p, models: ['claude-sonnet-5'] })),
+      },
+      NOW,
+    );
+    const hit = alerts.find((a) => a.key === 'consistency-engine-silent');
+    expect(hit?.message).toContain('claude');
+  });
+
+  it('does not flag chatgpt-shopping as silent when configured but shopping is off', () => {
+    const alerts = evaluateConsistency(
+      {
+        ...healthy,
+        prompts: healthy.prompts.map((p) => ({
+          ...p,
+          platforms: [...p.platforms, 'chatgpt-shopping'],
+        })),
+      },
+      NOW,
+    );
+    expect(alerts.find((a) => a.key === 'consistency-engine-silent')).toBeUndefined();
+  });
+
+  it('treats chatgpt-shopping and API-model platforms as known (no unknown-platform alert)', () => {
+    const alerts = evaluateConsistency(
+      {
+        ...healthy,
+        prompts: healthy.prompts.map((p) => ({ ...p, models: ['claude-sonnet-5'] })),
+        recentResults: [
+          ...healthy.recentResults,
+          {
+            brandId: 'b1',
+            platform: 'chatgpt-shopping',
+            mentionCount: 1,
+            citationCount: 0,
+            appearanceRank: 1,
+            sentiment: 'neutral',
+          },
+          {
+            brandId: 'b1',
+            platform: 'claude',
+            mentionCount: 1,
+            citationCount: 0,
+            appearanceRank: 1,
+            sentiment: 'neutral',
+          },
+        ],
+      },
+      NOW,
+    );
+    expect(alerts.find((a) => a.key === 'consistency-unknown-platform')).toBeUndefined();
+  });
+
+  it('index weights: partial table row equal to default keeps the effective sum at 100', () => {
+    const alerts = evaluateConsistency(
+      { ...healthy, indexWeights: [{ dimKey: 'dim1', weight: 15 }] },
+      NOW,
+    );
+    expect(alerts.find((a) => a.key === 'consistency-index-weights-sum')).toBeUndefined();
+  });
+
+  it('index weights: rows summing 100 alone still alert when the EFFECTIVE merge breaks', () => {
+    const alerts = evaluateConsistency(
+      {
+        ...healthy,
+        indexWeights: [
+          { dimKey: 'dim1', weight: 50 },
+          { dimKey: 'dim2', weight: 50 },
+        ],
+      },
+      NOW,
+    );
+    const hit = alerts.find((a) => a.key === 'consistency-index-weights-sum');
+    expect(hit?.message).toContain('165');
   });
 
   it('flags systematic mention recount drift, but tolerates isolated rows', () => {

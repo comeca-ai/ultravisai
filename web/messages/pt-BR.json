@@ -1246,7 +1246,7 @@
   },
   "citability": {
     "title": "Índice de Citabilidade",
-    "subtitle": "Sua nota 0–100 de citabilidade — o que você já construiu para ser citado pelas IAs. É a alavanca que dirige o Score de Visibilidade (resultado). A conta está sempre aberta.",
+    "subtitle": "Sua nota 0–100 de citabilidade — o que você já construiu para ser citado pelas IAs. É a alavanca que dirige o Score de Visibilidade (resultado): aqui você AGE; lá você MEDE. A conta está sempre aberta.",
     "period": {
       "7d": "7 dias",
       "30d": "30 dias",
@@ -1275,16 +1275,16 @@
       "zoneLabel": "Zona {zone}",
       "weightShare": "{weight}% do índice",
       "A": {
-        "name": "Faça agora",
-        "desc": "Você controla e é rápido — site e conteúdo próprios. É o que destrava o resto: IA só cita quem consegue ler."
+        "name": "Você controla",
+        "desc": "Site e conteúdo próprios, rápido de mudar. É o que destrava o resto: IA só cita quem consegue ler."
       },
       "B": {
-        "name": "Reivindique",
+        "name": "Você ativa",
         "desc": "É de terceiros, mas a ativação é sua — perfis, avaliações, publicações. Retorno médio, esforço baixo."
       },
       "C": {
-        "name": "Conquiste",
-        "desc": "Depende de terceiros e leva tempo — mídia earned e autoridade de vertical. Maior peso isolado do índice."
+        "name": "Você conquista",
+        "desc": "Depende de terceiros e leva tempo — mídia earned e autoridade de vertical. Maior peso isolado do índice: é campanha, não ajuste de semana."
       }
     },
     "dims": {

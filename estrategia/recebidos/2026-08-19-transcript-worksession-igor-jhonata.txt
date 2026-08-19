@@ -1,0 +1,662 @@
+Ultravis WorkSession
+Wed, Aug 19, 2026
+
+0:00 - Igor Meskelis
+E aí E aí E aí Bom dia, Marcelo. ... ...
+
+1:49 - Igor Meskelis
+O que é que acontece? O que é que você tá fazendo?
+
+2:31 - Unidentified Speaker
+Oi, Brasil. Olá. E não. E.
+
+3:28 - Igor Meskelis
+Não, não, não, não. Para que você não tenha esse grau em cima de mim, ok? Sim, mas é que... É que... É que...
+
+4:09 - Unidentified Speaker
+é que... É que...
+
+4:20 - Igor Meskelis
+é que... É que... É que... É que O que é que a gente tá falando? Hoje eu tô de pijama ainda, hein?
+
+5:01 - Unidentified Speaker
+Aí, você viu? Boa.
+
+5:07 - Igor Meskelis
+Hoje eu tô de pijama ainda.
+
+5:18 - Unidentified Speaker
+Ah, que bom, tranquilo. É que você falou... Eu também, eu nem fui...
+
+5:22 - Igor Meskelis
+Eu nem fui treinar, eu acordei mais cedo pra jogar umas coisas aqui ainda antes de receber... Eu sei que eu tinha visto isso, cara. Semana passada eu fiz uma limpada no meu computador e eu deletei, eu postei tirar o Edge. Ontem, eu saí, acabou a bateria, apagou o computador e tal. Cara, me apagou o Chrome, me apagou uma coisa aqui, eu não sei se ele se de você, entendeu, na história ou não? Nunca tinha visto isso, nunca tinha apagado o Chrome.
+
+5:53 - Jhonata Emerick
+É, como eu atendo instituição financeira, tendo duplo fator de autenticação no computador, circulação no meu computador, eu sou meio obcecado com esse negócio. Então, cara, em geral, assim, apagar o Chrome, ele te desloca das suas sessões e tudo mais. Apagar alguma coisa mas ele tem que ter algum poder de navegação na sua máquina. Ele tem que ter alguma autorização para poder apagar. Então, às vezes você instalou alguma AI ou alguma coisa e deu uma autorização para fazer algum tipo de coisa e está fazendo, entendeu? Tipo, apagar o Chrome é só você, velho. Você não pode ir lá e apagar. Fernando, a pior coisa que eu tenho ali...
+
+6:39 - Igor Meskelis
+Fernando, você tem uma ideia? Que louco eu tô num café um café morando em casa e aí eu precisava conectar na internet só para deixar na internet você tem que autenticar no no servidor deles aqui. Ele nem só tem que falar que não achava o Chrome. Eu tive que parar. Fiz a ponte com o meu celular baixei o Chrome instalei o Chrome e voltou. Depois eu vou ter que olhar com calma. Mas você falou você tem um ponto.
+
+7:13 - Unidentified Speaker
+É isso que aconteceu. E eu não tenho muita coisa.
+
+7:21 - Igor Meskelis
+Eu sou bem novo. Bastante. Tá. Peraí. Deixa eu ver se ele vai entrar não. É a vida. Peraí, peraí, peraí.
+
+7:45 - Unidentified Speaker
+Espera aí. Boa. Voltou? Voltamos.
+
+8:10 - Igor Meskelis
+melhor né melhor melhor Então, esse é o nosso dashboard operacional.
+
+8:42 - Jhonata Emerick
+Então, você é um aqui, ó, com isso aqui.
+
+8:47 - Igor Meskelis
+Agora, olha a ferramenta nossa. Eu coloco o... Ó, tchau. Não, não, o Travis.AI, que é o que eu uso, ó, ele não vai, mãe.
+
+9:00 - Unidentified Speaker
+Agora foi. Agora entrou. É, agora entrou. Tá bom?
+
+9:05 - Igor Meskelis
+Não, agora entrou.
+
+9:07 - Jhonata Emerick
+Eu tenho um dashboard operacional, ali avisa se cai a ferramenta. Não, por isso, não, não.
+
+9:13 - Igor Meskelis
+O meu tema é o acesso aqui, entendeu? Vou pegar pra você.
+
+9:18 - Unidentified Speaker
+É... Não, agora tá tudo normal.
+
+9:21 - Igor Meskelis
+Tá bom? Não, agora tá normal, mas não tava.
+
+9:25 - Unidentified Speaker
+Beleza, beleza, beleza.
+
+9:26 - Igor Meskelis
+Cara, tá rodando alguma coisa. Não, não, tava assim.
+
+9:30 - Unidentified Speaker
+Vou discutir com você. Tava assim. Não, eu tô dizendo.
+
+9:34 - Igor Meskelis
+Estava normal, eu tô falando, não, eu não tô discutindo contigo não, parceiro, tô falando comigo aqui, é alguma coisa que tá rodando aqui na minha máquina, que tá zoado, eu vou ter que olhar, entendeu, pra cá, porque não é normal, eu tive que reinstalar tudo, entendeu, o Chrome, o Zap, as coisas todas, tá vendo?
+
+9:54 - Jhonata Emerick
+Aí, como você é social, você foi deslogado pelo Eu sou o bebês do Google, eu sou iloguinha sexual.
+
+10:07 - Igor Meskelis
+é então aí eu vou ter que olhar tá vendo ele sumiu tá vendo os íconezinhos aqui ó que eu tenho das coisas ó ele sumiu aqui ó tá vendo ó é o ícone do Chrome que eu tive que reinstalar então ele sumiu agora tá vendo ó beleza mas vamos em frente aqui me conta do ó vai naquele dashboard operacional que você pediu uma senha coloca John e essa senha Essa cena tá fácil de decorar, hein? É porque ali é o cérebro que todo mundo pode checar.
+
+10:48 - Jhonata Emerick
+Não, não, tô de boa, tô de boa.
+
+10:51 - Unidentified Speaker
+Eu tô brincando.
+
+10:52 - Igor Meskelis
+Observado por segurança, velho.
+
+10:54 - Jhonata Emerick
+Aí, ó. Aí. Aqui é o motor. Aqui eu tô checando a máquina, quanto eu tô consumindo, se cai, ele me alerta, se a gente tem uma falha de sistema, se saiu do ar.
+
+11:08 - Unidentified Speaker
+Ah, legal.
+
+11:09 - Igor Meskelis
+você antes tinha, você tinha colocado, você tinha numa tela aqui ó, deixa eu fazer uma pergunta só, pra você aparecer uma telinha aqui, um negocinho de consumo de de grana, lembra?
+
+11:22 - Jhonata Emerick
+Do do Stokings, aparecia só pra você, curiosidade, onde a gente vê isso depois?
+
+11:29 - Unidentified Speaker
+Lembra Stokings que você mostrou uma vez na sua solução?
+
+11:33 - Igor Meskelis
+Ele tinha um cifrãozinho aqui, lembra?
+
+11:36 - Unidentified Speaker
+Tem.
+
+11:36 - Jhonata Emerick
+Esse custo e consumo, quer que eu ponha nesse dashboard aí?
+
+11:41 - Igor Meskelis
+Pode, coloca no, a minha pergunta é a seguinte, só para não dar mais trabalho, eu tô entendendo que essa versão que eu tô vendo aqui é uma como se fosse um cliente usando. Isso. Então, não, eu queria ver numa que fosse nossa de ADM, porque eu não vou pedir para você colocar numa que cliente está vendo e depois pedir para tirar, porque a gente não vai abrir isso.
+
+12:06 - Unidentified Speaker
+Entendeu?
+
+12:07 - Igor Meskelis
+É só depois você... Ou você cria um acesso, entendeu? Paralelo pra mim aqui, alguma coisa e tal, entendeu? Pra poder ver e entender. Aí eu vou voltar pra você. Se você fosse cliente...
+
+12:19 - Jhonata Emerick
+É porque, assim, ali tá descrito a nossa margem, né, velho? Eu não sei se um dia a gente vai deixar o cliente autênticar com o token dele, é... Então, por isso que eu separei essa coisa de onde bate o motor. Isso, e qual que é a tua pergunta? Que um dia, o cliente de grandes companhias, o que acontece? Você vai numa Adidas. O cara, em geral, o que acontece? Ele tem contratos globais com o Cloud, com não sei o quê. Pode ser uma barreira de entrada, ele vira AI e falar assim, ah, mas você, eu podia consumir com a minha conta? Eu autentico e consumo com a minha conta, eu quero a plataforma, mas quando for bater na AI, não consigo ter duas contas de AI aqui para justificar, mas eu autentico dentro do meu e tenho a sua ferramenta. Na minha cabeça eu penso um pouco nisso, porque...
+
+13:21 - Unidentified Speaker
+Ah, e eu estou te ouvindo.
+
+13:27 - Igor Meskelis
+Porque isso aqui pode ficar grande. É, então, a minha visão inicial é até a gente, eu manteria como está independente, sabe, e fora. Por quê? Porque tem aqui a integridade da nossa máquina. E outra coisa que eu acho que vai acontecer é o seguinte, é sempre, né? Think big, start small. Na ponta, quem vai usar nas empresas ali são os caras que mal vão saber, depois configurar, trocar o que seja de cor, de outras coisas. Então a nossa solução para mim tem que ser stand-alone. Então, por exemplo, o quê? Esse custo nosso de tout tá no nosso custo, tá na nossa margem. Então a gente nem mostra para ele o quanto e a gente consome do pacote que a gente tem. Ah, se depois pra frente, um específico, precisar ver, customizar e tal, eu acho que se a gente chegar nesse nível, cara, eu já vou estar tão feliz, você entende assim, tão feliz lá na frente na história, entendeu? Significa que a gente tá fazendo, sabe, as mega análises pro fundo, e aí a gente vai quase que desenvolver um dashboard específico para essa empresa. Beleza. Faz sentido para você, como eu estou te ouvindo?
+
+14:57 - Jhonata Emerick
+Faz sim, cara, total. E aí, ótimo, até porque a gente está fazendo só coisa pública, ninguém está subindo nada da empresa. Perfeito. Entendeu? Esse é o...
+
+15:12 - Igor Meskelis
+a gente está usando o Vamos dizer assim, o que eu sempre acredito, a gente tem que ser estruturado, crescer e parar em pé sozinho. Se depois, entendeu, o cara pedir pra desenvolver um tema custom, então beleza, a gente faz uma, entendeu, pra copiar e colar um tema a parte, sabe? Você faz um, uma, uma versão específica, entendeu, pra eles e pluga lá, mas aí ela fica, entendeu, desconectada do nosso... Do nosso principal. Eu acho que vai ser pouco provável no nosso negócio acontecer isso. Eu, pelo menos, não tenho ouvido nem visto ninguém perto de mim. Tá bom. Não, e assim, a gente vai começar com as pequenas marcas aqui que a gente controla no nosso ambiente, porque depois você sabe bem, né?
+
+16:03 - Jhonata Emerick
+Se você é a Adidas e tá ou, sei lá, a Riboc, pô, mas como é que o meu dado não circula no... Como é que ele sabe que não sei o quê... É isso.
+
+16:14 - Igor Meskelis
+O lado para você, esse lado de dados aqui é interessante. Como a gente só faz leitura de informação pública e de informação aberta, a gente lê da marca A e lê do concorrente B, C e D. Entendeu? É zero problema. Como a gente não está rodando nada dentro. Lembra que a gente tem uma solução que ela é da porta para fora. Ela manda a porta pra dentro. E ela trabalha isso. Então, é zero. E, na verdade, todos os clientes que eu passei a conversar no intestino, a maior fragilidade deles é assim, me mostra mais ou menos como eu sou, mas eu quero ver meu concorrente. Todo mundo me pergunta, mas como tá? A cabeça de quem vai ser global, mas pequeno e rápido.
+
+17:06 - Jhonata Emerick
+Mas a gente deixa otimizar o Prompet na pergunta depois. Se um concorrente, se a gente tem um dado que fala... Aí você começa a ter um pouco de inteligência dentro da marca. Eu vou otimizando meu próprio. Se alguém sabe como esse produto foi otimizado para essa linha do tempo, a gente começa a ter problema, porque você começa a gerar. Aí esse dado tem que estar separado, super, porque você começa a utilizar e gerar inteligência.
+
+17:33 - Unidentified Speaker
+Isso.
+
+17:34 - Igor Meskelis
+O que você está falando é muito bom. Por quê? Vamos lá. Eu vou dar um exemplo. Eu vou pegar só o que você falou, Adidas. Então, a Adidas está otimizando, o prompt, ela está na campanha de lançamento, está no momento de novas fronteiras de futebol, está no ano passado. Então, ela está otimizando os prompts de Adidas, futebol, no segmento A, B, C ou D. E como que a Rebork está otimizando a parte de training, de momento ali, urbana está utilizando a parte de posicionamento de corrida. O prompt que cada um vê é dela, né, assim, entendeu? Só que de novo, é isso, né, e você não repete, porque o prompt é como um cliente pergunta, e eu acho que é isso que é grandeza e sacanagem. E tem ali uma, na verdade, eu não vou chamar uma de inteligência, mas tem um foco, é que você coloca uma persona, né, quando a gente pergunta, eu quero saber um produto voltado para futebol ou para corrida, você tem aquele ponto de vista, aí o que você tá perguntando, você vai utilizar para aquilo, é isso que a ferramenta tem que entregar, né, isso que a gente tá fazendo aqui, ela te dá visibilidade nos prontos, né, aqui, ela te dá o ranking, né, que aparece, e depois o que a gente vem falando, ela te dá as soluções, o que que você tem que acertar aqui, para ser otimizado nesses próximos teus. E o que sai desse tudo aqui... Aí começa a botar inteligência dele aqui.
+
+19:13 - Jhonata Emerick
+Eu adiciono, vou fazer essa inteligência, aí eu começo a ter uma camada que é dele, de time. Aqui não é uma camada nossa. Isso, é dele.
+
+19:28 - Igor Meskelis
+é isso, é isso aí, ele começou a ajustar, o que vai acontecer com isso, o que eu espero no nosso é ajudar com ele, porque isso aqui vai acabar ficando na mão do avião marketing, de né, de alguma coisa, né, o cara vem com o briefing de campanha, ele quer pensar 360°, ele quer atingir esse público, ele vai orientar e a gente ajuda com a ferramenta a retenhar esse prompt para ele. É o trabalho de inteligência aqui, né, e com isso aqui vão sair os resultados, né, e depois a otimização tem que aparecer a listinha aqui, né, que eu falei, então aqui tem a tela de conteúdo, se ele colocar, né, que é o que a gente falou, Depois tem o tema lá do Steam, do Blog... Eu só tô pensando na minha cabeça aqui, ó. Auditoria do site.
+
+20:13 - Jhonata Emerick
+Lembra que a gente vai ter, na nossa solução, a gente vai ter um cara de TI que vai vir junto pra poder... Olha que o cara de TI, eu só tô adiantando as perguntas do cara de TI. Ah, mas calma. Tem aqui uma camada já nossa. Esse dado tá onde? Circula. Até pra gente ter no pitch comercial, pra gente poder ter o total da ferramenta. Que é essa pessoa ali, eu vou ter que começar com ela.
+
+20:35 - Unidentified Speaker
+Sim. E total.
+
+20:37 - Igor Meskelis
+A gente tem dois públicos, né, o cara quer entender como tá, quer saber o que ele tem que utilizar, e o cara técnico ali, ele quer olhar o que ele precisa botar a mão, o que ele vai ter que levar no site deles, e outra coisa, né, porque a gente não vai fazer mudança em nada no site dele de conteúdo, a gente vai recomendar, a gente pode orientar, dar o coaching na agência deles, na equipe deles não é para fazer, porque aqui ó, a minha visão é isso aqui ó, quando eu falo, né, desse elemento aqui ó, que são a legibilidade do site, a gente tá fazendo do esquema, o Jazon, o LLM, sitemap, o IQD, tal, tal, a gente precisa ter um tudu ali, né, o que fazer, o que otimizar à base disso que foi pesquisado para cada um desses temas, então por exemplo, aqui tem E esse é o ponto pra mim que a gente precisa... Ali ó, o que fazer?
+
+21:38 - Unidentified Speaker
+Auditoria do site. Então, mas o...
+
+21:40 - Jhonata Emerick
+mas ele não tá dando.
+
+21:42 - Igor Meskelis
+Aqui ó. Entendeu? O que que pra mim ele deveria aparecer? Isso eu já rodei e eu te deixo a dúvida. Tá? É que como eu já sei e tenho a experiência que tem uma parte técnica a copiar e do Zazon, do LLM, do site médio, tem uma orientação de Wikipedia, você entende um pouco do que é, mas isso aqui já precisa aparecer como resultado do que ele tem que botar a mão, copiar e colar, para utilizar à base esse diagnóstico, esse relatório que a gente rodou.
+
+22:23 - Unidentified Speaker
+Consegui?
+
+22:23 - Igor Meskelis
+Então olha só, imagina só você, roda uma foto, a gente vem e roda uma foto, aqui, a gente tira um pedacinho do fio, uma foto, vai, aqui, aí eu falo o seguinte, para otimizar isso, ele já tem que produzir para mim, aqui ó, você não copiou aqui, você tem que copiar, LLM e TXT pronto, mas aonde tá isso? Então deixa eu ver o que que veio aqui, Interessante. Eita, peraí.
+
+23:02 - Unidentified Speaker
+Olha só.
+
+23:08 - Igor Meskelis
+Quando apareceu aqui, certo? O que eu tô lendo? Ele tá aqui aparecendo o texto que tem que copiar e colar no LLM TXT da Polar, certo? Então, você deu aqui. Então, esse aqui é um exemplo. Então, isso tem que tá copiado e colado no LLM TXT. Só que eu preciso ter isso para o LLM TXT, né, aqui dentro disso. Eu preciso ter isso para o esquema.org Eu preciso ter isso para o... Estou pegando a sequência aqui. O Jazon é o primeiro, tá? É o principal que é onde a maioria dos sites tem problema, né? Então eu vou colocar aqui, eu tenho aqui... Eu tenho aqui... Normalmente, o que que eu tenho visto desses desafios? Os maiores problemas estão assim. Tem mais um aqui, tá faltando, é o esquema de azul LNM, aqui, prova.
+
+24:40 - Jhonata Emerick
+tá, aqui tem também.
+
+24:41 - Igor Meskelis
+Então, normalmente, eu vou, eu te mando, tinha aqui, tá faltando mais um, é o Esquino, Gazon, M&M's, Mobbets, Snap, Wikideira, peraí que eu vou abrir aqui e vou te mostrar.
+
+24:56 - Unidentified Speaker
+Peraí, peraí, peraí.
+
+24:59 - Jhonata Emerick
+Ficar em casa na planilha. Lá, tem esse pedaço aqui, ó.
+
+25:11 - Unidentified Speaker
+Aqui.
+
+25:12 - Igor Meskelis
+Ah, tá bom, essa eu tinha... Auditoria, Auditoria do Céu.
+
+25:24 - Unidentified Speaker
+do site aqui, tá vendo?
+
+25:26 - Igor Meskelis
+Auditoria técnica do site, tá vendo? Regime dos principais pontos para melhorar na marca, em relação a tal. Então tá aqui ó, esquema, jason, alfaca editorial tá faltando, né, e aqui a parte de produto que tá faltando, muitas vezes falta, né, descritivo de produto, ó, meta, tags sociais, esses são os elementos aqui. Eu vou trazer Eu vou ajustar. Muito bom.
+
+25:56 - Unidentified Speaker
+Beleza? Beleza. Por que?
+
+25:59 - Igor Meskelis
+Essa é a base sólida, porque a gente cobriu o conteúdo, a gente cobriu entender os índices, a gente cobriu o conteúdo. Eu não consigo escrever Você não tinha aqui? Já vou. Isso.
+
+26:24 - Unidentified Speaker
+Chegou.
+
+26:25 - Igor Meskelis
+Então, vou voltar na solução aqui.
+
+26:29 - Unidentified Speaker
+Consegui? Sim.
+
+26:30 - Jhonata Emerick
+Porque aí fica só.
+
+26:33 - Igor Meskelis
+Porque o conteúdo, né, aqui ó, o que fazer, tópicos onde publicar, que foi o que a gente colocou aqui, Fica legal. Então, por exemplo, aqui, o Trata, um velho page com um pouco do que a gente falou. Tem uma sugestão de texto, por que que importa, tal, tal, papapá. Os insights dos concorrentes. Será que depois é só indicar quais são os principais canais aqui, revistas, né, ou referência dele aqui. Que é esse o...
+
+27:14 - Igor Meskelis
+um ponto legal para a gente acertar.
+
+27:19 - Jhonata Emerick
+Só colocar aqui no Blacklog esse ponto. A gente vai pegar cada um desse e como a gente fez com os outros, dar uma resposta de estar aqui, uma coisa que você pode fazer já na largada ou exige mas como eu também recomendo que você faça para cada e é isso e nesses elementos que estão aqui porque eu quero abater o olho aqui pô e vamos voltar no nosso ó e no nosso ó aqui Ó, eu tô sendo consistente com aquilo que a gente tá vendendo.
+
+28:18 - Igor Meskelis
+Você tá vendo aqui? Eu tô falando pelo sentido, ó. Fiz análise, comece pelo que é seu. Legibilidade, conteúdo, então eu tenho que dizer pra ele o que eu tenho que colocar. Depois eu tenho uma sugestão do conteúdo aqui que eu posso explorar pra cá, mas aí ele tem que trabalhar. Customer view é consequência de como ele atende, né? Então eu trago as fontes, ele tem que ir lá e acertar. E os outros aqui, né, é um pouco da publicação independente, né, do que tem aqui, você usa o tema de conteúdo e você vai construindo com o tempo. Cara, posso fazer uma coisa que eu acho que vai ficar fácil pra mim, principalmente? Ah.
+
+28:56 - Jhonata Emerick
+Você quer me mandar de novo esse material, acho que você já mandou, mas eu queria, eu posso pôr aquela matriz no onboarding, só me uma, como, como é que no onboarding Como é que você... É assim, um on-boarding rápido. Começou com ela ali, você pode colocar. Lembra, gente? É que você colocou, eu falei que você lembra ontem que eu comentei, você acha que você tirou da matriz?
+
+29:18 - Igor Meskelis
+Manda pra mim de volta o que eu vou colocar, mas eu queria fazer um on-boarding. Às vezes as pessoas de marketing assim, tem quando a plataforma começa a ter uma complexidade, eles fazem um on-boarding.
+
+29:28 - Jhonata Emerick
+Esse on-boarding ia ser super legal de a gente separar. Sim, sim. Olha, como na vida, o que a gente controla e o que mais... Pesa, é aqui que a gente vai te direcionar e tal, seria muito legal. É isso, tá aqui ó, eu mando de novo aqui, você quer que manda aqui no Tinder ou manda no Whatsapp de novo?
+
+29:49 - Unidentified Speaker
+No Tinder ou no Whatsapp? Manda no Whatsapp pra mim.
+
+29:53 - Igor Meskelis
+Tá beleza, tá, vou mandar de novo aqui. Uma pergunta só, técnica tá, tipo, o teu WhatsApp, ele apaga, é aqui as coisas, vou mandar de novo aqui. Eu tirei. O seu tá ativado?
+
+30:08 - Unidentified Speaker
+Não, não.
+
+30:09 - Igor Meskelis
+É porque ele fica num... Ah, talvez você tenha apagado antes lá. Beleza, ó. Que eu tô... O PPT que eu acabei de mostrar tá aqui.
+
+30:21 - Unidentified Speaker
+Foi, ó.
+
+30:22 - Jhonata Emerick
+Ótimo, tá aqui agora. Eu vou voltar com a matriz lá, naquela seção que a gente falou ontem. A gente podia pensar num onboarding dizendo o que ele acha. Sabe quando você entra num site que tem a lógica, assim, meio, isso aqui que está aqui, isso aqui que está aqui, sempre que você precisar, por aqui que vai? É, então, assim, o que eu tenho?
+
+30:47 - Igor Meskelis
+Eu gosto e o que eu penso nisso? Tem dois modos para a gente fazer. Um é uma documentação de referência. Lembra que eu comecei num tema institucional e depois eu vou melhorar esse ensino visual, essa comunicação. Isso aqui que a gente gerou pra gente, eu sempre penso algo pra gente, mas visão final pro cliente. Então, a hora que a gente tiver certo, eu vou dar um exemplo pra você. Isso aqui, ó, isso aqui é final, né, isso aqui é final, um pouco do que a gente tem, a gente explica, né, pros da lei, isso aqui a gente vai explicar e faço parte do documento, esse aqui vai tomar junto, né, porque o índice de estabilidade a gente tá casado correto, mas o score de visibilidade a gente combinou duas coisas ontem, né, lembra que a gente ia ter lá o tema de percentual, né, de respostas e o tema do banco. Já foi a discussão nossa aqui. Então, isto ela tá aqui para não falar besteira, e eu não... Ó... Eu não, eu não vi aqui, ó, ó, se eu pegar, quando você fala tá no ar aqui, eu não consegui achar, deixa que eu te mostrar o que que eu tô olhando errado, para você me orientar, por favor. O que que melhorou? Lembra que ele tava mais de cem por cento, né, nos promptes aqui, de alguma das ferramentas, beleza. Estão aqui, ele estava mais de cem, já voltou para menos de cem, beleza. Mas ele não apareceu aqui ainda, o Cloud, né, que a gente falou, e lembra que a gente falou do ente de visibilidade? E depois tinha o tema do ranking, que a gente ficou fazendo aquela continha do ranking, não apareceu aqui para mim, onde eu olho?
+
+32:55 - Jhonata Emerick
+não apareceu o cloud ali para você?
+
+33:00 - Igor Meskelis
+não, você tá vendo a minha tela aqui ó, ó, eu tô te mostrando a tela roda ali!
+
+33:12 - Unidentified Speaker
+rodar o que? Tudo? Tudo!
+
+33:15 - Jhonata Emerick
+confirma Vamos ver se o Clodo vai aparecer, porque como eu não estava pegando...
+
+33:32 - Unidentified Speaker
+Não tinha um stop.
+
+33:34 - Jhonata Emerick
+Talvez por isso você não esteja vendo. Mas eu já estou monitorando aqui. Enquanto ele roda, vai ali em score de visibilidade.
+
+33:47 - Unidentified Speaker
+Ah, ele está rodando. Oi?
+
+33:51 - Jhonata Emerick
+Mas aqui que ele colocou citação, posição, aquelas nossas... Como a gente falou de um score de visibilidade, ele também quebrou desse jeito, mas posso levá-la para cima. Então, mas era isto aqui?
+
+34:10 - Igor Meskelis
+Lembrar que, para mim, a visibilidade é um score cor de unidade, você tem que aparecer aqui dentro da tua primeira telinha, você tá vendo a minha mãozinha aqui?
+
+34:23 - Unidentified Speaker
+Por quê?
+
+34:24 - Igor Meskelis
+A gente tá meio que abandonando, a gente tá mudando esse tema aqui dos cor de unidade, deixa eu fazer um desenho pra você aqui ó, imagina assim, isso aqui, deixa eu ver se eu consigo rabiscar aqui, pra você entender O que que eu tenho no meu desenho? Isso aqui...
+
+35:02 - Unidentified Speaker
+Nossa!
+
+35:09 - Igor Meskelis
+Tá vendo a minha tela? Isso aqui era um tema que a gente tinha aprendido e que a gente combinou, que a gente vai ter. Desse elemento aqui, a gente tá fazendo uma conta de presença e a gente tá fazendo uma conta de posição. Na verdade, essa presença, essa excitação, a gente está fazendo a mesma conta, é uma coisa só. A gente está colocando ali, certo? Porque isso aqui, ele é a quantidade de promptes. A pontinha da minha remetidinha aqui está...
+
+35:55 - Jhonata Emerick
+Espera aí.
+
+35:56 - Unidentified Speaker
+Deixa eu ficar aí.
+
+35:58 - Igor Meskelis
+Isso aqui é a quantidade de promptes que eu apareço sobre o total. É isso. E esse aqui é aquela média do ranking se o cara é 1, 2, 3, 4, 5 dentro disso aqui. Então isso aqui é um average da posição. E a gente vai deixar esses dois separados. A gente não tá olhando aqui E essa é a minha pergunta. A gente vai trazer alguma coisa mais de sentimento, entendeu? Mais positivo, menos, sabe? Como é que a gente quer conciliar? Porque eu posso repetir isso aqui, mas eu não queria ficar com muito... Outra tela. É, eu não queria ficar com muito número. Eu posso dar um resultado pra ele, entendeu? Só falar o seguinte, olha, e overall, o teu sentimento de marca, ele é positivo, né? Eu posso manter isso lá na atualizabilidade. Eu tenho segmento, ele é positivo, né? Neutro, né? Ou ele é negativo. Então aqui ele é positivo mais ou ele é menos, né? Do que a gente tá falando aqui. Beleza. Então esse aqui é o nosso O nosso visibilidade, ele te mostra três coisas. Em quantos porcento você aparece? Qual tua posição média? E o teu sentimento, se ele é positivo ou negativo. Isso.
+
+37:42 - Jhonata Emerick
+Pode dar uma olhadinha na minha tela aqui? Pode. Peraí.
+
+37:49 - Igor Meskelis
+Peraí, na sua tela...
+
+37:53 - Unidentified Speaker
+Aí. Beleza.
+
+37:54 - Jhonata Emerick
+Então, índice de visibilidade. Marcelo dos Prontos Rastreados em sua marca apareceu em pelo menos uma resposta DA, certo?
+
+38:10 - Unidentified Speaker
+Pronto.
+
+38:10 - Igor Meskelis
+Isso aí. Rastreados.
+
+38:14 - Jhonata Emerick
+Prompters distintos que produziram os resultados nos períodos. Certo? O que é esse Prompter rastreado? A gente começa com 35 e depois a gente diz o número de Prompters que...
+
+38:28 - Igor Meskelis
+Então é o seguinte, isso, só que para mim, qual é a conta? Ele é 54.710, entende? O que que... Volta ali, o que que me dá 11.1? É menos ali, senão volta lá. Quero ver a conta ainda.
+
+38:46 - Jhonata Emerick
+Prompters distintos que produziram o resultado no período. E com filtros selecionados, porque lembra que a pessoa pode ir lá fazer um prompter diferente, acaba sendo um filtro. É... Aí tem esse negócio de corta, basta... Então, assim, eu tô rastreando, eu tô rastreando 54 que ficou estranho.
+
+39:12 - Unidentified Speaker
+Rastreados.
+
+39:13 - Igor Meskelis
+Cinquenta e quatro de cento e setenta e dois rastreados.
+
+39:16 - Unidentified Speaker
+A gente tá me dando um nó na cabeça aqui. Eu vou arrumar.
+
+39:20 - Igor Meskelis
+O que que cê quis dizer aqui? É, mas o que cê quis dizer aqui, me conta.
+
+39:25 - Jhonata Emerick
+Eu quis dizer que o total de porque cê lembra que um a gente viu isso você tem um mas lembra que a gente viu que um pode desdobrar em dois, três pra cê ter a resposta, a gente fez esse exercício, Aqui é o fan-out, aquele exercíciozinho dele ali, beleza?
+
+39:42 - Unidentified Speaker
+Ele faz micro perguntas.
+
+39:43 - Igor Meskelis
+É, mas tá legal, mas o que que eu mudaria ontem? O índice de dignidade é 11.1%. E o que que ele é que eu tô vendo? Ele não é o 149 dividido por... O que que é essa menção aqui? Essa menção é quantas vezes uma marca foi citada pelo nome nas respostas geradas Então, mas o 11.1% é o que? Ele é esse número dividido pelo quê? O que que é o 11.1% Elias? Tá, tá, aí perfeito.
+
+40:17 - Unidentified Speaker
+Os próprios rastreados.
+
+40:18 - Jhonata Emerick
+A gente mudou ontem e eu não dei essa tela. Ela acabou vindo pra cá, ó. Entendi seu ponto. O seu painel é mais legal que o meu, tá?
+
+40:31 - Unidentified Speaker
+É ali.
+
+40:33 - Igor Meskelis
+Beleza, mas eu volto lá, você entende? Eu só quero botar na conta e aí eu tenho o pessoal do áudio. Então, a gente fez a...
+
+40:42 - Jhonata Emerick
+Me escuta, a gente fez a conta aqui. Só que ele criou um painel do escorte da visibilidade, que eu pedi para ele criar abertamente para a gente separar o que é citação, o que é posição, o que é presença. Eu só esqueci de levar de volta para lá. Então... Beleza. Então eu vou levar de volta.
+
+41:02 - Igor Meskelis
+tá?
+
+41:03 - Jhonata Emerick
+Então, por exemplo, agora a gente tem que redesenhar esse painel. Aqui, ele ainda tá o padrão. O índice de visibilidade, vai passar a ser aquele nosso score de visibilidade? Que é aqui, ó, a nossa citação.
+
+41:20 - Igor Meskelis
+Então, é que tem duas, é que aqui, esse é o meu ponto, é que aqui acho que a gente eu vou duas coisas aqui é esse tema aqui situação presença autoridade de posição apenas ele era uma tela inicial que eu tinha da outra empresa no aprendizado a gente deu um passo a mais a ele ser mais claro lembra não necessariamente aqui a gente vai usar essa ponta que é isso que eu mostrei no PowerPoint Lembra, e pra gente não misturar, porque a gente reorganizou. Lembra disso aqui que eu falei pra você? Deixa eu voltar aqui só um segundo pra você pegar, ó, ó. Exatamente onde a gente tá, ó. Pra gente não ter nó na cabeça. O nosso índice de citabilidade é esse, certo? Que ele tem legibilidade, conteúdo, isso a gente não muda.
+
+42:21 - Unidentified Speaker
+Citabilidade, tudo bem?
+
+42:22 - Igor Meskelis
+Agora, a gente tem o anterior, que é um resumo de visibilidade. Nesse resumo de visibilidade, o que que a gente tá fazendo? Eu só mostrei aqui a conciliação do antigo Gambia. O nosso índice de visibilidade, ele vai ter uma conta, que é o percentual de prontos sobre o total, um ranking e um sentimento. E esse índice de visibilidade nosso, eu não preciso ter uma nota ponderada disso. Lembra a gente falou mas eu não acho legal criar.
+
+42:55 - Unidentified Speaker
+Entendeu? Aqui. Perfeito. Tudo bem?
+
+42:57 - Igor Meskelis
+Volta lá no nosso sistema agora. Isso. Aí, agora você tem que projetar ali, que eu vejo diferente do P.
+
+43:04 - Unidentified Speaker
+Então, ó, aqui, eu tô vendo essa tela aqui.
+
+43:08 - Jhonata Emerick
+O seu já tá também, ó, o seu já tá também, desce aqui, escolhe visibilidade, essa aqui é a tradução, ó, o seu citação já é a conta da daquela citação ali que você mostrou. Ah, tá. Você misturou os dois aqui, então. Eu encapsulei para entender bem.
+
+43:26 - Igor Meskelis
+Agora que eu entendi bem, eu volto para o painel, porque...
+
+43:30 - Unidentified Speaker
+Como é que a minha cabeça funciona? Estamos com o método.
+
+43:34 - Jhonata Emerick
+O método está fechadinho. Agora a gente põe o número onde a gente quiser, do jeito que a gente quiser. Então, é que tinha uma coisa que me incomodava muito, e que você vai entender.
+
+43:47 - Igor Meskelis
+Com o Tava aqui, citação e presença são duas coisas muito parecidas. Lembra, no entanto que eu peguei isso aqui, lembra que eu falei, nós estamos juntando esses dois aqui? Porque eu tenho uma conta com a marca mencionada nas respostas, com seu nome e domínio, é isso que eu quero saber, é isso que eu estou chamando aqui, de... Entendeu? A gente coloca o nome que você quiser aqui.
+
+44:17 - Unidentified Speaker
+Entendeu?
+
+44:18 - Igor Meskelis
+Índice de... De presença, sabe? Percentual de presença, percentual de resposta e tal, pra ficar mais claro. O que eu não queria era misturar... Sabe uma coisa que eu fiquei lendo um pouco e ouvindo ontem? Você talvez pude conhecer bastante. Ontologia. E eu chamo pra mim de taxonomia.
+
+44:41 - Unidentified Speaker
+não, não, antologia é meu mundo.
+
+44:43 - Jhonata Emerick
+Então, é teu mundo.
+
+44:45 - Igor Meskelis
+E aí eu lembrei, quando eu vi, você falou assim, eu vou comentar, por exemplo, que ele vai entender. Então, aqui, vamos deixar bem claro estas coisas, por isso que eu fiz o desenho aqui. Então, eu tenho aqui o índice.
+
+45:00 - Jhonata Emerick
+Para mim, é você dar contexto ao problema na particularidade da persona que você tá falando, isso tem muito Ah tá, isso pra mim é a definição do Provençal.
+
+45:14 - Igor Meskelis
+O que o Miranda comentou no dia, que pra mim eu entendo como taxonomia, é você ter palavras e títulos claros que significam uma condição ou uma pessoa. Então tem gente que coloca lá cliente, devedor, você entendeu? Corredor ou tal, dependendo do ambiente que você tá, essas coisas parecem alguma coisa, mas não são, porque elas vão te levar a respostas em temas distintos. Então, pra mim, o que que eu queria padronizar contigo pra você ver se fica legal, pra gente não...
+
+46:01 - Unidentified Speaker
+Olha que interessante.
+
+46:02 - Jhonata Emerick
+Eu tô chamando Eu só sigo o líder aqui, porque esse é seu business. Então, padronização, eu estou escrevendo aqui.
+
+46:11 - Igor Meskelis
+Então, e é isso que eu quero simplificar aqui, porque a gente... Oi, voltou. Então, olha só. Eu tenho um índice, que é o índice de citabilidade. Tá bom? Depois aqui, eu tenho um score, né?
+
+46:26 - Unidentified Speaker
+Aqui, que eu vou chamar de...
+
+46:29 - Igor Meskelis
+Eu vou chamar... Eu vou colocar aqui, é o score de visibilidade, que é essa conta que a gente está falando aqui, tá bom? Aí eu tenho um tema que é o ranking de posicionamento.
+
+46:52 - Jhonata Emerick
+Isso, que você botar lá dentro da ele tem posição já. É, mas é que eu tô chamando...
+
+47:03 - Igor Meskelis
+Posição eu vou mudar para...
+
+47:06 - Jhonata Emerick
+Ah, não, tava com seu nome, posição. Então aqui, assim, aqui.
+
+47:12 - Igor Meskelis
+Eu tenho só isso aqui. Eu tenho aqui o ranking médio. Ranking médio, tá.
+
+47:20 - Unidentified Speaker
+Pronto.
+
+47:20 - Jhonata Emerick
+E...
+
+47:25 - Igor Meskelis
+Eu tenho um que eu chamo de sentimento.
+
+47:33 - Unidentified Speaker
+Por quê?
+
+47:35 - Igor Meskelis
+O que eu estou mantendo no critério?
+
+47:42 - Unidentified Speaker
+Lembra dessa lógica aqui?
+
+47:46 - Jhonata Emerick
+Então, ó...
+
+48:01 - Unidentified Speaker
+Perfeito, então...
+
+48:02 - Jhonata Emerick
+É, só que aqui tem um ponto. Eu penso na análise de sentimento, no score ele tem um peso. Então, mas isso é o meu ponto aqui, ó. Eu trouxe pra cá...
+
+48:28 - Igor Meskelis
+E estou simplificando aqui. Aqui é como a Yaki mostra. Aqui, a tua presença. A tua posição.
+
+48:44 - Unidentified Speaker
+Aqui, em sentimento.
+
+48:47 - Igor Meskelis
+Estou simplificando. Em sentimento.
+
+48:54 - Igor Meskelis
+Um, você ase, o outro você mede. Perfeito. É o que tá feito aqui, ó.
+
+49:02 - Jhonata Emerick
+Ó, a gente tá com esse código. Mostra aí, projeta aí, então. Uma tela, ó. Peraí que eu tô, deixa eu alternar na minha tela aqui, aí. Eu peguei tudo que a gente fez e criei a primeira na tela do score de visibilidade, com a citação, presença, autoridade, posição e sentimento.
+
+49:28 - Igor Meskelis
+É que isso aqui seria uma cópia daquele inicial que eu tinha, que eu usei como referência, e a gente refinou. É, mas aqui já está a conta como a gente combinou ontem, citação.
+
+49:42 - Jhonata Emerick
+Então, é isso que eu quero saber, isso.
+
+49:46 - Igor Meskelis
+O que eu estou chamando de presença, aquela conta percentual, Ela se colocou, ela está chamando ela como citação, certo? Ou você está chamando como presença?
+
+50:01 - Jhonata Emerick
+resposta com nome Presença é sua marca mencionada na
+
+50:04 - Unidentified Speaker
+Um detalhe sutil, cara, que agora que eu me toquei... Então, mas lembra que a gente...
+
+50:16 - Jhonata Emerick
+é por isso que ele está nessa conversa aqui, para a gente acertar.
+
+50:26 - Igor Meskelis
+Vamos, vamos... Vamos fazer pelo fácil, certo? Está tudo na tela, agora é o que a gente escolhe. Isso, então vamos lá. Vamos dizer que está claro. A autoridade é a curar se a gente está tirando.
+
+50:44 - Unidentified Speaker
+Não precisa... Está fácil. Beleza.
+
+50:46 - Igor Meskelis
+A posição e o sentimento a gente mantém e estamos...
+
+50:51 - Unidentified Speaker
+Está correto.
+
+50:56 - Jhonata Emerick
+Beleza. Então deixa eu ver a posição aqui.
+
+51:00 - Unidentified Speaker
+Exatamente isso. Então, olha que interessante aqui. Eu tô olhando a posição.
+
+51:05 - Igor Meskelis
+Vamos olhar o que tá fácil e o que tá feio. Sentimento, positivo, neutro, tá ok, uma nota depois a gente valida. O importante é só trazer as fontes pro cara saber quando tá mal, quando tá bem. Tudo bem? Como fica. No escódio, visibilidade, em sentimento, trazer as fontes.
+
+51:28 - Jhonata Emerick
+Isso, para o cara poder saber ter a referência depois, para ele ver quando ele está bem, ele quer entender quando está mal, ele quer saber onde estão falando mal dele, para ele atuar.
+
+51:45 - Unidentified Speaker
+Beleza.
+
+51:45 - Igor Meskelis
+Bom, aí vamos na posição. A posição está correta aqui, eu só de alguém aparecer 100% das vezes em primeiro lugar, tem que dar uma olhada no motor.
+
+52:00 - Jhonata Emerick
+Isso, isso, mas esse aqui não é o seu exemplo, vai na polar aí, vê se dá.
+
+52:09 - Unidentified Speaker
+Não sei se aparece 100%.
+
+52:11 - Igor Meskelis
+Ah, peraí, ele tá, deixa eu mudar aqui pra você ver, peraí, ó. Ele apareceu 49.
+
+52:19 - Jhonata Emerick
+Isso, o meu caso ali era um caso muito particular, tá?
+
+52:24 - Igor Meskelis
+Tá bom, mas aí então, beleza, o 3 morreu, a autoridade morreu, o coração morreu, sentimento 5, posição 5. A dúvida que a gente tá aqui agora é a seguinte, citação e presença. Esse daqui é um ponto. O que que eu tô dizendo? São duas coisas diferentes, sim, a gente precisa manter É ali? Sim. Aquilo que é o seguinte, ele trouxe, ele conseguiu ler e trouxe a informação do seu site, do seu blog, do seu conteúdo, dá uma nota de zero a cem. Beleza? Ele conseguiu ler, é isso que ele responde. E na presença, é quantas vezes naquele conjunto dos prontos certo e sua marca é mencionada então tá bom aqui é como como funciona isso na minha cabeça ó vou fazer Na minha cabeça.
+
+53:46 - Unidentified Speaker
+Funciona.
+
+53:47 - Igor Meskelis
+O que que eu trabalho com isso. Eu quero saber se sentir. E. E perguntas eu coloco sentimento como. Os clientes consumidores percebem a minha marca. Na verdade eu vou ser mais ainda.
+
+54:23 - Unidentified Speaker
+Eu vou dizer avaliam a minha marca.
+
+54:28 - Igor Meskelis
+Eu estou sendo mais específico. Aí, eu venho aqui, é o seguinte...
+
+54:38 - Unidentified Speaker
+Eu odeio essa função que tem do... Olha aqui. Em que posição...
+
+54:47 - Igor Meskelis
+Eu posso só pedir um gancho para você?
+
+54:52 - Jhonata Emerick
+Quando você, no nosso score de citabilidade, tem uma dimensão de avaliação. É a mesma do sentimento? Sim, ela é intacta. É isso. Lembra do desenho aqui, ó.
+
+55:09 - Igor Meskelis
+Lembra disso aqui? Porque ela lê a presença em solta, a presença em câncer, meu vizinho, e te dá um sentimento.
+
+55:22 - Unidentified Speaker
+Tá.
+
+55:22 - Jhonata Emerick
+Lembra? Aqui.
+
+55:24 - Igor Meskelis
+Então vamos só responder as perguntas, e depois a gente pode limpar, mas sim, oposição responde, e na verdade eu vou chamar de ranking, tá? Então aqui eu tenho que chamar isso aqui de ranking, né? Eu vou chamar isso aqui de sentimento.
+
+55:44 - Unidentified Speaker
+Tá bom?
+
+55:45 - Igor Meskelis
+Aqui, esses, e aí, é... Aqui eu estou falando de presenças. Em que percentual?
+
+55:59 - Unidentified Speaker
+Percentual, né?
+
+56:02 - Igor Meskelis
+Em que percentual das respostas apareço?
+
+56:10 - Unidentified Speaker
+Beleza. Aqui. E outros signos.
+
+56:15 - Igor Meskelis
+Um outro tema para mim aqui, que posso chamar de citação, dentro disso aqui, é esse tema que eu estou na dúvida, eu vou colocar entre parênteses aqui, porque a gente vai precisar acertar essa mas o que eu tô respondendo aqui?
+
+56:40 - Jhonata Emerick
+Aqui é tipo aquela vez que eu perguntei do relógio para pedir e ele não trouxe o relógio, mas ele trouxe a cinta.
+
+56:54 - Igor Meskelis
+Isso aí, ó, é que aqui vem assim, ó. Como minhas fontes proprietárias são lidas pela EF. Não é isso que ele responde?
+
+57:08 - Unidentified Speaker
+Isso. Comece, claro.
+
+57:10 - Jhonata Emerick
+Porque aí aonde estão fazendo esse trabalho?
+
+57:14 - Igor Meskelis
+Aí eu vou trazer isso aqui para cá, ó. Eu faço sempre o cara crachado que a gente falou. Então olha só. Eu tenho disso aqui. Ó.
+
+57:47 - Igor Meskelis
+Então, o que que eu tenho do que ele tá falando? Eu tenho aqui citação. Eu tenho aqui presença.
+
+58:02 - Jhonata Emerick
+Isso. E eu tenho aqui sentimento. E eu tenho aqui o meu ranking total.
+
+58:12 - Igor Meskelis
+E olha que interessante, e começa a ficar mais consistente. Então, aqui, eu estou chamando de... A única coisa que eu quero mudar... Como é que eu estou chamando de... Eu tenho que pensar se manter esse nome, índice de citabilidade, aqui, para poder casar com um outro aqui. Porque, para mim, é o seguinte, talvez esse nome, citação aqui, não seja o melhor deles. Para mim, talvez o melhor nome aqui seja leitura mesmo. Porque as ações proprietárias são lidas pela IA. É certo? Porque é isso que vai acontecer aqui. Na prática, é isso que a gente estava lendo.

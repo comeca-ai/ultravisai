@@ -69,8 +69,7 @@ import {
   Play,
   TrendingUp,
   TrendingDown,
-  Quote,
-  Zap,
+  ListOrdered,
   AlertCircle,
   Loader2,
   FlaskConical,
@@ -213,25 +212,6 @@ function DeltaBadge({ delta, suffix = '%' }: { delta: number | null; suffix?: st
   );
 }
 
-function CountDeltaBadge({
-  current,
-  previous,
-  delta,
-}: {
-  current: number;
-  previous: number | null;
-  delta: number | null;
-}) {
-  if (previous === 0 && current > 0) {
-    return (
-      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-        +{current} new
-      </span>
-    );
-  }
-  return <DeltaBadge delta={delta} />;
-}
-
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 
 function KpiCard({
@@ -258,7 +238,7 @@ function KpiCard({
       onClick={clickable ? onClick : undefined}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
-      aria-label={clickable ? `${title} — view breakdown` : undefined}
+      aria-label={clickable ? `${title} — ${t('clickBreakdown')}` : undefined}
       title={clickable ? t('clickBreakdown') : undefined}
       onKeyDown={
         clickable
@@ -1455,19 +1435,63 @@ export default function InsightsPage() {
             <NoDataForPeriod datePreset={filters.datePreset} onReset={handleResetFilters} />
           ) : (
             <>
-              {/* KPI Cards — Visibility Rate leads the row: the raw all-results
-              score average reads near zero for most brands (absent answers
-              each contribute 0) and buried the number users act on. The old
-              average survives in the breakdown sheet; Share of Voice has its
-              own chart section below. */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
+              {/* Resumo de visibilidade (reunião 19/ago): três coisas, sem
+              nota ponderada — presença "X de N prompts", ranking médio e
+              sentimento overall (Igor 42:22: "eu não preciso ter uma nota
+              ponderada disso"; 36:40: "não queria ficar com muito número").
+              Menções e Citações saíram do resumo — seguem no detalhamento
+              e na página Citações. */}
+              <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
                 <KpiCard
-                  title={t('visibilityRateTitle')}
+                  title={t('presenceTitle')}
                   tooltip={t('visibilityTooltip')}
                   icon={Eye}
-                  value={`${visibilityRatePct}%`}
-                  sub={null}
+                  value={t('presenceValue', {
+                    visible: visibilityRate?.visiblePrompts ?? 0,
+                    total: trackedPrompts?.activeInPeriod ?? 0,
+                  })}
+                  sub={t('presenceSub', { pct: visibilityRatePct })}
                   onClick={() => setBreakdownMetric('visibility')}
+                />
+                <KpiCard
+                  title={t('rankingTitle')}
+                  tooltip={t('rankingTooltip')}
+                  icon={ListOrdered}
+                  value={
+                    summary!.rankAvg !== null ? t('rankingValue', { avg: summary!.rankAvg }) : '—'
+                  }
+                  sub={
+                    summary!.rankCount > 0
+                      ? t('rankingSub', {
+                          r1: summary!.rankDist.r1,
+                          r2: summary!.rankDist.r2,
+                          r3: summary!.rankDist.r3,
+                          r4plus:
+                            summary!.rankDist.r4 + summary!.rankDist.r5 + summary!.rankDist.gt5,
+                        })
+                      : t('rankingEmpty')
+                  }
+                  onClick={() => router.push('/dashboard/score')}
+                />
+                <KpiCard
+                  title={t('sentimentOverallTitle')}
+                  tooltip={t('sentimentOverallTooltip')}
+                  icon={AlertCircle}
+                  value={
+                    summary!.sentPos + summary!.sentNeu + summary!.sentNeg === 0
+                      ? '—'
+                      : summary!.sentPos > summary!.sentNeg
+                        ? t('sentimentPositive')
+                        : summary!.sentNeg > summary!.sentPos
+                          ? t('sentimentNegative')
+                          : t('sentimentNeutral')
+                  }
+                  sub={t('sentimentCounts', {
+                    pos: summary!.sentPos,
+                    neu: summary!.sentNeu,
+                    neg: summary!.sentNeg,
+                  })}
+                  subVariant={summary!.sentPos > summary!.sentNeg ? 'positive' : 'muted'}
                 />
                 <KpiCard
                   title={t('trackedPromptsTitle')}
@@ -1489,7 +1513,7 @@ export default function InsightsPage() {
                             }}
                             className="ml-1 underline underline-offset-2 hover:text-foreground"
                           >
-                            Upgrade
+                            {t('upgrade')}
                           </button>
                         )}
                       </>
@@ -1498,56 +1522,6 @@ export default function InsightsPage() {
                     )
                   }
                   onClick={() => router.push('/dashboard/prompts')}
-                />
-                <KpiCard
-                  title={t('mentions')}
-                  tooltip={t('mentionsTooltip')}
-                  icon={Zap}
-                  value={summary!.totalMentions}
-                  sub={
-                    <CountDeltaBadge
-                      current={summary!.totalMentions}
-                      previous={summary!.prevMentions}
-                      delta={summary!.mentionsChange}
-                    />
-                  }
-                  subVariant={
-                    summary!.mentionsChange !== null && summary!.mentionsChange > 0
-                      ? 'positive'
-                      : 'muted'
-                  }
-                  onClick={() => setBreakdownMetric('mentions')}
-                />
-                <KpiCard
-                  title={t('citations')}
-                  tooltip={t('citationsTooltip')}
-                  icon={Quote}
-                  value={summary!.totalCitations}
-                  sub={
-                    <CountDeltaBadge
-                      current={summary!.totalCitations}
-                      previous={summary!.prevCitations}
-                      delta={summary!.citationsChange}
-                    />
-                  }
-                  subVariant={
-                    summary!.citationsChange !== null && summary!.citationsChange > 0
-                      ? 'positive'
-                      : 'muted'
-                  }
-                  onClick={() => router.push('/dashboard/citations')}
-                />
-                <KpiCard
-                  title={t('positiveSentiment')}
-                  tooltip={t('sentimentTooltip')}
-                  icon={AlertCircle}
-                  value={`${summary!.positiveSentimentPct}%`}
-                  sub={<DeltaBadge delta={summary!.sentimentChange} suffix=" pts" />}
-                  subVariant={
-                    summary!.sentimentChange !== null && summary!.sentimentChange > 0
-                      ? 'positive'
-                      : 'muted'
-                  }
                 />
               </div>
 

@@ -133,7 +133,14 @@ export interface VisibilityIndexData {
       samples: number;
       dist: { p1: number; p2: number; p3: number; p4: number };
     };
-    sentiment: { score: number | null; pos: number; neu: number; neg: number };
+    sentiment: {
+      score: number | null;
+      pos: number;
+      neu: number;
+      neg: number;
+      /** Fontes pesquisadas: placar de sentimento por motor (respostas com a marca). */
+      byPlatform: Array<{ platform: string; pos: number; neu: number; neg: number }>;
+    };
   };
   /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
   evolution: Array<{
@@ -345,6 +352,8 @@ export async function getVisibilityIndex(
   // Posição = ORDEM DE APARIÇÃO no texto (premissa de 18/ago): distribuição
   // de 1º/2º/3º/4º+ pré-calculada pelo server (appearance_rank).
   const sentAgg = { pos: 0, neu: 0, neg: 0 };
+  // Fontes pesquisadas do Sentimento: placar por motor (pedido de 19/ago).
+  const sentByPlatform = new Map<string, { pos: number; neu: number; neg: number }>();
   const posDist = { p1: 0, p2: 0, p3: 0, p4: 0 };
 
   interface WeekAgg {
@@ -432,9 +441,18 @@ export async function getVisibilityIndex(
     // Posição + Sentimento (Score de Visibilidade) — só respostas com a marca.
     const mc = r.mention_count ?? 0;
     if (mc > 0) {
-      if (r.sentiment === 'positive') sentAgg.pos += 1;
-      else if (r.sentiment === 'negative') sentAgg.neg += 1;
-      else sentAgg.neu += 1;
+      const sp = sentByPlatform.get(platform) ?? { pos: 0, neu: 0, neg: 0 };
+      if (r.sentiment === 'positive') {
+        sentAgg.pos += 1;
+        sp.pos += 1;
+      } else if (r.sentiment === 'negative') {
+        sentAgg.neg += 1;
+        sp.neg += 1;
+      } else {
+        sentAgg.neu += 1;
+        sp.neu += 1;
+      }
+      sentByPlatform.set(platform, sp);
 
       // rank >= 1 = calculado; 0 = não computável; null = pendente (o
       // enriquecimento do server preenche em até 30 min).
@@ -551,15 +569,18 @@ export async function getVisibilityIndex(
         const score = Math.round((posDist.p1 * 100 + posDist.p2 * 60 + posDist.p3 * 30) / samples);
         return { score, samples, dist: posDist };
       })(),
-      sentiment:
-        sentAgg.pos + sentAgg.neu + sentAgg.neg > 0
-          ? {
-              score: Math.round(
-                (sentAgg.pos * 100 + sentAgg.neu * 50) / (sentAgg.pos + sentAgg.neu + sentAgg.neg),
-              ),
-              ...sentAgg,
-            }
-          : { score: null, pos: 0, neu: 0, neg: 0 },
+      sentiment: (() => {
+        const byPlatform = Array.from(sentByPlatform.entries())
+          .map(([platform, s]) => ({ platform, ...s }))
+          .sort((a, b) => b.pos + b.neu + b.neg - (a.pos + a.neu + a.neg));
+        const total = sentAgg.pos + sentAgg.neu + sentAgg.neg;
+        if (total === 0) return { score: null, pos: 0, neu: 0, neg: 0, byPlatform };
+        return {
+          score: Math.round((sentAgg.pos * 100 + sentAgg.neu * 50) / total),
+          ...sentAgg,
+          byPlatform,
+        };
+      })(),
     },
     evolution,
   };

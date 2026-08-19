@@ -6,22 +6,17 @@
  * pelo Índice de Citabilidade (alavanca). Os dois NUNCA se somam.
  *
  * Dimensões e pesos do registro (PPT slide 8): Citação 20 · Presença 20 ·
- * Autoridade 20 · Posição 15 · Acurácia 15 · Sentimento 10. Autoridade e
- * Acurácia exigem juiz LLM (piloto futuro) — entram DECLARADAS como "em
- * construção" e os pesos são renormalizados sobre as dimensões medidas,
- * mesmo padrão do IC quando falta o D1.
+ * Autoridade 20 · Posição 15 · Acurácia 15 · Sentimento 10. Decisão do dono
+ * (19/ago): Autoridade e Acurácia SAEM do Score até o juiz LLM existir —
+ * nada de card "em construção"; os pesos das 4 dimensões medidas são
+ * renormalizados (mesma proporção relativa do registro). Quando o juiz
+ * entrar, as duas voltam aqui com os pesos originais.
  *
  * As faixas de nota são os mesmos quintis do IC
  * (`INDEX_SCORE_BANDS`/`indexScoreBand` em visibility-index.ts).
  */
 
-export type ScoreDimKey =
-  | 'citation'
-  | 'presence'
-  | 'authority'
-  | 'position'
-  | 'accuracy'
-  | 'sentiment';
+export type ScoreDimKey = 'citation' | 'presence' | 'position' | 'sentiment';
 
 export interface ScoreDimension {
   key: ScoreDimKey;
@@ -35,8 +30,6 @@ export interface ScoreDimension {
 export const SCORE_DIMENSIONS: ScoreDimension[] = [
   { key: 'citation', n: '01', weight: 20, measured: true },
   { key: 'presence', n: '02', weight: 20, measured: true },
-  { key: 'authority', n: '03', weight: 20, measured: false },
-  { key: 'position', n: '04', weight: 15, measured: true },
-  { key: 'accuracy', n: '05', weight: 15, measured: false },
-  { key: 'sentiment', n: '06', weight: 10, measured: true },
+  { key: 'position', n: '03', weight: 15, measured: true },
+  { key: 'sentiment', n: '04', weight: 10, measured: true },
 ];

@@ -9,9 +9,9 @@
  * declara isso logo no topo.
  *
  * v1: Citação, Presença, Posição e Sentimento medidos das respostas
- * (`resultScore` na action do índice — mesmo scan, sem custo extra);
- * Autoridade e Acurácia exigem juiz LLM e entram DECLARADAS "em construção",
- * com os pesos renormalizados sobre o que é medido (mesmo padrão do IC).
+ * (`resultScore` na action do índice — mesmo scan, sem custo extra).
+ * Autoridade e Acurácia SAÍRAM do Score por decisão do dono (19/ago) até o
+ * juiz LLM existir — pesos renormalizados sobre as 4 dimensões medidas.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -28,6 +28,7 @@ import {
   type VisibilityIndexPreset,
 } from '@/lib/actions/visibility-index';
 import { SCORE_DIMENSIONS, type ScoreDimKey } from '@/config/visibility-score';
+import { PLATFORM_LABELS } from '@/config/platform-labels';
 import { indexScoreBand } from '@/config/visibility-index';
 import { cn } from '@/lib/utils';
 
@@ -87,9 +88,7 @@ export default function VisibilityScorePage() {
     const map: Record<ScoreDimKey, number | null> = {
       citation: rs.citation,
       presence: rs.presence,
-      authority: null,
       position: rs.position.score,
-      accuracy: null,
       sentiment: rs.sentiment.score,
     };
     return map;
@@ -207,7 +206,7 @@ export default function VisibilityScorePage() {
       </Card>
 
       {/* Dimension cards */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {SCORE_DIMENSIONS.map((dim) => {
           const s = dimScores?.[dim.key] ?? null;
           return (
@@ -232,7 +231,7 @@ export default function VisibilityScorePage() {
                     <Skeleton className="h-9 w-16" />
                   ) : s === null ? (
                     <span className="text-sm font-medium italic text-muted-foreground">
-                      {dim.measured ? t('dims.noSample') : t('dims.building')}
+                      {t('dims.noSample')}
                     </span>
                   ) : (
                     <span className={cn('text-3xl font-bold tabular-nums', scoreColorClass(s))}>
@@ -248,9 +247,7 @@ export default function VisibilityScorePage() {
                 )}
               </CardHeader>
               <CardContent className="flex flex-1 flex-col gap-2 pt-0 text-xs text-muted-foreground">
-                {!dim.measured ? (
-                  <p className="italic">{t(`dims.${dim.key}.buildingNote`)}</p>
-                ) : (
+                {
                   <ul className="space-y-1">
                     {dim.key === 'citation' && data && (
                       <li>
@@ -324,6 +321,31 @@ export default function VisibilityScorePage() {
                       ))}
                     <li className="italic">{t(`dims.${dim.key}.how`)}</li>
                   </ul>
+                }
+                {/* Fontes pesquisadas do Sentimento: placar por motor (19/ago). */}
+                {dim.key === 'sentiment' && rs && rs.sentiment.byPlatform.length > 0 && (
+                  <div className="rounded-md border bg-muted/30 p-2.5">
+                    <p className="mb-1.5 font-semibold uppercase tracking-wide text-[10px] text-muted-foreground">
+                      {t('dims.sentiment.sourcesLabel')}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {rs.sentiment.byPlatform.map((p) => (
+                        <span
+                          key={p.platform}
+                          className="inline-flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-[11px] tabular-nums"
+                        >
+                          <span>{PLATFORM_LABELS[p.platform] ?? p.platform}</span>
+                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                            +{p.pos}
+                          </span>
+                          <span className="text-muted-foreground">~{p.neu}</span>
+                          <span className="font-medium text-red-600 dark:text-red-400">
+                            −{p.neg}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>

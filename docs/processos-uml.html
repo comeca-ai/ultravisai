@@ -1,0 +1,439 @@
+<title>Processos Ultravis · UML</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 30px}
+::selection{background:var(--amber);color:#fff}
+
+/* capa */
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:54px 0 46px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
+.prod{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--good);margin-top:16px}
+h1{font-family:var(--serif);font-weight:500;font-size:2.35rem;letter-spacing:-.02em;margin-top:6px;text-wrap:balance}
+.covsub{color:var(--ink2);margin-top:10px;max-width:74ch}
+.covmeta{display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);font-size:.7rem;color:var(--ink2);margin-top:26px;padding-top:18px;border-top:1px solid var(--rule)}
+.covmeta b{color:var(--ink)}
+.covline{font-size:.86rem;color:var(--faint);margin-top:14px}
+
+.page{padding:34px 0 64px}
+.fig{margin-top:38px}
+.fignum{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--good);font-weight:700}
+h2{font-family:var(--serif);font-size:1.35rem;font-weight:500;margin-top:4px;letter-spacing:-.01em}
+.note{color:var(--ink2);font-size:.88rem;max-width:82ch;margin-top:7px}
+.figbox{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:16px;margin-top:14px;overflow-x:auto}
+.figbox svg{display:block;width:100%;min-width:760px;height:auto}
+.figread{margin-top:14px;padding-top:12px;border-top:1px dashed var(--rule2);font-size:.86rem;color:var(--ink2)}
+.figread b{color:var(--ink)}
+
+h3{font-family:var(--serif);font-size:1.15rem;font-weight:500;margin-top:36px}
+table{width:100%;border-collapse:collapse;margin-top:12px;background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.cap{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:26px}
+th{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;text-align:left;padding:10px 13px;background:var(--sunk);border-bottom:1px solid var(--rule2)}
+td{padding:10px 13px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:top;color:var(--ink2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+td .mono,.mono{font-family:var(--mono);font-size:.78rem}
+.sim{color:var(--good);font-weight:600}
+.nao{color:var(--amber);font-weight:600}
+
+.sym{display:inline-block;width:34px;height:20px;vertical-align:-5px;margin-right:9px}
+
+.adr{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px 24px;margin-top:14px}
+.adr p{font-size:.87rem;color:var(--ink2);margin-bottom:11px}
+.adr p:last-child{margin-bottom:0}
+.adr b{color:var(--ink)}
+.adr .id{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--good)}
+
+.foot{font-family:var(--mono);font-size:.68rem;color:var(--ink2);line-height:1.9;border-top:1px solid var(--rule);padding-top:20px;margin-top:40px}
+.foot b{color:var(--good)}
+@media (max-width:820px){.wrap{padding:0 18px}h1{font-size:1.8rem}}
+@media print{body{background:#fff}.figbox{break-inside:avoid}}
+</style>
+
+<div class="cover">
+  <div class="wrap">
+    <div class="eyebrow">Documentação técnica</div>
+    <div class="prod">ultravis.ai</div>
+    <h1>Diagrama UML de Processos</h1>
+    <p class="covsub">Diagramas de atividade da plataforma — do cadastro da marca até a ação que o cliente executa e o censo seguinte mede.</p>
+    <div class="covmeta">
+      <span>Versão da plataforma: <b>44 migrations · 19/ago/2026</b></span>
+      <span>Processos documentados: <b>4</b></span>
+      <span>Fonte: <b>código em produção</b></span>
+    </div>
+    <p class="covline">Ultravis — visibilidade de marcas nas respostas de IA, mercado brasileiro. Todos os processos abaixo estão rodando: agendas, componentes e serviços externos são os do sistema em produção.</p>
+  </div>
+</div>
+
+<div class="wrap page">
+
+  <div class="fig">
+    <div class="fignum">Figura 1</div>
+    <h2>Cadastro e onboarding da marca</h2>
+    <p class="note">Diagrama de atividade (UML) com raias por ator. Sequência única, feita uma vez por marca: cadastro → leitura do site real → sugestão assistida → confirmação humana → prompt-set ativo.</p>
+    <div class="figbox"><svg viewBox="0 0 800 814" role="img" aria-label="Onboarding: cliente cadastra a marca, a plataforma lê o site real via proxy e sugere tópicos, prompts e concorrentes por LLM; o cliente revisa, escolhe os motores do pacote e o prompt-set é ativado." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" fill="#55524A"/></marker></defs>
+<rect x="0" y="0" width="800" height="814" fill="#FFFFFF"/>
+<rect x="22" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="148.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Cliente / Admin</text>
+<rect x="274" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="400.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Plataforma (web)</text>
+<line x1="274" y1="62" x2="274" y2="792" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="526" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="652.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Serviços externos</text>
+<line x1="526" y1="62" x2="526" y2="792" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<circle cx="148.0" cy="118.0" r="8" fill="#26251F"/>
+<rect x="44.0" y="176.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="198.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Cadastrar marca: nome,</text>
+<text x="148.0" y="211.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">domínio e aliases</text>
+<text x="148.0" y="225.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">wizard de marca</text>
+<rect x="296.0" y="264.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="293.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Ler o site real da marca</text>
+<text x="400.0" y="307.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">preserva o path (/br)</text>
+<rect x="548.0" y="264.0" width="208" height="60" rx="8" fill="#F4F2EB" stroke="#9A968A" stroke-width="1.2" stroke-dasharray="5 3"/>
+<text x="652.0" y="293.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#4C4940">Proxy de leitura</text>
+<text x="652.0" y="307.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">Scrape.do</text>
+<rect x="296.0" y="352.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="374.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Sugerir descrição, tópicos,</text>
+<text x="400.0" y="387.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">prompts e concorrentes</text>
+<text x="400.0" y="401.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">modelo por função · ADR-7</text>
+<rect x="548.0" y="352.0" width="208" height="60" rx="8" fill="#F4F2EB" stroke="#9A968A" stroke-width="1.2" stroke-dasharray="5 3"/>
+<text x="652.0" y="381.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#4C4940">Modelo de sugestão</text>
+<text x="652.0" y="395.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">provider/modelo via env</text>
+<rect x="44.0" y="440.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="467.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Revisar e confirmar: nada</text>
+<text x="148.0" y="480.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">entra sem aprovação</text>
+<rect x="44.0" y="528.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="550.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Escolher motores conforme o</text>
+<text x="148.0" y="563.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">pacote</text>
+<text x="148.0" y="577.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">4 · 6 · 9 motores</text>
+<rect x="296.0" y="616.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="638.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Ativar prompt-set + prompts</text>
+<text x="400.0" y="651.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">de marca</text>
+<text x="400.0" y="665.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">is_brand_prompt</text>
+<circle cx="400.0" cy="734.0" r="10" fill="none" stroke="#26251F" stroke-width="1.4"/>
+<circle cx="400.0" cy="734.0" r="6" fill="#26251F"/>
+<polyline points="148.0,128.0 148.0,176.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="148.0,236.0 148.0,294.0 296.0,294.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="158.0" y="287.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">domínio</text>
+<polyline points="504.0,294.0 548.0,294.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="526.0" y="286.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">URL</text>
+<polyline points="400.0,324.0 400.0,352.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="408.0" y="341.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">conteúdo lido</text>
+<polyline points="504.0,382.0 548.0,382.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="526.0" y="374.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">prompt</text>
+<polyline points="652.0,412.0 652.0,470.0 252.0,470.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="642.0" y="463.0" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">sugestões</text>
+<polyline points="148.0,500.0 148.0,528.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="148.0,588.0 148.0,646.0 296.0,646.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="158.0" y="639.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">seleção</text>
+<polyline points="400.0,676.0 400.0,724.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+</svg></div>
+    <p class="figread"><b>A confirmação humana é obrigatória.</b> A plataforma sugere tópicos, prompts e concorrentes a partir do site real, mas nada entra no prompt-set sem o cliente aprovar — a mesma regra que impede o sistema de inventar concorrente ou tópico que a marca não reconhece.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fignum">Figura 2</div>
+    <h2>Censo semanal de rastreamento</h2>
+    <p class="note">O processo central da plataforma: do disparo do cron até a linha gravada. Duas fases de coleta (motores web por coletor assíncrono, modelos de API direto) convergem no mesmo parser.</p>
+    <div class="figbox"><svg viewBox="0 0 1304 902" role="img" aria-label="Censo semanal: o cron cria o job, o worker submete tarefas aos motores web em modo webhook, drena a fila, roda os modelos de API, o parser conta menções e citações, o sentimento só roda quando há menção e o resultado é gravado." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" fill="#55524A"/></marker></defs>
+<rect x="0" y="0" width="1304" height="902" fill="#FFFFFF"/>
+<rect x="22" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="148.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Agendador</text>
+<rect x="274" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="400.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Worker de rastreamento</text>
+<line x1="274" y1="62" x2="274" y2="880" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="526" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="652.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Motores de IA</text>
+<line x1="526" y1="62" x2="526" y2="880" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="778" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="904.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Parser &amp; análise</text>
+<line x1="778" y1="62" x2="778" y2="880" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="1030" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="1156.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Banco</text>
+<line x1="1030" y1="62" x2="1030" y2="880" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<circle cx="148.0" cy="118.0" r="8" fill="#26251F"/>
+<rect x="44.0" y="176.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="205.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Disparar censo semanal</text>
+<text x="148.0" y="219.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">DAILY_CRON_SCHEDULE</text>
+<rect x="296.0" y="176.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="205.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Criar job e reservar cota</text>
+<text x="400.0" y="219.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">tabela jobs · ADR-6</text>
+<rect x="296.0" y="264.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="286.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Submeter tarefas dos 6</text>
+<text x="400.0" y="299.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">motores web</text>
+<text x="400.0" y="313.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">modo webhook · ADR-2</text>
+<rect x="548.0" y="264.0" width="208" height="60" rx="8" fill="#F4F2EB" stroke="#9A968A" stroke-width="1.2" stroke-dasharray="5 3"/>
+<text x="652.0" y="293.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#4C4940">Coletor de respostas</text>
+<text x="652.0" y="307.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">Cloro · cloro_pending_tasks</text>
+<rect x="296.0" y="352.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="374.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Drenar fila com 2 orçamentos</text>
+<text x="400.0" y="387.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">e stall de 25 min</text>
+<text x="400.0" y="401.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">checkpoints de cancelamento</text>
+<rect x="548.0" y="440.0" width="208" height="60" rx="8" fill="#F4F2EB" stroke="#9A968A" stroke-width="1.2" stroke-dasharray="5 3"/>
+<text x="652.0" y="469.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#4C4940">Modelos de API</text>
+<text x="652.0" y="483.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">claude · gemini · chatgpt</text>
+<rect x="800.0" y="440.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="904.0" y="462.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Contar menções, citações</text>
+<text x="904.0" y="475.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">próprias e concorrentes</text>
+<text x="904.0" y="489.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">URLs removidas · nome+aliases</text>
+<polygon points="904.0,518.0 1008.0,558.0 904.0,598.0 800.0,558.0" fill="#FBF1DF" stroke="#B8741C" stroke-width="1.4"/>
+<text x="904.0" y="555.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#7A4E12">A marca foi</text>
+<text x="904.0" y="568.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#7A4E12">mencionada?</text>
+<rect x="800.0" y="616.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="904.0" y="638.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Analisar sentimento da</text>
+<text x="904.0" y="651.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">resposta</text>
+<text x="904.0" y="665.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">só quando há menção</text>
+<rect x="1052.0" y="704.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="1156.0" y="733.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Gravar resultado da resposta</text>
+<text x="1156.0" y="747.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">prompt_results</text>
+<circle cx="1156.0" cy="822.0" r="10" fill="none" stroke="#26251F" stroke-width="1.4"/>
+<circle cx="1156.0" cy="822.0" r="6" fill="#26251F"/>
+<polyline points="148.0,128.0 148.0,176.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="252.0,206.0 296.0,206.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="274.0" y="198.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">semanal 06:00 UTC</text>
+<polyline points="400.0,236.0 400.0,264.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="504.0,294.0 548.0,294.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="526.0" y="286.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">tarefas</text>
+<polyline points="652.0,324.0 652.0,382.0 504.0,382.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="642.0" y="375.0" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">callback</text>
+<polyline points="400.0,412.0 400.0,470.0 548.0,470.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="410.0" y="463.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">fase 2</text>
+<polyline points="756.0,470.0 800.0,470.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="778.0" y="462.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">texto + fontes</text>
+<polyline points="904.0,500.0 904.0,521.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="904.0,595.0 904.0,616.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="912.0" y="608.5" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">sim</text>
+<polyline points="904.0,595.0 904.0,734.0 1052.0,734.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="914.0" y="727.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">não · pula o LLM</text>
+<polyline points="904.0,676.0 904.0,734.0 1052.0,734.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="914.0" y="727.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">positivo/neutro/negativo</text>
+<polyline points="1156.0,764.0 1156.0,812.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+</svg></div>
+    <p class="figread"><b>O sentimento só roda quando há menção.</b> Resposta sem a marca não gasta chamada de LLM — e a análise de sentimento nunca divide por respostas em que a marca não aparece. O coletor trabalha em modo webhook: um deploy no meio do censo não perde as tarefas já enviadas.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fignum">Figura 3</div>
+    <h2>Enriquecimento contínuo e vigilância</h2>
+    <p class="note">Quatro agendas independentes do censo. As três primeiras enriquecem o dado; a quarta fiscaliza o próprio sistema — saúde da máquina e consistência dos números.</p>
+    <div class="figbox"><svg viewBox="0 0 1052 726" role="img" aria-label="Enriquecimento e vigilância: crons calculam ranking a cada 30 minutos, checam avaliações semanalmente e varrem o site mensalmente; a cada 15 minutos os vigias avaliam saúde e consistência e, havendo desvio, alertam por e-mail e webhook, com tudo visível no painel do operador." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" fill="#55524A"/></marker></defs>
+<rect x="0" y="0" width="1052" height="726" fill="#FFFFFF"/>
+<rect x="22" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="148.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Crons do server</text>
+<rect x="274" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="400.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Coleta / enriquecimento</text>
+<line x1="274" y1="62" x2="274" y2="704" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="526" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="652.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Vigias</text>
+<line x1="526" y1="62" x2="526" y2="704" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="778" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="904.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Operador</text>
+<line x1="778" y1="62" x2="778" y2="704" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="44.0" y="88.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="117.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">A cada 30 min</text>
+<text x="148.0" y="131.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">APPEARANCE_RANK_CRON</text>
+<rect x="296.0" y="88.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="110.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Calcular a ordem de aparição</text>
+<text x="400.0" y="123.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">no texto salvo</text>
+<text x="400.0" y="137.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">lotes de 200 · sem custo externo</text>
+<rect x="44.0" y="176.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="205.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Semanal, segunda 08:30</text>
+<text x="148.0" y="219.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">REVIEW_CHECK_CRON</text>
+<rect x="296.0" y="176.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="198.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Checar plataformas de</text>
+<text x="400.0" y="211.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">avaliação</text>
+<text x="400.0" y="225.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">Trustpilot · G2 · Capterra</text>
+<rect x="44.0" y="264.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="293.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Mensal, dia 1</text>
+<text x="148.0" y="307.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">SITE_CRAWL_CRON</text>
+<rect x="296.0" y="264.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="286.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Varrer até 10 páginas-chave</text>
+<text x="400.0" y="299.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">do site</text>
+<text x="400.0" y="313.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">sitemap → sinais por página</text>
+<rect x="44.0" y="440.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="148.0" y="469.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">A cada 15 min</text>
+<text x="148.0" y="483.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">WATCHDOG_INTERVAL_MIN</text>
+<rect x="548.0" y="352.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="652.0" y="374.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Saúde: jobs, fila,</text>
+<text x="652.0" y="387.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">sentimento, censo, drift</text>
+<text x="652.0" y="401.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">6 checks</text>
+<rect x="548.0" y="440.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="652.0" y="462.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Consistência: contas, nomes,</text>
+<text x="652.0" y="475.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">duplicatas, motor calado</text>
+<text x="652.0" y="489.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">10 invariantes</text>
+<polygon points="652.0,518.0 756.0,558.0 652.0,598.0 548.0,558.0" fill="#FBF1DF" stroke="#B8741C" stroke-width="1.4"/>
+<text x="652.0" y="562.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#7A4E12">Algo fora do esperado?</text>
+<rect x="800.0" y="528.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="904.0" y="557.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Alertar por e-mail e webhook</text>
+<text x="904.0" y="571.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">anti-spam de 6 h</text>
+<rect x="800.0" y="616.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="904.0" y="638.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Painel /ops: saúde, custos e</text>
+<text x="904.0" y="651.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">pesos</text>
+<text x="904.0" y="665.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">Basic Auth própria</text>
+<polyline points="252.0,118.0 296.0,118.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="252.0,206.0 296.0,206.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="252.0,294.0 296.0,294.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="252.0,470.0 652.0,470.0 652.0,412.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="652.0,412.0 652.0,440.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="652.0,500.0 652.0,521.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<polyline points="756.0,558.0 800.0,558.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="778.0" y="550.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">sim</text>
+<polyline points="652.0,595.0 652.0,646.0 800.0,646.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="662.0" y="639.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">não · segue no painel</text>
+<polyline points="904.0,588.0 904.0,616.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+</svg></div>
+    <p class="figread"><b>O vigia de consistência é o produto interno da nossa própria dor.</b> Dez invariantes nascidos de bugs reais: concorrente duplicado somando em dobro, marcas quase-idênticas dividindo os números, motor configurado que parou de entregar, prompt de marca com grafia que o parser não reconhece.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fignum">Figura 4</div>
+    <h2>Do dado à ação — o ciclo de valor</h2>
+    <p class="note">Como o dado coletado vira decisão do cliente. Os dois índices não se somam: a Citabilidade é a alavanca onde se age, o Score é o resultado que se mede.</p>
+    <div class="figbox"><svg viewBox="0 0 1052 638" role="img" aria-label="Ciclo de valor: o banco alimenta o Índice de Citabilidade e o Score de Visibilidade; o Score é resumido no Insights, a Citabilidade gera as indicações da Auditoria, o cliente executa e o próximo censo mede o efeito." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 4 L0 8 z" fill="#55524A"/></marker></defs>
+<rect x="0" y="0" width="1052" height="638" fill="#FFFFFF"/>
+<rect x="22" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="148.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Banco</text>
+<rect x="274" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="400.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Índices (app)</text>
+<line x1="274" y1="62" x2="274" y2="616" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="526" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="652.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Telas</text>
+<line x1="526" y1="62" x2="526" y2="616" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="778" y="22" width="252" height="40" fill="#EEEBE1" stroke="#C6C2B5" stroke-width="1"/>
+<text x="904.0" y="47" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.04em" fill="#26251F">Cliente</text>
+<line x1="778" y1="62" x2="778" y2="616" stroke="#DFDCD2" stroke-width="1" stroke-dasharray="3 4"/>
+<rect x="44.0" y="176.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="148.0" y="198.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Respostas, avaliações,</text>
+<text x="148.0" y="211.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">leituras do site</text>
+<text x="148.0" y="225.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">mesma fonte para todas as telas</text>
+<rect x="296.0" y="88.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="110.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Índice de Citabilidade: 6</text>
+<text x="400.0" y="123.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">alavancas</text>
+<text x="400.0" y="137.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">pesos calibráveis no /ops</text>
+<rect x="296.0" y="264.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="400.0" y="286.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Score de Visibilidade: 4</text>
+<text x="400.0" y="299.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">dimensões medidas</text>
+<text x="400.0" y="313.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">Leitura · Presença · Ranking · Sentimento</text>
+<rect x="548.0" y="176.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="652.0" y="198.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Resumo: presença, ranking</text>
+<text x="652.0" y="211.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">médio e sentimento</text>
+<text x="652.0" y="225.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">sem nota ponderada</text>
+<rect x="548.0" y="352.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="652.0" y="374.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Auditoria: o que fazer, lido</text>
+<text x="652.0" y="387.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">do site</text>
+<text x="652.0" y="401.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8C8878">indicação por evidência</text>
+<rect x="800.0" y="440.0" width="208" height="60" rx="8" fill="#FFFFFF" stroke="#55524A" stroke-width="1.3"/>
+<text x="904.0" y="467.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">Executar a correção no site</text>
+<text x="904.0" y="480.5" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#26251F">e no conteúdo</text>
+<rect x="44.0" y="528.0" width="208" height="60" rx="8" fill="#26251F" stroke="none"/>
+<text x="148.0" y="557.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" font-weight="600" fill="#FFFFFF">Próximo censo mede o efeito</text>
+<text x="148.0" y="571.0" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#B9B5A8">o loop fecha aqui</text>
+<polyline points="252.0,206.0 400.0,206.0 400.0,148.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="264.0" y="197.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">ativos lidos</text>
+<polyline points="148.0,236.0 148.0,294.0 296.0,294.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="158.0" y="287.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">respostas</text>
+<polyline points="400.0,148.0 400.0,264.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="408.0" y="209.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">dirige (semanas depois)</text>
+<polyline points="504.0,294.0 652.0,294.0 652.0,236.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="516.0" y="285.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">resume</text>
+<polyline points="400.0,148.0 400.0,382.0 548.0,382.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="410.0" y="375.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">você controla</text>
+<polyline points="652.0,412.0 652.0,470.0 800.0,470.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="662.0" y="463.0" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">indicação</text>
+<polyline points="904.0,500.0 904.0,558.0 252.0,558.0" fill="none" stroke="#55524A" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="894.0" y="551.0" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="8.2" font-style="italic" fill="#7A776E">site alterado</text>
+</svg></div>
+    <p class="figread"><b>O loop fecha no censo seguinte.</b> A Auditoria indica o que fazer a partir do que foi lido do site — "encontramos X, falta Y" —, o cliente executa, e a coleta seguinte registra o efeito na alavanca. É o que separa relatório de instrumento.</p>
+  </div>
+
+  <h3>Legenda e detalhamento</h3>
+
+  <div class="cap">Tabela 1 · Notação usada nos diagramas</div>
+  <table>
+    <thead><tr><th style="width:210px">Símbolo</th><th>Significado</th></tr></thead>
+    <tbody>
+      <tr><td><svg class="sym" viewBox="0 0 40 22"><circle cx="12" cy="11" r="7" fill="#26251F"/><circle cx="30" cy="11" r="8.5" fill="none" stroke="#26251F" stroke-width="1.3"/><circle cx="30" cy="11" r="5" fill="#26251F"/></svg> Círculo / círculo duplo</td><td>Estado inicial e estado final do processo</td></tr>
+      <tr><td><svg class="sym" viewBox="0 0 40 22"><rect x="1" y="1" width="38" height="20" rx="6" fill="#fff" stroke="#55524A" stroke-width="1.3"/></svg> Retângulo claro</td><td>Atividade executada por pessoa (cliente, admin, operador)</td></tr>
+      <tr><td><svg class="sym" viewBox="0 0 40 22"><rect x="1" y="1" width="38" height="20" rx="6" fill="#26251F"/></svg> Retângulo escuro</td><td>Atividade automática da plataforma (server, worker ou app)</td></tr>
+      <tr><td><svg class="sym" viewBox="0 0 40 22"><rect x="1" y="1" width="38" height="20" rx="6" fill="#F4F2EB" stroke="#9A968A" stroke-dasharray="4 3" stroke-width="1.2"/></svg> Retângulo tracejado</td><td>Serviço externo — fornecedor fora do nosso controle</td></tr>
+      <tr><td><svg class="sym" viewBox="0 0 40 22"><polygon points="20,1 39,11 20,21 1,11" fill="#FBF1DF" stroke="#B8741C" stroke-width="1.3"/></svg> Losango âmbar</td><td>Ponto de decisão, com as saídas rotuladas</td></tr>
+      <tr><td><svg class="sym" viewBox="0 0 40 22"><rect x="1" y="1" width="38" height="8" fill="#EEEBE1" stroke="#C6C2B5"/><line x1="20" y1="9" x2="20" y2="21" stroke="#DFDCD2" stroke-dasharray="3 3"/></svg> Raia vertical</td><td>Responsável pela atividade (ator ou subsistema)</td></tr>
+      <tr><td><svg class="sym" viewBox="0 0 40 22"><line x1="2" y1="11" x2="31" y2="11" stroke="#55524A" stroke-width="1.3"/><path d="M31 6 L39 11 L31 16 z" fill="#55524A"/></svg> Seta</td><td>Transição de controle; rótulo em itálico indica a condição ou o dado transportado</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cap">Tabela 2 · Pontos de decisão</div>
+  <table>
+    <thead><tr><th style="width:240px">Decisão</th><th>Caminho <span class="sim">sim</span></th><th>Caminho <span class="nao">não</span></th></tr></thead>
+    <tbody>
+      <tr><td>A marca foi mencionada na resposta? <span class="mono">(Fig. 2)</span></td><td>Analisa o sentimento da resposta e grava com o veredito</td><td>Grava a resposta sem chamar o LLM — sentimento não se aplica e não entra no denominador</td></tr>
+      <tr><td>Algo fora do esperado? <span class="mono">(Fig. 3)</span></td><td>Alerta por e-mail e webhook, deduplicado por 6 h, e destaca no painel</td><td>Segue apenas registrado no painel do operador</td></tr>
+      <tr><td>O cliente confirma as sugestões? <span class="mono">(Fig. 1)</span></td><td>Prompt-set é ativado e entra no próximo censo</td><td>Nada é ativado — a plataforma não decide sozinha o que rastrear</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cap">Tabela 3 · Fases, gatilhos e saídas</div>
+  <table>
+    <thead><tr><th style="width:150px">Fase</th><th style="width:170px">Ator / subsistema</th><th style="width:200px">Gatilho</th><th>Saída</th></tr></thead>
+    <tbody>
+      <tr><td>Onboarding</td><td>Cliente + app</td><td>Marca nova cadastrada</td><td>Prompt-set ativo com tópicos, concorrentes e motores confirmados</td></tr>
+      <tr><td>Coleta</td><td>Worker de rastreamento</td><td>Cron semanal ou execução manual</td><td>Respostas brutas dos motores, com a lista de fontes de cada uma</td></tr>
+      <tr><td>Extração</td><td>Parser de resposta</td><td>Resposta recebida</td><td>Menções da marca e dos concorrentes, citações do domínio próprio</td></tr>
+      <tr><td>Sentimento</td><td>Modelo de linguagem</td><td>Resposta com menção à marca</td><td>Positivo, neutro ou negativo — gravado na linha</td></tr>
+      <tr><td>Ranking</td><td>Enriquecimento (30 min)</td><td>Linha com menção e sem ranking</td><td>Ordem de aparição da marca no texto, de 1º em diante</td></tr>
+      <tr><td>Avaliações</td><td>Coletor de reviews</td><td>Cron semanal</td><td>Presença, nota e volume por plataforma; ausência declarada quando não verificável</td></tr>
+      <tr><td>Leitura do site</td><td>Varredura mensal</td><td>Cron mensal</td><td>Sinais por página-chave: JSON-LD, FAQ, títulos, meta tags, llms.txt</td></tr>
+      <tr><td>Vigilância</td><td>Watchdog + consistência</td><td>A cada 15 minutos</td><td>Alertas de saúde e de consistência dos números</td></tr>
+      <tr><td>Leitura do cliente</td><td>App</td><td>Acesso às telas</td><td>Citabilidade, Score, resumo de visibilidade e indicações da Auditoria</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cap">Tabela 4 · Agenda real dos processos automáticos</div>
+  <table>
+    <thead><tr><th style="width:230px">Processo</th><th style="width:190px">Frequência</th><th>Variável de configuração</th></tr></thead>
+    <tbody>
+      <tr><td>Censo de rastreamento</td><td>Semanal — segunda, 06:00 UTC</td><td class="mono">DAILY_CRON_SCHEDULE</td></tr>
+      <tr><td>Ordem de aparição (ranking)</td><td>A cada 30 minutos</td><td class="mono">APPEARANCE_RANK_CRON</td></tr>
+      <tr><td>Checagem de avaliações</td><td>Semanal — segunda, 08:30 UTC</td><td class="mono">REVIEW_CHECK_CRON</td></tr>
+      <tr><td>Varredura do site</td><td>Mensal — dia 1, 09:00 UTC</td><td class="mono">SITE_CRAWL_CRON</td></tr>
+      <tr><td>Vigias (saúde + consistência)</td><td>A cada 15 minutos</td><td class="mono">WATCHDOG_INTERVAL_MIN</td></tr>
+      <tr><td>Vigia do upstream</td><td>A cada 3 dias, 09:00 UTC</td><td class="mono">— fixo no código</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Decisões de arquitetura referenciadas</h3>
+  <div class="adr">
+    <p><span class="id">ADR-1</span> · <b>Web sem servidor, worker sempre ligado.</b> O rastreamento leva minutos a horas, tem cron e recebe webhooks — trabalho que ambiente serverless não sustenta. O app roda na borda; o worker roda em processo persistente.</p>
+    <p><span class="id">ADR-2</span> · <b>Coletor em modo webhook, não em espera ativa.</b> Deploy no meio de um censo matava execuções em polling. Com callback assíncrono e registro das tarefas pendentes, o resultado pago sobrevive a reinício e a deploy.</p>
+    <p><span class="id">ADR-5</span> · <b>Fork disciplinado.</b> O núcleo herdado não é reescrito; toda feature é aditiva — rota, componente ou migration nova. Correção pontual no núcleo é permitida, documentada na linha.</p>
+    <p><span class="id">ADR-6</span> · <b>Tabelas operacionais só do servidor.</b> Fila e execuções ficam invisíveis ao aplicativo por segurança de linha; a consequência aceita é que o log de execução vive no painel do operador, não na tela do cliente.</p>
+    <p><span class="id">ADR-7</span> · <b>Modelo de IA por função, via configuração.</b> Cada função — sugestão de tópico, de prompt, de concorrente, auditoria, sentimento — escolhe o modelo por variável de ambiente: troca de provedor sem deploy.</p>
+    <p><span class="id">ADR-8</span> · <b>Vigia de domínio em código próprio.</b> Ferramenta genérica não entende degradação de domínio — "sentimento 100% neutro" significa provedor caindo em fallback, e nenhum monitor de prateleira sabe disso. O vigia mora dentro do próprio servidor.</p>
+    <p><span class="id">19/ago</span> · <b>Dois índices que não se somam.</b> A Citabilidade mede a alavanca (seus ativos), o Score mede o resultado (as respostas de IA). Somar seria contar causa e efeito na mesma conta. O resumo de visibilidade mostra três números sem nota ponderada.</p>
+    <p><span class="id">19/ago</span> · <b>A tela só mostra o que mede.</b> Dimensões sem mecanismo de medição ficam fora do Score até existir a medição — e o que não é coletável é declarado como não coletado, nunca estimado.</p>
+  </div>
+
+  <div class="foot">
+    <b>DOCUMENTO GERADO DO ESTADO REAL DA PLATAFORMA</b> — agendas, componentes, serviços externos e pontos de decisão conferidos no código em produção em 19/ago/2026 (44 migrations aplicadas).<br>
+    ESCOPO — os quatro processos automáticos que rodam hoje. Fluxos previstos e ainda não implementados não aparecem nestes diagramas.<br>
+    INSPIRAÇÃO — formato e notação inspirados na documentação UML de processos do reembolsa.ia (board FigJam), adaptados aos processos da Ultravis.
+  </div>
+
+</div>

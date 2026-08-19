@@ -1203,12 +1203,11 @@
       "noDataHint": "Run a tracking to measure the Score — the numbers come from collected answers.",
       "sample": "Measured from {results} AI answers in the selected window",
       "formulaLabel": "The math, in the open",
-      "renormNote": "Authority and Accuracy are not measured yet (LLM judge under construction) — weights are renormalized over the measured dimensions."
+      "renormNote": "Registry weights renormalized over the 4 measured dimensions (20 · 20 · 15 · 10). Authority and Accuracy join once the LLM judge exists (decision of Aug 19)."
     },
     "dims": {
       "weight": "weight {weight}%",
       "noSample": "no sample",
-      "building": "under construction",
       "citation": {
         "name": "Citation",
         "brief": "AIs cite your sources (your site) as a reference in their answers.",
@@ -1221,11 +1220,6 @@
         "ev": "Mentioned in {mentioned} of {total} answers",
         "how": "Direct percentage of answers mentioning the brand."
       },
-      "authority": {
-        "name": "Authority",
-        "brief": "When cited, the brand appears with depth and context — not just in passing.",
-        "buildingNote": "Requires an LLM judge reading the answers (pilot planned). Enters at 20% weight once live; until then the weight is redistributed."
-      },
       "position": {
         "name": "Position",
         "brief": "When the AI cites several brands, yours is mentioned first in the answer.",
@@ -1237,17 +1231,13 @@
         "p3": "3rd place",
         "p4": "4th or worse"
       },
-      "accuracy": {
-        "name": "Accuracy",
-        "brief": "What AIs say about the brand is correct — no hallucination.",
-        "buildingNote": "Requires an LLM judge comparing answers against brand facts (pilot planned). Enters at 15% weight once live; until then the weight is redistributed."
-      },
       "sentiment": {
         "name": "Sentiment",
         "brief": "When they talk about you, they speak well.",
         "ev": "{pos} positive · {neu} neutral · {neg} negative (among answers with the brand)",
         "noSample": "The brand has not appeared in any answer in this window yet.",
-        "how": "Positive = 100 · neutral = 50 · negative = 0, averaged over answers with the brand."
+        "how": "Positive = 100 · neutral = 50 · negative = 0, averaged over answers with the brand.",
+        "sourcesLabel": "Sources searched — answers with the brand, per engine (+positive · ~neutral · −negative)"
       }
     },
     "gapNote": "Next step of the architecture: the 2×2 gap diagnosis (Citability × Score) — high lever with low result is a harvest lag; low lever with high result is fragility.",

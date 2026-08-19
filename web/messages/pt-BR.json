@@ -1203,12 +1203,11 @@
       "noDataHint": "Rode um rastreamento para medir o Score — os números nascem das respostas coletadas.",
       "sample": "Medido de {results} respostas de IA na janela selecionada",
       "formulaLabel": "A conta, aberta",
-      "renormNote": "Autoridade e Acurácia ainda não são medidas (juiz LLM em construção) — os pesos são renormalizados sobre as dimensões medidas."
+      "renormNote": "Pesos do registro renormalizados sobre as 4 dimensões medidas (20 · 20 · 15 · 10). Autoridade e Acurácia entram quando houver juiz LLM (decisão de 19/ago)."
     },
     "dims": {
       "weight": "peso {weight}%",
       "noSample": "sem amostra",
-      "building": "em construção",
       "citation": {
         "name": "Citação",
         "brief": "As IAs citam suas fontes (seu site) como referência nas respostas.",
@@ -1221,11 +1220,6 @@
         "ev": "Mencionada em {mentioned} de {total} respostas",
         "how": "Percentual direto de respostas com menção à marca."
       },
-      "authority": {
-        "name": "Autoridade",
-        "brief": "Quando citada, a marca aparece com profundidade e contexto — não só de passagem.",
-        "buildingNote": "Exige juiz LLM lendo as respostas (piloto planejado). Entra com peso 20% quando estiver no ar; até lá o peso é redistribuído."
-      },
       "position": {
         "name": "Posição",
         "brief": "Quando a IA cita várias marcas, a sua é citada primeiro na resposta.",
@@ -1237,17 +1231,13 @@
         "p3": "3º lugar",
         "p4": "4º ou pior"
       },
-      "accuracy": {
-        "name": "Acurácia",
-        "brief": "O que as IAs dizem sobre a marca está correto — sem alucinação.",
-        "buildingNote": "Exige juiz LLM comparando respostas com os fatos da marca (piloto planejado). Entra com peso 15% quando estiver no ar; até lá o peso é redistribuído."
-      },
       "sentiment": {
         "name": "Sentimento",
         "brief": "Quando falam de você, falam bem.",
         "ev": "{pos} positivas · {neu} neutras · {neg} negativas (entre respostas com a marca)",
         "noSample": "A marca ainda não apareceu em nenhuma resposta da janela.",
-        "how": "Positiva = 100 · neutra = 50 · negativa = 0, na média das respostas com a marca."
+        "how": "Positiva = 100 · neutra = 50 · negativa = 0, na média das respostas com a marca.",
+        "sourcesLabel": "Fontes pesquisadas — respostas com a marca, por motor (+positivas · ~neutras · −negativas)"
       }
     },
     "gapNote": "Próximo passo da arquitetura: o diagnóstico de gap 2×2 (Citabilidade × Score) — alavanca alta com resultado baixo é atraso de colheita; alavanca baixa com resultado alto é fragilidade.",

@@ -1182,7 +1182,7 @@
   },
   "visibilityScore": {
     "title": "Score de Visibilidade",
-    "subtitle": "O índice de RESULTADO: como sua marca aparece nas respostas das IAs — citada, presente, bem posicionada e bem falada. Quem move este número é o Índice de Citabilidade.",
+    "subtitle": "O índice de RESULTADO: como sua marca aparece nas respostas das IAs — lida, presente, bem ranqueada e bem falada. Quem move este número é o Índice de Citabilidade.",
     "twoIndexNote": "Dois índices, papéis diferentes: o Score de Visibilidade mede o RESULTADO nas respostas de IA; o Índice de Citabilidade mede a ALAVANCA (seus ativos). Eles não se somam — um dirige o outro.",
     "twoIndexLink": "Ver o Índice de Citabilidade",
     "period": {
@@ -1209,8 +1209,8 @@
       "weight": "peso {weight}%",
       "noSample": "sem amostra",
       "citation": {
-        "name": "Citação",
-        "brief": "As IAs citam suas fontes (seu site) como referência nas respostas.",
+        "name": "Leitura",
+        "brief": "Como suas fontes proprietárias (site, blog, conteúdo) são lidas e citadas pela IA nas respostas.",
         "ev": "{citing} de {total} respostas citam seu domínio ({pct}% — régua: 10% = 100)",
         "how": "Medido dos links citados em cada resposta coletada."
       },
@@ -1221,11 +1221,11 @@
         "how": "Percentual direto de respostas com menção à marca."
       },
       "position": {
-        "name": "Posição",
+        "name": "Ranking",
         "brief": "Quando a IA cita várias marcas, a sua é citada primeiro na resposta.",
         "ev": "Ordem de aparição no texto, em {samples} respostas em que você aparece:",
-        "noSample": "A marca ainda não apareceu em nenhuma resposta da janela (ou o cálculo de posição está em andamento — leva até 30 min).",
-        "how": "Posição = ordem da 1ª menção no texto da resposta. Nota: 1º=100 · 2º=60 · 3º=30 · 4º+=0, na média das respostas.",
+        "noSample": "A marca ainda não apareceu em nenhuma resposta da janela (ou o cálculo de ranking está em andamento — leva até 30 min).",
+        "how": "Ranking = ordem da 1ª menção no texto da resposta. Nota: 1º=100 · 2º=60 · 3º=30 · 4º+=0, na média das respostas.",
         "p1": "1º lugar",
         "p2": "2º lugar",
         "p3": "3º lugar",
@@ -2206,41 +2206,25 @@
           "num": "01",
           "title": "Respostas monitoradas",
           "body": "O que cada modelo diz da sua marca, com que tom e ao lado de quais concorrentes — atualizado todo dia.",
-          "tags": [
-            "sentimento",
-            "share of answer",
-            "concorrentes"
-          ]
+          "tags": ["sentimento", "share of answer", "concorrentes"]
         },
         {
           "num": "02",
           "title": "Perguntas que importam",
           "body": "As perguntas reais que levam à sua categoria, com volume estimado e o custo de você não estar nelas.",
-          "tags": [
-            "volume de prompts",
-            "intenção",
-            "priorização"
-          ]
+          "tags": ["volume de prompts", "intenção", "priorização"]
         },
         {
           "num": "03",
           "title": "Citações e fontes",
           "body": "Quais páginas e veículos os modelos citam, e o que precisa existir para que citem você.",
-          "tags": [
-            "fontes",
-            "autoridade",
-            "cobertura"
-          ]
+          "tags": ["fontes", "autoridade", "cobertura"]
         },
         {
           "num": "04",
           "title": "Da leitura à ação",
           "body": "Cada lacuna vira um briefing pronto: o que escrever, onde publicar, o que corrigir no site.",
-          "tags": [
-            "briefings",
-            "site audit",
-            "MCP"
-          ]
+          "tags": ["briefings", "site audit", "MCP"]
         }
       ]
     },
@@ -2678,9 +2662,7 @@
         },
         {
           "h": "12. Lei aplicável",
-          "p": [
-            "Estes Termos são regidos pelas leis da República Federativa do Brasil."
-          ]
+          "p": ["Estes Termos são regidos pelas leis da República Federativa do Brasil."]
         },
         {
           "h": "13. Contato",

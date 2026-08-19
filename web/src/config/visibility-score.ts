@@ -12,6 +12,11 @@
  * renormalizados (mesma proporção relativa do registro). Quando o juiz
  * entrar, as duas voltam aqui com os pesos originais.
  *
+ * Taxonomia (reunião de 19/ago): na UI, 'citation' exibe como "Leitura"
+ * (como as fontes proprietárias são lidas pela IA) e 'position' como
+ * "Ranking". As CHAVES não mudam — banco, actions e i18n keys ficam
+ * estáveis; só os rótulos em web/messages/*.json.
+ *
  * As faixas de nota são os mesmos quintis do IC
  * (`INDEX_SCORE_BANDS`/`indexScoreBand` em visibility-index.ts).
  */

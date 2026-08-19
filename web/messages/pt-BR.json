@@ -353,8 +353,7 @@
       "checked": "Verificado em: {date}"
     },
     "presenceTitle": "Presença",
-    "presenceValue": "{visible} de {total}",
-    "presenceSub": "{pct}% dos prompts com a marca em pelo menos uma resposta",
+    "presenceSub": "{visible} de {total} prompts com a marca em pelo menos uma resposta",
     "rankingTitle": "Ranking médio",
     "rankingTooltip": "Posição média em que sua marca aparece no texto das respostas em que é citada (1º = citada antes de todos os concorrentes). Detalhe completo no Score de Visibilidade.",
     "rankingValue": "#{avg, number}",

@@ -1446,11 +1446,11 @@ export default function InsightsPage() {
                   title={t('presenceTitle')}
                   tooltip={t('visibilityTooltip')}
                   icon={Eye}
-                  value={t('presenceValue', {
+                  value={`${visibilityRatePct}%`}
+                  sub={t('presenceSub', {
                     visible: visibilityRate?.visiblePrompts ?? 0,
                     total: trackedPrompts?.activeInPeriod ?? 0,
                   })}
-                  sub={t('presenceSub', { pct: visibilityRatePct })}
                   onClick={() => setBreakdownMetric('visibility')}
                 />
                 <KpiCard

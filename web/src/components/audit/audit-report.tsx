@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { AuditResult, AuditSignal, AuditRecommendation } from '@/lib/actions/audits';
+import { buildIndication } from '@/lib/audit/indications';
 import { cn } from '@/lib/utils';
 
 // Display order + labels for the five rubric categories (keys come from the
@@ -138,7 +139,11 @@ function SignalRow({
   recommendation?: AuditRecommendation;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('audit');
   const Icon = STATUS_ICON[signal.status] ?? Minus;
+  // Ultravis (premissa v2, 19/ago): indicação específica construída da
+  // EVIDÊNCIA lida do site — "encontramos X, falta Y" — antes do fix genérico.
+  const indication = buildIndication(signal.key, signal.status, signal.evidence);
 
   return (
     <div className="border-b last:border-b-0">
@@ -175,6 +180,12 @@ function SignalRow({
             <p>
               <span className="font-medium text-foreground">Why: </span>
               {signal.why}
+            </p>
+          )}
+          {indication && (
+            <p className="rounded-md border border-primary/20 bg-primary/5 p-2 text-foreground">
+              <span className="font-medium">{t('indicationLabel')} </span>
+              {t(`indications.${indication.key}`, indication.params)}
             </p>
           )}
           {/* Prefer the page-specific AI recommendation when we have one; fall

@@ -120,6 +120,23 @@
     "listStatus": {
       "running": "em andamento",
       "failed": "falhou"
+    },
+    "indicationLabel": "O que fazer (lido do seu site):",
+    "indications": {
+      "aiBotsBlocked": "Seu robots.txt BLOQUEIA bots de IA ({bots}) — enquanto bloqueados, essas IAs não leem o site.",
+      "aiBotsSilent": "Seu robots.txt não menciona os bots de IA — declare explicitamente o acesso liberado (GPTBot, ClaudeBot, PerplexityBot…).",
+      "faqFew": "FAQPage presente, mas com {count} pergunta(s) — inclua pelo menos 2 perguntas e respostas reais dos seus clientes.",
+      "faqMissing": "Sem FAQPage estruturado — as perguntas que os clientes fazem às IAs não são extraíveis do seu site. Publique uma seção de FAQ com marcação FAQPage.",
+      "h1Length": "O H1 \"{text}\" tem {length} caracteres — o ideal é 20–70, descrevendo o que a página oferece (título descritivo).",
+      "h1Missing": "A página não tem H1 — a IA perde o título do que ela oferece.",
+      "h1Multiple": "{count} H1s na mesma página — deixe exatamente um, descritivo.",
+      "jsonLdPresence": "Nenhum bloco JSON-LD encontrado nesta página. Comece pelo tipo Organization no <head> — nome, site, logo e sameAs (redes, Wikipedia) — e adicione os tipos de cada página (Product, FAQPage, Article).",
+      "jsonLdRelevance": "Tipos encontrados no seu JSON-LD: {types}. Falta um tipo de alto valor para IA — adicione o que se aplica à página: Product, FAQPage, Article, HowTo ou Review.",
+      "jsonLdRelevanceNone": "Seu JSON-LD não declara nenhum @type — sem tipo, a IA não sabe o que a página descreve.",
+      "jsonLdValidity": "Dos {blocks} blocos JSON-LD lidos, {parsed} parseiam e {wellFormed} declaram @context schema.org com @type. Corrija os blocos inválidos e complete os sem tipo.",
+      "llmsTxt": "llms.txt ausente na raiz do site — o Índice de Citabilidade gera o arquivo pronto (botão \"Copiar llms.txt pronto\").",
+      "openGraph": "Faltam meta tags sociais: {missing} — IAs e prévias de link usam esses campos para entender e apresentar a página.",
+      "robotsMissing": "Sem robots.txt — os bots de IA entram por padrão, mas declare o acesso explicitamente (GPTBot, ClaudeBot, PerplexityBot…)."
     }
   },
   "auth": {

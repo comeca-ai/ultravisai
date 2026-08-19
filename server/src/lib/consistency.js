@@ -39,6 +39,35 @@ const RECOUNT_MIN_SHARE = 0.1;
 /** Sentiment values the pipeline is allowed to write. */
 const VALID_SENTIMENTS = new Set(['positive', 'neutral', 'negative']);
 
+/**
+ * Espelho de resolveModelPlatform (tracking-worker.js): motores de API são
+ * configurados em prompts.models e gravam platform 'claude'/'gemini'/'chatgpt'
+ * — sem este espelho, o vigia não enxerga o caso Claude (achado da revisão
+ * de 19/ago).
+ */
+function modelPlatform(model) {
+  const m = String(model ?? '');
+  if (m.startsWith('claude-')) return 'claude';
+  if (m.startsWith('gemini-')) return 'gemini';
+  return 'chatgpt';
+}
+
+/**
+ * Pesos-default do IC — ESPELHO de INDEX_DIMENSIONS em
+ * web/src/config/visibility-index.ts (mudanças valem nos dois). A tabela
+ * index_weights pode ser PARCIAL: o app faz merge das linhas sobre estes
+ * defaults, então a soma que importa é a EFETIVA (achado da revisão de
+ * 19/ago: somar só as linhas dava falso crítico e falso negativo).
+ */
+const IC_DEFAULT_WEIGHTS = { dim1: 15, dim2: 20, dim3: 12, dim4: 18, dim5: 22, dim6: 13 };
+
+/**
+ * Shopping tem pipeline e semântica próprios (isolado do Insights, #155):
+ * o worker mantém 'chatgpt-shopping' em prompts.platforms mesmo com o modo
+ * desligado na marca — fora dos checks de motor para não gritar em falso.
+ */
+const SHOPPING_PLATFORM = 'chatgpt-shopping';
+
 /** Lowercase, strip diacritics, collapse whitespace — "Ana  Coutô" → "ana couto". */
 export function normalizeName(s) {
   return String(s ?? '')
@@ -66,7 +95,7 @@ function isWordPrefix(shorter, longer) {
  *   competitors: { brandId: string, name: string, domain: string }[],
  *   brandDomains: { brandId: string, domain: string }[],
  *   indexWeights: { dimKey: string, weight: number }[],
- *   prompts: { brandId: string|null, platforms: string[], text: string, isBrandPrompt: boolean }[],
+ *   prompts: { brandId: string|null, platforms: string[], models: string[], text: string, isBrandPrompt: boolean }[],
  *   recentResults: { brandId: string, platform: string|null, mentionCount: number, citationCount: number, appearanceRank: number|null, sentiment: string }[],
  *   stalledRankRows: number,
  *   recountSample: { total: number, divergent: number },
@@ -196,14 +225,19 @@ export function evaluateConsistency(snap, _now) {
 
   // ── Família "pesos e config" ──────────────────────────────────────────────
 
-  // Os pesos do IC devem somar 100 — a fórmula aberta da tela quebra se não.
+  // Os pesos EFETIVOS do IC devem somar 100 — a tabela pode ser parcial e o
+  // app faz merge sobre os defaults; é a soma pós-merge que a tela usa.
   if (snap.indexWeights.length > 0) {
-    const sum = snap.indexWeights.reduce((s, w) => s + (w.weight ?? 0), 0);
+    const effective = { ...IC_DEFAULT_WEIGHTS };
+    for (const w of snap.indexWeights) {
+      if (w.dimKey in effective) effective[w.dimKey] = w.weight ?? 0;
+    }
+    const sum = Object.values(effective).reduce((s, v) => s + v, 0);
     if (sum !== 100) {
       alerts.push({
         key: 'consistency-index-weights-sum',
         severity: 'critical',
-        message: `Pesos do Índice de Citabilidade somam ${sum}, não 100 — corrigir em /ops (index_weights).`,
+        message: `Pesos efetivos do Índice de Citabilidade somam ${sum}, não 100 (linhas da tabela aplicadas sobre os defaults) — corrigir em /ops (index_weights).`,
       });
     }
   }
@@ -223,7 +257,10 @@ export function evaluateConsistency(snap, _now) {
     for (const p of snap.prompts) {
       if (!p.brandId) continue;
       const set = configured.get(p.brandId) ?? new Set();
-      for (const pl of p.platforms ?? []) set.add(pl);
+      for (const pl of p.platforms ?? []) {
+        if (pl !== SHOPPING_PLATFORM) set.add(pl);
+      }
+      for (const m of p.models ?? []) set.add(modelPlatform(m));
       configured.set(p.brandId, set);
     }
     const silentByPlatform = new Map();
@@ -280,8 +317,11 @@ export function evaluateConsistency(snap, _now) {
   // total mas some das quebras por motor — as barrinhas param de fechar com
   // o todo (a família do bug ">100%" visto de outro ângulo).
   {
-    const known = new Set();
-    for (const p of snap.prompts) for (const pl of p.platforms ?? []) known.add(pl);
+    const known = new Set([SHOPPING_PLATFORM]);
+    for (const p of snap.prompts) {
+      for (const pl of p.platforms ?? []) known.add(pl);
+      for (const m of p.models ?? []) known.add(modelPlatform(m));
+    }
     const unknown = new Map();
     for (const r of snap.recentResults) {
       const pl = r.platform ?? '(null)';
@@ -398,7 +438,7 @@ export async function collectConsistencySnapshot() {
       supabaseAdmin.from('prompt_sets').select('id, brand_id'),
       supabaseAdmin
         .from('prompts')
-        .select('prompt_set_id, platforms, text, is_brand_prompt')
+        .select('prompt_set_id, platforms, models, text, is_brand_prompt')
         .eq('is_active', true)
         .limit(2000),
     ]);
@@ -406,6 +446,7 @@ export async function collectConsistencySnapshot() {
     snap.prompts = (prompts ?? []).map((p) => ({
       brandId: brandBySet.get(p.prompt_set_id) ?? null,
       platforms: p.platforms ?? [],
+      models: p.models ?? [],
       text: p.text ?? '',
       isBrandPrompt: p.is_brand_prompt === true,
     }));

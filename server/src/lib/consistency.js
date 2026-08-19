@@ -26,8 +26,13 @@ import { countBrandMentions } from './response-parser.js';
 const WINDOW_DAYS = 8;
 /** A brand needs this many rows in the window before engine-silence is judged. */
 const ENGINE_MIN_ROWS = 10;
-/** Appearance-rank sweep runs every 30min; pending rows older than this = stalled. */
-const RANK_STALL_HOURS = 2;
+/**
+ * Appearance-rank sweep drains 200 rows per 30-min run (400/h); a weekly
+ * census can legitimately take a few hours to drain. Only rows older than
+ * this count as a STALLED sweep (auditor finding, 19/ago: 2h alarmava a
+ * drenagem normal de segunda-feira).
+ */
+const RANK_STALL_HOURS = 6;
 /** Recount drift alerts only when both thresholds are crossed (avoid noise). */
 const RECOUNT_MIN_ROWS = 3;
 const RECOUNT_MIN_SHARE = 0.1;
@@ -440,9 +445,13 @@ export async function collectConsistencySnapshot() {
 
   try {
     // Amostra pequena com o texto da resposta (única query pesada — limitada).
+    // Exclui chatgpt-shopping: o parser de shopping tem semântica própria de
+    // mention_count — recontar com countBrandMentions divergiria de propósito
+    // (mesma exclusão que a action do web aplica; auditor 19/ago).
     const { data } = await supabaseAdmin
       .from('prompt_results')
       .select('brand_id, mention_count, response')
+      .neq('platform', 'chatgpt-shopping')
       .order('created_at', { ascending: false })
       .limit(100);
     const domainsByBrand = new Map();

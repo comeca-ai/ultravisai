@@ -88,6 +88,31 @@
 - [ ] **Priorização de problemas**: severidade (já temos no audit) + estimativa de impacto no score por problema + quick wins destacados. `M`
 - [ ] **Plano de ação em sprints de 30 dias** + guia por responsável. `M`
 
+## 🎨 Redesign "Insights v3" — mockup do dono (19/ago)
+
+> Fonte: `estrategia/mockups/insights-v3-visual-19ago.html` (mockup completo,
+> navegável no browser). Referência de design para a tela de Visibilidade;
+> o rodapé do próprio mockup separa o que é DADO real do que é ILUSTRATIVO.
+> Atenção: o mockup mostra 6 dimensões no Score — a decisão vigente (19/ago)
+> é 4 dimensões até o juiz LLM; adotar o layout, não a composição.
+
+### Componentes de dado (novos na tela)
+- [ ] **Funil da citação**: execuções → respostas grounded (com fontes) → citam alguém do mercado → citam a marca, com % de conversão por etapa e leitura ("o gargalo não é a IA citar pouco; é você estar fora das fontes"). Requer marcar resposta como *grounded* e reusar o gabarito de mercado. `M` ⭐
+- [ ] **Scatter Menção × Citação** (mapa competitivo): bolha por marca (tamanho = presença), quadrantes nomeados — narrativa emprestada / narrativa sua / invisível / crédito perdido; legenda com diagnóstico por marca. Dados já existem (menções, citações, presença). `M` ⭐
+- [ ] **Heatmap Presença por engine** (marca × motor) com leitura do gap (ex.: ChatGPT/Copilot puxam do índice Bing). Dados já existem. `P`
+- [ ] **Placar em barras com diagnóstico**: presença em barra + denominador na linha (12/54 prompts) + badge de quadrante no nome. Substitui o placar atual. `P`
+- [ ] **Cards "Próxima ação"**: cada card nasce de um número da tela e aponta a alavanca do IC, com meta "de X → Y em 60d". Liga o Score (resultado) às alavancas (IC) na própria tela. `M` ⭐
+
+### Conceitos de métrica (implicam coleta/derivação nova)
+- [ ] **Resposta "grounded"**: flag por resposta (tem fontes/citações) — denominador da Taxa de Citação do mockup (12/462). Derivável do que já coletamos (citations não vazio). `P`
+- [ ] **Denominadores visíveis em toda métrica** (na linha: 12/54, 12/462) — mesmo espírito da premissa "proporção ao total de prompts" anunciada pelo dono (aguardando detalhes). `P`
+- [ ] **Multi-run por prompt** (painel "54 prompts × 6 engines × 3 runs"): rodar cada prompt N vezes por censo para reduzir variância. Multiplica custo de coleta ×N — decidir com números. `G`
+
+### Design/visual (linguagem do mockup)
+- [ ] Paleta clara quente (#F7F6F2 / accent #E0492A), IBM Plex Sans + JetBrains Mono para números, cards 14px radius, funil em card escuro de destaque. Avaliar adoção como tema da área de Insights (hoje usamos o design system do fork). `M`
+- [ ] Barra de filtros persistente: período (24h/7d/30d/90d/Tudo) + tópicos + regiões + engines no topo da tela. `P`
+- [ ] Rodapé de proveniência DADO × ILUSTRATIVO enquanto houver métrica provisória (padrão de honestidade que já usamos nos cards). `P`
+
 ## 🚀 Produto (features)
 
 ### P0 — Agora

@@ -113,7 +113,10 @@ describe('evaluateConsistency', () => {
     const alerts = evaluateConsistency(
       {
         ...healthy,
-        brandDomains: [...healthy.brandDomains, { brandId: 'b1', domain: 'https://www.polar.com/br' }],
+        brandDomains: [
+          ...healthy.brandDomains,
+          { brandId: 'b1', domain: 'https://www.polar.com/br' },
+        ],
       },
       NOW,
     );
@@ -127,7 +130,12 @@ describe('evaluateConsistency', () => {
         ...healthy,
         prompts: [
           ...healthy.prompts,
-          { brandId: 'b2', platforms: ['chatgpt-web'], text: 'O que é a Certeira?', isBrandPrompt: true },
+          {
+            brandId: 'b2',
+            platforms: ['chatgpt-web'],
+            text: 'O que é a Certeira?',
+            isBrandPrompt: true,
+          },
         ],
       },
       NOW,
@@ -141,8 +149,18 @@ describe('evaluateConsistency', () => {
       {
         ...healthy,
         prompts: [
-          { brandId: 'b1', platforms: ['chatgpt-web'], text: 'A POLÁR Brasil é boa?', isBrandPrompt: true },
-          { brandId: 'b2', platforms: ['chatgpt-web'], text: 'reviews de certeiro.com.br', isBrandPrompt: true },
+          {
+            brandId: 'b1',
+            platforms: ['chatgpt-web'],
+            text: 'A POLÁR Brasil é boa?',
+            isBrandPrompt: true,
+          },
+          {
+            brandId: 'b2',
+            platforms: ['chatgpt-web'],
+            text: 'reviews de certeiro.com.br',
+            isBrandPrompt: true,
+          },
         ],
       },
       NOW,

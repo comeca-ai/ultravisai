@@ -329,7 +329,7 @@ function render(d) {
     <div class="kpi"><div class="n">${d.machine.uptime}</div><div class="t">Uptime</div></div>
   </div>
 
-  <div class="card" style="margin-bottom:14px"><h2>Saúde (watchdog · mesmos checks do alerta)</h2>
+  <div class="card" style="margin-bottom:14px"><h2>Saúde (watchdog + consistência · mesmos checks do alerta)</h2>
     ${
       d.health === null
         ? '<div class="muted">não foi possível avaliar</div>'

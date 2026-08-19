@@ -175,6 +175,8 @@
 ## 🔧 Operacional & infra
 
 ### P1
+- [x] **Vigia de consistência — camada 1 (determinística)** — **feito (19/ago)**: 10 invariantes (duplicatas de concorrente, marcas irmãs na org, domínios malformados, pesos do IC, motor silencioso, linhas impossíveis, plataforma desconhecida, backlog de posição travado, recontagem de menções, prompt de marca sem grafia conhecida) dentro do watchdog de 15 min; achados aparecem no card Saúde do /ops e nos canais de alerta. `server/src/lib/consistency.js`.
+- [ ] **Vigia de consistência — camada 2 (agente LLM semanal)** — lê os números consolidados das telas pós-censo e caça o que regra fixa não pega (rótulo que não bate com o que o número mede, média escondendo extremos, incoerência IC × Score × Insights). ~1 dia; **depende da `ANTHROPIC_API_KEY` nova no Railway** (mesma pendência do Claude-motor). `M` · depende do dono
 - [x] **Rotacionar chaves que passaram por chat** — **feito (confirmado pelo dono em 11/ago)**.
 - [ ] **Ativar alertas do watchdog por e-mail** — código pronto (PR #40); aguarda o dono criar um **e-mail dedicado** (decisão 11/ago: não usar o Gmail pessoal) e setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway. Até lá o watchdog só loga. `P` · depende do dono
 - [ ] **Backfill de sentimento** — script (padrão `scripts/backfill-shopping-cards.js`) pra re-analisar resultados com sentimento de fallback (ex.: os 795 "neutral" do censo de 10/ago, gravados durante o 401 da OpenAI). Nota: coluna `sentiment` é NOT NULL — não dá pra anular; o script re-analisa in-place. `P`

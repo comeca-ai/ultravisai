@@ -3,7 +3,7 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 18/ago/2026.**
+> `BACKLOG.md` (o que vem). **Atualizado: 19/ago/2026.**
 
 ## A aplicação está no ar e saudável ✅
 
@@ -12,7 +12,7 @@
 | Site + app (Vercel, ultravis.ai) | ✅ No ar e ATUALIZADO (17/ago) — esteve congelado em build de 8/ago por integração GitHub quebrada na migração do repo; reconectada em 17/ago |
 | Server de rastreamento (Railway) | ✅ No ar (último deploy SUCCESS, 18/ago) |
 | Banco (Supabase) | ✅ Ok — 41 migrations, RLS ativo, **arquivo-morto de marcas** ligado |
-| Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 5 checks (incl. marca órfã) — alertas por e-mail **desligados** até você configurar um e-mail dedicado |
+| Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 10 invariantes de consistência** (19/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham — a família dos 5 bugs pegos à mão na semana) — alertas por e-mail **desligados** até você configurar um e-mail dedicado |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |
 
 ## O cliente piloto (Polar) — números reais

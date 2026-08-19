@@ -337,17 +337,32 @@ async function deliver(alerts) {
 }
 
 /**
+ * Ultravis (19/ago): a varredura de consistência (contas, nomes, duplicatas —
+ * consistency.js) entra no mesmo ciclo. Lazy import + best-effort para não
+ * derrubar o watchdog nem os testes se o módulo falhar.
+ */
+async function collectAllAlerts(intervalMin) {
+  const snap = await collectSnapshot(intervalMin);
+  const alerts = evaluateChecks(snap, new Date());
+  try {
+    const { checkConsistencyNow } = await import('./consistency.js');
+    alerts.push(...(await checkConsistencyNow()));
+  } catch (err) {
+    logger.error({ err }, 'watchdog: consistency sweep failed');
+  }
+  return alerts;
+}
+
+/**
  * Read-only health check for the /ops panel: evaluates the exact same checks
  * the cron uses, but never delivers alerts nor touches the anti-spam state.
  */
 export async function checkHealthNow(intervalMin = 15) {
-  const snap = await collectSnapshot(intervalMin);
-  return evaluateChecks(snap, new Date());
+  return collectAllAlerts(intervalMin);
 }
 
 export async function runWatchdogOnce(intervalMin = 15) {
-  const snap = await collectSnapshot(intervalMin);
-  const alerts = evaluateChecks(snap, new Date());
+  const alerts = await collectAllAlerts(intervalMin);
   await deliver(alerts);
   return alerts;
 }

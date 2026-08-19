@@ -8,7 +8,8 @@
  * Citabilidade é a alavanca que o dirige; os dois nunca se somam, e a página
  * declara isso logo no topo.
  *
- * v1: Citação, Presença, Posição e Sentimento medidos das respostas
+ * v1: Leitura (ex-Citação), Presença, Ranking (ex-Posição) e Sentimento —
+ * renomes da reunião de 19/ago, só nos rótulos i18n — medidos das respostas
  * (`resultScore` na action do índice — mesmo scan, sem custo extra).
  * Autoridade e Acurácia SAÍRAM do Score por decisão do dono (19/ago) até o
  * juiz LLM existir — pesos renormalizados sobre as 4 dimensões medidas.

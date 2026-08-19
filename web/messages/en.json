@@ -1182,7 +1182,7 @@
   },
   "visibilityScore": {
     "title": "Visibility Score",
-    "subtitle": "The RESULT index: how your brand shows up in AI answers — cited, present, well positioned and well spoken of. What moves this number is the Citability Index.",
+    "subtitle": "The RESULT index: how your brand shows up in AI answers — read, present, well ranked and well spoken of. What moves this number is the Citability Index.",
     "twoIndexNote": "Two indexes, different roles: the Visibility Score measures the RESULT in AI answers; the Citability Index measures the LEVER (your assets). They are never added together — one drives the other.",
     "twoIndexLink": "See the Citability Index",
     "period": {
@@ -1209,8 +1209,8 @@
       "weight": "weight {weight}%",
       "noSample": "no sample",
       "citation": {
-        "name": "Citation",
-        "brief": "AIs cite your sources (your site) as a reference in their answers.",
+        "name": "Reading",
+        "brief": "How your proprietary sources (site, blog, content) are read and cited by AI in answers.",
         "ev": "{citing} of {total} answers cite your domain ({pct}% — ruler: 10% = 100)",
         "how": "Measured from the links cited in each collected answer."
       },
@@ -1221,11 +1221,11 @@
         "how": "Direct percentage of answers mentioning the brand."
       },
       "position": {
-        "name": "Position",
+        "name": "Ranking",
         "brief": "When the AI cites several brands, yours is mentioned first in the answer.",
         "ev": "Order of appearance in the text, across {samples} answers where you appear:",
-        "noSample": "The brand has not appeared in any answer in this window yet (or position enrichment is still running — up to 30 min).",
-        "how": "Position = order of the first mention in the answer text. Score: 1st=100 · 2nd=60 · 3rd=30 · 4th+=0, averaged over answers.",
+        "noSample": "The brand has not appeared in any answer in this window yet (or ranking enrichment is still running — up to 30 min).",
+        "how": "Ranking = order of the first mention in the answer text. Score: 1st=100 · 2nd=60 · 3rd=30 · 4th+=0, averaged over answers.",
         "p1": "1st place",
         "p2": "2nd place",
         "p3": "3rd place",
@@ -2206,41 +2206,25 @@
           "num": "01",
           "title": "Monitored answers",
           "body": "What each model says about your brand, in what tone, and next to which competitors — refreshed daily.",
-          "tags": [
-            "sentiment",
-            "share of answer",
-            "competitors"
-          ]
+          "tags": ["sentiment", "share of answer", "competitors"]
         },
         {
           "num": "02",
           "title": "Questions that matter",
           "body": "The real questions that lead to your category, with estimated volume and the cost of not being in them.",
-          "tags": [
-            "prompt volume",
-            "intent",
-            "prioritization"
-          ]
+          "tags": ["prompt volume", "intent", "prioritization"]
         },
         {
           "num": "03",
           "title": "Citations and sources",
           "body": "Which pages and outlets the models cite, and what needs to exist for them to cite you.",
-          "tags": [
-            "sources",
-            "authority",
-            "coverage"
-          ]
+          "tags": ["sources", "authority", "coverage"]
         },
         {
           "num": "04",
           "title": "From reading to action",
           "body": "Every gap becomes a ready brief: what to write, where to publish, what to fix on your site.",
-          "tags": [
-            "briefs",
-            "site audit",
-            "MCP"
-          ]
+          "tags": ["briefs", "site audit", "MCP"]
         }
       ]
     },
@@ -2333,12 +2317,7 @@
           "price": "R$ 390",
           "per": "/mo",
           "body": "To start measuring and understanding the current picture.",
-          "items": [
-            "150 monitored prompts",
-            "4 answer engines",
-            "Weekly report",
-            "1 user"
-          ],
+          "items": ["150 monitored prompts", "4 answer engines", "Weekly report", "1 user"],
           "cta": "Create account",
           "featured": false
         },
@@ -2678,9 +2657,7 @@
         },
         {
           "h": "12. Governing law",
-          "p": [
-            "These Terms are governed by the laws of the Federative Republic of Brazil."
-          ]
+          "p": ["These Terms are governed by the laws of the Federative Republic of Brazil."]
         },
         {
           "h": "13. Contact",

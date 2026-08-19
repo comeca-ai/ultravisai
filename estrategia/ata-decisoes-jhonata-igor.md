@@ -64,7 +64,7 @@ claros que significam uma condição só".
 | 4.2 | **"Citação" → "Leitura"**: "como minhas fontes proprietárias são lidas pela IA... talvez o melhor nome aqui seja leitura mesmo" | 56:40–58:12 · deck slides 5-7 | ✅ |
 | 4.3 | **"Posição" → "Ranking"** ("ranking médio") | 47:12 · 55:24 | ✅ |
 | 4.4 | Presença = "em que % das respostas apareço"; Sentimento = "como os clientes/consumidores **avaliam** a minha marca" — definições ditadas viram o texto dos cards | 53:47–54:28 · post-its P2 | ✅ |
-| 4.5 | **Resumo de visibilidade (Insights) mostra 3 coisas, sem nota ponderada**: presença como "X de N prompts", ranking médio (#1–#5) e sentimento overall — "eu não preciso ter uma nota ponderada disso" | 42:22–42:55 · 35:58–37:42 | 🔨 próxima tela |
+| 4.5 | **Resumo de visibilidade (Insights) mostra 3 coisas, sem nota ponderada**: presença como "X de N prompts", ranking médio (com distribuição #1..#4+) e sentimento overall (positivo/neutro/negativo + placar) — "eu não preciso ter uma nota ponderada disso"; Menções e Citações saíram do resumo ("não queria ficar com muito número", 36:40) | 42:22–42:55 · 35:58–37:42 | ✅ (migration 00044) |
 | 4.6 | **Sentimento traz as fontes** — "ele quer saber onde estão falando mal dele, para ele atuar"; régua 100/50/0 é provisória ("uma nota depois a gente valida") | 51:05–51:28 | ✅ fontes (motores + domínios top 10) · 📋 validar régua |
 | 4.7 | Sanidade combinada: "só de alguém aparecer 100% das vezes em primeiro lugar, tem que dar uma olhada no motor" | 51:45 | 📋 invariante do vigia |
 
@@ -76,9 +76,9 @@ claros que significam uma condição só".
 | 4.9 | **"O que fazer" da Legibilidade é orientado pelo que foi LIDO do site** (premissa v2, refinada por Jhonata em 19/ago): a plataforma lê o que o site TEM (JSON-LD parseado de verdade — blocos, validade, @types —, FAQ, H1, OG, robots, llms.txt), compara com as melhores práticas e INDICA o que precisa ser feito item a item ("encontramos X, falta Y"); o copy-paste é acabamento onde couber (llms.txt continua). JSON-LD primeiro ("é o principal, onde a maioria dos sites tem problema") | 20:37–24:41 · premissa v2 confirmada | ✅ 1ª fatia (8 sinais com indicação por evidência) |
 | 4.10 | Checklist da auditoria técnica confirmado: schema JSON-LD, FAQ editorial, descritivo de produto, meta tags sociais, trust/reputação (+ Rendering, idioma/país do checklist do Igor) | 25:26 | ✅ 6/8 sinais · 📋 gaps |
 | 4.11 | Conteúdo: indicar **onde publicar** (canais/revistas de referência) — "só colocar no backlog esse ponto" | 26:33–27:19 | 📋 |
-| 4.12 | **Onboarding com a matriz controla / ativa / conquista** | 28:56–30:22 | ⏳ Igor enviou material por WhatsApp; aguarda repasse |
+| 4.12 | **Onboarding com a matriz controla / ativa / conquista** | 28:56–30:22 | 🔨 material recebido (o próprio deck v19/ago, capa + slides 3-4, em `recebidos/`); tela de onboarding a construir |
 | 4.13 | Inteligência de otimização de prompts é **do cliente e segregada** — dado da marca A nunca alimenta a marca B | 17:06–19:28 | 📋 princípio de arquitetura registrado |
-| 4.14 | Label "54 de 172 rastreados" confunde — clarificar o fan-out (1 prompt → micro-perguntas) na tela | 38:14–39:43 | 🔨 próxima tela |
+| 4.14 | Label "54 de 172 rastreados" confunde — clarificar o fan-out (1 prompt → micro-perguntas) na tela | 38:14–39:43 | ✅ (card Presença "X de N" + tooltip explica o fan-out) |
 | 4.15 | Igor vai **rever o nome "citabilidade"** (post-it no deck: "Rever o nome citabilidade") | deck slide 5 | ⏳ Igor |
 | 4.16 | **Matriz "você controla · você ativa · você conquista" aplicada às zonas do IC** — o deck carimba a tríade na capa e taguea cada dimensão no slide 3 (Legibilidade+Conteúdo = controla · Social+Reviews = ativa · Open Media+Verticais = conquista); zonas A/B/C da tela renomeadas para a tríade, com o framing do slide 2 no subtítulo ("aqui você AGE; lá você MEDE") | deck slides 1–3 · 48:54 | ✅ |
 

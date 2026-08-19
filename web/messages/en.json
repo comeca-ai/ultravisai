@@ -285,7 +285,7 @@
     "visibilityRateTitle": "Visibility Index",
     "trackedPromptsTitle": "Tracked Prompts",
     "visibilityTooltip": "Share of tracked prompts where your brand appeared in at least one AI answer under the current filters.",
-    "trackedTooltip": "Distinct prompts that produced tracked results in the selected period and filters. The quota below is current usage across your organization — it does not change with the date range.",
+    "trackedTooltip": "Distinct prompts that produced results under the selected period and filters. One prompt can fan out into micro-questions — which is why collected answers outnumber prompts. The quota below is the organization’s current usage and does not change with the period.",
     "mentionsTooltip": "How many times your brand was referenced by name in AI-generated responses.",
     "citationsTooltip": "Times your brand's domain was cited as a source with a direct link in AI responses.",
     "sentimentTooltip": "Percentage of answers that mention your brand and describe it in a positive context.",
@@ -351,7 +351,22 @@
       "aiResponse": "AI Response",
       "queryFanout": "Query fan-out ({count})",
       "checked": "Checked: {date}"
-    }
+    },
+    "presenceTitle": "Presence",
+    "presenceValue": "{visible} of {total}",
+    "presenceSub": "{pct}% of prompts with the brand in at least one answer",
+    "rankingTitle": "Average ranking",
+    "rankingTooltip": "Average position where your brand appears in the text of the answers that cite it (1st = cited before every competitor). Full detail in the Visibility Score.",
+    "rankingValue": "#{avg, number}",
+    "rankingSub": "1st ×{r1} · 2nd ×{r2} · 3rd ×{r3} · 4th+ ×{r4plus}",
+    "rankingEmpty": "No ranked answers in this window (ranking is computed up to 30 min after tracking).",
+    "sentimentOverallTitle": "Sentiment",
+    "sentimentOverallTooltip": "How answers that include your brand talk about it. Positive when positive answers outnumber negative ones; sources live in the Visibility Score.",
+    "sentimentPositive": "Positive",
+    "sentimentNeutral": "Neutral",
+    "sentimentNegative": "Negative",
+    "sentimentCounts": "{pos} positive · {neu} neutral · {neg} negative",
+    "upgrade": "Upgrade"
   },
   "topics": {
     "addTopic": "Add Topic",

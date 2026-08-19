@@ -145,6 +145,19 @@ export interface InsightsSummary {
   /** Raw previous-period count, used to distinguish a zero base from unavailable comparison data. */
   prevCitations: number | null;
   sentimentChange: number | null;
+  /**
+   * Ultravis (resumo de visibilidade, 19/ago — extensão aditiva): sentimento
+   * ENTRE respostas com a marca e ranking por ordem de aparição, vindos do
+   * mesmo RPC (migration 00044) — obedecem aos MESMOS filtros dos demais
+   * campos por construção.
+   */
+  sentPos: number;
+  sentNeu: number;
+  sentNeg: number;
+  /** Média da ordem de aparição (appearance_rank ≥ 1); null sem amostra. */
+  rankAvg: number | null;
+  rankCount: number;
+  rankDist: { r1: number; r2: number; r3: number; r4: number; r5: number; gt5: number };
 }
 
 /**
@@ -171,6 +184,19 @@ interface InsightsAggregates {
   total_citations: number;
   positive_count: number;
   mentioning_results: number;
+  // Ultravis (migration 00044) — ausentes até o RPC novo estar aplicado;
+  // o mapeamento usa ?? 0 para degradar sem quebrar.
+  sent_pos?: number;
+  sent_neu?: number;
+  sent_neg?: number;
+  rank_count?: number;
+  rank_sum?: number;
+  rank_1?: number;
+  rank_2?: number;
+  rank_3?: number;
+  rank_4?: number;
+  rank_5?: number;
+  rank_gt5?: number;
   last_checked_at: string | null;
   by_model: Array<{
     model_used: string;
@@ -1067,6 +1093,12 @@ export async function getInsightsSummary(
       prevMentions: null,
       prevCitations: null,
       sentimentChange: null,
+      sentPos: 0,
+      sentNeu: 0,
+      sentNeg: 0,
+      rankAvg: null,
+      rankCount: 0,
+      rankDist: { r1: 0, r2: 0, r3: 0, r4: 0, r5: 0, gt5: 0 },
     };
   }
 
@@ -1167,6 +1199,11 @@ export async function getInsightsSummary(
     }
   }
 
+  // Ultravis (resumo 19/ago): ranking médio = média da ordem de aparição
+  // sobre as respostas ranqueadas; distribuição #1..#5/>#5 dos post-its P1.
+  const rankCount = cur.rank_count ?? 0;
+  const rankAvg = rankCount > 0 ? roundTo1((cur.rank_sum ?? 0) / rankCount) : null;
+
   return {
     avgVisibilityScore,
     totalMentions,
@@ -1181,6 +1218,19 @@ export async function getInsightsSummary(
     prevMentions,
     prevCitations,
     sentimentChange,
+    sentPos: cur.sent_pos ?? 0,
+    sentNeu: cur.sent_neu ?? 0,
+    sentNeg: cur.sent_neg ?? 0,
+    rankAvg,
+    rankCount,
+    rankDist: {
+      r1: cur.rank_1 ?? 0,
+      r2: cur.rank_2 ?? 0,
+      r3: cur.rank_3 ?? 0,
+      r4: cur.rank_4 ?? 0,
+      r5: cur.rank_5 ?? 0,
+      gt5: cur.rank_gt5 ?? 0,
+    },
   };
 }
 

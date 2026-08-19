@@ -285,7 +285,7 @@
     "visibilityRateTitle": "Índice de Visibilidade",
     "trackedPromptsTitle": "Prompts Rastreados",
     "visibilityTooltip": "Parcela dos prompts rastreados em que sua marca apareceu em pelo menos uma resposta de IA, nos filtros atuais.",
-    "trackedTooltip": "Prompts distintos que produziram resultados no período e filtros selecionados. A cota abaixo é o uso atual da sua organização — não muda com o período.",
+    "trackedTooltip": "Prompts distintos que produziram resultados no período e filtros selecionados. Um prompt pode se desdobrar em micro-perguntas (fan-out) — por isso o número de respostas coletadas é maior que o de prompts. A cota abaixo é o uso atual da organização e não muda com o período.",
     "mentionsTooltip": "Quantas vezes sua marca foi citada pelo nome nas respostas geradas por IA.",
     "citationsTooltip": "Vezes em que o domínio da sua marca foi citado como fonte, com link direto, nas respostas de IA.",
     "sentimentTooltip": "Percentual de respostas que mencionam sua marca e a descrevem em contexto positivo.",
@@ -351,7 +351,22 @@
       "aiResponse": "Resposta da IA",
       "queryFanout": "Expansão de consultas ({count})",
       "checked": "Verificado em: {date}"
-    }
+    },
+    "presenceTitle": "Presença",
+    "presenceValue": "{visible} de {total}",
+    "presenceSub": "{pct}% dos prompts com a marca em pelo menos uma resposta",
+    "rankingTitle": "Ranking médio",
+    "rankingTooltip": "Posição média em que sua marca aparece no texto das respostas em que é citada (1º = citada antes de todos os concorrentes). Detalhe completo no Score de Visibilidade.",
+    "rankingValue": "#{avg, number}",
+    "rankingSub": "1º ×{r1} · 2º ×{r2} · 3º ×{r3} · 4º+ ×{r4plus}",
+    "rankingEmpty": "Sem respostas ranqueadas na janela (o cálculo leva até 30 min após o rastreamento).",
+    "sentimentOverallTitle": "Sentimento",
+    "sentimentOverallTooltip": "Como falam da sua marca nas respostas em que ela aparece. Positivo quando há mais respostas positivas que negativas; as fontes estão no Score de Visibilidade.",
+    "sentimentPositive": "Positivo",
+    "sentimentNeutral": "Neutro",
+    "sentimentNegative": "Negativo",
+    "sentimentCounts": "{pos} positivas · {neu} neutras · {neg} negativas",
+    "upgrade": "Fazer upgrade"
   },
   "topics": {
     "addTopic": "Adicionar Tópico",

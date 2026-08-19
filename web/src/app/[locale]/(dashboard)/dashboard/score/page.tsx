@@ -348,6 +348,32 @@ export default function VisibilityScorePage() {
                     </div>
                   </div>
                 )}
+                {/* Onde falam de você: domínios citados nas respostas com a
+                    marca, com o sentimento da resposta (Igor 51:28, 19/ago). */}
+                {dim.key === 'sentiment' && rs && rs.sentiment.topSources.length > 0 && (
+                  <div className="rounded-md border bg-muted/30 p-2.5">
+                    <p className="mb-1.5 font-semibold uppercase tracking-wide text-[10px] text-muted-foreground">
+                      {t('dims.sentiment.domainsLabel')}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {rs.sentiment.topSources.map((s) => (
+                        <span
+                          key={s.domain}
+                          className="inline-flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-[11px] tabular-nums"
+                        >
+                          <span className="max-w-[160px] truncate">{s.domain}</span>
+                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                            +{s.pos}
+                          </span>
+                          <span className="text-muted-foreground">~{s.neu}</span>
+                          <span className="font-medium text-red-600 dark:text-red-400">
+                            −{s.neg}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );

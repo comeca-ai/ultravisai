@@ -140,6 +140,13 @@ export interface VisibilityIndexData {
       neg: number;
       /** Fontes pesquisadas: placar de sentimento por motor (respostas com a marca). */
       byPlatform: Array<{ platform: string; pos: number; neu: number; neg: number }>;
+      /**
+       * Onde falam de você (Igor 51:28, 19/ago): domínios citados nas
+       * respostas com a marca, com o sentimento da resposta em que aparecem —
+       * a referência para o cliente atuar onde falam mal dele. Top 10 por
+       * volume; cada domínio conta 1× por resposta.
+       */
+      topSources: Array<{ domain: string; pos: number; neu: number; neg: number }>;
     };
   };
   /** Weekly (Monday-keyed) dimension scores over ALL history, oldest first. */
@@ -167,6 +174,8 @@ const CATEGORY_GROUPS: Record<IndexCategoryKey, SourceCategory[]> = {
 };
 
 const TOP_SOURCES_LIMIT = 4;
+/** Onde falam de você (card Sentimento): top domínios por volume. */
+const SENT_SOURCES_LIMIT = 10;
 const SCAN_PAGE_SIZE = 1000;
 const SCAN_MAX_ROWS = 50_000;
 
@@ -354,6 +363,7 @@ export async function getVisibilityIndex(
   const sentAgg = { pos: 0, neu: 0, neg: 0 };
   // Fontes pesquisadas do Sentimento: placar por motor (pedido de 19/ago).
   const sentByPlatform = new Map<string, { pos: number; neu: number; neg: number }>();
+  const sentSources = new Map<string, { pos: number; neu: number; neg: number }>();
   const posDist = { p1: 0, p2: 0, p3: 0, p4: 0 };
 
   interface WeekAgg {
@@ -453,6 +463,22 @@ export async function getVisibilityIndex(
         sp.neu += 1;
       }
       sentByPlatform.set(platform, sp);
+
+      // Onde falam de você: cada domínio citado nesta resposta herda o
+      // sentimento dela (1× por resposta — Set dedupe evita que a mesma
+      // fonte citada 3× na resposta conte 3).
+      const sentKey =
+        r.sentiment === 'positive' ? 'pos' : r.sentiment === 'negative' ? 'neg' : 'neu';
+      const hosts = new Set<string>();
+      for (const cite of citations) {
+        const host = extractHostname(cite.url);
+        if (host) hosts.add(host);
+      }
+      for (const host of hosts) {
+        const src = sentSources.get(host) ?? { pos: 0, neu: 0, neg: 0 };
+        src[sentKey] += 1;
+        sentSources.set(host, src);
+      }
 
       // rank >= 1 = calculado; 0 = não computável; null = pendente (o
       // enriquecimento do server preenche em até 30 min).
@@ -573,12 +599,19 @@ export async function getVisibilityIndex(
         const byPlatform = Array.from(sentByPlatform.entries())
           .map(([platform, s]) => ({ platform, ...s }))
           .sort((a, b) => b.pos + b.neu + b.neg - (a.pos + a.neu + a.neg));
+        // Negativas primeiro no desempate — "ele quer saber onde estão
+        // falando mal dele, para ele atuar" (Igor 51:28).
+        const topSources = Array.from(sentSources.entries())
+          .map(([domain, s]) => ({ domain, ...s }))
+          .sort((a, b) => b.pos + b.neu + b.neg - (a.pos + a.neu + a.neg) || b.neg - a.neg)
+          .slice(0, SENT_SOURCES_LIMIT);
         const total = sentAgg.pos + sentAgg.neu + sentAgg.neg;
-        if (total === 0) return { score: null, pos: 0, neu: 0, neg: 0, byPlatform };
+        if (total === 0) return { score: null, pos: 0, neu: 0, neg: 0, byPlatform, topSources };
         return {
           score: Math.round((sentAgg.pos * 100 + sentAgg.neu * 50) / total),
           ...sentAgg,
           byPlatform,
+          topSources,
         };
       })(),
     },

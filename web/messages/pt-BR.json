@@ -1210,19 +1210,19 @@
       "noSample": "sem amostra",
       "citation": {
         "name": "Leitura",
-        "brief": "Como suas fontes proprietárias (site, blog, conteúdo) são lidas e citadas pela IA nas respostas.",
+        "brief": "Como minhas fontes proprietárias (site, blog, conteúdo) são lidas pela IA?",
         "ev": "{citing} de {total} respostas citam seu domínio ({pct}% — régua: 10% = 100)",
         "how": "Medido dos links citados em cada resposta coletada."
       },
       "presence": {
         "name": "Presença",
-        "brief": "Sua marca é mencionada nas respostas, com nome ou domínio.",
+        "brief": "Em que % das respostas apareço?",
         "ev": "Mencionada em {mentioned} de {total} respostas",
         "how": "Percentual direto de respostas com menção à marca."
       },
       "position": {
         "name": "Ranking",
-        "brief": "Quando a IA cita várias marcas, a sua é citada primeiro na resposta.",
+        "brief": "Em que posição apareço nas respostas em que estou?",
         "ev": "Ordem de aparição no texto, em {samples} respostas em que você aparece:",
         "noSample": "A marca ainda não apareceu em nenhuma resposta da janela (ou o cálculo de ranking está em andamento — leva até 30 min).",
         "how": "Ranking = ordem da 1ª menção no texto da resposta. Nota: 1º=100 · 2º=60 · 3º=30 · 4º+=0, na média das respostas.",
@@ -1233,11 +1233,12 @@
       },
       "sentiment": {
         "name": "Sentimento",
-        "brief": "Quando falam de você, falam bem.",
+        "brief": "Como os clientes/consumidores avaliam a minha marca?",
         "ev": "{pos} positivas · {neu} neutras · {neg} negativas (entre respostas com a marca)",
         "noSample": "A marca ainda não apareceu em nenhuma resposta da janela.",
         "how": "Positiva = 100 · neutra = 50 · negativa = 0, na média das respostas com a marca.",
-        "sourcesLabel": "Fontes pesquisadas — respostas com a marca, por motor (+positivas · ~neutras · −negativas)"
+        "sourcesLabel": "Fontes pesquisadas — respostas com a marca, por motor (+positivas · ~neutras · −negativas)",
+        "domainsLabel": "Onde falam de você — domínios citados nas respostas com a marca, com o sentimento da resposta (top 10; atue onde falam mal)"
       }
     },
     "gapNote": "Próximo passo da arquitetura: o diagnóstico de gap 2×2 (Citabilidade × Score) — alavanca alta com resultado baixo é atraso de colheita; alavanca baixa com resultado alto é fragilidade.",

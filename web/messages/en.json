@@ -353,8 +353,7 @@
       "checked": "Checked: {date}"
     },
     "presenceTitle": "Presence",
-    "presenceValue": "{visible} of {total}",
-    "presenceSub": "{pct}% of prompts with the brand in at least one answer",
+    "presenceSub": "{visible} of {total} prompts with the brand in at least one answer",
     "rankingTitle": "Average ranking",
     "rankingTooltip": "Average position where your brand appears in the text of the answers that cite it (1st = cited before every competitor). Full detail in the Visibility Score.",
     "rankingValue": "#{avg, number}",

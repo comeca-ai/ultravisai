@@ -120,6 +120,23 @@
     "listStatus": {
       "running": "running",
       "failed": "failed"
+    },
+    "indicationLabel": "What to do (read from your site):",
+    "indications": {
+      "aiBotsBlocked": "Your robots.txt BLOCKS AI bots ({bots}) — while blocked, those AIs cannot read the site.",
+      "aiBotsSilent": "Your robots.txt does not mention AI bots — declare allowed access explicitly (GPTBot, ClaudeBot, PerplexityBot…).",
+      "faqFew": "FAQPage present, but with {count} question(s) — include at least 2 real customer questions and answers.",
+      "faqMissing": "No structured FAQPage — the questions customers ask AIs are not extractable from your site. Publish an FAQ section with FAQPage markup.",
+      "h1Length": "The H1 \"{text}\" is {length} characters — the ideal is 20–70, describing what the page offers (descriptive title).",
+      "h1Missing": "The page has no H1 — AI loses the title of what it offers.",
+      "h1Multiple": "{count} H1s on the same page — keep exactly one, descriptive.",
+      "jsonLdPresence": "No JSON-LD block found on this page. Start with the Organization type in the <head> — name, site, logo and sameAs (social, Wikipedia) — then add each page’s types (Product, FAQPage, Article).",
+      "jsonLdRelevance": "Types found in your JSON-LD: {types}. No high-value type for AI — add what applies to the page: Product, FAQPage, Article, HowTo or Review.",
+      "jsonLdRelevanceNone": "Your JSON-LD declares no @type — without a type, AI cannot tell what the page describes.",
+      "jsonLdValidity": "Of the {blocks} JSON-LD blocks read, {parsed} parse and {wellFormed} declare a schema.org @context with an @type. Fix the invalid blocks and complete the untyped ones.",
+      "llmsTxt": "llms.txt missing from the site root — the Citability Index generates the ready file (\"Copy ready llms.txt\" button).",
+      "openGraph": "Missing social meta tags: {missing} — AIs and link previews use these fields to understand and present the page.",
+      "robotsMissing": "No robots.txt — AI bots crawl by default, but declare access explicitly (GPTBot, ClaudeBot, PerplexityBot…)."
     }
   },
   "auth": {

@@ -73,7 +73,7 @@ claros que significam uma condição só".
 | # | Decisão | Evidência | Status |
 |---|---|---|---|
 | 4.8 | **Custos & consumo só no acesso ADM** — nunca na tela do cliente ("ali tá descrito a nossa margem"); solução stand-alone, custo de IA fica na margem | 11:09–14:57 | ✅ página admin-only existe · ⏳ criar acesso do Igor |
-| 4.9 | **"O que fazer" da Legibilidade gera artefato copy-paste pronto por item** — JSON-LD primeiro ("é o principal, onde a maioria dos sites tem problema"), depois schema.org, FAQ, descritivo de produto, meta tags — como o botão do llms.txt já faz | 20:37–24:41 | 🔨 nesta fila |
+| 4.9 | **"O que fazer" da Legibilidade é orientado pelo que foi LIDO do site** (premissa v2, refinada por Jhonata em 19/ago): a plataforma lê o que o site TEM (JSON-LD parseado de verdade — blocos, validade, @types —, FAQ, H1, OG, robots, llms.txt), compara com as melhores práticas e INDICA o que precisa ser feito item a item ("encontramos X, falta Y"); o copy-paste é acabamento onde couber (llms.txt continua). JSON-LD primeiro ("é o principal, onde a maioria dos sites tem problema") | 20:37–24:41 · premissa v2 confirmada | ✅ 1ª fatia (8 sinais com indicação por evidência) |
 | 4.10 | Checklist da auditoria técnica confirmado: schema JSON-LD, FAQ editorial, descritivo de produto, meta tags sociais, trust/reputação (+ Rendering, idioma/país do checklist do Igor) | 25:26 | ✅ 6/8 sinais · 📋 gaps |
 | 4.11 | Conteúdo: indicar **onde publicar** (canais/revistas de referência) — "só colocar no backlog esse ponto" | 26:33–27:19 | 📋 |
 | 4.12 | **Onboarding com a matriz controla / ativa / conquista** | 28:56–30:22 | ⏳ Igor enviou material por WhatsApp; aguarda repasse |

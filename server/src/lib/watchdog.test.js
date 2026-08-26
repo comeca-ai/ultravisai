@@ -6,7 +6,7 @@ const NOW = new Date('2026-08-10T12:00:00Z');
 const healthy = {
   failedJobs: [],
   stuckTasks: 0,
-  recentResults: { total: 120, neutral: 40 },
+  recentResults: { total: 120, neutral: 40, mentioned: 60, mentionedNeutral: 20 },
   lastResultAt: '2026-08-10T06:00:00Z',
   orphanBrands: 0,
 };
@@ -43,14 +43,23 @@ describe('watchdog evaluateChecks', () => {
   });
 
   it('flags 100% neutral sentiment over a real sample (the silent-401 case)', () => {
-    const alerts = evaluateChecks({ ...healthy, recentResults: { total: 795, neutral: 795 } }, NOW);
+    const alerts = evaluateChecks(
+      {
+        ...healthy,
+        recentResults: { total: 795, neutral: 795, mentioned: 300, mentionedNeutral: 300 },
+      },
+      NOW,
+    );
     expect(alerts).toHaveLength(1);
     expect(alerts[0].key).toBe('sentiment-degraded');
     expect(alerts[0].message).toContain('OPENAI_API_KEY');
   });
 
   it('does NOT flag 100% neutral on a tiny sample', () => {
-    const alerts = evaluateChecks({ ...healthy, recentResults: { total: 5, neutral: 5 } }, NOW);
+    const alerts = evaluateChecks(
+      { ...healthy, recentResults: { total: 5, neutral: 5, mentioned: 5, mentionedNeutral: 5 } },
+      NOW,
+    );
     expect(alerts).toEqual([]);
   });
 
@@ -165,5 +174,28 @@ describe('watchdog deploy-drift (incidente 17/ago)', () => {
       NOW,
     );
     expect(alerts).toEqual([]);
+  });
+});
+
+describe('watchdog sentiment-degraded (gated por menção)', () => {
+  it('não alerta quando a janela só tem respostas SEM menção (todas neutral por padrão)', () => {
+    const alerts = evaluateChecks(
+      { ...healthy, recentResults: { total: 40, neutral: 40, mentioned: 0, mentionedNeutral: 0 } },
+      NOW,
+    );
+    expect(alerts.find((a) => a.key === 'sentiment-degraded')).toBeUndefined();
+  });
+
+  it('alerta quando as respostas COM menção vêm 100% neutras em amostra real', () => {
+    const alerts = evaluateChecks(
+      {
+        ...healthy,
+        recentResults: { total: 90, neutral: 90, mentioned: 30, mentionedNeutral: 30 },
+      },
+      NOW,
+    );
+    const hit = alerts.find((a) => a.key === 'sentiment-degraded');
+    expect(hit?.severity).toBe('critical');
+    expect(hit?.message).toContain('COM menção');
   });
 });

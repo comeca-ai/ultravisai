@@ -78,6 +78,24 @@ export function normalizeName(s) {
     .trim();
 }
 
+/**
+ * Hostname normalizado — ESPELHO de extractHostname (response-parser.js e
+ * web/src/lib/citations/classify.ts): tira protocolo, "www." e caminho.
+ * null quando não sobra host nenhum.
+ */
+function hostOf(raw) {
+  const v = String(raw ?? '').trim();
+  if (!v) return null;
+  try {
+    const u = new URL(v);
+    const h = u.hostname.toLowerCase();
+    return h.startsWith('www.') ? h.slice(4) : h || null;
+  } catch {
+    const m = v.match(/^(?:https?:\/\/)?(?:www\.)?([^/\s?#]+)/i);
+    return m ? m[1].toLowerCase() : null;
+  }
+}
+
 /** True when the shorter name's words are a prefix of the longer's ("polar" ⊂ "polar electro"). */
 function isWordPrefix(shorter, longer) {
   const a = shorter.split(' ');
@@ -164,26 +182,50 @@ export function evaluateConsistency(snap, _now) {
     }
   }
 
-  // Domínio cadastrado com protocolo/www/caminho não bate com o classificador
-  // de citações (que compara hostname puro) — citação própria some da conta.
+  // Domínio cadastrado de forma que o classificador de citações não consegue
+  // usar como pretendido.
+  //
+  // ATENÇÃO (verificação de 26/ago): "www." e protocolo NÃO são problema —
+  // extractHostname normaliza os dois, e a contagem de citação própria bate
+  // igual ("www.polar.com" e "https://www.polar.com/br" contam as mesmas
+  // citações que "polar.com", provado em teste). A versão anterior deste
+  // check afirmava que "citações próprias deixam de contar" e acusava o
+  // domínio do cliente todos os dias — alerta falso. Ficam só os dois casos
+  // que realmente mudam o resultado:
+  //   (a) o domínio não normaliza para hostname nenhum (erro de cadastro);
+  //   (b) o domínio tem CAMINHO — a comparação usa só o host, então qualquer
+  //       link daquele host passa a contar como seu (ex.: um link de
+  //       agregador vira "linktr.ee" inteiro).
   {
-    const bad = [];
-    const looksBad = (d) => /^https?:\/\//i.test(d) || /^www\./i.test(d) || /[/\s]/.test(d.trim());
-    for (const d of snap.brandDomains) {
-      if (d.domain && looksBad(d.domain)) {
-        bad.push(`${brandName.get(d.brandId) ?? d.brandId}: "${d.domain}"`);
+    const broken = [];
+    const pathed = [];
+    const check = (label, raw) => {
+      const d = String(raw ?? '').trim();
+      if (!d) return;
+      const host = hostOf(d);
+      if (!host) {
+        broken.push(`${label}: "${d}"`);
+        return;
       }
-    }
+      const afterHost = d.replace(/^https?:\/\//i, '').slice(host.replace(/^www\./, '').length);
+      if (/\/\S/.test(afterHost) || /\s/.test(d)) pathed.push(`${label}: "${d}" → ${host}`);
+    };
+    for (const d of snap.brandDomains) check(brandName.get(d.brandId) ?? d.brandId, d.domain);
     for (const c of snap.competitors) {
-      if (c.domain && looksBad(c.domain)) {
-        bad.push(`${brandName.get(c.brandId) ?? c.brandId} (conc. ${c.name}): "${c.domain}"`);
-      }
+      check(`${brandName.get(c.brandId) ?? c.brandId} (conc. ${c.name})`, c.domain);
     }
-    if (bad.length > 0) {
+    if (broken.length > 0) {
       alerts.push({
-        key: 'consistency-bad-domains',
+        key: 'consistency-broken-domains',
         severity: 'warning',
-        message: `Domínio cadastrado com protocolo/www/caminho (citações próprias deixam de contar): ${bad.slice(0, 5).join(' · ')}. Corrigir para hostname puro (ex.: "polar.com").`,
+        message: `Domínio cadastrado que não vira hostname nenhum (citações desse domínio nunca contam): ${broken.slice(0, 5).join(' · ')}. Corrigir o cadastro.`,
+      });
+    }
+    if (pathed.length > 0) {
+      alerts.push({
+        key: 'consistency-pathed-domains',
+        severity: 'warning',
+        message: `Domínio cadastrado com caminho — a comparação usa só o host, então QUALQUER link desse host conta como seu: ${pathed.slice(0, 5).join(' · ')}. Cadastrar só o domínio próprio.`,
       });
     }
   }

@@ -48,7 +48,7 @@ const DEPLOY_DRIFT_GRACE_MIN = 90;
  * @param {{
  *   failedJobs: { type: string, failedReason: string|null }[],
  *   stuckTasks: number,
- *   recentResults: { total: number, neutral: number },
+ *   recentResults: { total: number, neutral: number, mentioned: number, mentionedNeutral: number },
  *   lastResultAt: string|null,
  * }} snap
  * @param {Date} now
@@ -78,14 +78,20 @@ export function evaluateChecks(snap, now) {
   // 100% neutral over a real sample means the sentiment analyzer is likely
   // failing and falling back (e.g. invalid/expired OPENAI_API_KEY) — real
   // traffic always has some non-neutral share.
+  //
+  // Só contam respostas COM menção à marca: a análise de sentimento é pulada
+  // quando a marca não aparece, e essas linhas ficam 'neutral' por padrão.
+  // Sem esse filtro, uma janela em que ninguém foi mencionado disparava
+  // alerta crítico com a análise funcionando perfeitamente (falso positivo
+  // observado em produção em 24/ago).
   if (
-    snap.recentResults.total >= SENTIMENT_MIN_SAMPLE &&
-    snap.recentResults.neutral === snap.recentResults.total
+    snap.recentResults.mentioned >= SENTIMENT_MIN_SAMPLE &&
+    snap.recentResults.mentionedNeutral === snap.recentResults.mentioned
   ) {
     alerts.push({
       key: 'sentiment-degraded',
       severity: 'critical',
-      message: `Sentimento 100% "neutral" nos últimos ${snap.recentResults.total} resultados — análise provavelmente caindo em fallback (verifique OPENAI_API_KEY no Railway).`,
+      message: `Sentimento 100% "neutral" nas últimas ${snap.recentResults.mentioned} respostas COM menção à marca — análise provavelmente caindo em fallback (verifique OPENAI_API_KEY no Railway).`,
     });
   }
 
@@ -146,7 +152,7 @@ async function collectSnapshot(intervalMin) {
   const snap = {
     failedJobs: [],
     stuckTasks: 0,
-    recentResults: { total: 0, neutral: 0 },
+    recentResults: { total: 0, neutral: 0, mentioned: 0, mentionedNeutral: 0 },
     lastResultAt: null,
     orphanBrands: 0,
     deployDrift: null,
@@ -176,12 +182,17 @@ async function collectSnapshot(intervalMin) {
   try {
     const { data } = await supabaseAdmin
       .from('prompt_results')
-      .select('sentiment, created_at')
+      .select('sentiment, mention_count, created_at')
       .gte('created_at', recentIso)
       .limit(1000);
     const rows = data ?? [];
     snap.recentResults.total = rows.length;
     snap.recentResults.neutral = rows.filter((r) => r.sentiment === 'neutral').length;
+    const withMention = rows.filter((r) => (r.mention_count ?? 0) > 0);
+    snap.recentResults.mentioned = withMention.length;
+    snap.recentResults.mentionedNeutral = withMention.filter(
+      (r) => r.sentiment === 'neutral',
+    ).length;
   } catch {
     /* best-effort */
   }

@@ -1,0 +1,297 @@
+<title>Decisões da Ultravis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --red:#C0492A; --redSoft:#FBEEEA;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 30px}
+::selection{background:var(--good);color:#fff}
+
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:52px 0 40px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2.3rem;letter-spacing:-.02em;margin-top:14px;text-wrap:balance}
+.covsub{color:var(--ink2);margin-top:10px;max-width:74ch}
+.stats{display:flex;gap:34px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid var(--rule)}
+.stat b{display:block;font-family:var(--mono);font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
+.stat span{font-family:var(--mono);font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+
+.spine{margin-top:26px}
+.spinebars{display:flex;align-items:flex-end;gap:5px;height:72px}
+.sb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}
+.sb i{display:block;width:100%;background:#5A574D;border-radius:3px 3px 0 0}
+.sb.hot i{background:var(--good)}
+.sb b{font-family:var(--mono);font-size:.68rem;font-weight:700}
+.spinelabs{display:flex;gap:5px;margin-top:6px}
+.spinelabs span{flex:1;text-align:center;font-family:var(--mono);font-size:.58rem;color:var(--faint)}
+
+.page{padding:30px 0 64px}
+.ph{margin-top:42px}
+.phhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.phn{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--good);font-weight:700}
+.phdate{font-family:var(--mono);font-size:.68rem;color:var(--faint)}
+h2{font-family:var(--serif);font-size:1.45rem;font-weight:500;letter-spacing:-.01em;margin-top:3px}
+.phsub{color:var(--ink2);font-size:.9rem;margin-top:6px;max-width:80ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:6px 22px;margin-top:14px}
+.d{display:grid;grid-template-columns:1fr 96px;gap:16px;padding:15px 0;border-bottom:1px solid var(--rule);align-items:start}
+.d:last-child{border-bottom:none}
+.dt{font-weight:600;font-size:.93rem}
+.dd{font-size:.85rem;color:var(--ink2);margin-top:3px}
+.tagw{text-align:right}
+.tag{display:inline-block;font-family:var(--mono);font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:3px 7px;border-radius:5px;white-space:nowrap}
+.tag.vig{background:var(--goodSoft);color:var(--good);border:1px solid var(--good)}
+.tag.sup{background:var(--sunk);color:var(--ink2);border:1px solid var(--rule2)}
+.tag.lic{background:var(--redSoft);color:var(--red);border:1px solid var(--red)}
+.tag.pen{background:var(--amberSoft);color:var(--amber);border:1px solid var(--amber)}
+
+.turn{background:var(--card);border-left:3px solid var(--good);border-radius:0 12px 12px 0;padding:16px 22px;margin-top:14px}
+.turn .tl{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--good);font-weight:700}
+.turn p{font-size:.88rem;color:var(--ink2);margin-top:6px}
+.turn b{color:var(--ink)}
+
+table{width:100%;border-collapse:collapse;margin-top:12px;background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+th{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;text-align:left;padding:10px 14px;background:var(--sunk);border-bottom:1px solid var(--rule2)}
+td{padding:11px 14px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:top;color:var(--ink2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+.cap{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:30px}
+h3{font-family:var(--serif);font-size:1.25rem;font-weight:500;margin-top:44px}
+.note{color:var(--ink2);font-size:.88rem;margin-top:6px;max-width:82ch}
+.foot{font-family:var(--mono);font-size:.68rem;color:var(--ink2);line-height:1.9;border-top:1px solid var(--rule);padding-top:20px;margin-top:44px}
+.foot b{color:var(--good)}
+@media (max-width:780px){.wrap{padding:0 18px}h1{font-size:1.75rem}.d{grid-template-columns:1fr}.tagw{text-align:left}}
+</style>
+
+<div class="cover">
+  <div class="wrap">
+    <div class="eyebrow">Retrospectiva</div>
+    <h1>Todas as decisões da Ultravis</h1>
+    <p class="covsub">Dezessete dias, do fork ao produto medindo cliente real. Noventa decisões registradas — produto, técnica e negócio — na ordem em que foram tomadas, com o que segue valendo e o que foi substituído pelo caminho.</p>
+    <div class="stats">
+      <div class="stat"><b>90</b><span>decisões registradas</span></div>
+      <div class="stat"><b>17</b><span>dias de operação</span></div>
+      <div class="stat"><b>7</b><span>fases</span></div>
+      <div class="stat"><b>44</b><span>migrations aplicadas</span></div>
+      <div class="stat"><b>4</b><span>reuniões com o sócio</span></div>
+    </div>
+    <div class="spine">
+      <div class="spinebars">
+        <div class="sb"><b>2</b><i style="height:8px"></i></div>
+        <div class="sb"><b>5</b><i style="height:20px"></i></div>
+        <div class="sb hot"><b>17</b><i style="height:66px"></i></div>
+        <div class="sb"><b>13</b><i style="height:50px"></i></div>
+        <div class="sb"><b>11</b><i style="height:43px"></i></div>
+        <div class="sb"><b>1</b><i style="height:5px"></i></div>
+        <div class="sb"><b>5</b><i style="height:20px"></i></div>
+        <div class="sb"><b>4</b><i style="height:16px"></i></div>
+        <div class="sb"><b>7</b><i style="height:27px"></i></div>
+        <div class="sb"><b>12</b><i style="height:47px"></i></div>
+        <div class="sb hot"><b>13</b><i style="height:50px"></i></div>
+      </div>
+      <div class="spinelabs">
+        <span>03/ago</span><span>07</span><span>08</span><span>10</span><span>11</span><span>12</span><span>13</span><span>15</span><span>17</span><span>18</span><span>19</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap page">
+
+  <!-- FASE 1 -->
+  <div class="ph">
+    <div class="phhead"><span class="phn">Fase 1</span><span class="phdate">03–07/ago · 7 decisões</span></div>
+    <h2>Fundação: o que construir em cima do quê</h2>
+    <p class="phsub">A primeira semana decidiu o terreno. Nenhuma delas foi revista desde então — são a base de tudo que veio depois.</p>
+    <div class="card">
+      <div class="d"><div><div class="dt">Forkar o Ansvisor como base da Ultravis</div><div class="dd">Licença permissiva permite produto comercial fechado; construir do zero custaria meses sem diferencial.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Fork disciplinado: núcleo intocado, features aditivas</div><div class="dd">Toda novidade é rota, componente ou migration nova (≥00034), para manter viável o sync com o projeto original.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Infra: app sem servidor + worker sempre ligado + banco gerenciado</div><div class="dd">Rastreamento leva horas e recebe webhooks — serverless não sustenta. DNS sem proxy para não interferir na coleta.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Português como idioma padrão, sem prefixo na URL</div><div class="dd">Mercado brasileiro primeiro; inglês vive em /en. Toda interface nova nasce nos dois idiomas — virou regra da casa.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Coletor em modo webhook, não em espera ativa</div><div class="dd">Deploy no meio de uma execução matava o run inteiro. Com callback assíncrono, o dado pago sobrevive a reinício.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Censo semanal, não diário</div><div class="dd">Custo cai 59% mantendo a leitura útil: censo semanal completo em vez de pulso diário.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Modo nuvem desligado até haver monetização</div><div class="dd">Cobrança e limites de plano degradariam a prova de conceito antes da hora.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+    </div>
+  </div>
+
+  <!-- FASE 2 -->
+  <div class="ph">
+    <div class="phhead"><span class="phn">Fase 2</span><span class="phdate">08/ago · 17 decisões</span></div>
+    <h2>O dia que definiu o produto</h2>
+    <p class="phsub">O dia mais denso da história do projeto. Definiu o diferencial, o que não fazer, o preço e a operação — e quase tudo decidido aqui continua de pé.</p>
+    <div class="card">
+      <div class="d"><div><div class="dt">Índice de Citabilidade como diferencial central</div><div class="dd">Seis dimensões, três zonas de ação. Ninguém no mercado tinha produtizado um score acionável — espaço em branco validado no benchmarking.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Índice parcial honesto: só mostrar o que é medido</div><div class="dd">Confiança acima de métrica de vaidade. Princípio que voltaria a decidir sozinho várias vezes depois.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Migrar para repositório privado</div><div class="dd">As features não são públicas, apesar da base aberta. O repositório antigo foi apagado — decisão que cobraria seu preço nove dias depois.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Quatro "nãos" que protegeram o foco</div><div class="dd">Não assinar mais uma ferramenta de dados · não dar seletor de modelo ao usuário · não fazer execução agêntica agora · não competir por preço.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Custos e consumo restritos ao operador</div><div class="dd">Dado de margem não é do cliente. Três camadas de proteção — decisão reafirmada pelo sócio onze dias depois, sem saber que já existia.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Painel de operação com autenticação própria</div><div class="dd">A operação não depende do login do produto; tabelas operacionais ficam invisíveis ao aplicativo por segurança de linha.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Confirmação obrigatória antes de rodar tudo</div><div class="dd">A coleta cobra no despacho e é irreversível — 264 execuções acidentais numa marca de teste ensinaram isso.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Superfície programática (MCP + API) no app, não no worker</div><div class="dd">Torna a plataforma plugável em qualquer IA — diferencial de distribuição, não só de produto.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+    </div>
+    <p class="note">Também neste dia: login social só com Google (o público não é de desenvolvedores), staging pelos previews em vez de ambiente isolado, faixa de preço preliminar, modelos de sugestão trocados por indisponibilidade de crédito, e o monitoramento indo para o painel de operação em vez da tela de admin.</p>
+  </div>
+
+  <!-- FASE 3 -->
+  <div class="ph">
+    <div class="phhead"><span class="phn">Fase 3</span><span class="phdate">10–12/ago · 25 decisões</span></div>
+    <h2>O primeiro cliente e a disciplina que ele impôs</h2>
+    <p class="phsub">O cliente piloto entrou e nada funcionou como esperado. As decisões desta fase são quase todas sobre confiança: dado correto, sistema vigiado, rastro escrito.</p>
+
+    <div class="turn">
+      <div class="tl">Ponto de virada</div>
+      <p><b>O caso do nome que a IA nunca escreve.</b> O cliente aparecia com zero menções em 184 respostas. A hipótese fácil era chave de API quebrada; o diagnóstico real foi outro: o nome corporativo cadastrado não é como as pessoas — e as IAs — escrevem a marca. A decisão que saiu daí vale mais que a correção: <b>o produto se adapta à marca, não o contrário</b>. Nasceram os apelidos de marca e o reprocessamento do histórico sem gastar um centavo de coleta.</p>
+    </div>
+
+    <div class="card">
+      <div class="d"><div><div class="dt">Vigia próprio dentro do servidor, em vez de ferramenta de prateleira</div><div class="dd">Monitor genérico não entende degradação de domínio — "sentimento 100% neutro" significa provedor caindo em fallback, e só quem conhece o negócio sabe disso.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Auditoria de código diária como condição do plano de monitoramento</div><div class="dd">Vigilância contínua virou pré-requisito, não item de backlog.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Log de decisões obrigatório, no mesmo PR do trabalho</div><div class="dd">A regra que tornou possível este documento. Rastreabilidade total exigida pelo dono.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Arquivo-morto de marcas: exclusão nunca perde dados</div><div class="dd">Apagar uma marca empacota tudo antes. Ideia do dono, testada em produção — três marcas apagadas depois, com 1.570 resultados preservados.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Nenhuma marca existe sem usuário ativo por trás</div><div class="dd">Marca órfã só queima crédito sem ninguém olhando. Virou check automático a cada 15 minutos.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Página de uma visão só (STATUS) para o dono</div><div class="dd">Volume de mudanças estava grande demais para acompanhar — um lugar só para olhar quando estiver perdido.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Alertas por e-mail como canal principal, webhook opcional</div><div class="dd">Sem ferramenta de time montada ainda: e-mail resolve enquanto há poucos clientes. Segue desligado até existir endereço dedicado.</div></div><div class="tagw"><span class="tag pen">aguarda você</span></div></div>
+      <div class="d"><div><div class="dt">Termos e privacidade publicados em versão preliminar genérica</div><div class="dd">Melhor um texto honesto e sem nomes do que um link morto onde a lei exige informação.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+    </div>
+  </div>
+
+  <!-- FASE 4 -->
+  <div class="ph">
+    <div class="phhead"><span class="phn">Fase 4</span><span class="phdate">13–15/ago · 9 decisões</span></div>
+    <h2>A reunião que redefiniu o core</h2>
+    <p class="phsub">A primeira sessão de método com o sócio mudou o produto por dentro — e criou os princípios que continuam decidindo até hoje.</p>
+
+    <div class="turn">
+      <div class="tl">Ponto de virada</div>
+      <p><b>"A matemática fecha na frente do cliente."</b> A reunião de 14/ago trocou nota parcial por nota completa (as seis dimensões sempre pontuam), exigiu que toda nota responda <b>por quê · onde olhamos · o que fazer</b>, e mandou abrir a fórmula na tela. Desse princípio saiu, cinco dias depois, o vigia de consistência — porque conta que fecha na frente do cliente precisa ser conta que fecha sempre.</p>
+    </div>
+
+    <div class="card">
+      <div class="d"><div><div class="dt">Réguas calibradas com dado real, não com palpite</div><div class="dd">A régua da citação própria ("10% das respostas = nota 100") saiu de 30.958 citações medidas em seis marcas — máximo real observado: 7,4%.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Avaliações exigem checagem direta — citação não serve de proxy</div><div class="dd">As IAs quase não citam plataformas de review (0 a 9 por censo). Única dimensão que precisou de coleta nova.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Novidades do projeto original entram por funil, com decisão conjunta</div><div class="dd">Um vigia varre o upstream a cada três dias; nada entra em desenvolvimento sem priorização registrada.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Fontes pesquisadas sempre visíveis — inclusive o que não lemos</div><div class="dd">Declarar a ausência é parte da medição. Princípio que reapareceria em todas as telas seguintes.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+    </div>
+  </div>
+
+  <!-- FASE 5 -->
+  <div class="ph">
+    <div class="phhead"><span class="phn">Fase 5</span><span class="phdate">17/ago · 7 decisões</span></div>
+    <h2>Dois índices, e o incidente que ninguém viu</h2>
+    <p class="phsub">Os documentos de lógica do sócio chegaram e resolveram a maior ambiguidade do produto. No mesmo dia, descobrimos que o site estava congelado havia nove dias.</p>
+
+    <div class="turn">
+      <div class="tl">Decisão estruturante</div>
+      <p><b>Dois índices que nunca se somam.</b> A Citabilidade mede a alavanca — o que você constrói. O Score de Visibilidade mede o resultado — como a IA te mostra. Somar os dois seria contar causa e efeito na mesma conta. Um dirige o outro, com semanas de defasagem. É a espinha dorsal do produto até hoje.</p>
+    </div>
+
+    <div class="card">
+      <div class="d"><div><div class="dt">Faixas de nota em quintis, compartilhadas pelos dois índices</div><div class="dd">Substituíram as faixas anteriores por alinhamento com as réguas do documento de lógica.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Pesos são um ponto de partida, não uma verdade</div><div class="dd">Ficam calibráveis pelo painel, sem deploy — e serão recalibrados por regressão quando houver histórico suficiente.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Site de produção congelado por nove dias — e o vigia que nasceu disso</div><div class="dd">Apagar o repositório antigo matou silenciosamente a integração de deploy: nenhum merge chegava ao ar. Correção imediata + check automático que compara o que está no ar com o que deveria estar.</div></div><div class="tagw"><span class="tag lic">lição cara</span></div></div>
+      <div class="d"><div><div class="dt">Botão "Parar" que para de verdade</div><div class="dd">O cancelamento marcava o job mas o trabalho seguia em segundo plano. Correção pontual e documentada no núcleo — a exceção permitida pela regra do fork.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+    </div>
+  </div>
+
+  <!-- FASE 6 -->
+  <div class="ph">
+    <div class="phhead"><span class="phn">Fase 6</span><span class="phdate">18/ago · 12 decisões</span></div>
+    <h2>Da estimativa à medição</h2>
+    <p class="phsub">O dia em que três dimensões deixaram de ser proxy e viraram medição direta — e em que uma conta errada apareceu na tela do sócio.</p>
+
+    <div class="turn">
+      <div class="tl">Decisão do dono, em sessão conjunta</div>
+      <p><b>Posição é ordem de aparição, não volume de menções.</b> "A posição deve capturar quem foi mencionado primeiro, segundo, terceiro — não quantas menções." A dimensão foi reescrita: cada resposta é rankeada pela ordem da primeira menção no texto, com o pódio valendo 100 · 60 · 30 · 0. O histórico inteiro foi recalculado do texto já salvo, sem gastar coleta nova.</p>
+    </div>
+
+    <div class="card">
+      <div class="d"><div><div class="dt">Coletor direto de avaliações no ar</div><div class="dd">Quatro tentativas de mecanismo até funcionar. Primeiro resultado real: o cliente com 1,4★ e 709 avaliações numa plataforma — reputação que a IA encontra.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Varredura do site inteiro, não de uma página</div><div class="dd">Até dez páginas-chave por marca, mensal — estrutura de site muda devagar, e proxy custa dinheiro.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Gráfico acima de 100% — o bug que virou produto</div><div class="dd">Um concorrente cadastrado duas vezes fazia o gráfico somar registros homônimos: barra a 178%. Correção dupla (dado + código) e a semente do vigia de consistência.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Créditos de proxy esgotados por uma varredura minha</div><div class="dd">Retry residencial custa ~25 créditos por requisição; ninguém conferiu antes de ligar. Regra nova: recurso pago tem estimativa de custo <b>antes</b> do deploy.</div></div><div class="tagw"><span class="tag lic">lição cara</span></div></div>
+      <div class="d"><div><div class="dt">Motores organizados em pacotes comerciais (4 · 6 · 9)</div><div class="dd">Configuração versionada em código, não em planilha solta — base do futuro controle por plano.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+    </div>
+  </div>
+
+  <!-- FASE 7 -->
+  <div class="ph">
+    <div class="phhead"><span class="phn">Fase 7</span><span class="phdate">19/ago · 13 decisões</span></div>
+    <h2>Taxonomia, vigilância e o rastro escrito</h2>
+    <p class="phsub">A sessão de trabalho mais longa com o sócio virou produto no mesmo dia: treze decisões, treze PRs, tudo no ar antes da noite.</p>
+
+    <div class="turn">
+      <div class="tl">Decisão de linguagem</div>
+      <p><b>Cada palavra significa uma coisa só.</b> "Citação" virou <b>Leitura</b> — como suas fontes proprietárias são lidas pela IA. "Posição" virou <b>Ranking</b>. As zonas do índice viraram a matriz <b>você controla · você ativa · você conquista</b>. Autoridade e Acurácia saíram do Score até existir medição, e o resumo passou a mostrar três números sem nota ponderada.</p>
+    </div>
+
+    <div class="card">
+      <div class="d"><div><div class="dt">Vigia de consistência: dez invariantes a cada 15 minutos</div><div class="dd">Nascido dos cinco bugs pegos à mão numa semana. Regra fixa pega no dia do cadastro o que hoje só aparece quando alguém estranha um gráfico.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">"O que fazer" nasce do que foi lido do site</div><div class="dd">Não é gerar artefato — é ler o site, comparar com as boas práticas e indicar: "encontramos X, falta Y". Correção de rumo do dono sobre a minha primeira leitura.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">O auditor verifica o executado; não prescreve</div><div class="dd">Papel definido pelo dono. Na primeira aplicação: nove achados, seis corrigidos no mesmo dia, três adiados com registro.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Ata de decisões entre os sócios, separada do log técnico</div><div class="dd">Quatro sessões, ~30 decisões com evidência (minuto do transcript, slide do deck) e status de implementação.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+      <div class="d"><div><div class="dt">Tudo que chega por mensagem entra no repositório</div><div class="dd">Treze arquivos dos sócios versionados com índice: decks, transcrições, planilhas, mockups. Material de referência não mora em anexo de conversa.</div></div><div class="tagw"><span class="tag vig">em vigor</span></div></div>
+    </div>
+  </div>
+
+  <!-- MUDANÇAS DE IDEIA -->
+  <h3>As decisões que mudaram pelo caminho</h3>
+  <p class="note">Nenhuma delas foi erro — foram etapas. Mostrar a substituição é parte do rastro: quem lê o produto hoje entende por que ele é assim.</p>
+  <div class="cap">Tabela · o que virou o quê</div>
+  <table>
+    <thead><tr><th style="width:210px">Tema</th><th>Como começou</th><th>Como está</th></tr></thead>
+    <tbody>
+      <tr><td>Nome do índice</td><td>"Índice de Citabilidade" (08/ago) → "Índice de Visibilidade" (14/ago, por ser mais simples)</td><td>Dois índices com nomes distintos (17/ago): Citabilidade é a alavanca, Score de Visibilidade é o resultado. O nome "citabilidade" ainda está em revisão pelo sócio.</td></tr>
+      <tr><td>Faixas de nota</td><td>Cinco faixas irregulares (0-30 · 31-50 …)</td><td>Quintis (0-20 · 21-40 · 41-60 · 61-80 · 81-100), iguais nos dois índices</td></tr>
+      <tr><td>Dimensão Posição</td><td>Fração de concorrentes superados por volume de menções</td><td>Ordem de aparição no texto, com pódio 100 · 60 · 30 · 0 — premissa do dono</td></tr>
+      <tr><td>Composição do Score</td><td>Seis dimensões (incluindo Autoridade e Acurácia)</td><td>Quatro dimensões medidas; as duas voltam quando existir juiz por LLM</td></tr>
+      <tr><td>Coleta de avaliações</td><td>Requisição direta → busca em SERP → proxy comum → proxy residencial</td><td>Proxy comum, com o residencial desligado por custo; uma plataforma segue declarada como não verificável</td></tr>
+      <tr><td>Resumo de visibilidade</td><td>Um índice percentual único na tela inicial</td><td>Três números sem nota ponderada: presença, ranking médio e sentimento</td></tr>
+      <tr><td>Nome da marca do cliente</td><td>Sugestão de renomear a marca para casar com o parser</td><td>Apelidos de marca — o produto se adapta à marca, nunca o contrário</td></tr>
+    </tbody>
+  </table>
+
+  <!-- PRINCÍPIOS -->
+  <h3>Os princípios que essas 90 decisões formaram</h3>
+  <p class="note">Cada um apareceu primeiro como decisão isolada e depois passou a decidir sozinho, em situações que ninguém tinha previsto.</p>
+  <div class="card">
+    <div class="d"><div><div class="dt">A tela só mostra o que mede</div><div class="dd">De "índice parcial honesto" (08/ago) até tirar Autoridade e Acurácia do Score e declarar "não coletamos os dados" (19/ago).</div></div><div class="tagw"><span class="tag vig">princípio</span></div></div>
+    <div class="d"><div><div class="dt">A matemática fecha na frente do cliente</div><div class="dd">Da fórmula aberta na tela (15/ago) ao vigia que confere as contas a cada 15 minutos (19/ago).</div></div><div class="tagw"><span class="tag vig">princípio</span></div></div>
+    <div class="d"><div><div class="dt">O produto se adapta ao cliente</div><div class="dd">Apelidos de marca em vez de renomear o cliente; leitura do site real em vez de formulário; nada entra sem confirmação humana.</div></div><div class="tagw"><span class="tag vig">princípio</span></div></div>
+    <div class="d"><div><div class="dt">Decisão sem registro não existe</div><div class="dd">Log no mesmo PR, ata das sessões com o sócio, material recebido versionado — este documento é consequência da regra.</div></div><div class="tagw"><span class="tag vig">princípio</span></div></div>
+    <div class="d"><div><div class="dt">O que custa dinheiro se estima antes de ligar</div><div class="dd">Lição dos créditos de proxy queimados; hoje vale para qualquer recurso pago novo.</div></div><div class="tagw"><span class="tag vig">princípio</span></div></div>
+    <div class="d"><div><div class="dt">Silêncio é falha: o sistema avisa em vez de esperar alguém notar</div><div class="dd">Nove dias de site congelado e uma madrugada de sentimento em fallback ensinaram — daí os vigias e a auditoria diária.</div></div><div class="tagw"><span class="tag vig">princípio</span></div></div>
+  </div>
+
+  <!-- ABERTO -->
+  <h3>O que segue em aberto</h3>
+  <div class="cap">Tabela · pendências com dono definido</div>
+  <table>
+    <thead><tr><th style="width:250px">Pendência</th><th style="width:120px">Com quem</th><th>O que destrava</th></tr></thead>
+    <tbody>
+      <tr><td>Credencial da Anthropic no servidor</td><td>Jhonata</td><td>Liga o Claude como motor de coleta e a camada de LLM do vigia de consistência</td></tr>
+      <tr><td>Chamado ao fornecedor de coleta (Grok)</td><td>Jhonata</td><td>Nono motor do pacote maior; o projeto original já publicou uma proteção para o mesmo problema</td></tr>
+      <tr><td>Acesso administrativo do sócio</td><td>Jhonata</td><td>Painel de custos e consumo, que nunca aparece para o cliente</td></tr>
+      <tr><td>E-mail dedicado de operação</td><td>Jhonata</td><td>Liga o envio dos alertas do vigia (hoje só registra)</td></tr>
+      <tr><td>Nome do índice de citabilidade</td><td>Igor</td><td>Fecha a taxonomia que o resto do produto já adotou</td></tr>
+      <tr><td>Régua do sentimento (100 · 50 · 0)</td><td>Igor + Jhonata</td><td>Provisória até haver censos suficientes para validar</td></tr>
+      <tr><td>Matriz de onboarding</td><td>adiado</td><td>Material já versionado; a tela fica para depois, por decisão do dono</td></tr>
+    </tbody>
+  </table>
+
+  <div class="foot">
+    <b>FONTE</b> — <code>DECISOES.md</code> (90 linhas, 03 a 19/ago/2026) e <code>estrategia/ata-decisoes-jhonata-igor.md</code>, ambos versionados no repositório.<br>
+    MÉTODO — cada decisão do log foi classificada em fase, marcada como em vigor, superada, lição ou pendência, e agrupada pelo que ela decidiu. Nenhuma decisão foi omitida por conveniência; as substituídas estão na tabela "o que virou o quê".<br>
+    ATUALIZAÇÃO — este documento é uma leitura de um momento. O log continua sendo a fonte: decisão nova entra lá, no mesmo PR do trabalho.
+  </div>
+
+</div>

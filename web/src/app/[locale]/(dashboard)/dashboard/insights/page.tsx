@@ -444,7 +444,9 @@ function FilterBar({
       {filters.datePreset === 'custom' && (
         <>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">From</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('dateFrom')}
+            </label>
             <Input
               type="date"
               value={filters.dateFrom}
@@ -453,7 +455,9 @@ function FilterBar({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">To</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('dateTo')}
+            </label>
             <Input
               type="date"
               value={filters.dateTo}
@@ -981,7 +985,7 @@ export default function InsightsPage() {
             setActiveJobId(null);
             setIsRunning(false);
             setJobStatus(null);
-            toast.success(`Analysis complete — ${status.result?.resultCount ?? 0} results saved.`);
+            toast.success(t('analysisComplete', { count: status.result?.resultCount ?? 0 }));
             loadData(undefined, { silent: true });
             break;
           }

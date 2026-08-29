@@ -137,7 +137,19 @@
       "llmsTxt": "llms.txt ausente na raiz do site — o Índice de Citabilidade gera o arquivo pronto (botão \"Copiar llms.txt pronto\").",
       "openGraph": "Faltam meta tags sociais: {missing} — IAs e prévias de link usam esses campos para entender e apresentar a página.",
       "robotsMissing": "Sem robots.txt — os bots de IA entram por padrão, mas declare o acesso explicitamente (GPTBot, ClaudeBot, PerplexityBot…)."
-    }
+    },
+    "copied": "Copiado",
+    "copyFailed": "Falha ao copiar",
+    "copyDraft": "Copiar rascunho",
+    "finding": "Constatação:",
+    "why": "Por quê:",
+    "recommendedFix": "Correção recomendada:",
+    "fix": "Correção:",
+    "aiRecommendations": "Recomendações de IA",
+    "signals": "Sinais",
+    "impactHigh": "impacto alto",
+    "impactMedium": "impacto médio",
+    "impactLow": "impacto baixo"
   },
   "auth": {
     "signIn": "Entrar",
@@ -276,7 +288,6 @@
     "exportCsv": "Exportar CSV",
     "testSingle": "Testar Prompt Único",
     "runAll": "Rodar Tudo",
-    "visibilityRateTitle": "Índice de Visibilidade",
     "trackedPromptsTitle": "Prompts Rastreados",
     "visibilityTooltip": "Parcela dos prompts rastreados em que sua marca apareceu em pelo menos uma resposta de IA, nos filtros atuais.",
     "trackedTooltip": "Prompts distintos que produziram resultados no período e filtros selecionados. Um prompt pode se desdobrar em micro-perguntas (fan-out) — por isso o número de respostas coletadas é maior que o de prompts. A cota abaixo é o uso atual da organização e não muda com o período.",
@@ -359,7 +370,14 @@
     "sentimentNeutral": "Neutro",
     "sentimentNegative": "Negativo",
     "sentimentCounts": "{pos} positivas · {neu} neutras · {neg} negativas",
-    "upgrade": "Fazer upgrade"
+    "upgrade": "Fazer upgrade",
+    "dateFrom": "De",
+    "dateTo": "Até",
+    "youBadge": "VOCÊ",
+    "showAll": "Mostrar todas ({count})",
+    "showLess": "Mostrar menos",
+    "voiceShareTooltip": "{sov}% SoV · {share}% das menções",
+    "analysisComplete": "Análise concluída — {count} resultados salvos."
   },
   "topics": {
     "addTopic": "Adicionar Tópico",
@@ -1293,7 +1311,7 @@
       "contributionAria": "Barra de contribuição de cada dimensão para o índice, em pontos",
       "pts": "{pts} pts",
       "evolutionTitle": "Evolução — censos semanais",
-      "evolutionAria": "Evolução do Índice de Visibilidade ao longo das semanas",
+      "evolutionAria": "Evolução do Índice de Citabilidade ao longo das semanas",
       "evolutionEmpty": "A evolução aparece a partir do segundo censo semanal."
     },
     "zones": {

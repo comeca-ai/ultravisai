@@ -109,10 +109,17 @@ export default function VisibilityScorePage() {
   }, [dimScores]);
 
   const dec = locale === 'en' ? '.' : ',';
+  // A conta impressa usa os pesos EFETIVOS (renormalizados sobre as dimensões
+  // medidas), não os brutos do registro — senão a equação não soma o valor
+  // exibido (revisão 29/ago: 0,20×31+0,20×48+0,15×57+0,10×64 = 30,75 ≠ 47).
+  // Com coeficientes arredondados a 2 casas, usa ≈ quando a soma não bate exata.
   const formula = useMemo(() => {
     if (!score) return '';
-    const terms = score.parts.map((p) => `0${dec}${String(p.weight).padStart(2, '0')}×${p.score}`);
-    return `${terms.join(' + ')} = ${score.value}`;
+    const coeffs = score.parts.map((p) => Math.round((p.weight / score.totalWeight) * 100) / 100);
+    const terms = coeffs.map((c, i) => `${c.toFixed(2).replace('.', dec)}×${score.parts[i].score}`);
+    const printedSum = coeffs.reduce((s, c, i) => s + c * score.parts[i].score, 0);
+    const sign = Math.round(printedSum) === score.value ? '=' : '≈';
+    return `${terms.join(' + ')} ${sign} ${score.value}`;
   }, [score, dec]);
 
   const hasData = (data?.totals.results ?? 0) > 0;

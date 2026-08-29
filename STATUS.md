@@ -3,16 +3,16 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 19/ago/2026.**
+> `BACKLOG.md` (o que vem). **Atualizado: 29/ago/2026.**
 
 ## A aplicação está no ar e saudável ✅
 
 | Camada | Estado |
 |---|---|
-| Site + app (Vercel, ultravis.ai) | ✅ No ar e ATUALIZADO (17/ago) — esteve congelado em build de 8/ago por integração GitHub quebrada na migração do repo; reconectada em 17/ago |
+| Site + app (Vercel, ultravis.ai) | ✅ No ar com o código de 19/ago (#94); a leva 26–29/ago espera o merge do PR #95 |
 | Server de rastreamento (Railway) | ✅ No ar (último deploy SUCCESS, 18/ago) |
-| Banco (Supabase) | ✅ Ok — 44 migrations, RLS ativo, **arquivo-morto de marcas** ligado |
-| Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 10 invariantes de consistência** (19/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham — a família dos 5 bugs pegos à mão na semana) — alertas por e-mail **desligados** até você configurar um e-mail dedicado |
+| Banco (Supabase) | ✅ Ok — 43 migrations (numeradas até 00044; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado |
+| Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 11 invariantes de consistência** (19/ago + 26/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham, domínios quebrados/com caminho) — 2 alertas que gritavam em falso corrigidos em 26/ago (**na branch, sobem com o PR #95**); alertas por e-mail **desligados** até você configurar um e-mail dedicado |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |
 
 ## O cliente piloto (Polar) — números reais
@@ -21,7 +21,16 @@
 - Aparece em **10 de 15 prompts** (Índice de Visibilidade 66,7%) · sentimento: 27 positivos, 2 negativos
 - Era tudo zero por bug de matching de nome → resolvido com **aliases de marca** + reprocessamento (10/ago)
 
-## O que aconteceu nas últimas 48h (resumão)
+## O que aconteceu desde 19/ago (resumão)
+
+0. **26–29/ago — verificação, revisão geral e limpeza (PR #95, draft, NÃO deployado de propósito):**
+   (a) **Verificação de produção 26/ago** (`docs/verificacao-26ago.html`): 21/21 entregas conferidas na main, fórmulas reconciliadas SQL→action→tela; lendo os logs 22–26/ago descobrimos que **2 alertas do vigia gritavam em falso** — corrigidos (`sentiment-degraded` agora só conta respostas COM menção; `bad-domains` virou `broken-domains`+`pathed-domains`);
+   (b) **Retrospectiva das 90 decisões** (`docs/retrospectiva-decisoes.html`) e **skill material-visual** empacotada (`estrategia/skills/`) — padrão dos materiais visuais com carimbo vNN;
+   (c) **Revisão geral de 29/ago** (pedido do dono): 167 pedidos extraídos de transcrição+decks+reuniões cruzados com o código + 87 contas conferidas em todas as camadas — relatório em `docs/revisao-geral-29ago-v1.html`; consertados no ato: **fórmula do hero do Score** (imprimia pesos brutos, mas o valor usa renormalizados — a equação não somava), STATUS/contagens defasadas, última string "Ansvisor" visível (en), aria da sparkline com nome antigo do índice, e **~25 strings hardcoded em inglês** nas telas Insights e Auditoria (agora i18n nos 2 idiomas);
+   (d) **Bloco "Recomendações" removido do fim do Insights** (pedido do dono 29/ago).
+   ⚠️ Produção ainda roda o código de 19/ago: os fixes acima só valem depois do merge do PR #95.
+
+## O que aconteceu até 19/ago
 
 1. **19/ago — o dia da reunião Igor×Jhonata virou produto (11 PRs, #82–#92):**
    (a) **Vigia de consistência** no watchdog — 10 invariantes (duplicatas, marcas irmãs, motor calado, contas que não fecham, recontagem independente), nascidos dos 5 bugs pegos à mão na semana; auditor verificou o executado e 6 achados da revisão completa foram corrigidos no mesmo dia;

@@ -263,12 +263,6 @@
     "allTopics": "Todos os Tópicos",
     "allRegions": "Todas as Regiões",
     "allPlatforms": "Todas as Plataformas",
-    "recommendations": "Recomendações",
-    "recommendationsSub": "Ideias das suas análises salvas — independentes dos filtros de data acima.",
-    "topicOpportunities": "Oportunidades de Tópicos",
-    "promptOpportunities": "Oportunidades de Prompts",
-    "topicOppEmpty": "Ainda sem clusters de tópicos. Analise os volumes dos seus prompts para revelar os temas com mais demanda de busca em IA.",
-    "promptOppEmpty": "Ainda sem sugestões de prompts. Gere ideias de prompts com IA a partir da sua marca e das citações dos concorrentes.",
     "noCompetitorsTitle": "Nenhum concorrente rastreado ainda",
     "noCompetitorsBody": "Adicione concorrentes para ver como você se compara nas respostas de IA.",
     "headToHead": "Comparação Direta",
@@ -2238,25 +2232,41 @@
           "num": "01",
           "title": "Respostas monitoradas",
           "body": "O que cada modelo diz da sua marca, com que tom e ao lado de quais concorrentes — atualizado todo dia.",
-          "tags": ["sentimento", "share of answer", "concorrentes"]
+          "tags": [
+            "sentimento",
+            "share of answer",
+            "concorrentes"
+          ]
         },
         {
           "num": "02",
           "title": "Perguntas que importam",
           "body": "As perguntas reais que levam à sua categoria, com volume estimado e o custo de você não estar nelas.",
-          "tags": ["volume de prompts", "intenção", "priorização"]
+          "tags": [
+            "volume de prompts",
+            "intenção",
+            "priorização"
+          ]
         },
         {
           "num": "03",
           "title": "Citações e fontes",
           "body": "Quais páginas e veículos os modelos citam, e o que precisa existir para que citem você.",
-          "tags": ["fontes", "autoridade", "cobertura"]
+          "tags": [
+            "fontes",
+            "autoridade",
+            "cobertura"
+          ]
         },
         {
           "num": "04",
           "title": "Da leitura à ação",
           "body": "Cada lacuna vira um briefing pronto: o que escrever, onde publicar, o que corrigir no site.",
-          "tags": ["briefings", "site audit", "MCP"]
+          "tags": [
+            "briefings",
+            "site audit",
+            "MCP"
+          ]
         }
       ]
     },
@@ -2694,7 +2704,9 @@
         },
         {
           "h": "12. Lei aplicável",
-          "p": ["Estes Termos são regidos pelas leis da República Federativa do Brasil."]
+          "p": [
+            "Estes Termos são regidos pelas leis da República Federativa do Brasil."
+          ]
         },
         {
           "h": "13. Contato",

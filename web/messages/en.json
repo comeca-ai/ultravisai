@@ -263,12 +263,6 @@
     "allTopics": "All Topics",
     "allRegions": "All Regions",
     "allPlatforms": "All Platforms",
-    "recommendations": "Recommendations",
-    "recommendationsSub": "Ideas from your stored analyses — independent of the date filters above.",
-    "topicOpportunities": "Topic Opportunities",
-    "promptOpportunities": "Prompt Opportunities",
-    "topicOppEmpty": "No topic clusters yet. Analyze your prompt volumes to surface the themes with the most AI search demand.",
-    "promptOppEmpty": "No prompt suggestions stored yet. Generate AI prompt ideas based on your brand and competitor citations.",
     "noCompetitorsTitle": "No competitors tracked yet",
     "noCompetitorsBody": "Add competitors to see how you compare in AI answers.",
     "headToHead": "Head-to-Head Comparison",
@@ -2238,25 +2232,41 @@
           "num": "01",
           "title": "Monitored answers",
           "body": "What each model says about your brand, in what tone, and next to which competitors — refreshed daily.",
-          "tags": ["sentiment", "share of answer", "competitors"]
+          "tags": [
+            "sentiment",
+            "share of answer",
+            "competitors"
+          ]
         },
         {
           "num": "02",
           "title": "Questions that matter",
           "body": "The real questions that lead to your category, with estimated volume and the cost of not being in them.",
-          "tags": ["prompt volume", "intent", "prioritization"]
+          "tags": [
+            "prompt volume",
+            "intent",
+            "prioritization"
+          ]
         },
         {
           "num": "03",
           "title": "Citations and sources",
           "body": "Which pages and outlets the models cite, and what needs to exist for them to cite you.",
-          "tags": ["sources", "authority", "coverage"]
+          "tags": [
+            "sources",
+            "authority",
+            "coverage"
+          ]
         },
         {
           "num": "04",
           "title": "From reading to action",
           "body": "Every gap becomes a ready brief: what to write, where to publish, what to fix on your site.",
-          "tags": ["briefs", "site audit", "MCP"]
+          "tags": [
+            "briefs",
+            "site audit",
+            "MCP"
+          ]
         }
       ]
     },
@@ -2349,7 +2359,12 @@
           "price": "R$ 390",
           "per": "/mo",
           "body": "To start measuring and understanding the current picture.",
-          "items": ["150 monitored prompts", "4 answer engines", "Weekly report", "1 user"],
+          "items": [
+            "150 monitored prompts",
+            "4 answer engines",
+            "Weekly report",
+            "1 user"
+          ],
           "cta": "Create account",
           "featured": false
         },
@@ -2689,7 +2704,9 @@
         },
         {
           "h": "12. Governing law",
-          "p": ["These Terms are governed by the laws of the Federative Republic of Brazil."]
+          "p": [
+            "These Terms are governed by the laws of the Federative Republic of Brazil."
+          ]
         },
         {
           "h": "13. Contact",

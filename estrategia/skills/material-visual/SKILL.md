@@ -36,7 +36,7 @@ Um material visual bem feito faz uma coisa: a pessoa abre, entende sozinha, e co
 
 **5. Confira renderizando** — `scripts/conferir_render.sh material.html`. Isso gera um PNG e você olha. Texto que encosta na borda do card, rótulo cortado, legenda que sumiu: só aparecem no render. Este passo já pegou erro em três de cinco materiais feitos com este padrão; não pule.
 
-**6. Entregue nos dois formatos**: publique como artifact (link que a pessoa abre) e mande o arquivo. Se o material documenta o projeto, versione junto — material de referência não deve morar em anexo de conversa.
+**6. Entregue nos dois formatos e carimbe a versão**: publique como artifact (link que a pessoa abre) e mande o arquivo. Se o material documenta o projeto, ele vai pro git — material de referência não deve morar em anexo de conversa. E a versão aparece nos dois lugares iguais: um carimbo `vNN` na própria página (no eyebrow da capa e no rodapé de método, junto da data) e o mesmo `vNN` no nome do arquivo ou na mensagem de commit. Quando regenerar o material com dados novos, suba a versão — quem tem o v2 aberto precisa perceber sozinho que existe um v3. Página sem carimbo de versão e arquivo sem versão no git são o mesmo erro: ninguém sabe qual é o vigente.
 
 ## Regras de forma que economizam retrabalho
 
@@ -44,7 +44,7 @@ Um material visual bem feito faz uma coisa: a pessoa abre, entende sozinha, e co
 - **Número grande = o que a pessoa repete.** Se o pedido é "presença de 22,2%", o destaque é `22,2%` e o "12 de 54 prompts" fica no subtítulo. Inverta assim que a pessoa disser qual é o número que importa.
 - **Cor tem significado, não decoração.** Um acento só, usado para o que exige ação; verde para o que está saudável; âmbar para decisão; cinza para o resto. Se tudo é colorido, nada é.
 - **Tabela larga rola dentro do próprio bloco** (`overflow-x:auto`), nunca empurra a página.
-- **Rodapé de método** em toda entrega: de onde vieram os dados, qual a janela, o que é aproximação e o que ficou de fora. Três linhas resolvem.
+- **Rodapé de método** em toda entrega: de onde vieram os dados, qual a janela, o que é aproximação e o que ficou de fora — e a versão (`vNN` + data), a mesma do git. Três linhas resolvem.
 
 ## Quando vier um material de referência
 

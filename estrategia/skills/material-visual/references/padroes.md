@@ -26,7 +26,7 @@ ele vai adivinhar errado.
 
 ```html
 <header class="cover"><div class="wrap">
-  <p class="eyebrow">Ultravis · painel de visibilidade</p>
+  <p class="eyebrow">Ultravis · painel de visibilidade · v1</p>
   <h1>Polar</h1>
   <p class="covsub">Como a marca aparece nas respostas de IA — 54 prompts,
      3 motores, janela de 26/jul a 26/ago de 2026.
@@ -35,7 +35,8 @@ ele vai adivinhar errado.
 ```
 
 A capa precisa dizer **de quando são os dados**, não só quando o arquivo foi
-gerado. Quem abre isso três semanas depois não tem como saber a diferença.
+gerado — quem abre isso três semanas depois não tem como saber a diferença. E o
+`vNN` do eyebrow é o mesmo do git: regenerou com dados novos, sobe a versão.
 
 ---
 
@@ -231,7 +232,7 @@ conferir sem te perguntar.
      entram no cálculo.</p>
   <p><b>Sentimento</b> classificado por LLM em positivo/neutro/negativo,
      calculado só sobre respostas com menção.</p>
-  <p>Janela 26/jul–26/ago/2026 · 4 862 respostas · gerado em 26/ago/2026.</p>
+  <p>v1 · janela 26/jul–26/ago/2026 · 4 862 respostas · gerado em 26/ago/2026.</p>
 </footer>
 ```
 

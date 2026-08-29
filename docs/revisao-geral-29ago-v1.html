@@ -1,0 +1,291 @@
+<title>Revisão Geral Ultravis</title>
+<style>/* Estilo da casa — copie para dentro de <style> no material.
+   Papel + serifada nos títulos + monoespaçada nos números.
+   Fontes via Google Fonts (único host externo permitido):
+   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"> */
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5; --mut:#B6B2A4;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;   /* saudável */
+  --amber:#B8741C; --amberSoft:#FBF1DF; /* decisão / atenção */
+  --red:#C0492A; --redSoft:#FBEEEA;     /* exige ação */
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:0 30px}
+
+/* capa e faixa de instrumentação */
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:48px 0 38px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2.2rem;letter-spacing:-.02em;margin-top:13px;text-wrap:balance}
+.covsub{color:var(--ink2);margin-top:9px;max-width:76ch}
+.instr{background:var(--sunk);border-bottom:1px solid var(--rule2);padding:9px 0;position:sticky;top:0;z-index:20}
+.instr-in{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:.68rem;color:var(--ink2)}
+.instr-in b{color:var(--ink)}
+.prov{font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--goodSoft);color:var(--good);border:1px solid var(--good)}
+.sep{width:1px;height:13px;background:var(--rule2)}
+
+/* estrutura */
+.page{padding:30px 0 60px}
+h2{font-family:var(--serif);font-size:1.35rem;font-weight:500;margin-top:38px}
+h3{font-family:var(--serif);font-size:1.15rem;font-weight:500;margin-top:32px}
+.note{color:var(--ink2);font-size:.87rem;margin-top:6px;max-width:82ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px 23px;margin-top:14px}
+/* a leitura do bloco: o que o número quer dizer */
+.leitura{margin-top:14px;padding-top:12px;border-top:1px dashed var(--rule2);font-size:.87rem;color:var(--ink2)}
+.leitura b{color:var(--ink)}
+
+/* números */
+.stats{display:flex;gap:32px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--rule)}
+.stat b{display:block;font-family:var(--mono);font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
+.stat span{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+
+/* tabela */
+table{width:100%;border-collapse:collapse;margin-top:12px;background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+th{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;text-align:left;padding:10px 13px;background:var(--sunk);border-bottom:1px solid var(--rule2)}
+td{padding:10px 13px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:top;color:var(--ink2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+/* legenda FORA da tabela: dentro de <table> com overflow:hidden ela é cortada */
+.cap{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:26px}
+.mono{font-family:var(--mono);font-size:.78rem}
+
+/* rodapé de método */
+.foot{font-family:var(--mono);font-size:.68rem;color:var(--ink2);line-height:1.9;border-top:1px solid var(--rule);padding-top:20px;margin-top:40px}
+.foot b{color:var(--good)}
+
+@media (max-width:800px){.wrap{padding:0 18px}h1{font-size:1.7rem}}
+@media print{body{background:#fff}.card,table{break-inside:avoid}}
+
+/* ---- blocos de gráfico (ver references/padroes.md) ---- */
+
+/* cartão de número: o número é o contrato, o resto é subtítulo menor embaixo */
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px}
+.num-card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:18px 20px}
+.num-card .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.num-card .n{font-family:var(--mono);font-size:2.1rem;font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-top:6px}
+.num-card .n .u{font-size:1.1rem;font-weight:500;color:var(--ink2)}
+.num-card .s{font-size:.8rem;color:var(--ink2);margin-top:4px}
+.num-card.na{border-style:dashed;background:transparent}
+.num-card.na .n{color:var(--rule2)}
+.num-card.na .s{color:var(--faint);font-style:italic}
+
+/* barra segmentada — 2 a 5 fatias, soma 100% */
+.seg{display:flex;height:15px;border-radius:8px;overflow:hidden;margin-top:16px;background:var(--sunk)}
+.seg span{display:block;height:100%}
+.legend{list-style:none;display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;font-size:.8rem;color:var(--ink2)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+.legend b{font-family:var(--mono);color:var(--ink)}
+
+/* barras horizontais — ordene por valor; .me marca a linha da marca do cliente */
+table.bars{border:none;background:transparent}
+table.bars th{background:transparent;border:none;font-family:var(--sans);font-size:.83rem;font-weight:600;
+  color:var(--ink);text-transform:none;letter-spacing:0;width:34%;padding:5px 12px 5px 0;text-align:left}
+table.bars td{border:none;padding:5px 0}
+table.bars td span{display:block;height:13px;border-radius:3px;background:var(--ink2)}
+table.bars .me td span{background:var(--amber)}
+table.bars .me th{color:var(--amber)}
+table.bars .v{font-family:var(--mono);font-size:.78rem;width:52px;text-align:right;padding-left:12px}
+
+/* funil — absoluto E retenção; só o absoluto esconde onde vaza */
+.funnel{list-style:none;margin-top:16px}
+.funnel li{display:grid;grid-template-columns:32% 1fr 46px;align-items:center;gap:12px;padding:5px 0}
+.funnel .lbl{font-size:.83rem;font-weight:600}
+/* a trilha é que vale 100%: sem ela a barra encolhe pra caber no flex e a escala mente */
+.funnel .track{display:block}
+.funnel .bar{display:block;background:var(--ink);color:#fff;font-family:var(--mono);font-size:.75rem;
+  font-weight:700;padding:5px 10px;border-radius:4px;text-align:right;min-width:44px}
+.funnel .pct{font-family:var(--mono);font-size:.72rem;color:var(--faint);text-align:right}
+
+/* heatmap — faixas fixas h0..h4, sempre com legenda dizendo quais são */
+table.heat td{text-align:center;font-family:var(--mono);font-size:.8rem;color:var(--ink);font-weight:600}
+table.heat th{text-align:center}
+table.heat tbody th{background:var(--card);text-transform:none;font-family:var(--sans);font-size:.8rem;
+  font-weight:600;color:var(--ink);text-align:left;letter-spacing:0}
+.h0{background:transparent;color:var(--rule2)!important}
+.h1{background:#EDF3EF}.h2{background:#D6E7DD}.h3{background:#B3D4C2}.h4{background:#8CC0A6}
+
+/* colunas de número: à direita e com dígitos de largura fixa */
+.num,td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* o que não foi medido — bloco obrigatório quando falta dado */
+.gap{background:var(--card);border:1px dashed var(--rule2);border-radius:12px;padding:20px 23px;margin-top:20px}
+.gap ul{margin-top:10px;padding-left:20px}
+.gap li{font-size:.85rem;color:var(--ink2);margin-top:7px}
+.gap li b{color:var(--ink)}
+
+/* qualquer bloco pode rolar sozinho — o corpo da página nunca rola de lado */
+.scroll{overflow-x:auto}
+
+.grp{margin-top:22px}
+.grow{display:flex;justify-content:space-between;align-items:baseline}
+.glabel{font-weight:600;font-size:.92rem}
+.gcounts{font-family:var(--mono);font-size:.75rem;color:var(--faint)}
+.grp .seg{margin-top:8px}
+.acao{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px dashed var(--rule)}
+.acao:last-child{border-bottom:none}
+.acao .n{font-family:var(--mono);font-weight:700;color:var(--red);flex:0 0 22px}
+.tag{display:inline-block;font-family:var(--mono);font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:1.5px 7px;border-radius:4px;margin-right:6px}
+.tag.ok{background:var(--goodSoft);color:var(--good)}
+.tag.dec{background:var(--amberSoft);color:#7A4E12}
+.tag.op{background:var(--redSoft);color:var(--red)}
+</style>
+
+<header class="cover"><div class="wrap">
+  <p class="eyebrow">Ultravis · revisão geral · v1</p>
+  <h1>Tudo que foi pedido × tudo que está no ar</h1>
+  <p class="covsub">Os 167 pedidos extraídos da transcrição de 19/ago, dos decks do Igor (17 e 19/ago),
+  da reunião de 14/ago, das planilhas de pacotes, dos mockups e da ata — cruzados um a um com o código,
+  mais 87 contas reconciliadas do SQL até a tela. Cada divergência passou por um contraditório
+  independente antes de entrar aqui. Gerado em 29/ago/2026.</p>
+</div></header>
+
+<div class="instr"><div class="wrap instr-in">
+  <span class="prov">dados reais</span>
+  <span><b>Fontes</b> 6 documentos dos sócios + código em produção + logs Railway 22–29/ago</span>
+  <span class="sep"></span>
+  <span><b>Método</b> 66 agentes: extração → verificação com evidência → contraditório</span>
+  <span class="sep"></span>
+  <span><b>Limite</b> banco Supabase inacessível nesta sessão — produção lida pelos logs</span>
+</div></div>
+
+<div class="wrap page">
+
+<h2>O veredito em números</h2>
+<div class="nums">
+  <div class="num-card"><p class="k">Pedidos atendidos</p><p class="n">47<span class="u">%</span></p>
+    <p class="s">70 de 150 verificações — 68 no ar, 2 prontos aguardando o merge do PR #95</p></div>
+  <div class="num-card"><p class="k">Parciais</p><p class="n">30<span class="u">%</span></p>
+    <p class="s">45 pedidos com o núcleo entregue e uma parte declarada faltando</p></div>
+  <div class="num-card"><p class="k">Pendentes</p><p class="n">23<span class="u">%</span></p>
+    <p class="s">35 pedidos ainda não iniciados — quase todos já priorizados no BACKLOG</p></div>
+  <div class="num-card"><p class="k">Contas que batem</p><p class="n">72<span class="u">/87</span></p>
+    <p class="s">12 divergiam; 8 foram corrigidas hoje, 4 são decisões abertas</p></div>
+</div>
+<p class="leitura">Dos 167 pedidos brutos, a fusão de duplicatas entre fontes deixou 150 verificações.
+<b>Nenhum achado da revisão foi derrubado pelo contraditório</b> — os 5 "refutados" eram achados já
+corrigidos entre a revisão e o contraditório. O que está pendente não está perdido: está nomeado,
+com dono e evidência, quase tudo no BACKLOG priorizado.</p>
+
+<h2>Tela a tela</h2>
+<ul class="legend"><li><i style="background:var(--good)"></i>Feito</li>
+<li><i style="background:var(--amber)"></i>Parcial</li>
+<li><i style="background:var(--red)"></i>Pendente</li></ul>
+<div class="grp"><div class="grow"><span class="glabel">Score de Visibilidade</span><span class="gcounts"><b style="color:var(--good)">24</b> · <b style="color:var(--amber)">6</b> · <b style="color:var(--red)">1</b></span></div><div class="seg" role="img" aria-label="24 feitos, 6 parciais, 1 pendentes"><span style="width:77.4%;background:var(--good)"></span><span style="width:19.4%;background:var(--amber)"></span><span style="width:3.2%;background:var(--red)"></span></div><p class="leitura" style="margin-top:8px;border:none;padding-top:0">A tela mais fiel à reunião: taxonomia, 4 dimensões, sentimento com fontes — tudo no ar. O 1 pendente é operacional (Claude sem chave).</p></div>
+<div class="grp"><div class="grow"><span class="glabel">Índice de Citabilidade</span><span class="gcounts"><b style="color:var(--good)">14</b> · <b style="color:var(--amber)">4</b> · <b style="color:var(--red)">2</b></span></div><div class="seg" role="img" aria-label="14 feitos, 4 parciais, 2 pendentes"><span style="width:70.0%;background:var(--good)"></span><span style="width:20.0%;background:var(--amber)"></span><span style="width:10.0%;background:var(--red)"></span></div><p class="leitura" style="margin-top:8px;border:none;padding-top:0">Matriz controla/ativa/conquista e quintis no ar; falta evolução por dimensão e a régua da Presença por pacote.</p></div>
+<div class="grp"><div class="grow"><span class="glabel">Insights</span><span class="gcounts"><b style="color:var(--good)">12</b> · <b style="color:var(--amber)">15</b> · <b style="color:var(--red)">11</b></span></div><div class="seg" role="img" aria-label="12 feitos, 15 parciais, 11 pendentes"><span style="width:31.6%;background:var(--good)"></span><span style="width:39.5%;background:var(--amber)"></span><span style="width:28.9%;background:var(--red)"></span></div><p class="leitura" style="margin-top:8px;border:none;padding-top:0">O resumo de 3 números está no ar — mas o pacote do mockup v3 (funil, scatter, próxima ação, leituras) está inteiro no backlog: é o maior bloco pendente do produto.</p></div>
+<div class="grp"><div class="grow"><span class="glabel">Auditoria do Site</span><span class="gcounts"><b style="color:var(--good)">1</b> · <b style="color:var(--amber)">5</b> · <b style="color:var(--red)">1</b></span></div><div class="seg" role="img" aria-label="1 feitos, 5 parciais, 1 pendentes"><span style="width:14.3%;background:var(--good)"></span><span style="width:71.4%;background:var(--amber)"></span><span style="width:14.3%;background:var(--red)"></span></div><p class="leitura" style="margin-top:8px;border:none;padding-top:0">O "ler → diagnosticar → indicar" existe; faltam 2 das 8 dimensões (Rendering, idioma), drafts de schema.org/OG e as abas por tema.</p></div>
+<div class="grp"><div class="grow"><span class="glabel">Conteúdo · site · comercial</span><span class="gcounts"><b style="color:var(--good)">9</b> · <b style="color:var(--amber)">9</b> · <b style="color:var(--red)">16</b></span></div><div class="seg" role="img" aria-label="9 feitos, 9 parciais, 16 pendentes"><span style="width:26.5%;background:var(--good)"></span><span style="width:26.5%;background:var(--amber)"></span><span style="width:47.0%;background:var(--red)"></span></div><p class="leitura" style="margin-top:8px;border:none;padding-top:0">Onde está o maior gap: pacotes R$15k/20k/30k não refletidos no produto, "onde publicar" e classificação de esforço sem registro.</p></div>
+<div class="grp"><div class="grow"><span class="glabel">Processos & server</span><span class="gcounts"><b style="color:var(--good)">11</b> · <b style="color:var(--amber)">6</b> · <b style="color:var(--red)">4</b></span></div><div class="seg" role="img" aria-label="11 feitos, 6 parciais, 4 pendentes"><span style="width:52.4%;background:var(--good)"></span><span style="width:28.6%;background:var(--amber)"></span><span style="width:19.0%;background:var(--red)"></span></div><p class="leitura" style="margin-top:8px;border:none;padding-top:0">Vigia com 11 invariantes e 223 testes; pendem congelar prompt no tempo (auditabilidade) e o invariante "100% em 1º lugar".</p></div>
+
+<h2>As contas que não fechavam</h2>
+<p class="note">As 87 conferências cobriram: resumo do Insights nas 3 camadas (RPC 00044 → action → tela),
+Score 4 dimensões, pesos do IC, indicações da Auditoria × i18n, invariantes do vigia × schema real,
+números afirmados nos documentos, e produção via Railway. 72 bateram. As 12 divergências:</p>
+
+<div class="cap">Corrigidas hoje (commits 8f3b46c · 20a4b75 · docs desta leva)</div>
+<table>
+<thead><tr><th>Conta</th><th>O que estava errado</th><th>Correção</th></tr></thead>
+<tbody>
+<tr><td>Fórmula do hero do Score</td><td>"A conta, aberta" imprimia pesos brutos (0,20×31+… = 30,75) mas exibia 47 — o valor usa pesos renormalizados</td><td>Fórmula agora imprime os pesos efetivos; a equação soma o valor exibido</td></tr>
+<tr><td>"44 migrations" (STATUS)</td><td>São 43 arquivos — a numeração vai até 00044, mas a 00007 não existe</td><td>STATUS corrigido com a explicação</td></tr>
+<tr><td>STATUS parado em 19/ago</td><td>Regra do repo exige atualização por sessão; a leva de 26/ago não aparecia</td><td>Atualizado com a leva 26–29/ago e o aviso "produção roda 19/ago até o merge"</td></tr>
+<tr><td>"12 arquivos dos sócios"</td><td>São 13 na main</td><td>Corrigido</td></tr>
+<tr><td>"14 PRs em 19/ago"</td><td>Foram 15 (#80–#94)</td><td>Corrigido no relatório de verificação</td></tr>
+<tr><td>"40 chamadas Claude com 401"</td><td>≥101 — a consulta aos logs estava capada em ~100 entradas</td><td>Corrigido, com o limite declarado</td></tr>
+<tr><td>Strings em inglês (Insights + Auditoria)</td><td>~25 rótulos hardcoded renderizando em inglês na UI pt-BR</td><td>Movidos para i18n nos 2 idiomas</td></tr>
+<tr><td>Nome antigo do índice na sparkline</td><td>aria dizia "Índice de Visibilidade"</td><td>"Índice de Citabilidade" + chave morta removida</td></tr>
+</tbody></table>
+
+<div class="cap">Divergências que são DECISÃO, não bug — levar pro Igor</div>
+<table>
+<thead><tr><th>Conta</th><th>Situação</th><th>Decisão aberta</th></tr></thead>
+<tbody>
+<tr><td>Numerador da Presença</td><td>A tela diz "prompts com a marca em pelo menos uma resposta", e a conta inclui menção <b>ou citação do domínio</b> — um prompt onde só o site é citado (sem falarem da marca) conta como presença</td><td>Citação-sem-menção conta como presença? Se sim, declarar no tooltip; se não, mudar o filtro do RPC</td></tr>
+<tr><td>Sentimento "neutro"</td><td>Respostas ainda não classificadas (sentiment null) caem no balde neutro do placar — neutro-de-verdade e não-processado se misturam</td><td>Separar "sem análise" do neutro, ou declarar a aproximação na tela</td></tr>
+<tr><td>Draft de FAQ gera JSON-LD</td><td>A premissa "não é gerador de JSON" tem uma exceção herdada do core: o draft de FAQ inclui bloco FAQPage pronto</td><td>Manter (é útil e pedido no P3 "copiar e colar") ou restringir à indicação</td></tr>
+<tr><td>Marcas quase-idênticas</td><td>Vigia alerta Polar Electro × Polar ativas na mesma organização desde 27/ago — é intencional (aliases) ou resíduo?</td><td>Confirmar e silenciar o par, ou desativar uma</td></tr>
+</tbody></table>
+
+<h2>O que sobreviveu ao contraditório — os grandes pendentes</h2>
+<p class="note">47 dos 92 achados passaram por refutação independente (todos os altos e médios);
+nenhum caiu. Agrupados pelo que são:</p>
+
+<h3>1 · O pacote do mockup Insights v3 <span class="tag dec">maior bloco de produto</span></h3>
+<div class="card"><p class="note" style="margin-top:0">O mockup aprovado em 19/ago foi desmembrado e priorizado no BACKLOG — mas <b>nenhum</b> dos blocos novos foi implementado ainda:
+funil da citação em 4 estágios ⭐ · scatter Menção × Citação com quadrantes nomeados (narrativa emprestada / narrativa sua / invisível / crédito perdido) ⭐ ·
+cards "Próxima ação" com meta de→para ⭐ · flag "resposta grounded" como denominador · heatmap por motor · placar em barras ·
+"Leitura" em linguagem natural sob cada gráfico · multi-run ×3 e marcação unbranded.</p>
+<p class="leitura"><b>É a maior distância entre o que o Igor desenhou e o que está no ar.</b> Os dados para quase tudo já existem — é trabalho de tela.</p></div>
+
+<h3>2 · Comercial <span class="tag op">bloqueia venda</span></h3>
+<div class="card"><p class="note" style="margin-top:0">Os pacotes <b>Sinal R$15k · Alcance R$20k · Domínio R$30k</b> das planilhas de 17/ago não existem no produto —
+plans.ts segue com Starter $49/Growth $249 do upstream. Sem eles: frequência de rastreamento por plano, gates de motores 4/6/9 por pacote
+(a tabela existe em config, os gates não), briefing complementar do plano Domínio, scan de comércio agêntico.</p>
+<p class="leitura">Enquanto isso não entra, o produto não consegue espelhar a proposta comercial que vocês apresentam.</p></div>
+
+<h3>3 · Telas e experiência</h3>
+<div class="card"><p class="note" style="margin-top:0">
+· Tela/entrega <b>"O QUE FAZER?"</b> do post-it P3 — não existe rota; hoje o mais próximo são os CTAs por dimensão do IC<br>
+· <b>"O que a IA sabe e não sabe da sua marca"</b> — declarado fora de escopo na tela, sem implementação<br>
+· Tópicos sem camada educacional (item 20 do feedback do cliente)<br>
+· Logado → dashboard direto (item 23 — decisão pendente: home ou ferramenta?)<br>
+· Gráfico com escala quebrada no relatório do cliente — aguarda o print pra reproduzir<br>
+· Evolução do IC: nota total tem sparkline; <b>por dimensão</b> não tem<br>
+· Régua da Presença atrelada ao pacote (6/6, 9/9 motores) — hoje é % simples</p></div>
+
+<h3>4 · Auditoria — fechar as 8 dimensões</h3>
+<div class="card"><p class="note" style="margin-top:0">6 de 8 cobertas por 47 sinais. Faltam: <b>Rendering</b> (dependência de JS não é diagnosticada) e
+<b>idioma/hreflang</b>. A régua do card cita sitemap sem medição por trás. Drafts prontos-pra-colar existem pra FAQ/meta/H1;
+faltam schema.org Organization/Product e OG/social. Os textos what/why/fix dos 47 sinais vêm do rubric em inglês —
+traduzir é trabalho no server, não na tela.</p></div>
+
+<h3>5 · Processos & confiabilidade</h3>
+<div class="card"><p class="note" style="margin-top:0">
+· <b>Congelar prompt e fonte no tempo</b> — hoje editar um prompt reescreve o passado dos resultados; é o pendente mais sério de auditabilidade <span class="tag op">alta</span><br>
+· Invariante "marca 100% das vezes em 1º lugar" no vigia<br>
+· Prompt suggestions automático (o manual funciona)<br>
+· Régua de ±5 pontos no Daily Pulse (hoje 15) + canal WhatsApp<br>
+· Reviews por segmento via LLM (v1.1) — e Reclame Aqui precisa do DataForSEO no Railway</p></div>
+
+<h2>Ações que só você pode executar</h2>
+<div class="card">
+<div class="acao"><span class="n">1</span><div><b>Mergear o PR #95</b> (fora de horário de censo) — produção ainda roda o código de 19/ago:
+o alerta falso <span class="mono">bad-domains</span> segue gritando todo dia nos logs e as correções desta revisão só valem depois do deploy.</div></div>
+<div class="acao"><span class="n">2</span><div><b>Trocar a <span class="mono">ANTHROPIC_API_KEY</span> no Railway</b> — Claude parado desde 8/ago; ≥101 chamadas 401 no censo de 24/ago. Sem isso o "Claude no dashboard" fica parcial pra sempre.</div></div>
+<div class="acao"><span class="n">3</span><div><b>Ticket do Grok no Cloro</b> — falha 100% do lado deles; alternativa: portar a guarda que o upstream shipou (#734).</div></div>
+<div class="acao"><span class="n">4</span><div><b>E-mail dedicado de operação</b> — vigia e Daily Pulse continuam mudos (alertas só no log).</div></div>
+<div class="acao"><span class="n">5</span><div><b>Acesso ADM do Igor</b> — a página de custos existe; o e-mail dele não está na allowlist.</div></div>
+<div class="acao"><span class="n">6</span><div><b>DataForSEO no Railway</b> — destrava Reclame Aqui nas reviews. E os templates de e-mail do Supabase ainda podem dizer Ansvisor (verificar no painel).</div></div>
+</div>
+
+<section class="gap">
+<h2 style="margin-top:0">O que esta revisão não conseguiu verificar</h2>
+<ul>
+<li><b>"21/21 checagens" do relatório de 26/ago</b> — o script das checagens não foi versionado; o número não é reproduzível. As próximas verificações devem versionar o script.</li>
+<li><b>Estado do banco em produção</b> — o acesso Supabase está bloqueado nesta sessão; tudo que é produção foi lido pelos logs do Railway (limite declarado também no relatório de 26/ago).</li>
+<li><b>Silêncio do sentiment-degraded</b> — o alerta sumiu dos logs 27–29/ago, mas o fix está na branch, não deployado — pode ser efeito do fix ou só uma janela sem amostra; só o pós-merge confirma.</li>
+</ul>
+</section>
+
+<h2>Sequência recomendada</h2>
+<div class="card"><p class="note" style="margin-top:0">
+<b>Agora:</b> merge do PR #95 + chave do Claude (itens 1–2 acima).<br>
+<b>Com o Igor (30 min):</b> as 4 decisões da tabela de contas — numerador da Presença, sentimento null, draft JSON-LD, par Polar Electro×Polar.<br>
+<b>Próxima leva de produto:</b> o pacote do mockup v3 na ordem dos ⭐ — funil, scatter com quadrantes, próxima ação — e os pacotes comerciais no plans.ts.<br>
+<b>Depois:</b> congelar prompt no tempo (auditabilidade) antes de escalar clientes.</p></div>
+
+<footer class="foot">
+<h3 style="margin-top:0">Método</h3>
+<p><b>Extração</b> — 6 agentes, um por fonte: transcrição da work session 19/ago, decks de 17 e 19/ago (o de 19 como palavra final), anotações Gemini de 14/ago + feedback do cliente sobre o site, planilhas de pacotes v1/v2 + CSV de motores, mockup Insights v3, ata de decisões. 167 pedidos com citação literal.</p>
+<p><b>Verificação</b> — 6 agentes por área de tela, status com evidência arquivo:linha; pedidos repetidos entre fontes fundidos (167 → 150).</p>
+<p><b>Contas</b> — 7 agentes: RPC 00044 × action × tela, Score 4D, pesos IC, indicações × i18n, vigia × schema (+ 223 testes do server), documentos × contagens reais, produção via Railway MCP.</p>
+<p><b>Contraditório</b> — 47 dos 92 achados (todos os altos e médios) submetidos a refutação independente com instrução de derrubar só com prova. Zero derrubados; 5 já estavam corrigidos quando o cético olhou. Os 45 restantes são severidade baixa, reportados sem contraditório.</p>
+<p>v1 · janela de produção lida: 22–29/ago · gerado em 29/ago/2026 · commits desta leva: cf83ab9 · 2ce159c · bfffeec · 8f3b46c · 20a4b75 + este relatório · PR #95</p>
+</footer>
+
+</div>

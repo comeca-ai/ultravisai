@@ -57,7 +57,7 @@ pre{background:#26251F;color:#EDEBE4;border-radius:9px;padding:13px 15px;font-fa
   <div class="wrap">
     <div class="eyebrow">Verificação de produção · 26/ago/2026</div>
     <h1>As mudanças foram feitas. As contas batem — com três ressalvas.</h1>
-    <p class="covsub">Compilação de tudo que mudou em 19/ago (14 PRs) com verificação mecânica de cada entrega, conferência das fórmulas entre as três camadas e leitura do que a produção reportou nos sete dias seguintes.</p>
+    <p class="covsub">Compilação de tudo que mudou em 19/ago (15 PRs, #80–#94) com verificação mecânica de cada entrega, conferência das fórmulas entre as três camadas e leitura do que a produção reportou nos sete dias seguintes.</p>
     <div class="verdict">
       <div class="vd ok">
         <div class="vl">Entregas</div>
@@ -86,7 +86,7 @@ pre{background:#26251F;color:#EDEBE4;border-radius:9px;padding:13px 15px;font-fa
   <div class="box red">
     <div class="bl">Problema real · depende de você</div>
     <div class="bt">O Claude segue com credencial inválida — e agora está medido</div>
-    <p>Em 24/ago um censo rodou e <b>40 chamadas ao Claude falharam com 401 "API key is invalid"</b>, uma a uma, nos logs. O vigia acusou corretamente: <span class="mono">consistency-engine-silent (crítico)</span> — "grok-web e claude sem entregar resultado na janela de 8 dias enquanto os demais entregaram". Segue disparando a cada ciclo.</p>
+    <p>Em 24/ago um censo rodou e <b>ao menos 101 chamadas ao Claude falharam com 401 "API key is invalid"</b>, uma a uma, nos logs (consulta capada em ~100 entradas; corrigido de "40" na revisão de 29/ago). O vigia acusou corretamente: <span class="mono">consistency-engine-silent (crítico)</span> — "grok-web e claude sem entregar resultado na janela de 8 dias enquanto os demais entregaram". Segue disparando a cada ciclo.</p>
     <p>Junto com ele: <span class="mono">cloro-stuck</span> subiu de 4 → 7 → <b>49 tarefas pendentes há mais de 2h</b>. A fila do fornecedor de coleta está acumulando tarefas que nunca voltam — consistente com a falha do Grok que o projeto original também enfrentou e já publicou proteção.</p>
     <p><b>O que isso significa para os números:</b> o painel continua correto para os seis motores que entregam; os dois que não entregam simplesmente não aparecem — e o vigia declara isso em vez de deixar passar como zero.</p>
   </div>

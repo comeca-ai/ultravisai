@@ -119,3 +119,11 @@ Observabilidade: o stdout do container NÃO sai no `wrangler tail` (só a aba
 Logs do painel mostra). `console.log` no lado do worker (classe DO) SAI no
 tail — logar `Object.keys(envVars)` no start é a prova barata de que a env
 foi. `instance_type: "standard"` foi renomeado para `"standard-1"`.
+
+**Causa-raiz final (run #9)**: `wrangler deploy` com `keep_vars` default
+(`false`) **apaga as variáveis de texto do painel a cada deploy** — worker
+ficava sem env nenhuma (`start envVars: HOST,PORT` no tail provou). Sempre
+`"keep_vars": true` no wrangler.jsonc de worker deployado por CI; e valores
+sensíveis no painel sempre como tipo **Secret** (sobrevivem a deploy), nunca
+Text. Cinto-e-suspensório: passo de sync no workflow re-propaga do GitHub
+Secrets após cada deploy (ausente = pulado com aviso no summary).

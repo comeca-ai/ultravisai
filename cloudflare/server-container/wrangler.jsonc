@@ -7,6 +7,10 @@
   "account_id": "749b2e9b3642e4b03321d5830e81c195",
   "main": "src/index.js",
   "compatibility_date": "2026-08-01",
+  // CRÍTICO: sem isto, cada `wrangler deploy` APAGA as variáveis de texto
+  // coladas no painel — foi a causa-raiz dos runs #3–#9 (worker sem env,
+  // container em crash-loop por "Missing SUPABASE_URL").
+  "keep_vars": true,
   "observability": { "enabled": true },
   "containers": [
     {

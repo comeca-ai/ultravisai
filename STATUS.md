@@ -28,8 +28,8 @@ desligado é a pendência nº 1 e este incidente é o argumento definitivo.
 | Camada | Estado |
 |---|---|
 | Site + app (Vercel, ultravis.ai) | ✅ No ar com o código de 19/ago (#94); a leva 26–29/ago espera o merge do PR #95 |
-| Server de rastreamento (Railway) | ✅ No ar (deploy de 18/ago), mas **trial expirado = sem deploy novo** — é o endereço oficial (`api.ultravis.ai`) só até o corte |
-| **Server no Cloudflare (Container)** | ✅ **NO AR desde 06/set 20:46 UTC** (https://ultravis-server.jhonata-emerick.workers.dev, HTTP 200) — mesmo código, 10 segredos no worker, deploy auditado via Actions; aguarda o corte de DNS fora da janela de censo |
+| Server de rastreamento (Railway) | ⬛ **APAGADO em 06/set à noite** (trial expirado; dono removeu após o corte) |
+| **Server no Cloudflare (Container)** | ✅ **OFICIAL desde 06/set ~23h UTC**: `api.ultravis.ai` cortado pro worker (Custom Domain) — mesmo código, 10 segredos + vars versionadas, deploy auditado via Actions. Censo de 07/set 06:00 UTC é o primeiro na infra nova |
 | Banco (Supabase) | ✅ Ok — 43 migrations (numeradas até 00044; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado |
 | Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 11 invariantes de consistência** (19/ago + 26/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham, domínios quebrados/com caminho) — 2 alertas que gritavam em falso corrigidos em 26/ago (**na branch, sobem com o PR #95**); alertas por e-mail **desligados** até você configurar um e-mail dedicado |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |

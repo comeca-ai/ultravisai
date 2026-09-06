@@ -11,6 +11,17 @@
   // coladas no painel — foi a causa-raiz dos runs #3–#9 (worker sem env,
   // container em crash-loop por "Missing SUPABASE_URL").
   "keep_vars": true,
+  // Config NÃO-secreta do server (a secreta vive no painel como Secret).
+  // Sem isto: CORS só aceita localhost:3000, o censo roda TODO DIA às 06:00
+  // (default do código; Railway limitava pra segunda) e o Cloro cai pro modo
+  // polling em vez de webhook.
+  "vars": {
+    "NODE_ENV": "production",
+    "ALLOWED_ORIGINS": "https://ultravis.ai,https://www.ultravis.ai,https://utravisaiclaude.vercel.app,http://localhost:3000",
+    "DAILY_CRON_SCHEDULE": "0 6 * * 1",
+    "CLORO_WEBHOOK_URL": "https://api.ultravis.ai/cloro/callback",
+    "PUBLIC_APP_URL": "https://ultravis.ai"
+  },
   "observability": { "enabled": true },
   "containers": [
     {

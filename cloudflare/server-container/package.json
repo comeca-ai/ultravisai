@@ -1,0 +1,8 @@
+{
+  "name": "ultravis-server-container",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@cloudflare/containers": "^0.0.28"
+  }
+}

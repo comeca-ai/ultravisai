@@ -4,7 +4,7 @@
  * O Express de server/ roda INTACTO dentro do container (mesmo Dockerfile do
  * Railway). Este Worker é a frente dele:
  *  - fetch: todo request vai pro container (API, /cloro/callback, /ops, tudo);
- *  - scheduled (cron */10): keepalive — mantém o container acordado para o
+ *  - scheduled (cron a cada 10 min): keepalive — mantém o container acordado para o
  *    node-cron INTERNO continuar agendando censo/vigia/reviews como sempre.
  *    (v2: destilar cada agenda em Cron Triggers nativos chamando os endpoints
  *    /api/internal/* com CRON_SECRET; aí o keepalive morre e o container

@@ -8,6 +8,11 @@ name: deploy-edge-gateway
 
 on:
   workflow_dispatch:
+    inputs:
+      cf_api_token:
+        description: 'PROVISÓRIO: token da API Cloudflare para este run (prefira o secret CLOUDFLARE_API_TOKEN; input de run fica visível a colaboradores — rotacionar depois)'
+        required: false
+        type: string
   push:
     branches: [main]
     paths: ['cloudflare/edge-gateway/**']
@@ -17,10 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Mascarar token provisório nos logs
+        if: ${{ inputs.cf_api_token != '' }}
+        run: echo "::add-mask::${{ inputs.cf_api_token }}"
       - name: Deploy no Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: cloudflare/edge-gateway
       - name: Smoke test
         env:

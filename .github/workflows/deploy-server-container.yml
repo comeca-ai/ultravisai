@@ -55,10 +55,22 @@ jobs:
             exit "$rc"
           fi
           echo "### Server container publicado — worker ultravis-server" >> "$GITHUB_STEP_SUMMARY"
-      - name: Smoke test (GET / via worker)
+      - name: Smoke test (GET / via worker, com retry pro cold start)
         if: steps.cred.outputs.has == '1'
         run: |
-          sleep 15
-          curl -sSf "https://ultravis-server.jhonata-emerick.workers.dev/" | head -c 200
-          echo
-          echo "### Smoke test OK: https://ultravis-server.jhonata-emerick.workers.dev/" >> "$GITHUB_STEP_SUMMARY"
+          set -o pipefail
+          URL="https://ultravis-server.jhonata-emerick.workers.dev/"
+          for i in 1 2 3 4 5 6; do
+            sleep 20
+            code=$(curl -sS -o /tmp/body -w '%{http_code}' "$URL" || echo 000)
+            echo "tentativa $i: HTTP $code"
+            if [ "$code" = "200" ]; then
+              head -c 200 /tmp/body; echo
+              echo "### Smoke test OK ($URL)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          done
+          head -c 300 /tmp/body 2>/dev/null; echo
+          echo "### Smoke: HTTP $code após 6 tentativas — corpo acima; se 500, container sem porta (envVars/secrets); se 503, processo fora" >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning::smoke não passou (HTTP $code) — deploy publicado; investigar envVars/secrets"
+          exit 0

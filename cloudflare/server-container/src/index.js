@@ -50,13 +50,16 @@ export class UltravisServer extends Container {
   // cron trigger falhar duas vezes seguidas.
   sleepAfter = '25m';
 
-  get envVars() {
+  constructor(ctx, env) {
+    super(ctx, env);
+    // envVars como PROPRIEDADE no construtor (a lib não lê getter): repassa
+    // ao container todo env de string do worker — secrets do painel incluídos.
+    // PASS_ENV vira documentação do que o server espera, não filtro.
     const out = {};
-    for (const k of PASS_ENV) {
-      const v = this.env?.[k];
-      if (v !== undefined && v !== null && v !== '') out[k] = String(v);
+    for (const [k, v] of Object.entries(env ?? {})) {
+      if (typeof v === 'string' && v !== '') out[k] = v;
     }
-    return out;
+    this.envVars = out;
   }
 }
 

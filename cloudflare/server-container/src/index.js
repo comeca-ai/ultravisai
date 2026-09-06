@@ -6,43 +6,20 @@
  *  - fetch: todo request vai pro container (API, /cloro/callback, /ops, tudo);
  *  - scheduled (cron a cada 10 min): keepalive — mantém o container acordado para o
  *    node-cron INTERNO continuar agendando censo/vigia/reviews como sempre.
- *    (v2: destilar cada agenda em Cron Triggers nativos chamando os endpoints
- *    /api/internal/* com CRON_SECRET; aí o keepalive morre e o container
- *    dorme entre execuções.)
  *
- * Segredos: setados NO WORKER (painel ou sync-cf-secrets) e repassados ao
- * container via envVars — mesma lista do Railway.
+ * Env/segredos: setados NO WORKER (painel ou sync-cf-secrets) e injetados no
+ * container NO MOMENTO DO START via startOptions.envVars — na lib 0.0.28 o
+ * this.envVars de construtor não chegou ao container (provado no log de
+ * 06/set 20:06 UTC: "Missing SUPABASE_URL..." em crash-loop). Duas armadilhas
+ * documentadas no fonte da lib:
+ *  1. startAndWaitForPorts PULA o start() se o container já está `running`
+ *     (short-circuit de healthy) — e o pm2-runtime nunca morre, então um
+ *     container que subiu sem env fica "running" em crash-loop pra sempre.
+ *     Por isso: running && !healthy ⇒ destroy() antes de startar de novo.
+ *  2. A chave em startOptions é `envVars` (não `env`) — ver
+ *     dist/types ContainerStartConfigOptions.
  */
 import { Container, getContainer } from '@cloudflare/containers';
-
-const PASS_ENV = [
-  'NODE_ENV',
-  'IS_CLOUD',
-  'PLATFORM_PROVIDER',
-  'ALLOWED_ORIGINS',
-  'PUBLIC_APP_URL',
-  'NEXT_PUBLIC_APP_URL',
-  'SUPABASE_URL',
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'SUPABASE_ANON_KEY',
-  'OPENAI_API_KEY',
-  'ANTHROPIC_API_KEY',
-  'GOOGLE_GENERATIVE_AI_API_KEY',
-  'CLORO_API_KEY',
-  'CLORO_WEBHOOK_URL',
-  'CLORO_WEBHOOK_SECRET',
-  'SCRAPEDO_API_KEY',
-  'CRON_SECRET',
-  'DAILY_CRON_SCHEDULE',
-  'AUDIT_LLM_MODEL',
-  'DEFAULT_SUGGESTION_MODEL',
-  'PROMPT_SUGGESTION_MODEL',
-  'TOPIC_SUGGESTION_MODEL',
-  'COMPETITOR_SUGGESTION_MODEL',
-  'AI_GATEWAY_ACCOUNT_ID',
-  'AI_GATEWAY_NAME',
-  'AI_GATEWAY_TOKEN',
-];
 
 export class UltravisServer extends Container {
   defaultPort = 80; // o Dockerfile expõe 80 (PORT default do server.js)
@@ -50,18 +27,31 @@ export class UltravisServer extends Container {
   // cron trigger falhar duas vezes seguidas.
   sleepAfter = '25m';
 
-  constructor(ctx, env) {
-    super(ctx, env);
-    // envVars como PROPRIEDADE no construtor (a lib não lê getter): repassa
-    // ao container todo env de string do worker — secrets do painel incluídos.
-    // PASS_ENV vira documentação do que o server espera, não filtro.
-    // PORT/HOST explícitos (cinto-e-suspensório do probe 10.0.0.1:80) e
-    // por cima todo env de string do worker — secrets do painel incluídos.
+  // Todo env de string do worker (secrets do painel incluídos) + PORT/HOST
+  // explícitos pro probe da plataforma (10.0.0.1:80).
+  buildEnv() {
     const out = { PORT: '80', HOST: '0.0.0.0' };
-    for (const [k, v] of Object.entries(env ?? {})) {
+    for (const [k, v] of Object.entries(this.env ?? {})) {
       if (typeof v === 'string' && v !== '') out[k] = v;
     }
-    this.envVars = out;
+    return out;
+  }
+
+  async fetch(request) {
+    const state = await this.getState();
+    if (this.ctx.container?.running && state.status !== 'healthy') {
+      // Instância viva sem porta aberta = crash-loop com env do boot antigo.
+      // Env só entra via start(), e start() é pulado com container running —
+      // derruba pra renascer com a env certa.
+      console.log(`container running sem healthy (${state.status}) — destroy pra reiniciar com env`);
+      await this.destroy();
+    }
+    const envVars = this.buildEnv();
+    // Só os NOMES no log (nunca valores) — é o que o tail precisa pra provar
+    // que SUPABASE_URL & cia. foram no start.
+    console.log('start envVars:', Object.keys(envVars).sort().join(','));
+    await this.startAndWaitForPorts({ startOptions: { envVars }, ports: [80] });
+    return super.fetch(request);
   }
 }
 

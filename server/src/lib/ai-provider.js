@@ -6,6 +6,7 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { gatewayBaseURL, gatewayHeaders } from './ai-gateway.js';
 
 const providers = {};
 
@@ -17,19 +18,27 @@ let googleProvider = null;
 
 // Initialize providers based on available API keys
 if (process.env.OPENAI_API_KEY) {
-  openaiProvider = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  openaiProvider = createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: gatewayBaseURL('openai'),
+    headers: gatewayHeaders(),
+  });
   providers.openai = openaiProvider;
 }
 
 if (process.env.ANTHROPIC_API_KEY) {
   providers.anthropic = createAnthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
+    baseURL: gatewayBaseURL('anthropic/v1'),
+    headers: gatewayHeaders(),
   });
 }
 
 if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
   googleProvider = createGoogleGenerativeAI({
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    baseURL: gatewayBaseURL('google-ai-studio/v1beta'),
+    headers: gatewayHeaders(),
   });
   providers.google = googleProvider;
 }

@@ -26,7 +26,30 @@ Trocar a URL de callback no painel do Cloro (e/ou `CLORO_WEBHOOK_URL` no
 Railway) para `https://<worker>/cloro/callback`. **Fora de janela de censo**
 (segunda 06:00 UTC). Rollback = apontar a URL de volta pro Railway.
 
-## Segredos (fonte única: GitHub Secrets)
+## Deploy preferido: Workers Builds (GitHub direto, sem token)
+
+O dono conecta o repo no painel — Cloudflare → Workers e Pages → Criar →
+**Importar um repositório** → `comeca-ai/ultravisai` → diretório raiz
+`cloudflare/edge-gateway` → comando de deploy `npx wrangler deploy`. A partir
+daí é push-to-deploy pelo próprio Cloudflare (igual Vercel/Railway), e os
+secrets do worker são colados direto no painel do worker (Settings →
+Variables and Secrets). Os workflows de Actions abaixo ficam como alternativa.
+
+## AI Gateway "ultravis" (chamadas de LLM com painel)
+
+Criar no dashboard: **IA → AI Gateway → criar gateway** com o nome `ultravis`
+(2 cliques — a API exigiria token com permissão AI Gateway: Edit). Depois,
+para o server atual passar a rotear por ele, setar no Railway:
+
+    AI_GATEWAY_ACCOUNT_ID=749b2e9b3642e4b03321d5830e81c195
+    AI_GATEWAY_NAME=ultravis
+
+O código (server/src/lib/ai-gateway.js) só roteia quando a env existe —
+apagar a variável desfaz. Com "Authenticated Gateway" ligado dá pra guardar
+as chaves de provedor NO gateway (BYOK) e setar AI_GATEWAY_TOKEN; aí um 401
+de provedor vira linha vermelha no painel em vez de silêncio no log.
+
+## Segredos (alternativa via GitHub Secrets)
 
 Nenhum segredo em chat, commit ou wrangler.jsonc. O fluxo é: colar o valor no
 painel do GitHub (Settings → Secrets → Actions) → rodar o workflow

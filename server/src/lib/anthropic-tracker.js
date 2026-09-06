@@ -4,6 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { gatewayBaseURL, gatewayHeaders } from './ai-gateway.js';
 
 let client = null;
 
@@ -12,7 +13,11 @@ function getClient() {
     if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY is not configured');
     }
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    client = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      baseURL: gatewayBaseURL('anthropic'),
+      defaultHeaders: gatewayHeaders(),
+    });
   }
   return client;
 }

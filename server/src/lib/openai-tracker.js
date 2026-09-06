@@ -5,6 +5,7 @@
 
 import OpenAI from 'openai';
 import { logger } from './logger.js';
+import { gatewayBaseURL, gatewayHeaders } from './ai-gateway.js';
 
 const DEFAULT_MODEL = 'gpt-5-chat-latest';
 
@@ -15,7 +16,11 @@ function getClient() {
     if (!process.env.OPENAI_API_KEY) {
       throw new Error('OPENAI_API_KEY is not configured');
     }
-    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: gatewayBaseURL('openai'),
+      defaultHeaders: gatewayHeaders(),
+    });
   }
   return client;
 }

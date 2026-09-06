@@ -1,5 +1,10 @@
 # Ultravis Server no Cloudflare (Containers)
 
+> **Status 06/set (noite)**: secrets mínimos do Supabase colados pelo dono no
+> painel do worker (CRON_SECRET não existe no Railway — normal: os endpoints
+> /api/internal/* ficam trancados e o node-cron interno agenda). Este commit
+> redeploya para o container nascer com os envVars novos e o smoke conferir o 200.
+
 O server Express de `server/` rodando **intacto** num Cloudflare Container
 (mesmo Dockerfile do Railway), com um Worker na frente (`src/index.js`):
 todo request vai pro container; um Cron Trigger a cada 10 min mantém o

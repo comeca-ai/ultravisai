@@ -38,3 +38,5 @@ URL: https://ultravis-server.jhonata-emerick.workers.dev
 3. Observar um censo completo (segunda 06:00 UTC) com o vigia de consistência
    como juiz; só então desligar o serviço no Railway.
 Rollback = voltar o DNS pro Railway.
+
+Verificação 06/set 20:4x UTC: segredos preenchidos no painel pelo dono — run de verificação (smoke + tail com 'start envVars:').

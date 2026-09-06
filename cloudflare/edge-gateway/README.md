@@ -26,6 +26,23 @@ Trocar a URL de callback no painel do Cloro (e/ou `CLORO_WEBHOOK_URL` no
 Railway) para `https://<worker>/cloro/callback`. **Fora de janela de censo**
 (segunda 06:00 UTC). Rollback = apontar a URL de volta pro Railway.
 
+## Segredos (fonte única: GitHub Secrets)
+
+Nenhum segredo em chat, commit ou wrangler.jsonc. O fluxo é: colar o valor no
+painel do GitHub (Settings → Secrets → Actions) → rodar o workflow
+`sync-cf-secrets` → ele propaga via `wrangler secret put`. Rotacionar =
+atualizar no GitHub e re-rodar. A lista completa pensada pra migração inteira:
+
+| Secret | Usado a partir de | Pra quê |
+|---|---|---|
+| `CLOUDFLARE_API_TOKEN` | já | deploy + sync (permissão Workers Scripts: Edit) |
+| `SUPABASE_URL` · `SUPABASE_SERVICE_ROLE_KEY` | fase 2 | consumer grava resultados no banco |
+| `CLORO_API_KEY` · `CLORO_WEBHOOK_SECRET` | fase 2 | submeter tarefas + verificar assinatura na edge |
+| `ANTHROPIC_API_KEY` · `OPENAI_API_KEY` · `GOOGLE_GENERATIVE_AI_API_KEY` | fase 3 | censo via API na edge |
+| `SCRAPEDO_API_KEY` | fase 3 | varredura de site / reviews |
+
+O gateway (fase 1) não precisa de segredo nenhum — só `ORIGIN_URL`, que é var.
+
 ## Fase 2 — fila (a escala)
 
 Quando o volume justificar: `npx wrangler queues create ultravis-cloro`,

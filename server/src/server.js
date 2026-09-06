@@ -524,10 +524,22 @@ app.use((err, req, res, _next) => {
 // --- Start ---
 const PORT = process.env.PORT || 80;
 
+// Log de boot em console.log cru (diagnóstico Cloudflare Containers, 06/set):
+// desempata "env não chegou" × "listen não alcançado" direto no stdout, antes
+// de qualquer formatação do pino. Barato o bastante pra ficar.
+console.log(
+  'BOOT env-check',
+  'SUPABASE?', Boolean(process.env.SUPABASE_URL),
+  'PORT', process.env.PORT || '(default 80)',
+  'HOST', process.env.HOST || '(n/a)',
+  'NODE_ENV', process.env.NODE_ENV || '(unset)',
+);
+
 // Bugfix pontual do fork (Cloudflare Containers, 06/set): bind explícito em
 // 0.0.0.0 — sem host, o Node tenta '::' e, em VMs onde v6 não mapeia v4, o
 // healthcheck IPv4 da plataforma não enxerga a porta. Inócuo no Railway/local.
 server.listen(PORT, '0.0.0.0', async () => {
+  console.log(`LISTENING 0.0.0.0:${PORT}`);
   logger.info({ port: PORT, env: process.env.NODE_ENV }, 'server running');
 
   await cleanupStaleJobs();

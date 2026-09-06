@@ -14,7 +14,7 @@
       // contexto de build = server/ (mesmo Dockerfile que o Railway usava)
       "image": "../../server/Dockerfile",
       "max_instances": 1,
-      "instance_type": "basic"
+      "instance_type": "standard"
     }
   ],
   "durable_objects": {

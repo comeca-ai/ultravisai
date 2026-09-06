@@ -55,7 +55,9 @@ export class UltravisServer extends Container {
     // envVars como PROPRIEDADE no construtor (a lib não lê getter): repassa
     // ao container todo env de string do worker — secrets do painel incluídos.
     // PASS_ENV vira documentação do que o server espera, não filtro.
-    const out = {};
+    // PORT/HOST explícitos (cinto-e-suspensório do probe 10.0.0.1:80) e
+    // por cima todo env de string do worker — secrets do painel incluídos.
+    const out = { PORT: '80', HOST: '0.0.0.0' };
     for (const [k, v] of Object.entries(env ?? {})) {
       if (typeof v === 'string' && v !== '') out[k] = v;
     }

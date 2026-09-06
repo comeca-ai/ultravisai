@@ -25,12 +25,25 @@ jobs:
       - name: Mascarar token provisório nos logs
         if: ${{ inputs.cf_api_token != '' }}
         run: echo "::add-mask::${{ inputs.cf_api_token }}"
+      - name: Verificar credencial
+        id: cred
+        env:
+          TOK: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$TOK" ]; then
+            echo "has=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=0" >> "$GITHUB_OUTPUT"
+            echo "::warning::CLOUDFLARE_API_TOKEN ausente — deploy do worker pulado (crie o secret e re-rode, ou use Workers Builds no painel)"
+          fi
       - name: Deploy no Cloudflare Workers
+        if: steps.cred.outputs.has == '1'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: cloudflare/edge-gateway
       - name: Smoke test
+        if: steps.cred.outputs.has == '1'
         env:
           SUB: ${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}
         run: |

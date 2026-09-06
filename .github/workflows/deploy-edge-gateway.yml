@@ -1,0 +1,34 @@
+# Deploy do Ultravis Edge Gateway (Cloudflare Worker) — ver cloudflare/edge-gateway/README.md
+#
+# Dispara: manualmente (workflow_dispatch) ou em push na main que toque o worker.
+# Requisito único: secret CLOUDFLARE_API_TOKEN no repo (Settings → Secrets →
+# Actions), com a permissão "Workers Scripts: Edit". O account_id não é segredo
+# e vive no wrangler.jsonc.
+name: deploy-edge-gateway
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['cloudflare/edge-gateway/**']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy no Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: cloudflare/edge-gateway
+      - name: Smoke test
+        env:
+          SUB: ${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}
+        run: |
+          if [ -z "$SUB" ]; then
+            echo "::warning::smoke test pulado — defina a variável CLOUDFLARE_WORKERS_SUBDOMAIN (Settings → Variables) com o subdomínio workers.dev da conta"
+            exit 0
+          fi
+          sleep 5
+          curl -sSf "https://ultravis-edge-gateway.$SUB.workers.dev/health"

@@ -36,24 +36,41 @@ jobs:
             echo "has=0" >> "$GITHUB_OUTPUT"
             echo "::warning::CLOUDFLARE_API_TOKEN ausente — deploy do worker pulado (crie o secret e re-rode, ou use Workers Builds no painel)"
           fi
-      # wrangler direto, sem o wrangler-action: o pre-flight (whoami) do action
-      # exige User->Memberships->Read, que Account API Tokens não carregam —
-      # o deploy em si não precisa dessa permissão.
-      - name: Deploy no Cloudflare Workers
+      # API REST crua, sem wrangler: o wrangler 4 (deploy E whoami) resolve
+      # membership roles e falha com Account API Tokens sem User->Memberships->
+      # Read. O upload via REST exige só Workers Scripts: Edit.
+      - name: Deploy no Cloudflare Workers (REST)
         if: steps.cred.outputs.has == '1'
         working-directory: cloudflare/edge-gateway
         env:
-          CLOUDFLARE_API_TOKEN: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: '749b2e9b3642e4b03321d5830e81c195'
-        run: npx --yes wrangler@4.129.0 deploy
-      - name: Smoke test
-        if: steps.cred.outputs.has == '1'
-        env:
-          SUB: ${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}
+          CF_TOKEN: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
+          ACC: '749b2e9b3642e4b03321d5830e81c195'
+          SCRIPT: ultravis-edge-gateway
         run: |
-          if [ -z "$SUB" ]; then
-            echo "::warning::smoke test pulado — defina a variável CLOUDFLARE_WORKERS_SUBDOMAIN (Settings → Variables) com o subdomínio workers.dev da conta"
-            exit 0
-          fi
-          sleep 5
-          curl -sSf "https://ultravis-edge-gateway.$SUB.workers.dev/health"
+          set -euo pipefail
+          cat > /tmp/metadata.json <<'EOF'
+          {
+            "main_module": "index.js",
+            "compatibility_date": "2026-08-01",
+            "observability": { "enabled": true },
+            "bindings": [
+              { "type": "plain_text", "name": "ORIGIN_URL", "text": "https://api.ultravis.ai" }
+            ]
+          }
+          EOF
+          echo "— upload do script"
+          curl -sS -f -X PUT             "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$SCRIPT"             -H "Authorization: Bearer $CF_TOKEN"             -F "metadata=@/tmp/metadata.json;type=application/json"             -F "index.js=@src/index.js;type=application/javascript+module"             | head -c 600; echo
+          echo "— habilitar rota workers.dev do script"
+          curl -sS -f -X POST             "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$SCRIPT/subdomain"             -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json"             -d '{"enabled": true, "previews_enabled": false}' | head -c 300; echo
+          echo "— descobrir o subdomínio workers.dev da conta"
+          SUB=$(curl -sS -f "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/subdomain"             -H "Authorization: Bearer $CF_TOKEN" | python3 -c 'import json,sys;print(json.load(sys.stdin)["result"]["subdomain"])')
+          URL="https://$SCRIPT.$SUB.workers.dev"
+          echo "WORKER_URL=$URL" >> "$GITHUB_ENV"
+          echo "### Worker publicado: $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Smoke test (health)
+        if: steps.cred.outputs.has == '1'
+        run: |
+          sleep 8
+          curl -sSf "$WORKER_URL/health"
+          echo
+          echo "### Smoke test OK: $WORKER_URL/health" >> "$GITHUB_STEP_SUMMARY" 

@@ -5,6 +5,23 @@
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
 > `BACKLOG.md` (o que vem). **Atualizado: 29/ago/2026.**
 
+## ⚠️ INCIDENTE ABERTO (06/set): rastreamento parado há 13 dias
+
+O censo de segunda 31/ago **rodou no horário e coletou ZERO resultados** (as 8
+marcas, `resultCount: 0`). Causa dupla, provada nos logs de 06:00 UTC:
+1. **Cloro sem créditos** — todo submit de scraper falhou com
+   `403 INSUFFICIENT_CREDITS` (chatgpt-web, perplexity, copilot, google-aimode…);
+2. **Claude 401** — a mesma `ANTHROPIC_API_KEY` inválida desde 8/ago (31
+   falhas só nessa hora).
+
+Correção é do dono, antes do censo de segunda 06:00 UTC: **recarregar créditos
+do Cloro** e **trocar a chave da Anthropic no Railway** — aí o sistema se
+recupera sozinho. Créditos de outras plataformas (ex.: Cloudflare) NÃO
+substituem: o produto mede os motores reais (ChatGPT/Gemini/Claude), que só
+saem via Cloro (interfaces web) e via chave da Anthropic (API). O vigia acusou
+certo (`tracking-silent`), mas o alerta ficou só no log — o e-mail de operação
+desligado é a pendência nº 1 e este incidente é o argumento definitivo.
+
 ## A aplicação está no ar e saudável ✅
 
 | Camada | Estado |

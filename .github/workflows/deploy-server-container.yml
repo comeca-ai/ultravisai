@@ -92,6 +92,11 @@ jobs:
           echo "===== tail do worker/container ====="
           cat /tmp/tail.log
           echo "===== fim do tail ====="
+          echo "===== estado das instâncias (containers list/info) ====="
+          npx wrangler@4.129.0 containers list 2>&1 | tee /tmp/clist.log || true
+          APP_ID=$(grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' /tmp/clist.log | head -1)
+          if [ -n "$APP_ID" ]; then npx wrangler@4.129.0 containers info "$APP_ID" 2>&1 || true; fi
+          echo "===== fim do estado ====="
           {
             echo '### Tail do container (diagnóstico)'
             echo '```'

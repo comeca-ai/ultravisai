@@ -10,7 +10,7 @@ WORKDIR /ansvisor-server
 
 COPY package.json package-lock.json* ./
 
-RUN npm install && npm install -g pm2
+RUN npm ci --omit=dev && npm install -g pm2
 
 COPY . .
 

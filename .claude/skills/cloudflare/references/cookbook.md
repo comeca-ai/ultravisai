@@ -97,3 +97,25 @@ segue suportado, mas `send()` é o caminho novo.
 - `account_id` no wrangler.jsonc não é segredo. Segredos: GitHub Secrets
   (workflow `sync-cf-secrets`) ou painel do worker.
 - Toda decisão de arquitetura Cloudflare → linha no DECISOES.md, mesmo PR.
+
+## 6 · Containers: env que não chega (lições do run #9, 06/set)
+
+Sintoma clássico: app dentro do container em crash-loop por env ausente
+("Missing SUPABASE_URL...") com o worker já cheio de secrets. Três fatos da
+lib `@cloudflare/containers` 0.0.28 (conferidos no fonte, `npm pack`):
+
+1. **`this.envVars` de construtor não confiável** — o caminho garantido é
+   injetar no momento do start:
+   `await this.startAndWaitForPorts({ startOptions: { envVars }, ports: [80] })`.
+2. **A chave é `envVars`, não `env`** (`ContainerStartConfigOptions`) — `env`
+   é ignorado em silêncio.
+3. **`startAndWaitForPorts` PULA o `start()` se o container já está
+   `running`** — e um supervisor tipo pm2-runtime nunca morre, então um
+   container que subiu sem env fica "running" em crash-loop eterno
+   (`active:1, healthy:0, failed:0`). Antes de startar com env nova:
+   `running && getState().status !== 'healthy'` ⇒ `await this.destroy()`.
+
+Observabilidade: o stdout do container NÃO sai no `wrangler tail` (só a aba
+Logs do painel mostra). `console.log` no lado do worker (classe DO) SAI no
+tail — logar `Object.keys(envVars)` no start é a prova barata de que a env
+foi. `instance_type: "standard"` foi renomeado para `"standard-1"`.

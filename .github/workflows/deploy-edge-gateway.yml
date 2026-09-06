@@ -15,7 +15,7 @@ on:
         type: string
   push:
     branches: [main]
-    paths: ['cloudflare/edge-gateway/**']
+    paths: ['cloudflare/edge-gateway/**', '.github/workflows/deploy-edge-gateway.yml']
 
 jobs:
   deploy:
@@ -42,6 +42,7 @@ jobs:
         with:
           apiToken: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: cloudflare/edge-gateway
+          wranglerVersion: '4.129.0'
       - name: Smoke test
         if: steps.cred.outputs.has == '1'
         env:

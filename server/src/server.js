@@ -524,7 +524,10 @@ app.use((err, req, res, _next) => {
 // --- Start ---
 const PORT = process.env.PORT || 80;
 
-server.listen(PORT, async () => {
+// Bugfix pontual do fork (Cloudflare Containers, 06/set): bind explícito em
+// 0.0.0.0 — sem host, o Node tenta '::' e, em VMs onde v6 não mapeia v4, o
+// healthcheck IPv4 da plataforma não enxerga a porta. Inócuo no Railway/local.
+server.listen(PORT, '0.0.0.0', async () => {
   logger.info({ port: PORT, env: process.env.NODE_ENV }, 'server running');
 
   await cleanupStaleJobs();

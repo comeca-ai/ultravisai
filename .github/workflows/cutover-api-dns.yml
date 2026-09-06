@@ -1,0 +1,72 @@
+# CORTE one-shot: api.ultravis.ai → worker ultravis-server (Custom Domain).
+# Ordem defensiva: (1) lê e IMPRIME o registro atual (é o rollback);
+# (2) tenta o attach SEM apagar nada; (3) só se o attach reclamar de registro
+# existente, apaga o CNAME e tenta de novo; (4) smoke até 200.
+# Se o token não tiver permissão de zona, falha ANTES de tocar no DNS.
+# Rollback manual: recriar CNAME api → valor impresso no passo 2 (DNS-only).
+# Roda no merge deste arquivo; depois fica inerte.
+name: cutover-api-dns
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/cutover-api-dns.yml']
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACC: '749b2e9b3642e4b03321d5830e81c195'
+      HOST: 'api.ultravis.ai'
+      ZONE: 'ultravis.ai'
+      SERVICE: 'ultravis-server'
+    steps:
+      - name: Cortar DNS pro worker (com rollback impresso)
+        run: |
+          CF="https://api.cloudflare.com/client/v4"
+          j() { python3 -c 'import json,sys;print(json.dumps(json.load(sys.stdin),indent=1)[:900])'; }
+          okof() { python3 -c 'import json,sys;print(1 if json.load(sys.stdin).get("success") else 0)'; }
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && { echo "::error::sem token"; exit 1; }
+
+          echo "== 1. zona =="
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$CF/zones?name=$ZONE" > /tmp/zone.json
+          j < /tmp/zone.json
+          ZID=$(python3 -c 'import json;r=json.load(open("/tmp/zone.json")).get("result") or [];print(r[0]["id"] if r else "")')
+          [ -z "$ZID" ] && { echo "::error::token não enxerga a zona $ZONE (falta Zone:Read/DNS) — NADA foi alterado"; exit 1; }
+
+          echo "== 2. registro atual de $HOST (ROLLBACK: recriar igual, DNS-only) =="
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$CF/zones/$ZID/dns_records?name=$HOST" > /tmp/rec.json
+          j < /tmp/rec.json
+          RID=$(python3 -c 'import json;r=json.load(open("/tmp/rec.json")).get("result") or [];print(r[0]["id"] if r else "")')
+
+          attach() {
+            curl -sS -X PUT -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+              "$CF/accounts/$ACC/workers/domains" \
+              --data "{\"zone_id\":\"$ZID\",\"hostname\":\"$HOST\",\"service\":\"$SERVICE\",\"environment\":\"production\"}"
+          }
+          echo "== 3. attach do domínio personalizado =="
+          attach > /tmp/att.json; j < /tmp/att.json
+          if [ "$(okof < /tmp/att.json)" != "1" ] && [ -n "$RID" ]; then
+            echo "== 3b. attach recusou; apagando CNAME antigo e repetindo =="
+            curl -sS -X DELETE -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$CF/zones/$ZID/dns_records/$RID" | j
+            attach > /tmp/att.json; j < /tmp/att.json
+          fi
+          if [ "$(okof < /tmp/att.json)" != "1" ]; then
+            echo "::error::attach falhou — JSON acima. Se o CNAME foi apagado no 3b, ROLLBACK: recriar api → valor do passo 2 (DNS-only)."
+            exit 1
+          fi
+
+          echo "== 4. smoke https://$HOST/ =="
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            sleep 15
+            code=$(curl -sS -o /tmp/b -w '%{http_code}' "https://$HOST/" || echo 000)
+            echo "tentativa $i: HTTP $code"
+            if [ "$code" = "200" ]; then
+              head -c 200 /tmp/b; echo
+              echo "### CORTE OK: $HOST → worker $SERVICE (HTTP 200)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          done
+          echo "::warning::domínio anexado mas smoke ainda não-200 (certificado pode levar alguns min) — conferir https://$HOST/ manualmente"
+          echo "### Domínio anexado; smoke pendente — conferir https://$HOST/" >> "$GITHUB_STEP_SUMMARY"

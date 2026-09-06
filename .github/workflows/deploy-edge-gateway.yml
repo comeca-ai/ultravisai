@@ -58,12 +58,23 @@ jobs:
             ]
           }
           EOF
+          cf() { curl -sS "$@" ; }
+          check() { python3 -c 'import json,sys
+          b=sys.stdin.read()
+          try: d=json.loads(b)
+          except Exception: print(b[:800]); sys.exit(1)
+          print(json.dumps(d, ensure_ascii=False)[:800])
+          sys.exit(0 if d.get("success") else 1)' ; }
+          echo "— verify do token (a resposta da API, crua)"
+          cf "https://api.cloudflare.com/client/v4/accounts/$ACC/tokens/verify" -H "Authorization: Bearer $CF_TOKEN" | check || true
+          echo "— leitura: listar workers existentes"
+          cf "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts" -H "Authorization: Bearer $CF_TOKEN" | check || true
           echo "— upload do script"
-          curl -sS -f -X PUT             "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$SCRIPT"             -H "Authorization: Bearer $CF_TOKEN"             -F "metadata=@/tmp/metadata.json;type=application/json"             -F "index.js=@src/index.js;type=application/javascript+module"             | head -c 600; echo
+          cf -X PUT "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$SCRIPT" -H "Authorization: Bearer $CF_TOKEN" -F "metadata=@/tmp/metadata.json;type=application/json" -F "index.js=@src/index.js;type=application/javascript+module" | check
           echo "— habilitar rota workers.dev do script"
-          curl -sS -f -X POST             "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$SCRIPT/subdomain"             -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json"             -d '{"enabled": true, "previews_enabled": false}' | head -c 300; echo
+          cf -X POST "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$SCRIPT/subdomain" -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" -d '{"enabled": true, "previews_enabled": false}' | check
           echo "— descobrir o subdomínio workers.dev da conta"
-          SUB=$(curl -sS -f "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/subdomain"             -H "Authorization: Bearer $CF_TOKEN" | python3 -c 'import json,sys;print(json.load(sys.stdin)["result"]["subdomain"])')
+          SUB=$(cf "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/subdomain" -H "Authorization: Bearer $CF_TOKEN" | python3 -c 'import json,sys;print(json.load(sys.stdin)["result"]["subdomain"])')
           URL="https://$SCRIPT.$SUB.workers.dev"
           echo "WORKER_URL=$URL" >> "$GITHUB_ENV"
           echo "### Worker publicado: $URL" >> "$GITHUB_STEP_SUMMARY"

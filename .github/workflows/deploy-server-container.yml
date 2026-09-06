@@ -1,0 +1,64 @@
+# Deploy do Ultravis Server como Cloudflare Container — ver
+# cloudflare/server-container/README.md.
+#
+# Requisitos (uma vez): Workers Paid na conta (Containers) e o secret
+# CLOUDFLARE_API_TOKEN com um token do template "Edit Cloudflare Workers"
+# (wrangler builda a imagem e publica; containers não saem pela REST crua —
+# e wrangler com Account API Token morre em membership roles, lição da skill
+# cloudflare).
+#
+# Auditoria: todo deploy nasce de push na main (PR mergeado) e fica com log
+# completo neste workflow.
+name: deploy-server-container
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/server-container/**'
+      - 'server/**'
+      - '.github/workflows/deploy-server-container.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar credencial
+        id: cred
+        env:
+          TOK: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$TOK" ]; then echo "has=1" >> "$GITHUB_OUTPUT"; else
+            echo "has=0" >> "$GITHUB_OUTPUT"
+            echo "::warning::CLOUDFLARE_API_TOKEN ausente — deploy pulado"
+          fi
+      - name: Deploy (wrangler + build da imagem)
+        if: steps.cred.outputs.has == '1'
+        working-directory: cloudflare/server-container
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: '749b2e9b3642e4b03321d5830e81c195'
+        run: |
+          npm install --no-audit --no-fund
+          npx wrangler@4.129.0 deploy 2>&1 | tee /tmp/deploy.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "## Deploy falhou — leia o motivo acima." >> "$GITHUB_STEP_SUMMARY"
+            if grep -qi "membership" /tmp/deploy.log; then
+              echo "::error::wrangler exige token do template 'Edit Cloudflare Workers' (User→Memberships→Read). Recrie o token pelo template e atualize o secret."
+            fi
+            if grep -qiE "paid|upgrade|not (available|enabled)" /tmp/deploy.log; then
+              echo "::error::Containers exige o plano Workers Paid (~US\$5/mês) — ativar em dash.cloudflare.com → Workers e Pages → Plans."
+            fi
+            exit "$rc"
+          fi
+          echo "### Server container publicado — worker ultravis-server" >> "$GITHUB_STEP_SUMMARY"
+      - name: Smoke test (GET / via worker)
+        if: steps.cred.outputs.has == '1'
+        run: |
+          sleep 15
+          curl -sSf "https://ultravis-server.jhonata-emerick.workers.dev/" | head -c 200
+          echo
+          echo "### Smoke test OK: https://ultravis-server.jhonata-emerick.workers.dev/" >> "$GITHUB_STEP_SUMMARY"

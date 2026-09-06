@@ -1,7 +1,7 @@
 # Ultravis Edge Gateway — POC 1 do caminho Cloudflare
 
-> **Status 06/set**: secret `CLOUDFLARE_API_TOKEN` criado pelo dono; este
-> commit dispara o primeiro deploy real via Actions.
+> **Status 06/set**: token com Workers Scripts: Edit confirmado pelo dono
+> (diagnóstico do run #7: lia, não escrevia); este commit dispara o deploy.
 
 Worker que recebe o webhook do Cloro na edge e encaminha, com retry, pro
 server atual (Railway). **Nenhuma lógica muda de lugar neste POC** — por isso

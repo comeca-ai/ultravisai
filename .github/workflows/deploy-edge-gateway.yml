@@ -43,6 +43,7 @@ jobs:
           apiToken: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: cloudflare/edge-gateway
           wranglerVersion: '4.129.0'
+          accountId: '749b2e9b3642e4b03321d5830e81c195'
       - name: Smoke test
         if: steps.cred.outputs.has == '1'
         env:

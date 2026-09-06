@@ -1,0 +1,161 @@
+<title>Verificação de produção</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --red:#C0492A; --redSoft:#FBEEEA;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:48px 0 38px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2.15rem;letter-spacing:-.02em;margin-top:13px}
+.covsub{color:var(--ink2);margin-top:9px;max-width:76ch}
+.verdict{display:flex;gap:14px;flex-wrap:wrap;margin-top:24px}
+.vd{flex:1;min-width:240px;border-radius:11px;padding:15px 18px;border:1px solid}
+.vd.ok{background:var(--goodSoft);border-color:var(--good)}
+.vd.warn{background:var(--amberSoft);border-color:var(--amber)}
+.vd .vl{font-family:var(--mono);font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.vd.ok .vl{color:var(--good)} .vd.warn .vl{color:var(--amber)}
+.vd .vt{font-weight:700;font-size:1rem;margin-top:6px}
+.vd .vv{font-size:.85rem;color:var(--ink2);margin-top:4px}
+.page{padding:30px 0 60px}
+h2{font-family:var(--serif);font-size:1.35rem;font-weight:500;margin-top:40px}
+.note{color:var(--ink2);font-size:.88rem;margin-top:6px;max-width:82ch}
+table{width:100%;border-collapse:collapse;margin-top:13px;background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+th{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;text-align:left;padding:10px 13px;background:var(--sunk);border-bottom:1px solid var(--rule2)}
+td{padding:10px 13px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:top;color:var(--ink2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+.ok{color:var(--good);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.no{color:var(--red);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.mono{font-family:var(--mono);font-size:.78rem}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:18px 22px;margin-top:14px}
+.box.red{border-color:var(--red);background:var(--redSoft)}
+.box .bl{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red)}
+.box.n .bl{color:var(--good)}
+.box .bt{font-weight:700;font-size:1rem;margin-top:6px}
+.box p{font-size:.87rem;color:var(--ink2);margin-top:7px}
+.box b{color:var(--ink)}
+pre{background:#26251F;color:#EDEBE4;border-radius:9px;padding:13px 15px;font-family:var(--mono);font-size:.72rem;overflow-x:auto;margin-top:10px;line-height:1.75}
+.foot{font-family:var(--mono);font-size:.68rem;color:var(--ink2);line-height:1.9;border-top:1px solid var(--rule);padding-top:20px;margin-top:40px}
+.foot b{color:var(--good)}
+@media (max-width:780px){.wrap{padding:0 18px}h1{font-size:1.7rem}}
+</style>
+
+<div class="cover">
+  <div class="wrap">
+    <div class="eyebrow">Verificação de produção · 26/ago/2026</div>
+    <h1>As mudanças foram feitas. As contas batem — com três ressalvas.</h1>
+    <p class="covsub">Compilação de tudo que mudou em 19/ago (15 PRs, #80–#94) com verificação mecânica de cada entrega, conferência das fórmulas entre as três camadas e leitura do que a produção reportou nos sete dias seguintes.</p>
+    <div class="verdict">
+      <div class="vd ok">
+        <div class="vl">Entregas</div>
+        <div class="vt">21 de 21 confirmadas</div>
+        <div class="vv">Cada PR verificado na main pelo artefato que prometeu — arquivo, chave i18n, migration ou função.</div>
+      </div>
+      <div class="vd ok">
+        <div class="vl">Contas</div>
+        <div class="vt">Fórmulas reconciliadas</div>
+        <div class="vv">Resumo, Score e banco usam os mesmos filtros e denominadores declarados. 223 testes verdes.</div>
+      </div>
+      <div class="vd warn">
+        <div class="vl">Produção</div>
+        <div class="vt">3 problemas ativos</div>
+        <div class="vv">Dois eram alarme falso do meu próprio vigia — corrigidos esta noite. Um é real e depende de você.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap page">
+
+  <h2>1 · O que a produção reportou nos últimos sete dias</h2>
+  <p class="note">O vigia roda a cada 15 minutos desde 19/ago. Li os alertas de 22 a 26/ago direto dos logs do servidor — é a evidência viva de que as contas batem ou não.</p>
+
+  <div class="box red">
+    <div class="bl">Problema real · depende de você</div>
+    <div class="bt">O Claude segue com credencial inválida — e agora está medido</div>
+    <p>Em 24/ago um censo rodou e <b>ao menos 101 chamadas ao Claude falharam com 401 "API key is invalid"</b>, uma a uma, nos logs (consulta capada em ~100 entradas; corrigido de "40" na revisão de 29/ago). O vigia acusou corretamente: <span class="mono">consistency-engine-silent (crítico)</span> — "grok-web e claude sem entregar resultado na janela de 8 dias enquanto os demais entregaram". Segue disparando a cada ciclo.</p>
+    <p>Junto com ele: <span class="mono">cloro-stuck</span> subiu de 4 → 7 → <b>49 tarefas pendentes há mais de 2h</b>. A fila do fornecedor de coleta está acumulando tarefas que nunca voltam — consistente com a falha do Grok que o projeto original também enfrentou e já publicou proteção.</p>
+    <p><b>O que isso significa para os números:</b> o painel continua correto para os seis motores que entregam; os dois que não entregam simplesmente não aparecem — e o vigia declara isso em vez de deixar passar como zero.</p>
+  </div>
+
+  <div class="box n">
+    <div class="bl">Alarme falso 1 · corrigido esta noite</div>
+    <div class="bt">"Sentimento 100% neutro" com a análise funcionando perfeitamente</div>
+    <p>Em 24/ago o vigia disparou crítico: <span class="mono">"Sentimento 100% neutral nos últimos 28 resultados — verifique OPENAI_API_KEY"</span>. A chave estava boa. O check contava <b>todas</b> as respostas recentes, mas o sentimento só roda quando a marca é mencionada — as demais gravam "neutral" por padrão. Uma janela de três horas sem nenhuma menção dispara o alerta sozinha.</p>
+    <p><b>Correção:</b> o check passou a contar apenas respostas <b>com menção</b>. O incidente real de 10/ago (o 401 silencioso da OpenAI) continua sendo detectado — está coberto por teste.</p>
+  </div>
+
+  <div class="box n">
+    <div class="bl">Alarme falso 2 · corrigido esta noite</div>
+    <div class="bt">O vigia acusava o domínio do cliente todos os dias — mentindo</div>
+    <p>Todo ciclo, desde 22/ago: <span class="mono">"Domínio cadastrado com protocolo/www/caminho (citações próprias deixam de contar): Polar: www.polar.com…"</span>. Testei a afirmação contra o código real:</p>
+    <pre>extractHostname("www.polar.com")            → polar.com
+extractHostname("https://www.polar.com/br") → polar.com
+countOwnDomainCitations(cites, ["www.polar.com"])            = 2
+countOwnDomainCitations(cites, ["https://www.polar.com/br"]) = 2</pre>
+    <p>As citações contam <b>igual</b>. O alerta estava errado — e errado justamente sobre a marca do cliente, que é a que mais se olha. Substituído por dois checks honestos: <b>domínio que não vira hostname nenhum</b> (erro de cadastro real) e <b>domínio com caminho</b>, cuja consequência verdadeira é outra: a comparação usa só o host, então qualquer link daquele host passaria a contar como seu — o caso real <span class="mono">linktr.ee/…</span> cadastrado como domínio de um concorrente.</p>
+  </div>
+
+  <h2>2 · Cada entrega de 19/ago, verificada na main</h2>
+  <p class="note">Verificação mecânica: para cada PR, o artefato que ele prometia existe no código publicado. Nenhum "confie em mim".</p>
+  <table>
+    <thead><tr><th style="width:190px">Entrega</th><th>Verificado por</th><th style="width:70px">Resultado</th></tr></thead>
+    <tbody>
+      <tr><td>Vigia de consistência</td><td><span class="mono">consistency.js</span> na main e chamado pelo watchdog</td><td class="ok">OK</td></tr>
+      <tr><td>Score: Leitura e Ranking</td><td>Rótulos presentes nos dois idiomas</td><td class="ok">OK</td></tr>
+      <tr><td>Sentimento com fontes</td><td><span class="mono">topSources</span> na action do índice</td><td class="ok">OK</td></tr>
+      <tr><td>Citabilidade: matriz</td><td>"Você controla" nos textos publicados</td><td class="ok">OK</td></tr>
+      <tr><td>Auditoria por evidência</td><td>Módulo, testes e uso no relatório da auditoria</td><td class="ok">OK</td></tr>
+      <tr><td>Resumo do Insights</td><td>Migration 00044 no repo e dentro do schema consolidado</td><td class="ok">OK</td></tr>
+      <tr><td>Presença com % em destaque</td><td>Valor do card é o percentual (ajuste do dono)</td><td class="ok">OK</td></tr>
+      <tr><td>Menções e Citações fora do resumo</td><td>Componente de delta removido — sem código morto de UI</td><td class="ok">OK</td></tr>
+      <tr><td>Correções da revisão</td><td>Motor de API no radar · pesos efetivos do índice · plurais ICU</td><td class="ok">OK</td></tr>
+      <tr><td>Ata e material recebido</td><td>Ata dos sócios + 13 arquivos versionados</td><td class="ok">OK</td></tr>
+      <tr><td>Documentação</td><td>STATUS, UML com geradores, wireframe</td><td class="ok">OK</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3 · As contas, conferidas entre as três camadas</h2>
+  <p class="note">A família de bug mais perigosa é a tela que não fecha com o banco. Conferi cada número do resumo nas três camadas onde ele passa: consulta no banco → cálculo na aplicação → texto na tela.</p>
+  <table>
+    <thead><tr><th style="width:150px">Número</th><th>Banco</th><th>Aplicação e tela</th><th style="width:70px">Bate?</th></tr></thead>
+    <tbody>
+      <tr><td>Presença</td><td>Prompts distintos com resultado na janela e nos filtros</td><td>Prompts visíveis ÷ prompts rastreados — <b>o mesmo denominador do card ao lado</b>, por construção</td><td class="ok">SIM</td></tr>
+      <tr><td>Ranking médio</td><td>Soma e contagem das respostas com ordem calculada</td><td>Média = soma ÷ contagem; a distribuição 1º/2º/3º/4º+ particiona exatamente esse conjunto</td><td class="ok">SIM</td></tr>
+      <tr><td>Sentimento</td><td>Positivas, neutras e negativas <b>entre respostas com menção</b></td><td>Mesma regra do card de Sentimento no Score — a análise não roda sem menção</td><td class="ok">SIM</td></tr>
+      <tr><td>Leitura (citação)</td><td>Respostas que citam domínio próprio, hostname normalizado</td><td>Normalização idêntica no servidor e na aplicação (provado em teste esta noite)</td><td class="ok">SIM</td></tr>
+      <tr><td>Filtros e janela</td><td>Uma única cláusula de filtro alimenta todos os campos novos</td><td>Impossível divergirem: os números novos nasceram na mesma consulta dos antigos</td><td class="ok">SIM</td></tr>
+    </tbody>
+  </table>
+  <p class="note"><b>Uma diferença que não é erro:</b> a Presença no resumo conta <b>prompts</b> ("apareci em 12 de 54 prompts") e a Presença no Score conta <b>respostas</b> ("mencionada em 318 de 720 respostas"). São unidades diferentes de propósito, e cada tela declara a sua no próprio texto. Dois números diferentes, ambos corretos.</p>
+
+  <h2>4 · Sua fila</h2>
+  <table>
+    <thead><tr><th style="width:250px">O quê</th><th>Efeito hoje</th></tr></thead>
+    <tbody>
+      <tr><td>Trocar a credencial da Anthropic no servidor</td><td>Destrava o Claude como motor (40 falhas por censo) e a camada de LLM do vigia</td></tr>
+      <tr><td>Fila do fornecedor de coleta: 49 tarefas presas</td><td>Chamado no fornecedor — ou eu porto a proteção que o projeto original publicou, que para de enviar tarefas enquanto o motor devolve erro</td></tr>
+      <tr><td>E-mail dedicado de operação</td><td>Os alertas acima ficam só no log; com o e-mail configurado, chegam a você em minutos</td></tr>
+    </tbody>
+  </table>
+
+  <div class="foot">
+    <b>MÉTODO</b> — entregas verificadas por inspeção do código publicado na main (21 checagens automatizadas); fórmulas conferidas nas três camadas por leitura cruzada; estado de produção lido dos logs do servidor de 22 a 26/ago; normalização de domínio provada por execução direta do código.<br>
+    LIMITE DECLARADO — o acesso direto ao banco está bloqueado nesta sessão, então não recontei os números do cliente célula a célula hoje; a conferência foi feita pelas fórmulas, pelos testes e pelo que o vigia reporta de dentro da produção.<br>
+    CORREÇÕES DESTA NOITE — dois checks do vigia reescritos e cobertos por teste (223 verdes). Nenhuma mudança de comportamento no produto.
+  </div>
+
+</div>

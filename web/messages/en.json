@@ -57,7 +57,7 @@
     "emptyBodyOr": "or",
     "emptyExample2": "“who's gaining share of voice this month?”",
     "keyMissingTitle": "Add your Anthropic API key",
-    "keyMissingBody": "The agent uses your own Anthropic key to call Claude directly — usage is billed to your Anthropic account, not to Ansvisor. Paste a key in Settings to unlock the chat.",
+    "keyMissingBody": "The agent uses your own Anthropic key to call Claude directly — usage is billed to your Anthropic account, not to Ultravis. Paste a key in Settings to unlock the chat.",
     "goToSettings": "Go to Settings",
     "planGateTitle": "Agent is a {plan} feature",
     "planGateBody": "Upgrade your plan to chat with your dashboard about visibility, competitors, citations, and content gaps."
@@ -137,7 +137,19 @@
       "llmsTxt": "llms.txt missing from the site root — the Citability Index generates the ready file (\"Copy ready llms.txt\" button).",
       "openGraph": "Missing social meta tags: {missing} — AIs and link previews use these fields to understand and present the page.",
       "robotsMissing": "No robots.txt — AI bots crawl by default, but declare access explicitly (GPTBot, ClaudeBot, PerplexityBot…)."
-    }
+    },
+    "copied": "Copied",
+    "copyFailed": "Copy failed",
+    "copyDraft": "Copy draft",
+    "finding": "Finding:",
+    "why": "Why:",
+    "recommendedFix": "Recommended fix:",
+    "fix": "Fix:",
+    "aiRecommendations": "AI Recommendations",
+    "signals": "Signals",
+    "impactHigh": "high impact",
+    "impactMedium": "medium impact",
+    "impactLow": "low impact"
   },
   "auth": {
     "signIn": "Sign in",
@@ -263,12 +275,6 @@
     "allTopics": "All Topics",
     "allRegions": "All Regions",
     "allPlatforms": "All Platforms",
-    "recommendations": "Recommendations",
-    "recommendationsSub": "Ideas from your stored analyses — independent of the date filters above.",
-    "topicOpportunities": "Topic Opportunities",
-    "promptOpportunities": "Prompt Opportunities",
-    "topicOppEmpty": "No topic clusters yet. Analyze your prompt volumes to surface the themes with the most AI search demand.",
-    "promptOppEmpty": "No prompt suggestions stored yet. Generate AI prompt ideas based on your brand and competitor citations.",
     "noCompetitorsTitle": "No competitors tracked yet",
     "noCompetitorsBody": "Add competitors to see how you compare in AI answers.",
     "headToHead": "Head-to-Head Comparison",
@@ -282,7 +288,6 @@
     "exportCsv": "Export CSV",
     "testSingle": "Test Single Prompt",
     "runAll": "Run All",
-    "visibilityRateTitle": "Visibility Index",
     "trackedPromptsTitle": "Tracked Prompts",
     "visibilityTooltip": "Share of tracked prompts where your brand appeared in at least one AI answer under the current filters.",
     "trackedTooltip": "Distinct prompts that produced results under the selected period and filters. One prompt can fan out into micro-questions — which is why collected answers outnumber prompts. The quota below is the organization’s current usage and does not change with the period.",
@@ -365,7 +370,14 @@
     "sentimentNeutral": "Neutral",
     "sentimentNegative": "Negative",
     "sentimentCounts": "{pos} positive · {neu} neutral · {neg} negative",
-    "upgrade": "Upgrade"
+    "upgrade": "Upgrade",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "youBadge": "YOU",
+    "showAll": "Show all ({count})",
+    "showLess": "Show less",
+    "voiceShareTooltip": "{sov}% SoV · {share}% of voice",
+    "analysisComplete": "Analysis complete — {count} results saved."
   },
   "topics": {
     "addTopic": "Add Topic",
@@ -1299,7 +1311,7 @@
       "contributionAria": "Bar showing each dimension's contribution to the index, in points",
       "pts": "{pts} pts",
       "evolutionTitle": "Evolution — weekly censuses",
-      "evolutionAria": "Visibility Index evolution across weeks",
+      "evolutionAria": "Citability Index evolution across weeks",
       "evolutionEmpty": "Evolution appears from the second weekly census onward."
     },
     "zones": {
@@ -2238,25 +2250,41 @@
           "num": "01",
           "title": "Monitored answers",
           "body": "What each model says about your brand, in what tone, and next to which competitors — refreshed daily.",
-          "tags": ["sentiment", "share of answer", "competitors"]
+          "tags": [
+            "sentiment",
+            "share of answer",
+            "competitors"
+          ]
         },
         {
           "num": "02",
           "title": "Questions that matter",
           "body": "The real questions that lead to your category, with estimated volume and the cost of not being in them.",
-          "tags": ["prompt volume", "intent", "prioritization"]
+          "tags": [
+            "prompt volume",
+            "intent",
+            "prioritization"
+          ]
         },
         {
           "num": "03",
           "title": "Citations and sources",
           "body": "Which pages and outlets the models cite, and what needs to exist for them to cite you.",
-          "tags": ["sources", "authority", "coverage"]
+          "tags": [
+            "sources",
+            "authority",
+            "coverage"
+          ]
         },
         {
           "num": "04",
           "title": "From reading to action",
           "body": "Every gap becomes a ready brief: what to write, where to publish, what to fix on your site.",
-          "tags": ["briefs", "site audit", "MCP"]
+          "tags": [
+            "briefs",
+            "site audit",
+            "MCP"
+          ]
         }
       ]
     },
@@ -2349,7 +2377,12 @@
           "price": "R$ 390",
           "per": "/mo",
           "body": "To start measuring and understanding the current picture.",
-          "items": ["150 monitored prompts", "4 answer engines", "Weekly report", "1 user"],
+          "items": [
+            "150 monitored prompts",
+            "4 answer engines",
+            "Weekly report",
+            "1 user"
+          ],
           "cta": "Create account",
           "featured": false
         },
@@ -2689,7 +2722,9 @@
         },
         {
           "h": "12. Governing law",
-          "p": ["These Terms are governed by the laws of the Federative Republic of Brazil."]
+          "p": [
+            "These Terms are governed by the laws of the Federative Republic of Brazil."
+          ]
         },
         {
           "h": "13. Contact",

@@ -236,7 +236,7 @@ export default function SiteAuditPage() {
                 return (
                   <div key={cat.key}>
                     <div className="mb-1 flex items-center justify-between text-xs">
-                      <span className="font-medium">{cat.label}</span>
+                      <span className="font-medium">{t(`categories.${cat.key}`)}</span>
                       <span className="text-muted-foreground tabular-nums">
                         {p === null ? t('na') : `${p}/100`}
                       </span>

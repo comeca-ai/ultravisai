@@ -464,7 +464,9 @@ function LeaderboardEntry({ entry, rank }: { entry: CompetitorComparisonEntry; r
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium truncate">{entry.name}</span>
-          {entry.isOwnBrand && <span className="text-[10px] font-medium text-primary">YOU</span>}
+          {entry.isOwnBrand && (
+            <span className="text-[10px] font-medium text-primary">{t('youBadge')}</span>
+          )}
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
           <span>{t('countMentions', { count: entry.totalMentions })}</span>
@@ -496,6 +498,7 @@ function LeaderboardEntry({ entry, rank }: { entry: CompetitorComparisonEntry; r
 }
 
 export function CompetitorLeaderboard({ data }: { data: CompetitorComparisonEntry[] }) {
+  const t = useTranslations('insights');
   const [expanded, setExpanded] = useState(false);
 
   const needsTruncation = data.length > MAX_VISIBLE;
@@ -532,7 +535,7 @@ export function CompetitorLeaderboard({ data }: { data: CompetitorComparisonEntr
           onClick={() => setExpanded(true)}
           className="w-full text-center text-xs font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
         >
-          Show all ({data.length})
+          {t('showAll', { count: data.length })}
         </button>
       )}
       {expanded && (
@@ -540,7 +543,7 @@ export function CompetitorLeaderboard({ data }: { data: CompetitorComparisonEntr
           onClick={() => setExpanded(false)}
           className="w-full text-center text-xs font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
         >
-          Show less
+          {t('showLess')}
         </button>
       )}
     </div>
@@ -630,7 +633,10 @@ export function ShareOfVoicePlatformChart({
                     <div className="rounded-md border bg-popover px-2.5 py-1.5 text-xs shadow-sm">
                       <div className="font-medium">{p.provider}</div>
                       <div className="text-muted-foreground">
-                        {p.sov.toFixed(1)}% SoV · {platformShare.toFixed(1)}% of voice
+                        {t('voiceShareTooltip', {
+                          sov: p.sov.toFixed(1),
+                          share: platformShare.toFixed(1),
+                        })}
                       </div>
                     </div>
                   );

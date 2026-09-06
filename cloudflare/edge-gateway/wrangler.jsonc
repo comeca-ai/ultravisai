@@ -1,0 +1,18 @@
+{
+  // Ultravis Edge Gateway — ver src/index.js e cloudflare/edge-gateway/README.md
+  "name": "ultravis-edge-gateway",
+  "account_id": "749b2e9b3642e4b03321d5830e81c195",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+  "observability": { "enabled": true },
+  "vars": {
+    // Origin atual (server no Railway). Trocar aqui é o "desfazer" do POC.
+    "ORIGIN_URL": "https://api.ultravis.ai"
+  }
+  // Fase 2 (fila por prompt×motor — decisão do dono 06/set "fila seria
+  // perfeito para a escala"): descomentar e criar a fila
+  //   npx wrangler queues create ultravis-cloro
+  // "queues": {
+  //   "producers": [{ "binding": "CLORO_QUEUE", "queue": "ultravis-cloro" }]
+  // }
+}

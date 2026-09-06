@@ -111,19 +111,42 @@ describe('evaluateConsistency', () => {
     expect(alerts.find((a) => a.key === 'consistency-sibling-brands')).toBeUndefined();
   });
 
-  it('flags malformed domains on brands and competitors', () => {
+  it('does NOT flag www/protocol domains — extractHostname normaliza os dois', () => {
     const alerts = evaluateConsistency(
       {
         ...healthy,
         brandDomains: [
-          ...healthy.brandDomains,
-          { brandId: 'b1', domain: 'https://www.polar.com/br' },
+          { brandId: 'b1', domain: 'www.polar.com' },
+          { brandId: 'b2', domain: 'https://certeiro.com.br' },
         ],
       },
       NOW,
     );
-    const hit = alerts.find((a) => a.key === 'consistency-bad-domains');
-    expect(hit?.message).toContain('https://www.polar.com/br');
+    expect(alerts.find((a) => a.key === 'consistency-pathed-domains')).toBeUndefined();
+    expect(alerts.find((a) => a.key === 'consistency-broken-domains')).toBeUndefined();
+  });
+
+  it('flags a domain with a path — qualquer link daquele host contaria como seu', () => {
+    const alerts = evaluateConsistency(
+      {
+        ...healthy,
+        competitors: [
+          ...healthy.competitors,
+          { brandId: 'b1', name: 'Jefferson', domain: 'linktr.ee/jeffersonfbarbosa' },
+        ],
+      },
+      NOW,
+    );
+    const hit = alerts.find((a) => a.key === 'consistency-pathed-domains');
+    expect(hit?.message).toContain('linktr.ee');
+  });
+
+  it('flags a domain that normalizes to no host at all', () => {
+    const alerts = evaluateConsistency(
+      { ...healthy, brandDomains: [{ brandId: 'b1', domain: '/// ' }] },
+      NOW,
+    );
+    expect(alerts.find((a) => a.key === 'consistency-broken-domains')).toBeTruthy();
   });
 
   it('flags brand prompts that contain no known spelling of the brand (caso Anacouto)', () => {

@@ -49,7 +49,6 @@ import {
   type VisibilityRateKpi,
   type CompetitorComparisonData,
   type ShareOfVoiceData,
-  type InsightsRecommendations,
   type TrackingJobStatus,
   type BreakdownMetric,
 } from '@/lib/actions/tracking';
@@ -80,9 +79,6 @@ import {
   ArrowUpRight,
   Download,
   Layers,
-  Lightbulb,
-  Sparkles,
-  Tag,
 } from 'lucide-react';
 import {
   Select,
@@ -95,7 +91,6 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { getAIProviderDisplayName, resolveAIProvider } from '@/components/ai-provider-avatar';
 import { usePlanContext } from '@/components/providers/plan-provider';
-import { formatCompactNumber } from '@/lib/format';
 import { toast } from 'sonner';
 
 // ─── Filter Types ─────────────────────────────────────────────────────────────
@@ -449,7 +444,9 @@ function FilterBar({
       {filters.datePreset === 'custom' && (
         <>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">From</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('dateFrom')}
+            </label>
             <Input
               type="date"
               value={filters.dateFrom}
@@ -458,7 +455,9 @@ function FilterBar({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">To</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {t('dateTo')}
+            </label>
             <Input
               type="date"
               value={filters.dateTo}
@@ -652,137 +651,6 @@ function NoDataForPeriod({ datePreset, onReset }: { datePreset: DatePreset; onRe
   );
 }
 
-// ─── Recommendations ──────────────────────────────────────────────────────────
-
-/** Teaser targets. Topic suggestions live on the Topics page (#463) — its
- *  card expands + scrolls itself for this hash; the prompt-suggestions card
- *  lives on the Prompts page's default All Prompts tab and does the same. */
-const TOPIC_OPPORTUNITIES_HREF = '/dashboard/topics#topic-opportunities';
-const PROMPT_OPPORTUNITIES_HREF = '/dashboard/prompts#prompt-opportunities';
-
-function RecommendationCard({
-  title,
-  icon: Icon,
-  href,
-  emptyText,
-  children,
-  isEmpty,
-}: {
-  title: string;
-  icon: React.ElementType;
-  href: string;
-  emptyText: string;
-  children: React.ReactNode;
-  isEmpty: boolean;
-}) {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="flex items-center gap-2 text-sm font-medium">
-            <Icon className="h-4 w-4 text-primary" />
-            {title}
-          </CardTitle>
-          {!isEmpty && (
-            <Link
-              href={href}
-              className="shrink-0 text-xs font-medium text-primary underline-offset-2 hover:underline"
-            >
-              See all
-            </Link>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        {isEmpty ? (
-          <div className="flex flex-col items-center justify-center py-6 text-center gap-2">
-            <p className="text-xs text-muted-foreground max-w-xs">{emptyText}</p>
-            <Link
-              href={href}
-              className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-            >
-              Generate ideas →
-            </Link>
-          </div>
-        ) : (
-          children
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-/**
- * The "so what, what next?" row (#459) filling the space freed by the removed
- * results tree (#458). Reads only stored data assembled server-side inside
- * getInsightsData — no extra client round trip, no LLM call. Deliberately
- * outside the date-filter contract: no delta badges, own section heading
- * (see #457 for why period-scoped and account-scoped numbers must not mix).
- */
-function RecommendationsSection({ data }: { data: InsightsRecommendations }) {
-  const t = useTranslations('insights');
-  return (
-    <div className="space-y-3">
-      <div>
-        <h2 className="flex items-center gap-2 text-sm font-semibold">
-          <Lightbulb className="h-4 w-4 text-primary" />
-          {t('recommendations')}
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">{t('recommendationsSub')}</p>
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <RecommendationCard
-          title={t('topicOpportunities')}
-          icon={Tag}
-          href={TOPIC_OPPORTUNITIES_HREF}
-          isEmpty={data.topics.length === 0}
-          emptyText={t('topicOppEmpty')}
-        >
-          <ul className="divide-y">
-            {data.topics.map((t) => (
-              <li key={t.keyword} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
-                <p className="flex-1 min-w-0 truncate text-sm">{t.keyword}</p>
-                <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                  {t.promptCount} prompt{t.promptCount !== 1 ? 's' : ''}
-                </span>
-                <Badge variant="outline" className="shrink-0 gap-1 text-xs tabular-nums">
-                  <TrendingUp className="h-3 w-3" />~{formatCompactNumber(t.estimatedAiVolume)}/mo
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        </RecommendationCard>
-        <RecommendationCard
-          title={t('promptOpportunities')}
-          icon={Sparkles}
-          href={PROMPT_OPPORTUNITIES_HREF}
-          isEmpty={data.prompts.length === 0}
-          emptyText={t('promptOppEmpty')}
-        >
-          <ul className="divide-y">
-            {data.prompts.map((p) => (
-              <li key={p.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
-                <p className="flex-1 min-w-0 truncate text-sm">{p.text}</p>
-                {p.topicName && (
-                  <Badge variant="outline" className="hidden sm:inline-flex shrink-0 gap-1 text-xs">
-                    <Tag className="h-3 w-3" />
-                    {p.topicName}
-                  </Badge>
-                )}
-                {p.estVolume != null && p.estVolume > 0 && (
-                  <Badge variant="outline" className="shrink-0 gap-1 text-xs tabular-nums">
-                    <TrendingUp className="h-3 w-3" />~{formatCompactNumber(p.estVolume)}/mo
-                  </Badge>
-                )}
-              </li>
-            ))}
-          </ul>
-        </RecommendationCard>
-      </div>
-    </div>
-  );
-}
-
 // ─── Tracking Progress ────────────────────────────────────────────────────────
 
 import { saveTrackingJob, loadTrackingJob, clearTrackingJob } from '@/lib/tracking-job-store';
@@ -965,7 +833,6 @@ export default function InsightsPage() {
   const [availableTopics, setAvailableTopics] = useState<Topic[]>([]);
   const [competitorData, setCompetitorData] = useState<CompetitorComparisonData | null>(null);
   const [sovData, setSovData] = useState<ShareOfVoiceData | null>(null);
-  const [recommendations, setRecommendations] = useState<InsightsRecommendations | null>(null);
   const [breakdownMetric, setBreakdownMetric] = useState<BreakdownMetric | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const filtersRef = useRef(filters);
@@ -1004,7 +871,6 @@ export default function InsightsPage() {
         setVisibilityRate(insights.visibilityRate);
         setCompetitorData(insights.competitors.brands.length > 1 ? insights.competitors : null);
         setSovData(insights.sov.byPlatform.length > 0 ? insights.sov : null);
-        setRecommendations(insights.recommendations);
         setHasAnyData(insights.hasAnyData);
 
         // Group raw model slugs by their resolved display name so different
@@ -1119,7 +985,7 @@ export default function InsightsPage() {
             setActiveJobId(null);
             setIsRunning(false);
             setJobStatus(null);
-            toast.success(`Analysis complete — ${status.result?.resultCount ?? 0} results saved.`);
+            toast.success(t('analysisComplete', { count: status.result?.resultCount ?? 0 }));
             loadData(undefined, { silent: true });
             break;
           }
@@ -1600,9 +1466,6 @@ export default function InsightsPage() {
                   </Card>
                 </div>
               )}
-
-              {/* Recommendations (#459) — stored data, not period-scoped */}
-              {recommendations && <RecommendationsSection data={recommendations} />}
             </>
           )}
         </div>

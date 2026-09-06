@@ -1,0 +1,55 @@
+# Deploy do Ultravis Edge Gateway (Cloudflare Worker) — ver cloudflare/edge-gateway/README.md
+#
+# Dispara: manualmente (workflow_dispatch) ou em push na main que toque o worker.
+# Requisito único: secret CLOUDFLARE_API_TOKEN no repo (Settings → Secrets →
+# Actions), com a permissão "Workers Scripts: Edit". O account_id não é segredo
+# e vive no wrangler.jsonc.
+name: deploy-edge-gateway
+
+on:
+  workflow_dispatch:
+    inputs:
+      cf_api_token:
+        description: 'PROVISÓRIO: token da API Cloudflare para este run (prefira o secret CLOUDFLARE_API_TOKEN; input de run fica visível a colaboradores — rotacionar depois)'
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths: ['cloudflare/edge-gateway/**']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mascarar token provisório nos logs
+        if: ${{ inputs.cf_api_token != '' }}
+        run: echo "::add-mask::${{ inputs.cf_api_token }}"
+      - name: Verificar credencial
+        id: cred
+        env:
+          TOK: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$TOK" ]; then
+            echo "has=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=0" >> "$GITHUB_OUTPUT"
+            echo "::warning::CLOUDFLARE_API_TOKEN ausente — deploy do worker pulado (crie o secret e re-rode, ou use Workers Builds no painel)"
+          fi
+      - name: Deploy no Cloudflare Workers
+        if: steps.cred.outputs.has == '1'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ inputs.cf_api_token || secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: cloudflare/edge-gateway
+      - name: Smoke test
+        if: steps.cred.outputs.has == '1'
+        env:
+          SUB: ${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}
+        run: |
+          if [ -z "$SUB" ]; then
+            echo "::warning::smoke test pulado — defina a variável CLOUDFLARE_WORKERS_SUBDOMAIN (Settings → Variables) com o subdomínio workers.dev da conta"
+            exit 0
+          fi
+          sleep 5
+          curl -sSf "https://ultravis-edge-gateway.$SUB.workers.dev/health"

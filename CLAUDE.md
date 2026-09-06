@@ -70,3 +70,13 @@ Após adicionar migration: `bash supabase/build-schema.sh` (regenera
 - Env vars de modelo por função: `*_SUGGESTION_MODEL`, `AUDIT_LLM_MODEL`
   (formato `provider/modelo`). Cron: `DAILY_CRON_SCHEDULE`.
 - Nunca colar segredos em chat/commits; configurar direto no painel.
+
+## Cloudflare (migração em fases — desde 06/set)
+
+- Qualquer tarefa Cloudflare (worker, deploy, fila, e-mail, AI Gateway, token):
+  usar a skill **`cloudflare`** (`.claude/skills/cloudflare/`) e/ou delegar ao
+  agente **`cloudflare-ops`** (`.claude/agents/`). Eles carregam as sintaxes
+  validadas e as lições dos runs #2–#8 — não redescobrir na tentativa e erro.
+- Deploy de worker sai pelo GitHub Actions (sandbox não alcança
+  api.cloudflare.com); banco permanece no Supabase; e-mail transacional via
+  Email Service (binding `send_email`), não Email Routing.

@@ -40,5 +40,7 @@ next-env.d.ts
 # ide
 .cursor/
 
-# claude
-.claude/
+# claude — estado local fora; agentes e skills da equipe VERSIONAM
+.claude/*
+!.claude/agents/
+!.claude/skills/

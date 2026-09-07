@@ -204,3 +204,31 @@ Regras que vieram junto:
 7. **Parser de `wrangler.jsonc` na unha**: `re.sub(r'//[^\n]*','',s)` corta no
    `https://` das vars e quebra o `json.loads`. Tire comentário só fora de
    string (versão curta em `sync-cf-secrets.yml`).
+
+## 8 · Email Service: SMTP autenticado (descoberta 07/set)
+
+Além do binding `send_email` (workers), o Email Service expõe **credenciais
+SMTP autenticadas** no painel (dash → Email Service → Sending) — serve de
+backend SMTP pra QUALQUER sistema, sem worker no meio. Uso na Ultravis:
+1. Painel: verificar o domínio `ultravis.ai` (SPF/DKIM automáticos — a zona
+   já é Cloudflare) e gerar credencial SMTP + remetente (ex.:
+   `no-reply@ultravis.ai`).
+2. **Supabase Auth** (magic link/convites): Dashboard → Authentication →
+   Emails → SMTP Settings → host/porta/usuário/senha do Email Service.
+3. **Vigia/Daily Pulse**: envs no worker `ultravis-server` —
+   `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS` (Secret),
+   `ALERT_EMAIL_TO`, `ALERT_EMAIL_FROM` — código já pronto (watchdog.js).
+
+## 9 · Workers Builds: conectar worker EXISTENTE ao GitHub (padrão preferido do dono)
+
+Doc: developers.cloudflare.com/workers/ci-cd/builds/git-integration/
+- Worker já existente: painel → Workers e Pages → <worker> → **Settings →
+  Builds → Connect** → repo `comeca-ai/ultravisai` → branch main →
+  **Root directory** = a pasta do worker (ex.: `cloudflare/d1-espelho`) →
+  build command vazio → deploy command padrão (`npx wrangler deploy`).
+- NUNCA usar "Create → Import a repository" pra worker que já existe —
+  cria duplicata (a menos que o name do wrangler.jsonc bata exato).
+- Depois de conectar: apagar/reduzir o workflow do Actions da pasta
+  (deploy duplo). O que o Builds NÃO faz e fica no Actions: `d1 execute`
+  (schema), sync de secrets, smoke com diagnóstico.
+- Piloto: `ultravis-d1-espelho` (07/set).

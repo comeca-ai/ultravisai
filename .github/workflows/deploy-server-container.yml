@@ -86,18 +86,64 @@ jobs:
           ACC: '749b2e9b3642e4b03321d5830e81c195'
         run: |
           api() { curl -sS -m 20 -H "Authorization: Bearer $TOK" "$@" || echo '{"success":false,"errors":[{"message":"curl falhou"}]}'; }
-          ok() { python3 -c "import json,sys;d=json.load(sys.stdin);print('sim' if d.get('success') else 'NAO: '+'; '.join(str(e.get('message')) for e in d.get('errors') or []))"; }
+          B=https://api.cloudflare.com/client/v4
 
-          echo "1) token vivo?          $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
-          echo "2) LÊ Workers?          $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
-          echo "3) LÊ D1?               $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
+          # Um parser só, em arquivo, pra não brigar com a indentação do YAML:
+          # os blocos `python3 -c "..."` inline quebravam o bloco escalar.
+          cat > /tmp/pf.py <<'PYPF'
+          import json, sys
+          modo = sys.argv[1]
+          try:
+              d = json.load(sys.stdin)
+          except Exception:
+              print('indeterminado (resposta nao-JSON)'); raise SystemExit
+          erros = d.get('errors') or []
+          codigos = [e.get('code') for e in erros]
+          msgs = '; '.join(str(e.get('message')) for e in erros)
+          if modo == 'ler':
+              print('sim' if d.get('success') else 'NAO: ' + msgs)
+          elif modo == 'escrever':
+              # DELETE de script inexistente: 10000 = sem permissao (a API nega
+              # antes de olhar o alvo); 10007/nao-encontrado = permissao existe.
+              if d.get('success'):
+                  print('SIM (sucesso — alvo inexistente)')
+              elif 10000 in codigos:
+                  print('NAO — falta Workers Scripts: Edit (' + msgs + ')')
+              elif any(c in (10007, 10090) for c in codigos) or 'not found' in msgs.lower():
+                  print('SIM — escreve (alvo inexistente: ' + msgs + ')')
+              else:
+                  print('indeterminado: ' + str(codigos) + ' ' + msgs)
+          elif modo == 'politicas':
+              if not d.get('success'):
+                  print('  (o token nao pode listar a si mesmo — precisa de User → API Tokens: Read; nao e obrigatorio pro deploy)')
+                  raise SystemExit
+              for t in d.get('result') or []:
+                  print('  token "' + str(t.get('name')) + '" (' + str(t.get('status')) + ')')
+                  for pol in t.get('policies') or []:
+                      for g in pol.get('permission_groups') or []:
+                          print('    - ' + str(g.get('name')))
+          PYPF
+          sed -i 's/^          //' /tmp/pf.py
+
+          ALVO="preflight-inexistente-${GITHUB_RUN_ID}"
+          {
+            echo "== LEITURA =="
+            echo "token vivo?        $(api $B/user/tokens/verify | python3 /tmp/pf.py ler)"
+            echo "le Workers?        $(api $B/accounts/$ACC/workers/scripts | python3 /tmp/pf.py ler)"
+            echo "le D1?             $(api $B/accounts/$ACC/d1/database | python3 /tmp/pf.py ler)"
+            echo "le KV?             $(api $B/accounts/$ACC/storage/kv/namespaces | python3 /tmp/pf.py ler)"
+            echo "le zonas?          $(api $B/zones | python3 /tmp/pf.py ler)"
+            echo "== ESCRITA (sem efeito: DELETE de script que nao existe) =="
+            echo "escreve Workers?   $(api -X DELETE $B/accounts/$ACC/workers/scripts/$ALVO | python3 /tmp/pf.py escrever)"
+            echo "== PERMISSOES NOMINAIS =="
+            api $B/user/tokens | python3 /tmp/pf.py politicas
+          } | tee /tmp/preflight.txt
+
           {
             echo "### Preflight do token"
-            echo "- vivo: $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
-            echo "- lê Workers: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
-            echo "- lê D1: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
-            echo ""
-            echo "Escrita não é testada aqui (criaria worker de teste em produção) — quem prova é o deploy abaixo."
+            echo '```'
+            cat /tmp/preflight.txt
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy (wrangler + build da imagem)

@@ -87,56 +87,19 @@ jobs:
         run: |
           api() { curl -sS -m 20 -H "Authorization: Bearer $TOK" "$@" || echo '{"success":false,"errors":[{"message":"curl falhou"}]}'; }
           B=https://api.cloudflare.com/client/v4
-
-          # Um parser só, em arquivo, pra não brigar com a indentação do YAML:
-          # os blocos `python3 -c "..."` inline quebravam o bloco escalar.
-          cat > /tmp/pf.py <<'PYPF'
-          import json, sys
-          modo = sys.argv[1]
-          try:
-              d = json.load(sys.stdin)
-          except Exception:
-              print('indeterminado (resposta nao-JSON)'); raise SystemExit
-          erros = d.get('errors') or []
-          codigos = [e.get('code') for e in erros]
-          msgs = '; '.join(str(e.get('message')) for e in erros)
-          if modo == 'ler':
-              print('sim' if d.get('success') else 'NAO: ' + msgs)
-          elif modo == 'escrever':
-              # DELETE de script inexistente: 10000 = sem permissao (a API nega
-              # antes de olhar o alvo); 10007/nao-encontrado = permissao existe.
-              if d.get('success'):
-                  print('SIM (sucesso — alvo inexistente)')
-              elif 10000 in codigos:
-                  print('NAO — falta Workers Scripts: Edit (' + msgs + ')')
-              elif any(c in (10007, 10090) for c in codigos) or 'not found' in msgs.lower():
-                  print('SIM — escreve (alvo inexistente: ' + msgs + ')')
-              else:
-                  print('indeterminado: ' + str(codigos) + ' ' + msgs)
-          elif modo == 'politicas':
-              if not d.get('success'):
-                  print('  (o token nao pode listar a si mesmo — precisa de User → API Tokens: Read; nao e obrigatorio pro deploy)')
-                  raise SystemExit
-              for t in d.get('result') or []:
-                  print('  token "' + str(t.get('name')) + '" (' + str(t.get('status')) + ')')
-                  for pol in t.get('policies') or []:
-                      for g in pol.get('permission_groups') or []:
-                          print('    - ' + str(g.get('name')))
-          PYPF
-          sed -i 's/^          //' /tmp/pf.py
-
+          PF="python3 $GITHUB_WORKSPACE/.github/scripts/cf-preflight.py"
           ALVO="preflight-inexistente-${GITHUB_RUN_ID}"
           {
             echo "== LEITURA =="
-            echo "token vivo?        $(api $B/user/tokens/verify | python3 /tmp/pf.py ler)"
-            echo "le Workers?        $(api $B/accounts/$ACC/workers/scripts | python3 /tmp/pf.py ler)"
-            echo "le D1?             $(api $B/accounts/$ACC/d1/database | python3 /tmp/pf.py ler)"
-            echo "le KV?             $(api $B/accounts/$ACC/storage/kv/namespaces | python3 /tmp/pf.py ler)"
-            echo "le zonas?          $(api $B/zones | python3 /tmp/pf.py ler)"
+            echo "token vivo?        $(api $B/user/tokens/verify | $PF ler)"
+            echo "le Workers?        $(api $B/accounts/$ACC/workers/scripts | $PF ler)"
+            echo "le D1?             $(api $B/accounts/$ACC/d1/database | $PF ler)"
+            echo "le KV?             $(api $B/accounts/$ACC/storage/kv/namespaces | $PF ler)"
+            echo "le zonas?          $(api $B/zones | $PF ler)"
             echo "== ESCRITA (sem efeito: DELETE de script que nao existe) =="
-            echo "escreve Workers?   $(api -X DELETE $B/accounts/$ACC/workers/scripts/$ALVO | python3 /tmp/pf.py escrever)"
+            echo "escreve Workers?   $(api -X DELETE $B/accounts/$ACC/workers/scripts/$ALVO | $PF escrever)"
             echo "== PERMISSOES NOMINAIS =="
-            api $B/user/tokens | python3 /tmp/pf.py politicas
+            api $B/user/tokens | $PF politicas
           } | tee /tmp/preflight.txt
 
           {

@@ -23,6 +23,13 @@
     "PUBLIC_APP_URL": "https://ultravis.ai"
   },
   "observability": { "enabled": true },
+  // PRODUÇÃO — não remover. O run #19 mostrou o wrangler planejando APAGAR
+  // esta rota ("Uploading the Worker will override the remote configuration
+  // with your local one"): o Custom Domain foi criado à mão no painel em
+  // 06/set e nunca existiu aqui, então o primeiro deploy bem-sucedido
+  // derrubaria api.ultravis.ai — o front inteiro, sem erro nenhum no log.
+  // Config na origem: o que está aqui é o que a produção tem.
+  "routes": [{ "pattern": "api.ultravis.ai", "custom_domain": true }],
   "containers": [
     {
       "class_name": "UltravisServer",

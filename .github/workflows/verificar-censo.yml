@@ -68,3 +68,5 @@ jobs:
             cat /tmp/resumo.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+# retrigger: secrets cadastrados pelo dono em 07/set ~12:50 UTC

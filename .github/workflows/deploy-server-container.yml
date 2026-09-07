@@ -72,6 +72,34 @@ jobs:
           else
             echo "formato plausível (não prova que é válido — só que não tem defeito óbvio)"
           fi
+
+      # Preflight de PERMISSÃO (3 chamadas, ~2s). Cinco runs foram gastos
+      # descobrindo problema de token DEPOIS de npm install + download do
+      # wrangler + build; as três perguntas que separam os casos são baratas
+      # e a resposta vem em texto claro em vez de código numérico.
+      # Nunca falha o job: só informa — quem decide é o wrangler logo abaixo.
+      - name: Preflight de permissão do token (informativo)
+        if: steps.cred.outputs.has == '1'
+        continue-on-error: true
+        env:
+          TOK: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACC: '749b2e9b3642e4b03321d5830e81c195'
+        run: |
+          api() { curl -sS -m 20 -H "Authorization: Bearer $TOK" "$@" || echo '{"success":false,"errors":[{"message":"curl falhou"}]}'; }
+          ok() { python3 -c "import json,sys;d=json.load(sys.stdin);print('sim' if d.get('success') else 'NAO: '+'; '.join(str(e.get('message')) for e in d.get('errors') or []))"; }
+
+          echo "1) token vivo?          $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
+          echo "2) LÊ Workers?          $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
+          echo "3) LÊ D1?               $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
+          {
+            echo "### Preflight do token"
+            echo "- vivo: $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
+            echo "- lê Workers: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
+            echo "- lê D1: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
+            echo ""
+            echo "Escrita não é testada aqui (criaria worker de teste em produção) — quem prova é o deploy abaixo."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Deploy (wrangler + build da imagem)
         if: steps.cred.outputs.has == '1'
         working-directory: cloudflare/server-container

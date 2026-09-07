@@ -48,5 +48,12 @@
   ],
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["UltravisServer"] }],
   // keepalive: mantém o node-cron interno vivo (lift-and-shift v1)
-  "triggers": { "crons": ["*/10 * * * *"] }
+  "triggers": {
+    "crons": [
+      // keepalive do container (node-cron interno vivo)
+      "*/10 * * * *",
+      // ponte Supabase -> D1: 30 min depois do censo semanal (seg 06:00 UTC)
+      "30 6 * * 1"
+    ]
+  }
 }

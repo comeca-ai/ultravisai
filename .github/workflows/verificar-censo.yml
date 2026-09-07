@@ -108,3 +108,53 @@ jobs:
             cat /tmp/resumo.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # Caminho ALTERNATIVO de leitura, sem depender dos secrets do Supabase: o
+  # worker (que tem a SERVICE_ROLE) agrega o censo no D1 pelo cron semanal, e
+  # aqui a gente lê o D1 com o token da Cloudflare que já existe. Se a ponte
+  # ainda não rodou, a tabela vem vazia e o job diz isso — nunca falha o run.
+  espelho:
+    name: agregados pelo espelho D1 (sem secret do Supabase)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ler censo_agregados no D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: '749b2e9b3642e4b03321d5830e81c195'
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::sem CLOUDFLARE_API_TOKEN — leitura pelo espelho pulada"; exit 0
+          fi
+          SQL="SELECT dia, marca, motor, respostas, mencoes, citacoes, sent_pos, sent_neu, sent_neg FROM censo_agregados ORDER BY dia DESC, marca, motor LIMIT 200;"
+          npx wrangler@4.129.0 d1 execute ultravis-espelho --remote --command "$SQL" --json 2>&1 | tee /tmp/d1out.json
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning::não deu pra ler o D1 (token sem D1:Edit/Read, banco ausente ou ponte nunca rodou) — ver saída acima"
+            exit 0
+          fi
+          python3 - <<'PY2' | tee /tmp/espelho.txt
+          import json, sys
+          try:
+              bruto = open('/tmp/d1out.json').read()
+              inicio = bruto.find('[')
+              d = json.loads(bruto[inicio:]) if inicio >= 0 else []
+              linhas = (d[0].get('results') if d and isinstance(d, list) else []) or []
+          except Exception as e:
+              print(f'saída do wrangler não parseável ({e})'); sys.exit(0)
+          if not linhas:
+              print('censo_agregados VAZIA — a ponte (cron seg 06:30 UTC ou /espelho/sincronizar) ainda não rodou.')
+              sys.exit(0)
+          tn = sum(l['respostas'] for l in linhas)
+          tm = sum(l['mencoes'] for l in linhas)
+          tc = sum(l['citacoes'] for l in linhas)
+          print(f'TOTAL NA JANELA: {tn} respostas · {tm} menções · {tc} citações')
+          for l in linhas:
+              print(f"  {l['dia']} · {l['marca']} × {l['motor']}: {l['respostas']} resp · {l['mencoes']} m · {l['citacoes']} c · sent +{l['sent_pos']}/~{l['sent_neu']}/-{l['sent_neg']}")
+          PY2
+          {
+            echo "### Agregados lidos do espelho D1"
+            echo '```'
+            cat /tmp/espelho.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

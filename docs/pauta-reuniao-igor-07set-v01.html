@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pauta — Ultravis × Igor · 07/set</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5; --mut:#B6B2A4;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --red:#C0492A; --redSoft:#FBEEEA;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:0 30px}
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:40px 0 30px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-.02em;margin-top:11px;text-wrap:balance}
+.covsub{color:var(--ink2);margin-top:8px;max-width:76ch}
+.instr{background:var(--sunk);border-bottom:1px solid var(--rule2);padding:9px 0;position:sticky;top:0;z-index:20}
+.instr-in{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:.68rem;color:var(--ink2)}
+.instr-in b{color:var(--ink)}
+.sep{width:1px;height:13px;background:var(--rule2)}
+.page{padding:26px 0 56px}
+h2{font-family:var(--serif);font-size:1.3rem;font-weight:500;margin-top:34px}
+.note{color:var(--ink2);font-size:.87rem;margin-top:5px;max-width:82ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:19px 22px;margin-top:13px}
+.leitura{margin-top:13px;padding-top:11px;border-top:1px dashed var(--rule2);font-size:.87rem;color:var(--ink2)}
+.leitura b{color:var(--ink)}
+ol.linhas{margin:8px 0 0 20px}
+ol.linhas li{margin-top:7px}
+.tagbox{border-left:4px solid var(--amber);background:var(--amberSoft);border-radius:0 10px 10px 0;padding:14px 18px;margin-top:12px}
+.tagbox .dt{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);font-weight:700}
+.tagbox .dq{font-weight:600;margin-top:4px}
+.tagbox .dc{font-size:.86rem;color:var(--ink2);margin-top:4px}
+.nd{border:1.5px dashed var(--rule2);border-radius:12px;padding:17px 20px;margin-top:13px;background:transparent}
+.nd .ndt{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--red);font-weight:700}
+.mono{font-family:var(--mono)}
+.foot{border-top:1px solid var(--rule);margin-top:44px;padding-top:14px;font-size:.78rem;color:var(--faint);max-width:82ch}
+.pill{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:5px;border:1px solid var(--good);color:var(--good);background:var(--goodSoft);vertical-align:2px}
+</style>
+</head>
+<body>
+
+<div class="cover"><div class="wrap">
+  <div class="eyebrow">Ultravis · pauta de reunião · v01</div>
+  <h1>Reunião Jhonata × Igor — 07/set/2026</h1>
+  <div class="covsub">Uma página: o que mudou na semana, o número do dia, e as 4 decisões que só saem com os dois na mesa.</div>
+</div></div>
+
+<div class="instr"><div class="wrap"><div class="instr-in">
+  <span><b>janela</b> 31/ago → 07/set</span><span class="sep"></span>
+  <span><b>fontes</b> git (PRs #95–#124) · logs de produção · censo de 07/set 06:00 UTC</span><span class="sep"></span>
+  <span><b>versão</b> v01 · 07/set manhã</span>
+</div></div></div>
+
+<div class="page"><div class="wrap">
+
+  <h2>1 · A semana em 5 linhas</h2>
+  <div class="card">
+    <ol class="linhas">
+      <li><b>A aplicação inteira migrou para o Cloudflare em um dia</b> (06/set): server de rastreamento saiu do Railway (trial expirado, deploy congelado) para um Container na edge — mesmo código, <span class="mono">api.ultravis.ai</span> preservado, front intocado. Railway desligado.</li>
+      <li><b>O incidente das 2 semanas mudas foi resolvido na raiz</b>: créditos do Cloro recarregados + chave da Anthropic válida no ar (estava impossível de trocar no Railway congelado). O censo de hoje é o primeiro com coleta plena desde 24/ago.</li>
+      <li><b>Deploy agora é 100% auditável</b>: todo código sobe por GitHub Actions com log; segredos nunca passam por chat ou commit.</li>
+      <li><b>Dois upgrades prontos aguardando revisão</b>: Insights v3 (funil da citação + mapa competitivo + próxima ação, do mockup de 19/ago) e o vigia camada 2 (agente que caça incoerência de números toda semana).</li>
+      <li><b>Consolidação Polar × Polar Electro</b>: script pronto e travado apenas em acesso ao banco — decisão de 29/ago, executa nesta semana.</li>
+    </ol>
+  </div>
+
+  <h2>2 · O número do dia — censo de hoje (06:00 UTC)</h2>
+  <div class="nd">
+    <div class="ndt">ainda não coletado nesta versão</div>
+    <p class="note" style="margin-top:8px">O censo rodou hoje às 06:00 UTC na infra nova. Os agregados (respostas por motor, menções, citações da Polar) entram na <b>v02</b> desta pauta assim que a leitura automática do banco destravar — falta criar 2 segredos no GitHub (<span class="mono">SUPABASE_URL</span>, <span class="mono">SUPABASE_SERVICE_ROLE_KEY</span>) e re-rodar o workflow <span class="mono">verificar-censo</span>. Alternativa de 1 minuto: dashboard → Visibilidade, filtro 24h.</p>
+    <div class="leitura"><b>O que conferir a olho:</b> ① apareceram resultados novos de hoje? ② o Claude voltou a pontuar (ficou 30 dias mudo por chave inválida)? ③ os números da Polar Electro estão na faixa histórica (presença ~2 de 3 prompts, SoV ~7%)?</div>
+  </div>
+
+  <h2>3 · As 4 decisões — bater o martelo hoje</h2>
+  <p class="note">Cada uma trava um pedaço do produto. Duas linhas de contexto; a decisão é de vocês.</p>
+
+  <div class="tagbox">
+    <div class="dt">decisão 1 · métrica</div>
+    <div class="dq">Numerador da Presença: menção OU citação?</div>
+    <div class="dc">Hoje a Presença conta prompts onde a marca é <b>mencionada</b>. Se contar também prompts onde ela só é <b>citada como fonte</b> (sem menção no texto), o número muda de significado — "a IA fala de mim" vira "eu apareço de alguma forma". Afeta o KPI central da tela.</div>
+  </div>
+
+  <div class="tagbox">
+    <div class="dt">decisão 2 · métrica</div>
+    <div class="dq">Sentimento: resposta sem menção é nulo ou neutro?</div>
+    <div class="dc">Resposta que não menciona a marca grava "neutro" por padrão técnico. Contar essas no placar dilui o sentimento real (parece mais morno do que é); tirar (nulo) deixa o placar honesto porém com amostra menor. O vigia já conta só COM menção — as telas precisam seguir a mesma regra.</div>
+  </div>
+
+  <div class="tagbox">
+    <div class="dt">decisão 3 · métrica</div>
+    <div class="dq">Régua do sentimento: 100 / 50 / 0 fica?</div>
+    <div class="dc">Positivo=100, neutro=50, negativo=0 foi provisório ("uma nota, depois a gente valida" — Igor, 19/ago). Com os censos voltando a coletar, dá para validar contra casos reais ou trocar por escala com pesos (ex.: negativo pesar mais).</div>
+  </div>
+
+  <div class="tagbox">
+    <div class="dt">decisão 4 · auditoria</div>
+    <div class="dq">FAQ visível sem JSON-LD: conta parcial ou zero?</div>
+    <div class="dc">A auditoria hoje só dá ponto de FAQ com schema JSON-LD. Site com FAQ bem escrito porém sem marcação técnica leva zero — decidir se ganha crédito parcial (o texto existe e a IA lê) ou se o zero fica como incentivo à marcação.</div>
+  </div>
+
+  <h2>4 · Demo opcional — Insights v3 <span class="pill">PRONTO EM DRAFT</span></h2>
+  <div class="card">
+    <p>O redesign do mockup de 19/ago está implementado e testado: <b>funil da citação</b> (execuções → com fontes → citam o mercado → citam a Polar), <b>mapa competitivo Menção × Citação</b> (quadrantes: narrativa emprestada / sua / invisível / crédito perdido) e <b>cards de próxima ação</b> derivados dos números da tela.</p>
+    <div class="leitura"><b>Para demonstrar na reunião:</b> um "mergeia o 122" antes da reunião põe no ar em ~2 minutos, já populado com o censo de hoje. Sem o merge, segue invisível para o cliente.</div>
+  </div>
+
+  <div class="foot">
+    <b>Método:</b> semana reconstruída do git (PRs #95–#124) e DECISOES.md; contexto das decisões 1–4 vem da revisão geral de 29/ago e da ata de 19/ago; números do censo declarados como não coletados nesta versão (v02 quando a leitura do banco destravar).<br>
+    Ultravis · pauta de reunião · <b>v01</b> · 07/set/2026 · gerada pela sessão da madrugada da migração
+  </div>
+
+</div></div>
+</body>
+</html>

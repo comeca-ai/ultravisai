@@ -21,7 +21,7 @@
       //   npx wrangler@4.129.0 d1 create ultravis-espelho
       // Enquanto o placeholder estiver aqui o workflow deploy-d1-espelho
       // falha de propósito, com a mensagem apontando este passo.
-      "database_id": "PREENCHER_NO_PAINEL"
+      "database_id": "b1babe44-4cdf-499c-abce-235ea8c73576"
     }
   ]
 }

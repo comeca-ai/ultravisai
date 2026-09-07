@@ -106,16 +106,25 @@ enums→`CHECK`. PKs, FKs (com `ON DELETE`), UNIQUEs e os índices principais
 > `ultravis-espelho` é recurso de conta, separado do script; a consolidação só
 > trocou quem detém o binding.
 
-## ⚠️ Exposição: `/espelho` é público e sem autenticação
+## Acesso ao `/espelho` (resolvido no PR #131 — e uma pendência do dono)
 
-Enquanto o banco está **vazio** (fase A) o dano é zero. **Antes da fase B**
-(carga de dados reais) é obrigatório decidir: D1 não tem RLS — quem tem o
-binding vê tudo, e `/espelho/tabela/<qualquer>` despejaria as tabelas de todas
-as orgs (`profiles`, `api_keys`, `agent_messages`…) num domínio de produção.
-Remédio pronto: HTTP Basic no próprio worker reusando `OPS_USER`/`OPS_PASS`
-(já são secrets deste worker, mesmo par do `/ops` do Express) — ~15 linhas em
-`servirEspelho()` + credenciais no smoke test do workflow. O Basic do Express
-**não** protege `/espelho`: o worker intercepta antes do container.
+D1 **não tem RLS**: quem tem o binding vê tudo, e `/espelho/tabela/<qualquer>`
+despejaria `profiles`, `api_keys`, `agent_messages` de todas as orgs num
+domínio de produção. Por isso `servirEspelho()` exige **HTTP Basic** antes de
+qualquer `prepare()`/`batch()` — requisição anônima não custa leitura de D1
+nem revela nome de tabela — e, **sem** `OPS_USER`/`OPS_PASS` configurados, a
+rota responde 503: fechada por omissão, nunca aberta. O Basic do Express não
+cobre isto; o worker intercepta antes do container. O smoke do deploy exige
+401 no anônimo e 200 no autenticado.
+
+> ⚠️ **Pendência do dono (achada no run #19).** Hoje `OPS_USER`/`OPS_PASS`
+> estão no painel como **vars de texto** (`jhon`/`jhon`) — não como Secret.
+> Duas consequências: (1) o valor aparece em claro no dashboard e no diff de
+> configuração que o wrangler imprime **no log do CI**; (2) é a senha que
+> protege `/ops` e `/espelho` em produção. Correção: apagar as duas vars no
+> painel do worker, cadastrar `OPS_USER`/`OPS_PASS` (valor novo, forte) em
+> *GitHub → Secrets → Actions* e rodar o `sync-cf-secrets` — ele as grava
+> como **Secret**, que não sai do painel nem aparece em diff.
 
 ## Fases
 

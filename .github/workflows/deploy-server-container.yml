@@ -74,6 +74,11 @@ jobs:
           S_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           S_GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
           S_SCRAPEDO_API_KEY: ${{ secrets.SCRAPEDO_API_KEY }}
+          S_OPS_USER: ${{ secrets.OPS_USER }}
+          S_OPS_PASS: ${{ secrets.OPS_PASS }}
+          S_AI_GATEWAY_ACCOUNT_ID: ${{ secrets.AI_GATEWAY_ACCOUNT_ID }}
+          S_AI_GATEWAY_NAME: ${{ secrets.AI_GATEWAY_NAME }}
+          S_AI_GATEWAY_TOKEN: ${{ secrets.AI_GATEWAY_TOKEN }}
         run: |
           put() {
             curl -sS -X PUT \
@@ -86,7 +91,9 @@ jobs:
           for name in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY SUPABASE_ANON_KEY \
                       CLORO_API_KEY CLORO_WEBHOOK_SECRET CRON_SECRET \
                       ANTHROPIC_API_KEY OPENAI_API_KEY \
-                      GOOGLE_GENERATIVE_AI_API_KEY SCRAPEDO_API_KEY; do
+                      GOOGLE_GENERATIVE_AI_API_KEY SCRAPEDO_API_KEY \
+                      OPS_USER OPS_PASS \
+                      AI_GATEWAY_ACCOUNT_ID AI_GATEWAY_NAME AI_GATEWAY_TOKEN; do
             key="S_$name"; value="${!key}"
             if [ -n "$value" ]; then put "$name" "$value"; echo "✓ $name"; ok=$((ok+1));
             else skip="$skip $name"; fi

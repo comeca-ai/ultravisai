@@ -36,6 +36,24 @@ const ShareOfVoiceTrendChart = dynamic(
   },
 );
 import { MetricBreakdownSheet } from './_metric-breakdown-sheet';
+// Insights v3 (mockup 19/ago): funil da citação, mapa competitivo e próxima ação.
+const CitationFunnelCard = dynamic(
+  () => import('./_v3-sections').then((m) => m.CitationFunnelCard),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-40 w-full" />,
+  },
+);
+const CompetitiveScatterCard = dynamic(
+  () => import('./_v3-sections').then((m) => m.CompetitiveScatterCard),
+  { ssr: false, loading: () => <Skeleton className="h-64 w-full" /> },
+);
+const NextActionCards = dynamic(() => import('./_v3-sections').then((m) => m.NextActionCards), {
+  ssr: false,
+  loading: () => <Skeleton className="h-40 w-full" />,
+});
+import { getCitationFunnel } from '@/lib/actions/insights-funnel';
+import type { FunnelCounts } from './insights-v3-logic';
 import { useBrandStore } from '@/stores/use-brand-store';
 import {
   getInsightsData,
@@ -833,6 +851,8 @@ export default function InsightsPage() {
   const [availableTopics, setAvailableTopics] = useState<Topic[]>([]);
   const [competitorData, setCompetitorData] = useState<CompetitorComparisonData | null>(null);
   const [sovData, setSovData] = useState<ShareOfVoiceData | null>(null);
+  // Insights v3: contagens do funil da citação (mesmos filtros do resto da tela).
+  const [funnelData, setFunnelData] = useState<FunnelCounts | null>(null);
   const [breakdownMetric, setBreakdownMetric] = useState<BreakdownMetric | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const filtersRef = useRef(filters);
@@ -862,10 +882,19 @@ export default function InsightsPage() {
         // run in a real server-side Promise.all (one round trip instead of
         // five serialized POSTs), and "has any data" comes from a cheap
         // count instead of an unbounded full-table scan.
-        const insights = await getInsightsData(brand.id, {
-          ...filterOpts,
-          checkUnfiltered: hasFilters,
-        });
+        // O funil (v3) roda em paralelo com o consolidado — falha dele não
+        // derruba a tela: a seção simplesmente não aparece nessa carga.
+        const [insights, funnel] = await Promise.all([
+          getInsightsData(brand.id, {
+            ...filterOpts,
+            checkUnfiltered: hasFilters,
+          }),
+          getCitationFunnel(brand.id, filterOpts).catch((err) => {
+            console.warn('[insights] citation funnel failed', err);
+            return null;
+          }),
+        ]);
+        setFunnelData(funnel);
         setSummary(insights.summary);
         setTrackedPrompts(insights.trackedPrompts);
         setVisibilityRate(insights.visibilityRate);
@@ -1430,6 +1459,24 @@ export default function InsightsPage() {
               ) : (
                 <NoCompetitorsTeaser />
               )}
+
+              {/* Insights v3 (mockup 19/ago): funil da citação, mapa competitivo, próxima ação */}
+              {funnelData && funnelData.executions > 0 && (
+                <CitationFunnelCard funnel={funnelData} />
+              )}
+              {competitorData && <CompetitiveScatterCard data={competitorData} />}
+              {competitorData &&
+                (() => {
+                  const own = competitorData.brands.find((b) => b.isOwnBrand);
+                  return own ? (
+                    <NextActionCards
+                      funnel={funnelData}
+                      competitorData={competitorData}
+                      visiblePrompts={own.visiblePrompts}
+                      promptCount={own.promptCount}
+                    />
+                  ) : null;
+                })()}
 
               {/* Share of Voice */}
               {sovData && (

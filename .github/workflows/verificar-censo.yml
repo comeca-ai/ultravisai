@@ -1,0 +1,70 @@
+# Auditoria do censo direto na produção (Supabase) via GitHub Actions.
+#
+# Por quê: a sandbox da IA não alcança o banco e o conector OAuth está preso
+# na org errada — mas o runner do Actions alcança, e a SERVICE_ROLE vive no
+# GitHub Secrets. Este workflow lê APENAS agregados (contagens por motor,
+# menções, citações) e imprime no log/summary — nenhum dado sensível sai.
+#
+# Roda: toda segunda 07:00 UTC (1h após o censo das 06:00) + no merge deste
+# arquivo (prova imediata) + manual.
+name: verificar-censo
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verificar-censo.yml']
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Consultar agregados do dia na produção
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$KEY" ]; then
+            echo "::error::SUPABASE_URL e/ou SUPABASE_SERVICE_ROLE_KEY ausentes no GitHub Secrets — preencher em Settings → Secrets → Actions"
+            exit 1
+          fi
+          H1="apikey: $KEY"; H2="Authorization: Bearer $KEY"
+          TODAY=$(date -u +%Y-%m-%d)
+
+          echo "== marcas ativas =="
+          curl -sS -H "$H1" -H "$H2" \
+            "$SUPABASE_URL/rest/v1/brands?select=id,name,status&status=eq.active" > /tmp/brands.json
+          python3 -c 'import json;[print(b["id"],"·",b["name"]) for b in json.load(open("/tmp/brands.json"))]'
+
+          echo "== resultados de HOJE ($TODAY UTC) por marca × motor =="
+          curl -sS -H "$H1" -H "$H2" \
+            "$SUPABASE_URL/rest/v1/prompt_results?select=brand_id,platform,mention_count,citation_count,sentiment&created_at=gte.${TODAY}T00:00:00Z&limit=10000" > /tmp/today.json
+
+          python3 - <<'PY' | tee /tmp/resumo.txt
+          import json, collections
+          brands = {b["id"]: b["name"] for b in json.load(open("/tmp/brands.json"))}
+          rows = json.load(open("/tmp/today.json"))
+          if not rows:
+              print("NENHUM resultado hoje (ainda) — censo não rodou ou não gravou.")
+          agg = collections.defaultdict(lambda: {"n":0,"m":0,"c":0,"sent":collections.Counter()})
+          for r in rows:
+              k = (brands.get(r["brand_id"], r["brand_id"][:8]), r["platform"])
+              a = agg[k]; a["n"]+=1; a["m"]+=r["mention_count"]; a["c"]+=r["citation_count"]
+              a["sent"][r["sentiment"]] += 1
+          total_n = sum(a["n"] for a in agg.values())
+          total_m = sum(a["m"] for a in agg.values())
+          total_c = sum(a["c"] for a in agg.values())
+          print(f"TOTAL: {total_n} respostas · {total_m} menções · {total_c} citações")
+          for (brand, plat), a in sorted(agg.items()):
+              s = a["sent"]
+              print(f"  {brand} × {plat}: {a['n']} resp · {a['m']} m · {a['c']} c · sent +{s.get('positive',0)}/~{s.get('neutral',0)}/-{s.get('negative',0)}")
+          PY
+
+          {
+            echo "### Censo de $TODAY — agregados da produção"
+            echo '```'
+            cat /tmp/resumo.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

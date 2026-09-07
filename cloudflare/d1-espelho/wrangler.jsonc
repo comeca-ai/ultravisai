@@ -1,0 +1,27 @@
+{
+  // Ultravis D1 Espelho — worker de visualização do espelho SQLite/D1 do
+  // schema Postgres. Ver src/index.js, schema.d1.sql e README.md desta pasta.
+  "name": "ultravis-d1-espelho",
+  "account_id": "749b2e9b3642e4b03321d5830e81c195",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+  "observability": { "enabled": true },
+  // Lição do run #9 (skill cloudflare): sem keep_vars, cada deploy apaga as
+  // variáveis de texto do painel. Este worker não tem vars hoje, mas o
+  // cinto-e-suspensório fica desde o dia 1.
+  "keep_vars": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ultravis-espelho",
+      // PASSO DO DONO: criar o banco D1 "ultravis-espelho" no painel
+      // (dash.cloudflare.com → Storage & Databases → D1 → Create) e colar
+      // aqui o Database ID (UUID) que o painel mostra. Alternativa por CLI
+      // (exige token com permissão D1:Edit):
+      //   npx wrangler@4.129.0 d1 create ultravis-espelho
+      // Enquanto o placeholder estiver aqui o workflow deploy-d1-espelho
+      // falha de propósito, com a mensagem apontando este passo.
+      "database_id": "b1babe44-4cdf-499c-abce-235ea8c73576"
+    }
+  ]
+}

@@ -61,6 +61,19 @@ Leitura ok + escrita `{"code":10000,"message":"Authentication error"}` =
 permissão em Read, falta **Edit** (editar o token no painel preserva o valor —
 o secret no GitHub não precisa mudar).
 
+**Três falhas de token, três sintomas diferentes** (runs #14–#17, 07/set) —
+distingui-las poupa uma viagem ao painel por rodada:
+
+| Sintoma no log | Causa | Remédio |
+|---|---|---|
+| `Invalid format for Authorization header [6111]`, 36 chars | secret guarda o **ID** do token (UUID) e não o valor | copiar o VALOR (só aparece na criação/*Roll*) |
+| `Unable to get membership roles` | token de **conta** (não carrega `User→Memberships→Read`) | token de **usuário**, template "Edit Cloudflare Workers" |
+| `Authentication error [10000]` no `PUT /workers/scripts/...`, **depois** de o whoami listar conta e papéis | token válido, sem `Workers Scripts: Edit` | editar permissões do token — o valor não muda |
+
+Cuidado ao casar strings no CI: `Membership roles in "<conta>"` aparece na
+saída de **sucesso** do whoami. Grepar por `membership` fez o run #17 acusar
+"recrie o token" quando o token estava perfeito e faltava só a permissão.
+
 ## 3 · Armadilhas de wrangler (runs #2–#5)
 
 - wrangler **3.x não lê `wrangler.jsonc`** → "Missing entry-point". Use 4.x

@@ -23,6 +23,13 @@
     "PUBLIC_APP_URL": "https://ultravis.ai"
   },
   "observability": { "enabled": true },
+  // PRODUÇÃO — não remover. O run #19 mostrou o wrangler planejando APAGAR
+  // esta rota ("Uploading the Worker will override the remote configuration
+  // with your local one"): o Custom Domain foi criado à mão no painel em
+  // 06/set e nunca existiu aqui, então o primeiro deploy bem-sucedido
+  // derrubaria api.ultravis.ai — o front inteiro, sem erro nenhum no log.
+  // Config na origem: o que está aqui é o que a produção tem.
+  "routes": [{ "pattern": "api.ultravis.ai", "custom_domain": true }],
   "containers": [
     {
       "class_name": "UltravisServer",
@@ -35,7 +42,25 @@
   "durable_objects": {
     "bindings": [{ "name": "SERVER", "class_name": "UltravisServer" }]
   },
+  // Espelho D1 (somente leitura, rotas /espelho*) — veio do worker
+  // ultravis-d1-espelho, fundido aqui em 07/set ("1 produto = 1 worker").
+  // Binding D1 NÃO precisa de migration: mexer no array abaixo dispara
+  // migração de classe de Durable Object e pode derrubar o container.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ultravis-espelho",
+      "database_id": "b1babe44-4cdf-499c-abce-235ea8c73576"
+    }
+  ],
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["UltravisServer"] }],
   // keepalive: mantém o node-cron interno vivo (lift-and-shift v1)
-  "triggers": { "crons": ["*/10 * * * *"] }
+  "triggers": {
+    "crons": [
+      // keepalive do container (node-cron interno vivo)
+      "*/10 * * * *",
+      // ponte Supabase -> D1: 30 min depois do censo semanal (seg 06:00 UTC)
+      "30 6 * * 1"
+    ]
+  }
 }

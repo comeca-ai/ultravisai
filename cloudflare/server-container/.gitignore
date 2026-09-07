@@ -1,0 +1,3 @@
+node_modules/
+# estado local do wrangler dev / D1 --local (miniflare)
+.wrangler/

@@ -1,11 +1,17 @@
-# Deploy do Ultravis Server como Cloudflare Container — ver
-# cloudflare/server-container/README.md.
+# ÚNICO deploy do projeto (consolidação 07/set: 1 produto = 1 worker).
+# Publica o worker `ultravis-server` — container com o Express + rotas
+# /espelho do espelho D1. Ver cloudflare/server-container/README.md.
+#
+# Ordem dos passos (importa): deploy → sync de segredos → schema D1 →
+# smokes → diagnóstico. O sync ANTES do smoke é o que impede o container de
+# subir sem env (causa-raiz dos runs #3–#9).
 #
 # Requisitos (uma vez): Workers Paid na conta (Containers) e o secret
 # CLOUDFLARE_API_TOKEN com um token do template "Edit Cloudflare Workers"
 # (wrangler builda a imagem e publica; containers não saem pela REST crua —
 # e wrangler com Account API Token morre em membership roles, lição da skill
-# cloudflare).
+# cloudflare) + permissão de conta "D1:Edit" para o passo do schema — que é
+# TOLERANTE: sem a permissão ele avisa e o deploy segue.
 #
 # Auditoria: todo deploy nasce de push na main (PR mergeado) e fica com log
 # completo neste workflow.
@@ -25,15 +31,75 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verificar credencial
+      # Diagnóstico de FORMATO do token, nunca do valor. O run #14 morreu em
+      # "Invalid format for Authorization header [code: 6111]" — erro do
+      # wrangler que não diz o que há de errado. Aqui a resposta sai em uma
+      # linha: comprimido? tem espaço? veio com "Bearer"? é um UUID (id do
+      # token em vez do valor)? Só características, jamais o conteúdo.
+      - name: Verificar credencial (formato, nunca o valor)
         id: cred
         env:
           TOK: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          if [ -n "$TOK" ]; then echo "has=1" >> "$GITHUB_OUTPUT"; else
+          if [ -z "$TOK" ]; then
             echo "has=0" >> "$GITHUB_OUTPUT"
             echo "::warning::CLOUDFLARE_API_TOKEN ausente — deploy pulado"
+            exit 0
           fi
+          echo "has=1" >> "$GITHUB_OUTPUT"
+          limpo=$(printf '%s' "$TOK" | tr -d '[:space:]')
+          n=${#TOK}; nlimpo=${#limpo}
+          echo "comprimento: $n (sem espaços/quebras: $nlimpo)"
+          problema=""
+          [ "$n" -ne "$nlimpo" ] && problema="$problema espaço-ou-quebra-de-linha;"
+          case "$limpo" in
+            Bearer*|bearer*) problema="$problema prefixo-Bearer;" ;;
+          esac
+          case "$limpo" in
+            *@*) problema="$problema parece-e-mail-(Global-API-Key-usa-e-mail,-mas-aqui-é-API-Token);" ;;
+          esac
+          if printf '%s' "$limpo" | grep -qiE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+            problema="$problema é-um-UUID-(provável-ID-do-token-ou-database_id,-não-o-VALOR);"
+          fi
+          if ! printf '%s' "$limpo" | grep -qE '^[A-Za-z0-9_.-]+$'; then
+            problema="$problema caractere-fora-do-esperado;"
+          fi
+          # Tokens da Cloudflare têm ~40 chars; muito curto/longo é sinal.
+          { [ "$nlimpo" -lt 30 ] || [ "$nlimpo" -gt 120 ]; } && problema="$problema comprimento-atípico;"
+          if [ -n "$problema" ]; then
+            echo "::warning::formato suspeito do CLOUDFLARE_API_TOKEN:$problema — recadastrar o VALOR do token (API Tokens → Create/Roll → copiar), sem espaços e sem prefixo"
+            echo "### Token: formato suspeito —$problema" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "formato plausível (não prova que é válido — só que não tem defeito óbvio)"
+          fi
+
+      # Preflight de PERMISSÃO (3 chamadas, ~2s). Cinco runs foram gastos
+      # descobrindo problema de token DEPOIS de npm install + download do
+      # wrangler + build; as três perguntas que separam os casos são baratas
+      # e a resposta vem em texto claro em vez de código numérico.
+      # Nunca falha o job: só informa — quem decide é o wrangler logo abaixo.
+      - name: Preflight de permissão do token (informativo)
+        if: steps.cred.outputs.has == '1'
+        continue-on-error: true
+        env:
+          TOK: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACC: '749b2e9b3642e4b03321d5830e81c195'
+        run: |
+          api() { curl -sS -m 20 -H "Authorization: Bearer $TOK" "$@" || echo '{"success":false,"errors":[{"message":"curl falhou"}]}'; }
+          ok() { python3 -c "import json,sys;d=json.load(sys.stdin);print('sim' if d.get('success') else 'NAO: '+'; '.join(str(e.get('message')) for e in d.get('errors') or []))"; }
+
+          echo "1) token vivo?          $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
+          echo "2) LÊ Workers?          $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
+          echo "3) LÊ D1?               $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
+          {
+            echo "### Preflight do token"
+            echo "- vivo: $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
+            echo "- lê Workers: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
+            echo "- lê D1: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
+            echo ""
+            echo "Escrita não é testada aqui (criaria worker de teste em produção) — quem prova é o deploy abaixo."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Deploy (wrangler + build da imagem)
         if: steps.cred.outputs.has == '1'
         working-directory: cloudflare/server-container
@@ -46,8 +112,15 @@ jobs:
           rc=${PIPESTATUS[0]}
           if [ "$rc" -ne 0 ]; then
             echo "## Deploy falhou — leia o motivo acima." >> "$GITHUB_STEP_SUMMARY"
-            if grep -qi "membership" /tmp/deploy.log; then
-              echo "::error::wrangler exige token do template 'Edit Cloudflare Workers' (User→Memberships→Read). Recrie o token pelo template e atualize o secret."
+            # ATENÇÃO ao casar "membership": a frase "Membership roles in ..."
+            # aparece na saída de SUCESSO do whoami. Só a falha interessa —
+            # senão o run #17 se repete: token perfeito, mensagem mandando
+            # recriar o token (o problema era outro).
+            if grep -qiE "Unable to get membership|membership roles.*(fail|error)" /tmp/deploy.log; then
+              echo "::error::wrangler não conseguiu ler membership roles — token de CONTA não carrega isso. Use token de USUÁRIO (template 'Edit Cloudflare Workers')."
+            elif grep -qE "code: (10000|10007)|Authentication error" /tmp/deploy.log; then
+              echo "::error::Token autenticou mas NÃO tem permissão de escrita em Workers. Em dash.cloudflare.com/profile/api-tokens → editar o token (o VALOR não muda, o secret do GitHub fica como está) e garantir, no nível Conta: 'Workers Scripts: Edit' (obrigatório), 'Workers KV Storage: Edit', 'Workers R2 Storage: Edit', 'Workers Tail: Read', 'Account Settings: Read', 'D1: Edit' (passo do espelho) e, se existir na lista, 'Containers: Edit'/'Cloudchamber: Edit'."
+              echo "### Token sem permissão de escrita em Workers — ver o passo do deploy" >> "$GITHUB_STEP_SUMMARY"
             fi
             if grep -qiE "paid|upgrade|not (available|enabled)" /tmp/deploy.log; then
               echo "::error::Containers exige o plano Workers Paid (~US\$5/mês) — ativar em dash.cloudflare.com → Workers e Pages → Plans."
@@ -59,8 +132,24 @@ jobs:
       # painel morriam a cada deploy até o keep_vars:true. Este passo garante:
       # re-propaga do GitHub Secrets todo segredo que existir lá (ausente é
       # pulado com aviso — dá pra popular aos poucos).
-      - name: Sincronizar segredos GitHub → worker (ausentes são pulados)
+      # OTIMIZAÇÃO (07/set): cada PUT de segredo cria uma VERSÃO nova do worker
+      # — 15 segredos = 15 versões e 15 rollouts do container a cada deploy de
+      # código, sem nada ter mudado. Agora o sync só roda quando é pra rodar:
+      # dispatch manual, ou commit marcado com [secrets]. A rotação avulsa
+      # continua no workflow dedicado sync-cf-secrets (que não rebuilda a imagem).
+      - name: Decidir se sincroniza segredos
+        id: sync
         if: steps.cred.outputs.has == '1'
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || \
+             printf '%s' "${{ github.event.head_commit.message }}" | grep -qi '\[secrets\]'; then
+            echo "go=1" >> "$GITHUB_OUTPUT"; echo "sync de segredos: SIM"
+          else
+            echo "go=0" >> "$GITHUB_OUTPUT"
+            echo "sync de segredos: não (deploy de código) — use [secrets] no commit, o dispatch manual, ou o workflow sync-cf-secrets"
+          fi
+      - name: Sincronizar segredos GitHub → worker (ausentes são pulados)
+        if: steps.cred.outputs.has == '1' && steps.sync.outputs.go == '1'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           ACC: '749b2e9b3642e4b03321d5830e81c195'
@@ -99,6 +188,39 @@ jobs:
             else skip="$skip $name"; fi
           done
           echo "### Segredos: $ok propagado(s); ausentes no GitHub:${skip:- nenhum}" >> "$GITHUB_STEP_SUMMARY"
+      # Schema do espelho D1 (idempotente — IF NOT EXISTS em tudo; reaplicar a
+      # cada deploy custa só uma ida ao D1). TOLERANTE DE PROPÓSITO: este é o
+      # workflow que publica api.ultravis.ai; uma permissão faltando no token
+      # NÃO pode derrubar o deploy da aplicação que o cliente usa. Nunca
+      # propague o rc — só aviso nomeando o remédio.
+      - name: Aplicar schema do espelho D1 (tolerante — nunca derruba o deploy)
+        if: steps.cred.outputs.has == '1'
+        working-directory: cloudflare/server-container
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: '749b2e9b3642e4b03321d5830e81c195'
+        run: |
+          if [ ! -f d1/schema.d1.sql ]; then
+            echo "::warning::d1/schema.d1.sql não existe — passo do espelho pulado"
+            echo "### Espelho D1: schema ausente (d1/schema.d1.sql) — pulado" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          npx wrangler@4.129.0 d1 execute ultravis-espelho --remote --file=d1/schema.d1.sql -y 2>&1 | tee /tmp/d1.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "### Espelho D1: schema NÃO aplicado (deploy segue — o espelho é experimento)" >> "$GITHUB_STEP_SUMMARY"
+            if grep -qiE "authentication|authorization|10000|7403|not authorized|permission" /tmp/d1.log; then
+              echo "::warning::token precisa de D1:Edit — editar o token no painel (My Profile → API Tokens) adicionando a permissão de conta 'D1:Edit'; o valor do token não muda, o secret no GitHub não precisa ser trocado."
+            fi
+            if grep -qiE "couldn't find|not found|no (d1 )?database" /tmp/d1.log; then
+              echo "::warning::banco 'ultravis-espelho' não existe na conta — criar no painel (Storage & Databases → D1) e conferir o database_id no wrangler.jsonc."
+            fi
+            if grep -qi "membership" /tmp/d1.log; then
+              echo "::warning::wrangler exige token do template 'Edit Cloudflare Workers' (User→Memberships→Read). Recrie o token pelo template e atualize o secret."
+            fi
+            exit 0
+          fi
+          echo "### Schema do espelho aplicado no banco ultravis-espelho (37 tabelas, idempotente)" >> "$GITHUB_STEP_SUMMARY"
       - name: Smoke test (GET / via worker, com retry pro cold start)
         if: steps.cred.outputs.has == '1'
         run: |
@@ -119,6 +241,44 @@ jobs:
           echo "### Smoke: HTTP $code após 10 tentativas — corpo acima; tail do container no passo seguinte" >> "$GITHUB_STEP_SUMMARY"
           echo "::warning::smoke não passou (HTTP $code) — deploy publicado; ver o passo 'Diagnóstico'"
           echo "SMOKE_FAILED=1" >> "$GITHUB_ENV"
+          exit 0
+      # Segundo smoke: /espelho responde NO WORKER (não acorda o container) —
+      # é a prova barata de que o binding D1 subiu junto com o deploy.
+      # Dois smokes: (1) anônimo TEM que dar 401 — é a prova de que a rota não
+      # está aberta no domínio de produção; (2) autenticado dá 200. Sem
+      # OPS_USER/OPS_PASS no GitHub, o segundo é pulado com aviso (o worker
+      # segue fechado, que é o lado seguro).
+      - name: Smoke do espelho D1 (401 anônimo + 200 autenticado)
+        if: steps.cred.outputs.has == '1'
+        env:
+          OPS_USER: ${{ secrets.OPS_USER }}
+          OPS_PASS: ${{ secrets.OPS_PASS }}
+        run: |
+          URL="https://ultravis-server.jhonata-emerick.workers.dev/espelho?format=json"
+          anon=$(curl -sS -o /tmp/esp_anon -w '%{http_code}' "$URL" || echo 000)
+          echo "anônimo: HTTP $anon (esperado 401)"
+          if [ "$anon" != "401" ]; then
+            echo "::warning::/espelho anônimo devolveu $anon — esperado 401. Se for 503, faltam OPS_USER/OPS_PASS como Secret no worker (fechado, seguro). Qualquer 2xx é EXPOSIÇÃO: corrigir antes de carregar dados."
+          fi
+          if [ -z "$OPS_USER" ] || [ -z "$OPS_PASS" ]; then
+            echo "::warning::OPS_USER/OPS_PASS ausentes no GitHub Secrets — smoke autenticado pulado (o espelho segue protegido)"
+            echo "### Espelho D1: anônimo HTTP $anon · autenticado não testado (sem OPS_* no GitHub)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          code=000
+          for i in 1 2 3; do
+            code=$(curl -sS -u "$OPS_USER:$OPS_PASS" -o /tmp/esp -w '%{http_code}' "$URL" || echo 000)
+            echo "autenticado, tentativa $i: HTTP $code"
+            [ "$code" = "200" ] && break
+            sleep 10
+          done
+          head -c 400 /tmp/esp 2>/dev/null || true; echo
+          if [ "$code" = "200" ]; then
+            echo "### Espelho D1 OK — 401 anônimo, 200 autenticado ($URL)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::/espelho autenticado respondeu HTTP $code — binding DB (d1_databases) ou banco ausente; corpo no log"
+            echo "### Espelho D1: autenticado HTTP $code — ver log (deploy da aplicação não é afetado)" >> "$GITHUB_STEP_SUMMARY"
+          fi
           exit 0
       - name: Diagnóstico (wrangler tail captura o stdout do container)
         if: env.SMOKE_FAILED == '1'

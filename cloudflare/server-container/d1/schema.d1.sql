@@ -3,8 +3,11 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Tradução do schema Postgres (supabase/schema.sql + migrations 00034–00044)
 -- para SQLite / Cloudflare D1. 37 tabelas. Fonte da verdade continua sendo o
--- Supabase — este arquivo é um espelho de leitura/experimento (fases no
--- README.md desta pasta).
+-- Supabase — este arquivo é um espelho de leitura/experimento (fases na seção
+-- "Espelho D1" do ../README.md).
+--
+-- Aplicado pelo workflow deploy-server-container:
+--   npx wrangler@4.129.0 d1 execute ultravis-espelho --remote --file=d1/schema.d1.sql -y
 --
 -- Convenções de tradução (aplicadas em TODAS as tabelas):
 --   uuid        → TEXT (UUIDs do Postgres entram como texto; default local =

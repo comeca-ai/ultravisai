@@ -1,15 +1,21 @@
 ---
 name: cloudflare
-description: Como usar e configurar o Cloudflare da Ultravis — deploy do worker, criar novo worker, bindings (Queues, Cron Triggers, Durable Objects, Email Service), AI Gateway, secrets, diagnóstico de token e o mapa de produtos 2026. Use SEMPRE que a tarefa envolver Cloudflare, worker, edge, wrangler, fila, cron, e-mail transacional, AI Gateway, deploy do edge-gateway ou erro 403/authentication em api.cloudflare.com — mesmo sem a palavra "Cloudflare" no pedido.
+description: Como usar e configurar o Cloudflare da Ultravis — deploy do worker único, rotas novas na edge, bindings (D1, Queues, Cron Triggers, Durable Objects, Email Service), AI Gateway, secrets, diagnóstico de token e o mapa de produtos 2026. Use SEMPRE que a tarefa envolver Cloudflare, worker, edge, wrangler, fila, cron, e-mail transacional, AI Gateway, deploy do server ou erro 403/authentication em api.cloudflare.com — mesmo sem a palavra "Cloudflare" no pedido.
 ---
 
 # Cloudflare na Ultravis
 
-Conta `749b2e9b3642e4b03321d5830e81c195` · worker `ultravis-edge-gateway`
-(https://ultravis-edge-gateway.jhonata-emerick.workers.dev) · AI Gateway
-`ultravis` · fonte em `cloudflare/edge-gateway/`. Sintaxes prontas e as
-chamadas REST validadas: `references/cookbook.md` — leia antes de escrever
-config ou chamada de API na mão.
+Conta `749b2e9b3642e4b03321d5830e81c195` · **worker ÚNICO `ultravis-server`**
+(https://api.ultravis.ai — Custom Domain; e
+https://ultravis-server.jhonata-emerick.workers.dev) · AI Gateway `ultravis` ·
+fonte em `cloudflare/server-container/`. Sintaxes prontas e as chamadas REST
+validadas: `references/cookbook.md` — leia antes de escrever config ou chamada
+de API na mão.
+
+**Regra de ouro (07/set, ordem do dono): 1 produto = 1 worker.** Precisa de
+uma superfície nova? É **rota nova dentro do `ultravis-server`**, não worker
+novo. Foi assim que o espelho D1 virou `/espelho` e que `ultravis-edge-gateway`
+e `ultravis-d1-espelho` foram apagados. Ver cookbook §7.
 
 ## As 5 lições que custaram 7 runs (06/set) — não repita
 

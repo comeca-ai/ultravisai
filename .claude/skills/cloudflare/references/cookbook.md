@@ -127,3 +127,17 @@ ficava sem env nenhuma (`start envVars: HOST,PORT` no tail provou). Sempre
 sensíveis no painel sempre como tipo **Secret** (sobrevivem a deploy), nunca
 Text. Cinto-e-suspensório: passo de sync no workflow re-propaga do GitHub
 Secrets após cada deploy (ausente = pulado com aviso no summary).
+
+## 7 · Email Service: SMTP autenticado (descoberta 07/set)
+
+Além do binding `send_email` (workers), o Email Service expõe **credenciais
+SMTP autenticadas** no painel (dash → Email Service → Sending) — serve de
+backend SMTP pra QUALQUER sistema, sem worker no meio. Uso na Ultravis:
+1. Painel: verificar o domínio `ultravis.ai` (SPF/DKIM automáticos — a zona
+   já é Cloudflare) e gerar credencial SMTP + remetente (ex.:
+   `no-reply@ultravis.ai`).
+2. **Supabase Auth** (magic link/convites): Dashboard → Authentication →
+   Emails → SMTP Settings → host/porta/usuário/senha do Email Service.
+3. **Vigia/Daily Pulse**: envs no worker `ultravis-server` —
+   `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS` (Secret),
+   `ALERT_EMAIL_TO`, `ALERT_EMAIL_FROM` — código já pronto (watchdog.js).

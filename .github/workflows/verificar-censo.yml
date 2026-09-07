@@ -24,12 +24,38 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
-      - name: Consultar agregados do dia na produção
+      # Diagnóstico secreto a secreto: o run anterior falhou com os dois
+      # vazios e a mensagem única não dizia qual faltava. Nunca imprime valor
+      # — só presença e tamanho, que é o suficiente pra achar o erro de
+      # cadastro (aba Variables em vez de Secrets, nível Environment em vez
+      # de Repository, nome com espaço/typo).
+      - name: Conferir credenciais (nomes e presença, nunca valores)
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$KEY" ]; then
-            echo "::error::SUPABASE_URL e/ou SUPABASE_SERVICE_ROLE_KEY ausentes no GitHub Secrets — preencher em Settings → Secrets → Actions"
+          faltando=0
+          if [ -n "$SUPABASE_URL" ]; then
+            echo "✓ SUPABASE_URL presente (${#SUPABASE_URL} caracteres)"
+          else
+            echo "✗ SUPABASE_URL AUSENTE"; faltando=1
+          fi
+          if [ -n "$KEY" ]; then
+            echo "✓ SUPABASE_SERVICE_ROLE_KEY presente (${#KEY} caracteres)"
+          else
+            echo "✗ SUPABASE_SERVICE_ROLE_KEY AUSENTE"; faltando=1
+          fi
+          if [ "$faltando" = "1" ]; then
+            {
+              echo "### Credenciais ausentes — checklist"
+              echo "1. Tem que ser a aba **Secrets** (não *Variables*)"
+              echo "2. Nível **Repository secrets** do \`comeca-ai/ultravisai\` — o mesmo lugar onde \`CLOUDFLARE_API_TOKEN\` já funciona"
+              echo "3. Não pode ser *Environment secret* nem *Dependabot/Codespaces*"
+              echo "4. Nomes exatos: \`SUPABASE_URL\` e \`SUPABASE_SERVICE_ROLE_KEY\` (sem espaço)"
+              echo "5. Se forem *Organization secrets*: liberar o acesso ao repositório \`ultravisai\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::credencial ausente — ver o checklist no summary deste run"
             exit 1
           fi
+      - name: Consultar agregados do dia na produção
+        run: |
           H1="apikey: $KEY"; H2="Authorization: Bearer $KEY"
           TODAY=$(date -u +%Y-%m-%d)
 
@@ -41,6 +67,11 @@ jobs:
           echo "== resultados de HOJE ($TODAY UTC) por marca × motor =="
           curl -sS -H "$H1" -H "$H2" \
             "$SUPABASE_URL/rest/v1/prompt_results?select=brand_id,platform,mention_count,citation_count,sentiment&created_at=gte.${TODAY}T00:00:00Z&limit=10000" > /tmp/today.json
+
+          echo "== janela de 8 dias (contexto: o censo roda toda segunda) =="
+          SINCE=$(date -u -d '8 days ago' +%Y-%m-%d)
+          curl -sS -H "$H1" -H "$H2" \
+            "$SUPABASE_URL/rest/v1/prompt_results?select=created_at&created_at=gte.${SINCE}T00:00:00Z&limit=10000" > /tmp/semana.json
 
           python3 - <<'PY' | tee /tmp/resumo.txt
           import json, collections
@@ -56,15 +87,74 @@ jobs:
           total_n = sum(a["n"] for a in agg.values())
           total_m = sum(a["m"] for a in agg.values())
           total_c = sum(a["c"] for a in agg.values())
-          print(f"TOTAL: {total_n} respostas · {total_m} menções · {total_c} citações")
+          print(f"TOTAL HOJE: {total_n} respostas · {total_m} menções · {total_c} citações")
           for (brand, plat), a in sorted(agg.items()):
               s = a["sent"]
               print(f"  {brand} × {plat}: {a['n']} resp · {a['m']} m · {a['c']} c · sent +{s.get('positive',0)}/~{s.get('neutral',0)}/-{s.get('negative',0)}")
+          # Contexto semanal: em que dias houve coleta (pega censo de segunda
+          # e qualquer "Rodar Tudo" manual da semana).
+          dias = collections.Counter(r["created_at"][:10] for r in json.load(open("/tmp/semana.json")))
+          if dias:
+              print("\nCOLETA NOS ÚLTIMOS 8 DIAS (dia: respostas gravadas)")
+              for d in sorted(dias):
+                  print(f"  {d}: {dias[d]}")
+          else:
+              print("\nNENHUMA coleta nos últimos 8 dias — rastreamento silencioso.")
           PY
 
           {
             echo "### Censo de $TODAY — agregados da produção"
             echo '```'
             cat /tmp/resumo.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Caminho ALTERNATIVO de leitura, sem depender dos secrets do Supabase: o
+  # worker (que tem a SERVICE_ROLE) agrega o censo no D1 pelo cron semanal, e
+  # aqui a gente lê o D1 com o token da Cloudflare que já existe. Se a ponte
+  # ainda não rodou, a tabela vem vazia e o job diz isso — nunca falha o run.
+  espelho:
+    name: agregados pelo espelho D1 (sem secret do Supabase)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ler censo_agregados no D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: '749b2e9b3642e4b03321d5830e81c195'
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::sem CLOUDFLARE_API_TOKEN — leitura pelo espelho pulada"; exit 0
+          fi
+          SQL="SELECT dia, marca, motor, respostas, mencoes, citacoes, sent_pos, sent_neu, sent_neg FROM censo_agregados ORDER BY dia DESC, marca, motor LIMIT 200;"
+          npx wrangler@4.129.0 d1 execute ultravis-espelho --remote --command "$SQL" --json 2>&1 | tee /tmp/d1out.json
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning::não deu pra ler o D1 (token sem D1:Edit/Read, banco ausente ou ponte nunca rodou) — ver saída acima"
+            exit 0
+          fi
+          python3 - <<'PY2' | tee /tmp/espelho.txt
+          import json, sys
+          try:
+              bruto = open('/tmp/d1out.json').read()
+              inicio = bruto.find('[')
+              d = json.loads(bruto[inicio:]) if inicio >= 0 else []
+              linhas = (d[0].get('results') if d and isinstance(d, list) else []) or []
+          except Exception as e:
+              print(f'saída do wrangler não parseável ({e})'); sys.exit(0)
+          if not linhas:
+              print('censo_agregados VAZIA — a ponte (cron seg 06:30 UTC ou /espelho/sincronizar) ainda não rodou.')
+              sys.exit(0)
+          tn = sum(l['respostas'] for l in linhas)
+          tm = sum(l['mencoes'] for l in linhas)
+          tc = sum(l['citacoes'] for l in linhas)
+          print(f'TOTAL NA JANELA: {tn} respostas · {tm} menções · {tc} citações')
+          for l in linhas:
+              print(f"  {l['dia']} · {l['marca']} × {l['motor']}: {l['respostas']} resp · {l['mencoes']} m · {l['citacoes']} c · sent +{l['sent_pos']}/~{l['sent_neu']}/-{l['sent_neg']}")
+          PY2
+          {
+            echo "### Agregados lidos do espelho D1"
+            echo '```'
+            cat /tmp/espelho.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"

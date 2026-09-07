@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { AuditResult, AuditSignal, AuditRecommendation } from '@/lib/actions/audits';
+import { CitabilityKitCard } from './citability-kit-card';
 import { buildIndication } from '@/lib/audit/indications';
 import { cn } from '@/lib/utils';
 
@@ -311,6 +312,9 @@ export function AuditReport({ audit }: { audit: AuditResult }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Kit de citabilidade: o que publicar, não só o que corrigir */}
+      <CitabilityKitCard pecas={audit.citabilityKit} />
 
       {/* Category breakdown */}
       <Card>

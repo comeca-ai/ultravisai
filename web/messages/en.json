@@ -149,7 +149,18 @@
     "signals": "Signals",
     "impactHigh": "high impact",
     "impactMedium": "medium impact",
-    "impactLow": "low impact"
+    "impactLow": "low impact",
+    "kit": {
+      "title": "Citability kit",
+      "subtitle": "{count, plural, one {# ready-to-publish piece} other {# ready-to-publish pieces}} — copy and paste where indicated.",
+      "emptySubtitle": "Nothing to publish on this page.",
+      "empty": "This page already passes every signal that produces a file — llms.txt, AI crawler access, structured data and meta tags are all in order.",
+      "where": "Where to publish",
+      "copy": "Copy content",
+      "download": "Download file",
+      "originSite": "built from your site",
+      "originAi": "AI draft"
+    }
   },
   "auth": {
     "signIn": "Sign in",

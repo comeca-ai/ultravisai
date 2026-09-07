@@ -91,7 +91,22 @@ function escapeHtml(v) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Resposta de erro que respeita o Accept: navegador ganha página, curl ganha JSON.
+function erro(request, url, status, corpoJson, tituloHtml) {
+  if (querBrowser(request, url)) {
+    return pagina(
+      tituloHtml,
+      '<div class="eyebrow">Ultravis · espelho D1</div><h1>' +
+        escapeHtml(tituloHtml) +
+        '</h1><div class="sub"><a href="/espelho">← todas as tabelas</a></div>',
+      status
+    );
+  }
+  return json(corpoJson, status);
 }
 
 function querBrowser(request, url) {
@@ -99,7 +114,7 @@ function querBrowser(request, url) {
   return (request.headers.get('accept') || '').includes('text/html');
 }
 
-function pagina(titulo, corpo) {
+function pagina(titulo, corpo, status = 200) {
   const css =
     ':root{--bg:#F7F6F2;--card:#fff;--ink:#26251F;--ink2:#4C4940;--faint:#8C8878;--rule:#DFDCD2;--accent:#1F7A4D}' +
     '*{margin:0;padding:0;box-sizing:border-box}' +
@@ -122,7 +137,7 @@ function pagina(titulo, corpo) {
       '<meta name="viewport" content="width=device-width,initial-scale=1">' +
       '<title>' + escapeHtml(titulo) + '</title><style>' + css + '</style></head>' +
       '<body><div class="wrap">' + corpo + '</div></body></html>',
-    { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } }
+    { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } }
   );
 }
 
@@ -135,12 +150,16 @@ function paginaIndice(contagens) {
     )
     .join('');
   const total = contagens.reduce((s, c) => s + c.linhas, 0);
+  const sub =
+    contagens.length === 0
+      ? 'Banco ainda sem schema — ele é aplicado pelo deploy (<code>wrangler d1 execute</code> com <code>d1/schema.d1.sql</code>).'
+      : contagens.length + ' tabelas · ' + total +
+        ' linhas no total — schema traduzido do Supabase; dados entram na fase B. Clique numa tabela para amostra.';
   return pagina(
     'Espelho D1 — ultravis-espelho',
     '<div class="eyebrow">Ultravis · espelho D1 · fase A</div>' +
       '<h1>Banco <code>ultravis-espelho</code> no Cloudflare</h1>' +
-      '<div class="sub">' + contagens.length + ' tabelas · ' + total +
-      ' linhas no total — schema traduzido do Supabase; dados entram na fase B. Clique numa tabela para amostra.</div>' +
+      '<div class="sub">' + sub + '</div>' +
       '<div class="card"><table><thead><tr><th>tabela</th><th style="text-align:right">linhas</th></tr></thead>' +
       '<tbody>' + linhas + '</tbody></table></div>' +
       '<div class="foot">Somente leitura · produção (Supabase) intocada · <a href="/espelho?format=json">ver JSON</a></div>'
@@ -182,10 +201,70 @@ async function listarTabelas(db) {
   return results.map((r) => r.name);
 }
 
+// Comparação em tempo constante: não vaza o tamanho nem o prefixo da senha
+// pelo tempo de resposta.
+function igualSeguro(a, b) {
+  const x = String(a ?? '');
+  const y = String(b ?? '');
+  if (x.length !== y.length) return false;
+  let dif = 0;
+  for (let i = 0; i < x.length; i += 1) dif |= x.charCodeAt(i) ^ y.charCodeAt(i);
+  return dif === 0;
+}
+
+/**
+ * Basic auth do espelho — MESMO par do /ops (OPS_USER/OPS_PASS, já secrets
+ * deste worker). Roda ANTES de qualquer prepare()/batch() no D1: requisição
+ * anônima não custa leitura faturada nem revela nome de tabela. Sem as envs
+ * configuradas o espelho fica FECHADO (503), nunca aberto — a rota vive no
+ * domínio de produção e D1 não tem RLS.
+ */
+function autorizado(request, env) {
+  const user = env.OPS_USER;
+  const pass = env.OPS_PASS;
+  if (!user || !pass) return 'sem-credencial-configurada';
+  const header = request.headers.get('authorization') || '';
+  if (!header.toLowerCase().startsWith('basic ')) return false;
+  let decodificado = '';
+  try {
+    decodificado = atob(header.slice(6).trim());
+  } catch {
+    return false;
+  }
+  const corte = decodificado.indexOf(':');
+  if (corte < 0) return false;
+  // As duas comparações sempre executam — sem short-circuit por usuário errado.
+  const okUser = igualSeguro(decodificado.slice(0, corte), user);
+  const okPass = igualSeguro(decodificado.slice(corte + 1), pass);
+  return okUser && okPass;
+}
+
+function pedirCredencial(motivo) {
+  return new Response(JSON.stringify({ erro: motivo }, null, 2), {
+    status: 401,
+    headers: {
+      ...JSON_HEADERS,
+      'www-authenticate': 'Basic realm="espelho", charset="UTF-8"',
+    },
+  });
+}
+
 async function servirEspelho(request, env, url, path) {
   if (request.method !== 'GET') {
     return json({ erro: 'método não suportado — use GET' }, 405);
   }
+  const auth = autorizado(request, env);
+  if (auth === 'sem-credencial-configurada') {
+    // Fechado por falta de configuração — nunca aberto por omissão.
+    return json(
+      {
+        erro: 'espelho indisponível',
+        remedio: 'definir OPS_USER e OPS_PASS como Secret no worker ultravis-server',
+      },
+      503
+    );
+  }
+  if (!auth) return pedirCredencial('autenticação necessária');
   if (!env.DB) {
     return json(
       {
@@ -201,6 +280,9 @@ async function servirEspelho(request, env, url, path) {
     if (path === '/espelho') {
       const tabelas = await listarTabelas(env.DB);
       if (tabelas.length === 0) {
+        // Banco sem schema ainda: navegador também merece página (o early-return
+        // em JSON puro era um furo de UX visto na revisão).
+        if (querBrowser(request, url)) return paginaIndice([]);
         return json({
           banco: 'ultravis-espelho',
           tabelas: [],
@@ -231,30 +313,49 @@ async function servirEspelho(request, env, url, path) {
       // Validação anti-injection: só nomes que EXISTEM no sqlite_master.
       const nome = tabelas.find((t) => t === pedido);
       if (!nome) {
-        return json({ erro: 'tabela não encontrada', pedido, disponiveis: tabelas }, 404);
+        return erro(
+          request,
+          url,
+          404,
+          { erro: 'tabela não encontrada', pedido, disponiveis: tabelas },
+          'Tabela não encontrada'
+        );
       }
       const { results } = await env.DB.prepare('SELECT * FROM "' + nome + '" LIMIT 5').all();
       if (querBrowser(request, url)) return paginaTabela(nome, results);
       return json({ tabela: nome, amostra: results, limite: 5 });
     }
 
-    return json(
+    return erro(
+      request,
+      url,
+      404,
       { erro: 'rota não encontrada', rotas: ['GET /espelho', 'GET /espelho/tabela/<nome>'] },
-      404
+      'Rota não encontrada'
     );
   } catch (err) {
-    return json({ erro: 'falha na consulta D1', detalhe: String(err && err.message) }, 500);
+    // Detalhe do erro fica no log do worker, não no corpo da resposta: a rota
+    // vive no domínio de produção e mensagem de banco é informação interna.
+    console.error('espelho: falha na consulta D1', err && err.message);
+    return erro(request, url, 500, { erro: 'falha na consulta ao espelho' }, 'Falha na consulta');
   }
 }
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    // Normalização só para decidir o roteamento: o request que segue pro
-    // container é sempre o ORIGINAL, sem reescrita de path.
-    const path = url.pathname.replace(/\/+$/, '') || '/';
-    if (path === '/espelho' || path.startsWith('/espelho/')) {
-      return servirEspelho(request, env, url, path);
+    // O roteamento do espelho não pode, em hipótese alguma, atrapalhar o
+    // caminho da API: qualquer falha aqui cai pro container, que é o
+    // comportamento de antes desta consolidação.
+    try {
+      const url = new URL(request.url);
+      // Normalização só para decidir o roteamento: o request que segue pro
+      // container é sempre o ORIGINAL, sem reescrita de path.
+      const path = url.pathname.replace(/\/+$/, '') || '/';
+      if (path === '/espelho' || path.startsWith('/espelho/')) {
+        return await servirEspelho(request, env, url, path);
+      }
+    } catch (err) {
+      console.error('roteamento do espelho falhou — seguindo pro container', err && err.message);
     }
     return getContainer(env.SERVER).fetch(request);
   },

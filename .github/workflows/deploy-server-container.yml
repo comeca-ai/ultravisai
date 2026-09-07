@@ -65,8 +65,24 @@ jobs:
       # painel morriam a cada deploy até o keep_vars:true. Este passo garante:
       # re-propaga do GitHub Secrets todo segredo que existir lá (ausente é
       # pulado com aviso — dá pra popular aos poucos).
-      - name: Sincronizar segredos GitHub → worker (ausentes são pulados)
+      # OTIMIZAÇÃO (07/set): cada PUT de segredo cria uma VERSÃO nova do worker
+      # — 15 segredos = 15 versões e 15 rollouts do container a cada deploy de
+      # código, sem nada ter mudado. Agora o sync só roda quando é pra rodar:
+      # dispatch manual, ou commit marcado com [secrets]. A rotação avulsa
+      # continua no workflow dedicado sync-cf-secrets (que não rebuilda a imagem).
+      - name: Decidir se sincroniza segredos
+        id: sync
         if: steps.cred.outputs.has == '1'
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || \
+             printf '%s' "${{ github.event.head_commit.message }}" | grep -qi '\[secrets\]'; then
+            echo "go=1" >> "$GITHUB_OUTPUT"; echo "sync de segredos: SIM"
+          else
+            echo "go=0" >> "$GITHUB_OUTPUT"
+            echo "sync de segredos: não (deploy de código) — use [secrets] no commit, o dispatch manual, ou o workflow sync-cf-secrets"
+          fi
+      - name: Sincronizar segredos GitHub → worker (ausentes são pulados)
+        if: steps.cred.outputs.has == '1' && steps.sync.outputs.go == '1'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           ACC: '749b2e9b3642e4b03321d5830e81c195'
@@ -161,22 +177,40 @@ jobs:
           exit 0
       # Segundo smoke: /espelho responde NO WORKER (não acorda o container) —
       # é a prova barata de que o binding D1 subiu junto com o deploy.
-      - name: Smoke do espelho D1 (GET /espelho?format=json — responde no worker)
+      # Dois smokes: (1) anônimo TEM que dar 401 — é a prova de que a rota não
+      # está aberta no domínio de produção; (2) autenticado dá 200. Sem
+      # OPS_USER/OPS_PASS no GitHub, o segundo é pulado com aviso (o worker
+      # segue fechado, que é o lado seguro).
+      - name: Smoke do espelho D1 (401 anônimo + 200 autenticado)
         if: steps.cred.outputs.has == '1'
+        env:
+          OPS_USER: ${{ secrets.OPS_USER }}
+          OPS_PASS: ${{ secrets.OPS_PASS }}
         run: |
           URL="https://ultravis-server.jhonata-emerick.workers.dev/espelho?format=json"
+          anon=$(curl -sS -o /tmp/esp_anon -w '%{http_code}' "$URL" || echo 000)
+          echo "anônimo: HTTP $anon (esperado 401)"
+          if [ "$anon" != "401" ]; then
+            echo "::warning::/espelho anônimo devolveu $anon — esperado 401. Se for 503, faltam OPS_USER/OPS_PASS como Secret no worker (fechado, seguro). Qualquer 2xx é EXPOSIÇÃO: corrigir antes de carregar dados."
+          fi
+          if [ -z "$OPS_USER" ] || [ -z "$OPS_PASS" ]; then
+            echo "::warning::OPS_USER/OPS_PASS ausentes no GitHub Secrets — smoke autenticado pulado (o espelho segue protegido)"
+            echo "### Espelho D1: anônimo HTTP $anon · autenticado não testado (sem OPS_* no GitHub)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          code=000
           for i in 1 2 3; do
-            code=$(curl -sS -o /tmp/esp -w '%{http_code}' "$URL" || echo 000)
-            echo "tentativa $i: HTTP $code"
+            code=$(curl -sS -u "$OPS_USER:$OPS_PASS" -o /tmp/esp -w '%{http_code}' "$URL" || echo 000)
+            echo "autenticado, tentativa $i: HTTP $code"
             [ "$code" = "200" ] && break
             sleep 10
           done
-          head -c 400 /tmp/esp 2>/dev/null; echo
+          head -c 400 /tmp/esp 2>/dev/null || true; echo
           if [ "$code" = "200" ]; then
-            echo "### Espelho D1 OK — binding DB no ar ($URL)" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Espelho D1 OK — 401 anônimo, 200 autenticado ($URL)" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "::warning::/espelho respondeu HTTP $code — binding DB do wrangler.jsonc (d1_databases) ou banco ausente; corpo no log"
-            echo "### Espelho D1: HTTP $code — ver corpo no log (deploy da aplicação não é afetado)" >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::/espelho autenticado respondeu HTTP $code — binding DB (d1_databases) ou banco ausente; corpo no log"
+            echo "### Espelho D1: autenticado HTTP $code — ver log (deploy da aplicação não é afetado)" >> "$GITHUB_STEP_SUMMARY"
           fi
           exit 0
       - name: Diagnóstico (wrangler tail captura o stdout do container)

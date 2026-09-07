@@ -1,6 +1,11 @@
 # LIMPEZA one-shot: apaga os dois workers órfãos da conta (consolidação
-# 07/set — "1 produto = 1 worker"). Roda no merge deste arquivo e por
-# workflow_dispatch; depois fica inerte.
+# 07/set — "1 produto = 1 worker").
+#
+# SÓ RODA POR ACIONAMENTO EXPLÍCITO (workflow_dispatch, ou o merge de um PR que
+# toque este arquivo com a linha ARMADO abaixo em "sim"). Ação destrutiva não
+# pode viajar de carona no mesmo push que faz deploy: no merge da consolidação
+# os dois dispararam juntos, ou seja, a limpeza correria em paralelo com o
+# deploy que instala o substituto (achado da revisão de 07/set).
 #
 #   ultravis-edge-gateway  — encaminhava o webhook do Cloro pro Railway; o
 #                            Railway foi apagado em 06/set e o ORIGIN_URL dele
@@ -30,9 +35,27 @@ jobs:
     env:
       ACC: '749b2e9b3642e4b03321d5830e81c195'
       PROTEGIDO: 'ultravis-server'
+      # TRAVA DE ARMAMENTO — editar/mergear este arquivo com 'nao' NÃO apaga
+      # nada: o job faz um no-op e explica. Para executar de fato: PR só desta
+      # linha trocando para 'sim' (ou "Run workflow" pelo painel do Actions).
+      ARMADO: 'nao'
     steps:
+      # Porteiro: dispatch manual sempre executa; push só executa com ARMADO=sim.
+      - name: Trava de armamento
+        id: armar
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$ARMADO" = "sim" ]; then
+            echo "go=1" >> "$GITHUB_OUTPUT"
+            echo "armado — a limpeza vai executar"
+          else
+            echo "go=0" >> "$GITHUB_OUTPUT"
+            echo "### Limpeza NÃO executada (trava de armamento)" >> "$GITHUB_STEP_SUMMARY"
+            echo "Este run foi disparado por push com \`ARMADO: 'nao'\`. Para apagar os órfãos: PR trocando essa linha para \`'sim'\`, ou \"Run workflow\" no painel do Actions." >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::limpeza pulada — trava de armamento em 'nao' (nada foi apagado)"
+          fi
       - name: Verificar credencial
         id: cred
+        if: steps.armar.outputs.go == '1'
         env:
           TOK: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -62,25 +85,36 @@ jobs:
         run: |
           curl -sS "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$PROTEGIDO/settings" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" > /tmp/settings.json || true
+          # FAIL-CLOSED: deleção é irreversível na plataforma; se a verificação
+          # não conclui, NÃO apagamos. (Revisão de 07/set pegou este guard
+          # falhando aberto em 3 caminhos: curl falho, success:false e binding
+          # ausente.)
           python3 - <<'PY'
           import json, sys
           try:
               d = json.load(open('/tmp/settings.json'))
           except Exception as e:
-              print(f'::warning::não deu pra ler as settings do worker ({e}) — seguindo com a evidência versionada')
-              sys.exit(0)
+              print(f'::error::não deu pra ler as settings do worker ({e}) — '
+                    'sem verificação não se apaga nada. Rode de novo ou confira o token.')
+              sys.exit(1)
           if not d.get('success'):
-              print('::warning::GET settings falhou: ' + json.dumps(d)[:400])
-              sys.exit(0)
+              print('::error::GET settings falhou (nada foi apagado): ' + json.dumps(d)[:400])
+              sys.exit(1)
           binds = (d.get('result') or {}).get('bindings') or []
           url = next((b.get('text') for b in binds
                       if b.get('name') == 'CLORO_WEBHOOK_URL'), None)
           print(f'CLORO_WEBHOOK_URL efetivo: {url!r}')
-          if url and ('edge-gateway' in url or 'd1-espelho' in url):
+          if url is None:
+              print('::error::CLORO_WEBHOOK_URL não aparece nos bindings do worker de produção. '
+                    'Sem esse valor não dá pra provar que o gateway saiu do caminho — '
+                    'nada foi apagado. Confirme no painel e rode de novo.')
+              sys.exit(1)
+          if 'edge-gateway' in url or 'd1-espelho' in url:
               print('::error::CLORO_WEBHOOK_URL aponta para um worker órfão — '
                     'trocar para https://api.ultravis.ai/cloro/callback no painel '
                     'ANTES de apagar; nada foi apagado.')
               sys.exit(1)
+          print('guard ok: o webhook do Cloro não passa por nenhum órfão')
           PY
 
       - name: Apagar os workers órfãos (DELETE /workers/scripts/{nome})
@@ -97,14 +131,32 @@ jobs:
             fi
           done
           echo '### Limpeza de workers órfãos' >> "$GITHUB_STEP_SUMMARY"
+          falhas=0
           for nome in $ORFAOS; do
             echo "===== DELETE $nome ====="
             body=$(curl -sS -X DELETE \
               "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/$nome" \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
             echo "$body"
-            echo "- \`$nome\`: $(printf '%s' "$body" | head -c 300)" >> "$GITHUB_STEP_SUMMARY"
+            # O run precisa ficar VERMELHO se o DELETE não funcionou — verde com
+            # nada feito é pior que falha (achado da revisão de 07/set).
+            # "already deleted"/404 conta como sucesso: o objetivo é o worker não existir.
+            veredito=$(printf '%s' "$body" | python3 -c '
+            import json,sys
+            try: d=json.load(sys.stdin)
+            except Exception: print("erro:resposta ilegível"); raise SystemExit
+            if d.get("success"): print("ok")
+            elif any(e.get("code") in (10007, 10090) or "not found" in str(e.get("message","")).lower()
+                     for e in (d.get("errors") or [])): print("ok:já não existia")
+            else: print("erro:" + json.dumps(d.get("errors") or d)[:200])
+            ')
+            echo "- \`$nome\`: $veredito" >> "$GITHUB_STEP_SUMMARY"
+            case "$veredito" in ok*) ;; *) falhas=$((falhas+1));; esac
           done
+          if [ "$falhas" -gt 0 ]; then
+            echo "::error::$falhas deleção(ões) falharam — ver corpo acima; o worker de produção não foi tocado"
+            exit 1
+          fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "> O banco D1 \`ultravis-espelho\` NÃO é afetado (recurso separado do script)." >> "$GITHUB_STEP_SUMMARY"
 

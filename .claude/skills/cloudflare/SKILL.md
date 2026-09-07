@@ -22,7 +22,8 @@ e `ultravis-d1-espelho` foram apagados. Ver cookbook §7.
 1. **Deploy sai pelo GitHub Actions**, nunca da sandbox (egress bloqueia
    `api.cloudflare.com` e até `developers.cloudflare.com` — pesquise doc via
    WebSearch). Sem permissão de dispatch manual: dispara-se por micro-PR
-   mergeado na main tocando `cloudflare/edge-gateway/**` ou o próprio workflow.
+   mergeado na main tocando `cloudflare/server-container/**`, `server/**` ou o
+   próprio workflow.
 2. **wrangler 3.x ignora `wrangler.jsonc`** ("Missing entry-point") — só 4.x lê.
 3. **wrangler 4 + Account API Token = armadilha**: whoami E deploy consultam
    membership roles (`User→Memberships→Read`, que token de conta não tem).
@@ -37,14 +38,17 @@ e `ultravis-d1-espelho` foram apagados. Ver cookbook §7.
 
 ## Como fazer as tarefas comuns
 
-- **Redeployar o worker**: push na main tocando `cloudflare/edge-gateway/**`
-  → workflow `deploy-edge-gateway` publica, ativa a rota, imprime a URL e
-  faz smoke test do `/health` no summary. Verificar = ler o log do run.
-- **Criar worker novo**: nova pasta `cloudflare/<nome>/` com `src/index.js` +
-  `wrangler.jsonc` (name, account_id, main, compatibility_date) + workflow
-  clonado do existente (ou generalizar o atual). Testar local:
-  `npx wrangler@4.129.0 dev --local` — roda sem login; origin externo mocka-se
-  com servidor local + `--var`.
+- **Redeployar o worker**: push na main tocando `cloudflare/server-container/**`
+  ou `server/**` → workflow `deploy-server-container` (o ÚNICO deploy) builda a
+  imagem, publica, re-propaga os 15 segredos, aplica o schema do espelho D1
+  (tolerante) e faz dois smokes (`/` pelo container, `/espelho?format=json`
+  pelo worker). Verificar = ler o log do run.
+- **Superfície nova**: **rota nova em `cloudflare/server-container/src/index.js`**
+  (o `fetch` decide: prefixo conhecido = worker; resto = container). NÃO crie
+  worker novo — foi o que gerou a bagunça de 07/set. Prefixo escolhido vira
+  RESERVADO (o Express monta routers na raiz, então o caminho some pro
+  container): confira antes com um inventário das rotas do Express. Testar
+  local: `npx wrangler@4.129.0 dev --local` — roda sem login.
 - **Secrets do worker**: painel (Settings → Variables and Secrets) ou
   GitHub Secrets + `sync-cf-secrets`.
 - **AI Gateway**: criado no painel (IA → AI Gateway → `ultravis`). O server
@@ -65,9 +69,9 @@ e `ultravis-d1-espelho` foram apagados. Ver cookbook §7.
 | AI Gateway | GA | painel/log/custo de toda chamada de LLM |
 | Workers AI · Vectorize · AI Search (ex-AutoRAG) | GA | sentimento barato; "o que a IA sabe da marca" (backlog) |
 | R2 · Turnstile · Analytics Engine · Hyperdrive | GA | storage sem egress; anti-bot; métricas; ponte SQL→Supabase |
-| D1 | GA | **não usar** — banco é Supabase (auth/RLS/RPC) |
+| D1 | GA | **não é o banco** (Supabase tem auth/RLS/RPC) — só o **espelho de leitura** `ultravis-espelho` (experimento; binding `DB` do worker único, rotas `/espelho*`) |
 
 Doutrina: compute no Cloudflare, dado no Supabase, motores reais via Cloro +
 APIs dos provedores (AI Gateway na frente). Cutover de webhook nunca em
-véspera de censo (seg 06:00 UTC); rollback = trocar `ORIGIN_URL`/URL do
-webhook de volta.
+véspera de censo (seg 06:00 UTC); rollback = trocar a URL do webhook
+(`CLORO_WEBHOOK_URL` nas vars do worker) de volta.

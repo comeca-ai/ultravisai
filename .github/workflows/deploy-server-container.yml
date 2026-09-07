@@ -84,8 +84,15 @@ jobs:
           rc=${PIPESTATUS[0]}
           if [ "$rc" -ne 0 ]; then
             echo "## Deploy falhou — leia o motivo acima." >> "$GITHUB_STEP_SUMMARY"
-            if grep -qi "membership" /tmp/deploy.log; then
-              echo "::error::wrangler exige token do template 'Edit Cloudflare Workers' (User→Memberships→Read). Recrie o token pelo template e atualize o secret."
+            # ATENÇÃO ao casar "membership": a frase "Membership roles in ..."
+            # aparece na saída de SUCESSO do whoami. Só a falha interessa —
+            # senão o run #17 se repete: token perfeito, mensagem mandando
+            # recriar o token (o problema era outro).
+            if grep -qiE "Unable to get membership|membership roles.*(fail|error)" /tmp/deploy.log; then
+              echo "::error::wrangler não conseguiu ler membership roles — token de CONTA não carrega isso. Use token de USUÁRIO (template 'Edit Cloudflare Workers')."
+            elif grep -qE "code: (10000|10007)|Authentication error" /tmp/deploy.log; then
+              echo "::error::Token autenticou mas NÃO tem permissão de escrita em Workers. Em dash.cloudflare.com/profile/api-tokens → editar o token (o VALOR não muda, o secret do GitHub fica como está) e garantir, no nível Conta: 'Workers Scripts: Edit' (obrigatório), 'Workers KV Storage: Edit', 'Workers R2 Storage: Edit', 'Workers Tail: Read', 'Account Settings: Read', 'D1: Edit' (passo do espelho) e, se existir na lista, 'Containers: Edit'/'Cloudchamber: Edit'."
+              echo "### Token sem permissão de escrita em Workers — ver o passo do deploy" >> "$GITHUB_STEP_SUMMARY"
             fi
             if grep -qiE "paid|upgrade|not (available|enabled)" /tmp/deploy.log; then
               echo "::error::Containers exige o plano Workers Paid (~US\$5/mês) — ativar em dash.cloudflare.com → Workers e Pages → Plans."

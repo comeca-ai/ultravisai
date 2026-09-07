@@ -34,6 +34,7 @@ import {
   Wrench,
   ChevronDown,
   KeyRound,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface ConversationRow {
@@ -109,6 +110,22 @@ export default function AgentPage() {
   );
 }
 
+function AgentBackLink() {
+  const t = useTranslations('agent');
+  return (
+    <Link
+      href="/dashboard"
+      className={cn(
+        buttonVariants({ variant: 'ghost', size: 'sm' }),
+        'gap-1.5 text-muted-foreground hover:text-foreground',
+      )}
+    >
+      <ArrowLeft className="h-4 w-4" />
+      {t('backToDashboard')}
+    </Link>
+  );
+}
+
 function AgentChat(props: {
   conversations: ConversationRow[];
   setConversations: React.Dispatch<React.SetStateAction<ConversationRow[]>>;
@@ -137,11 +154,6 @@ function AgentChat(props: {
   } = props;
   const t = useTranslations('agent');
 
-  // Ref mirrors activeId for prepareSendMessagesRequest. Reading the
-  // state directly from the transport closure gives us a stale snapshot —
-  // setActiveId is async, so a "+ new chat then immediately send" flow
-  // would post conversationId: null and the server replies 400. The ref
-  // updates synchronously when we change the active conversation.
   const activeIdRef = useRef<string | null>(activeId);
   useEffect(() => {
     activeIdRef.current = activeId;
@@ -150,10 +162,6 @@ function AgentChat(props: {
   const { messages, sendMessage, status, setMessages, stop } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/agent/chat',
-      // Always forward the active conversation id alongside the messages
-      // array — the server saves messages keyed off it. Caller can also
-      // pass body via sendMessage(message, { body }) to override the id
-      // synchronously (first-message-of-new-chat path uses this).
       prepareSendMessagesRequest: ({ messages, body }) => ({
         body: {
           conversationId: activeIdRef.current,
@@ -164,18 +172,15 @@ function AgentChat(props: {
     }),
   });
 
-  // Sync hydrated messages into the chat hook whenever we switch conversation.
   useEffect(() => {
     setMessages(initialMessages);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialMessages]);
 
-  // Auto-scroll on new messages / streaming chunks.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, messagesEndRef]);
 
-  // Initial load of the conversation list + the most-recent conversation.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -217,9 +222,6 @@ function AgentChat(props: {
       const { messages: rows } = (await res.json()) as {
         messages: AgentMessageRow[];
       };
-      // Rehydrate UIMessages. We saved `tool_calls` as the full parts
-      // array, so prefer it; fall back to a single text part from the
-      // `content` column.
       const hydrated: UIMessage[] = rows.map((r) => ({
         id: r.id,
         role: r.role === 'tool' ? 'assistant' : r.role,
@@ -265,10 +267,6 @@ function AgentChat(props: {
     const text = input.trim();
     if (!text || status !== 'ready') return;
 
-    // Resolve the conversation id we'll send with this message. If no chat
-    // is selected, spin one up. Captured into a local so the sendMessage
-    // call below uses today's value (the ref + state update happen, but
-    // sendMessage's body argument is what the server actually reads).
     let convId = activeId;
     if (!convId) {
       const res = await fetch('/api/agent/conversations', {
@@ -301,11 +299,6 @@ function AgentChat(props: {
             <p className="text-xs text-muted-foreground text-center py-8">{t('noConversations')}</p>
           )}
           {conversations.map((c) => (
-            // Outer wrapper is a div with role="button" rather than a real
-            // <button> because we render the delete control as a nested
-            // <button> inside it — HTML doesn't allow button-in-button
-            // (hydration error in Next.js). Keyboard support via tabIndex +
-            // onKeyDown preserves the same affordance.
             <div
               key={c.id}
               role="button"
@@ -340,6 +333,9 @@ function AgentChat(props: {
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="border-b px-6 py-2">
+          <AgentBackLink />
+        </div>
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {hydrating ? (
             <div className="flex items-center justify-center h-full text-muted-foreground gap-2 text-sm">
@@ -427,11 +423,6 @@ function MessageBubble({ message }: { message: UIMessage }) {
       >
         {(message.parts ?? []).map((part, i) => {
           if (part.type === 'text') {
-            // User messages stay plain — they're typed text, not authored
-            // markdown, and the chat bubble background contrasts more
-            // cleanly without prose styling. Assistant output is intended
-            // to be markdown (lists, **bold**, headings, links), so render
-            // it through the same component the rest of the dashboard uses.
             if (isUser) {
               return (
                 <p key={i} className="whitespace-pre-wrap leading-relaxed">
@@ -474,25 +465,9 @@ function MessageBubble({ message }: { message: UIMessage }) {
   );
 }
 
-/**
- * Disclosure-style renderer for a `tool-<name>` UIMessage part.
- *
- * AI SDK v6 tool parts carry an internal `state` machine
- * (`input-streaming` → `input-available` → `output-available` | `output-error`).
- * Surfacing the raw state string ("output-available") to end users is noise —
- * what they actually want is "what did the agent ask and what came back?".
- *
- * So the collapsed view is a clean chip: tool name + chevron, with a spinner
- * while the call is still resolving. Clicking expands an inline console-style
- * panel that shows the input args and output payload as pretty-printed JSON,
- * the same affordance most agent UIs (Claude, ChatGPT, Cursor) ship.
- */
 function ToolCallDisclosure({ part }: { part: UIMessage['parts'][number] }) {
   const t = useTranslations('agent');
   const [open, setOpen] = useState(false);
-  // Tool parts in AI SDK v6 carry these fields at the part level; we narrow
-  // here rather than importing the union type because each tool gets a
-  // distinct generated discriminant.
   const toolPart = part as unknown as {
     type: string;
     toolName?: string;
@@ -575,15 +550,6 @@ function safeStringify(value: unknown): string {
   }
 }
 
-/**
- * Renderer for the `tool-render_chart` part. Once the tool reaches the
- * `output-available` state, the input args (which the tool echoes back as
- * its output) describe a chart spec we can hand to {@link AgentChart}.
- *
- * While the call is in flight we show a tiny spinner stub — same shape as
- * the generic tool disclosure, just without the JSON expansion since
- * there's no payload to inspect on a chart call.
- */
 function ChartToolPart({ part }: { part: UIMessage['parts'][number] }) {
   const toolPart = part as unknown as {
     type: string;
@@ -664,11 +630,6 @@ function EmptyState() {
   );
 }
 
-/**
- * Cloud wrapper: probes /api/settings/anthropic-key once on mount and
- * either renders the chat (key configured) or a Settings CTA (no key).
- * Self-host renders AgentChat directly — its key check is environmental.
- */
 function KeyGatedAgentChat(props: React.ComponentProps<typeof AgentChat>) {
   const [status, setStatus] = useState<'loading' | 'configured' | 'missing'>('loading');
 
@@ -694,7 +655,10 @@ function KeyGatedAgentChat(props: React.ComponentProps<typeof AgentChat>) {
 
   if (status === 'loading') {
     return (
-      <div className="flex h-[calc(100vh-4rem)] md:h-screen items-center justify-center -m-6 p-6">
+      <div className="flex h-[calc(100vh-4rem)] md:h-screen flex-col items-center justify-center -m-6 p-6">
+        <div className="absolute left-6 top-2">
+          <AgentBackLink />
+        </div>
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
       </div>
     );
@@ -708,7 +672,10 @@ function KeyGatedAgentChat(props: React.ComponentProps<typeof AgentChat>) {
 function KeyMissingState() {
   const t = useTranslations('agent');
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-screen items-center justify-center -m-6 p-6">
+    <div className="flex h-[calc(100vh-4rem)] md:h-screen flex-col items-center justify-center -m-6 p-6">
+      <div className="w-full max-w-md mb-4">
+        <AgentBackLink />
+      </div>
       <div className="text-center max-w-md">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
           <KeyRound className="h-7 w-7" />
@@ -730,7 +697,10 @@ function KeyMissingState() {
 function PlanGate({ requiredPlan }: { requiredPlan: string }) {
   const t = useTranslations('agent');
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-screen items-center justify-center -m-6 p-6">
+    <div className="flex h-[calc(100vh-4rem)] md:h-screen flex-col items-center justify-center -m-6 p-6">
+      <div className="w-full max-w-md mb-4">
+        <AgentBackLink />
+      </div>
       <div className="text-center max-w-md">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 mb-4">
           <Crown className="h-7 w-7 text-amber-600 dark:text-amber-400" />

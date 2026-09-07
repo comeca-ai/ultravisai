@@ -31,6 +31,7 @@
  * de string, e env.DB é objeto.
  */
 import { Container, getContainer } from '@cloudflare/containers';
+import { sincronizarAgregados, lerAgregados } from './censo-espelho.js';
 
 export class UltravisServer extends Container {
   defaultPort = 80; // o Dockerfile expõe 80 (PORT default do server.js)
@@ -190,6 +191,44 @@ function paginaTabela(nome, results) {
   );
 }
 
+function paginaCenso(linhas) {
+  if (linhas.length === 0) {
+    return pagina(
+      'Censo — espelho D1',
+      '<div class="eyebrow">Ultravis · censo na edge</div><h1>Sem agregados ainda</h1>' +
+        '<div class="sub">A ponte roda no cron semanal (segunda, logo após o censo) ou sob demanda em ' +
+        '<code>/espelho/sincronizar</code>. <a href="/espelho">← todas as tabelas</a></div>'
+    );
+  }
+  const cab = ['dia', 'marca', 'motor', 'respostas', 'menções', 'citações', 'sent +/~/−']
+    .map((c) => '<th>' + escapeHtml(c) + '</th>')
+    .join('');
+  const corpo = linhas
+    .map(
+      (l) =>
+        '<tr><td>' + escapeHtml(l.dia) + '</td><td>' + escapeHtml(l.marca) + '</td><td>' +
+        escapeHtml(l.motor) + '</td><td class="num">' + l.respostas + '</td><td class="num">' +
+        l.mencoes + '</td><td class="num">' + l.citacoes + '</td><td class="num">' +
+        l.sent_pos + '/' + l.sent_neu + '/' + l.sent_neg + '</td></tr>'
+    )
+    .join('');
+  const tot = linhas.reduce(
+    (a, l) => ({ n: a.n + l.respostas, m: a.m + l.mencoes, c: a.c + l.citacoes }),
+    { n: 0, m: 0, c: 0 }
+  );
+  return pagina(
+    'Censo — espelho D1',
+    '<div class="eyebrow">Ultravis · censo na edge · últimos 8 dias</div>' +
+      '<h1>Coleta por dia, marca e motor</h1>' +
+      '<div class="sub">' + tot.n + ' respostas · ' + tot.m + ' menções · ' + tot.c +
+      ' citações no período. Atualizado em ' + escapeHtml(linhas[0].atualizado_em || '—') +
+      '. <a href="/espelho">← todas as tabelas</a></div>' +
+      '<div class="card"><table><thead><tr>' + cab + '</tr></thead><tbody>' + corpo + '</tbody></table></div>' +
+      '<div class="foot">Contagens agregadas — nenhum texto de resposta sai do Supabase · ' +
+      '<a href="/espelho/censo?format=json">ver JSON</a></div>'
+  );
+}
+
 // Tabelas reais do banco (exclui internas do SQLite e do D1).
 async function listarTabelas(db) {
   const { results } = await db
@@ -306,6 +345,19 @@ async function servirEspelho(request, env, url, path) {
       });
     }
 
+    // Números do censo (ponte Supabase → D1). Leitura barata: só o D1.
+    if (path === '/espelho/censo') {
+      const linhas = await lerAgregados(env.DB);
+      if (querBrowser(request, url)) return paginaCenso(linhas);
+      return json({ agregados: linhas, total: linhas.length });
+    }
+
+    // Dispara a sincronização sob demanda (o cron faz sozinho depois do censo).
+    if (path === '/espelho/sincronizar') {
+      const resumo = await sincronizarAgregados(env);
+      return json({ ok: true, ...resumo });
+    }
+
     const m = path.match(/^\/espelho\/tabela\/([A-Za-z0-9_]+)$/);
     if (m) {
       const pedido = m[1];
@@ -360,8 +412,17 @@ export default {
     return getContainer(env.SERVER).fetch(request);
   },
 
-  async scheduled(_controller, env) {
-    // keepalive + healthcheck; o GET / do server responde 200
+  async scheduled(controller, env, ctx) {
+    // Dois crons, um handler: o semanal sincroniza os agregados do censo
+    // (Supabase → D1); os demais são o keepalive que mantém o node-cron do
+    // container vivo. A ponte nunca pode derrubar o keepalive — daí o catch.
+    if (controller && controller.cron === '30 6 * * 1') {
+      const sincronizar = sincronizarAgregados(env)
+        .then((r) => console.log(JSON.stringify({ ponte_censo: r })))
+        .catch((err) => console.error('ponte do censo falhou', err && err.message));
+      if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(sincronizar);
+      else await sincronizar;
+    }
     const resp = await getContainer(env.SERVER).fetch('http://server/');
     console.log(JSON.stringify({ keepalive: resp.status }));
   },

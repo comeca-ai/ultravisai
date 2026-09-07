@@ -784,4 +784,25 @@ CREATE TABLE IF NOT EXISTS agent_token_usage (
 CREATE INDEX IF NOT EXISTS idx_agent_token_usage_user_month
   ON agent_token_usage (user_id, year_month);
 
+-- ─── censo_agregados ─────────────────────────────────────────────────────────
+-- NÃO é espelho de tabela do Supabase: é a ponte de leitura (07/set). O worker
+-- (que tem a SERVICE_ROLE como Secret) agrega o censo lá e grava aqui só
+-- CONTAGENS por dia x marca x motor — nada de texto de resposta, citação ou
+-- dado de usuário. Assim /espelho/censo e o pipeline leem os números sem que
+-- nenhuma credencial nova precise existir. Ver src/censo-espelho.js.
+CREATE TABLE IF NOT EXISTS censo_agregados (
+  dia            TEXT NOT NULL,          -- YYYY-MM-DD (UTC)
+  marca          TEXT NOT NULL,
+  motor          TEXT NOT NULL,
+  respostas      INTEGER NOT NULL DEFAULT 0,
+  mencoes        INTEGER NOT NULL DEFAULT 0,
+  citacoes       INTEGER NOT NULL DEFAULT 0,
+  sent_pos       INTEGER NOT NULL DEFAULT 0,
+  sent_neu       INTEGER NOT NULL DEFAULT 0,
+  sent_neg       INTEGER NOT NULL DEFAULT 0,
+  atualizado_em  TEXT NOT NULL,
+  PRIMARY KEY (dia, marca, motor)
+);
+CREATE INDEX IF NOT EXISTS idx_censo_agregados_dia ON censo_agregados (dia);
+
 -- fim — 37 tabelas. brand_archives ficou FORA (ver README.md, "Não migradas").

@@ -141,3 +141,17 @@ backend SMTP pra QUALQUER sistema, sem worker no meio. Uso na Ultravis:
 3. **Vigia/Daily Pulse**: envs no worker `ultravis-server` —
    `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS` (Secret),
    `ALERT_EMAIL_TO`, `ALERT_EMAIL_FROM` — código já pronto (watchdog.js).
+
+## 8 · Workers Builds: conectar worker EXISTENTE ao GitHub (padrão preferido do dono)
+
+Doc: developers.cloudflare.com/workers/ci-cd/builds/git-integration/
+- Worker já existente: painel → Workers e Pages → <worker> → **Settings →
+  Builds → Connect** → repo `comeca-ai/ultravisai` → branch main →
+  **Root directory** = a pasta do worker (ex.: `cloudflare/d1-espelho`) →
+  build command vazio → deploy command padrão (`npx wrangler deploy`).
+- NUNCA usar "Create → Import a repository" pra worker que já existe —
+  cria duplicata (a menos que o name do wrangler.jsonc bata exato).
+- Depois de conectar: apagar/reduzir o workflow do Actions da pasta
+  (deploy duplo). O que o Builds NÃO faz e fica no Actions: `d1 execute`
+  (schema), sync de secrets, smoke com diagnóstico.
+- Piloto: `ultravis-d1-espelho` (07/set).

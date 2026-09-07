@@ -2,7 +2,7 @@
 
 > Backlog operacional vivo, priorizado. Destila `estrategia/roadmap-produto-e-valuation.md`,
 > o benchmarking e as pendências do `CONTEXTO.md` em itens acionáveis.
-> Atualizar conforme entrega/decisão. **Última atualização:** 08/ago/2026.
+> Atualizar conforme entrega/decisão. **Última atualização:** 07/set/2026 (pós-migração Cloudflare — envs agora vivem no worker `ultravis-server`, não mais no Railway).
 
 ## Como ler
 
@@ -21,7 +21,7 @@
 > em desenvolvimento sem decisão conjunta registrada no `DECISOES.md`.
 > **Última varredura:** 13/ago/2026 — release 0.2.0 do upstream (09/ago) + commits até 13/ago.
 
-- [x] **Watchdog: check de drift de deploy do web** (feito 17/ago; falta só configurar VERCEL_TOKEN/PROJECT_ID no Railway) — comparar o commit do último deploy de produção da Vercel com o HEAD da `main` (API Vercel pelo server, que tem egress aberto); alertar se divergir por mais de 1h. Motivo: web ficou 9 dias congelado sem ninguém notar (incidente 17/ago). `P1`
+- [x] **Watchdog: check de drift de deploy do web** (feito 17/ago; falta só configurar VERCEL_TOKEN/PROJECT_ID no worker Cloudflare) — comparar o commit do último deploy de produção da Vercel com o HEAD da `main` (API Vercel pelo server, que tem egress aberto); alertar se divergir por mais de 1h. Motivo: web ficou 9 dias congelado sem ninguém notar (incidente 17/ago). `P1`
 - [x] `[ansvisor]` **Daily Pulse** — **lado servidor PORTADO (13/ago)**: engine+metrics+email+webhook-dispatch com todos os fixes (#654 catch-up adaptado pra tabela `jobs`, #690 drain do pulse, #701 dedupe por janela — migration 00038 aplicada). E-mail sai por Resend OU pelo SMTP do watchdog (self-host incluído); sem transporte configurado, dispara só o webhook `daily_pulse.created`. **Follow-ups:** tela Configurações→Notificações (frequência/destinatários) e tradução do e-mail pra pt-BR **antes de ligar o envio**.
 - [ ] `[ansvisor]` **AI Visibility Score** — nova métrica central 0-100 (60% menção · 25% citação · 15% posição da menção), idêntica em todas as superfícies; cobertura vira linha secundária. *Nosso ângulo: responde exatamente a confusão do cliente com a nota; mas muda migrations/core (00041-00042) — sync grande.*
 - [ ] `[ansvisor]` **Integração Google Search Console** — sugestões de prompt alimentadas por demanda real de busca (queries que a marca ranqueia e não rastreia), via Composio. *Nosso ângulo: casa com "grounding de prompts" do P1; nós usaríamos Semrush ou GSC direto.*
@@ -55,7 +55,7 @@
 - [ ] **D2 cobertura × qualidade GEO**: % dos tópicos com página própria × front-load/estatística com fonte/tabelas/blocos 50-150p/frescor <12m (LLM judge sobre o crawl). `M`
 - [ ] **D3 checagem de canais sociais**: nº de plataformas ativas (satura em 5), cadência/recência, bônus YouTube. Exige leitura dos perfis (declarar o que não lemos). `M`
 - [x] **D4 checagem direta de reviews** — FEITO 18/ago (PRs #66-#71): Trustpilot/G2/Capterra checados semanalmente via Scrape.do (cron `REVIEW_CHECK_CRON` + warm-up), régua v1 aplicada, card da tela mostra medição direta. Ficam pra frente:
-  - [ ] **Reclame Aqui**: a API de busca deles devolve 502 até por proxy residencial — fica "não verificável" (declarado). Saída já implementada: mecanismo SERP via DataForSEO entra sozinho quando `DATAFORSEO_LOGIN`/`PASSWORD` forem configurados no Railway (pendência do dono). `P`
+  - [ ] **Reclame Aqui**: a API de busca deles devolve 502 até por proxy residencial — fica "não verificável" (declarado). Saída já implementada: mecanismo SERP via DataForSEO entra sozinho quando `DATAFORSEO_LOGIN`/`PASSWORD` forem configurados no worker Cloudflare (pendência do dono). `P`
   - [ ] Nota/volume do G2 e Capterra (páginas encontradas mas sem JSON-LD legível) — a SERP do DataForSEO também resolve. `P`
   - [ ] Google Reviews (API paga) + Reddit/Quora + lista por segmento via LLM (v1.1). `M`
 - [ ] **D6 demanda de marca**: volume de busca da marca (DataForSEO — correlato r≈0,334), presença em listas "melhores/alternativas a", reguladores/associações, Wikipedia. `M`
@@ -174,14 +174,20 @@
 
 ## 🔧 Operacional & infra
 
+### P0 — pós-migração Cloudflare (ADR-9, 06/set)
+- [ ] **Consolidação Polar** — script pronto (`supabase/scripts/consolidar-polar.sql`, decisão 29/ago); **bloqueado só em acesso**: conector Supabase precisa alcançar o projeto de produção (`twhqjfbealruvcbvkegc`) OU dono roda no SQL Editor. Backfill: `BACKFILL_MENTIONS_BRAND_ID` agora se seta no worker Cloudflare. `P` · depende do dono
+- [ ] **Token Cloudflare definitivo até 13/set** — o atual expira; criar pelo template "Edit Cloudflare Workers" (+ Zona→DNS→Editar se quisermos operar DNS por API) e atualizar `CLOUDFLARE_API_TOKEN` no GitHub. Sem ele o deploy do server para. `P` · depende do dono
+- [ ] **Fase 2 do ADR-9** (ordem sugerida): Cron Triggers nativos chamando `/api/internal/*` com `CRON_SECRET` (mata o keepalive; container dorme entre execuções) → fila (Queues) no caminho do Cloro via edge-gateway → alertas do vigia/Daily Pulse por **Email Service** (`send_email` binding, sem SMTP) → web via OpenNext (por último). `M`
+- [ ] **AI Gateway `ultravis`**: dono cria no painel + `AI_GATEWAY_ACCOUNT_ID` no worker — código já roteia (PR #95). `P` · depende do dono
+
 ### P1
 - [x] **Vigia de consistência — camada 1 (determinística)** — **feito (19/ago)**: 10 invariantes (duplicatas de concorrente, marcas irmãs na org, domínios malformados, pesos do IC, motor silencioso, linhas impossíveis, plataforma desconhecida, backlog de posição travado, recontagem de menções, prompt de marca sem grafia conhecida) dentro do watchdog de 15 min; achados aparecem no card Saúde do /ops e nos canais de alerta. `server/src/lib/consistency.js`.
 - [ ] **Revisão 19/ago — 3 achados adiados**: (a) ramo "mentions" do detalhamento do Insights virou código morto (cards de Menções/Citações saíram do resumo) — remover ou dar novo gatilho; (b) /ops roda a varredura de consistência completa a cada render — servir o resultado do último ciclo do cron (cache); (c) `topSources` do sentimento re-extrai hostnames já computados no mesmo aggregate — deduplicar. `P`
 - [ ] **Vigia: invariante "100% em 1º lugar"** — marca com ranking 1º em 100% das respostas (amostra ≥10) = suspeito, "tem que dar uma olhada no motor" (Igor 51:45, 19/ago). Check novo em `consistency.js`. `P`
 - [ ] **Validar a régua do sentimento** — nota 100/50/0 é provisória ("uma nota depois a gente valida", Igor 51:05, 19/ago); revisitar quando houver mais censos. `P` · decisão com o Igor
-- [ ] **Vigia de consistência — camada 2 (agente LLM semanal)** — lê os números consolidados das telas pós-censo e caça o que regra fixa não pega (rótulo que não bate com o que o número mede, média escondendo extremos, incoerência IC × Score × Insights). ~1 dia; **depende da `ANTHROPIC_API_KEY` nova no Railway** (mesma pendência do Claude-motor). `M` · depende do dono
+- [ ] **Vigia de consistência — camada 2 (agente LLM semanal)** — lê os números consolidados das telas pós-censo e caça o que regra fixa não pega (rótulo que não bate com o que o número mede, média escondendo extremos, incoerência IC × Score × Insights). ~1 dia; **desbloqueado em 06/set** — a `ANTHROPIC_API_KEY` nova está no worker Cloudflare. `M` · depende do dono
 - [x] **Rotacionar chaves que passaram por chat** — **feito (confirmado pelo dono em 11/ago)**.
-- [ ] **Ativar alertas do watchdog por e-mail** — código pronto (PR #40); aguarda o dono criar um **e-mail dedicado** (decisão 11/ago: não usar o Gmail pessoal) e setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway. Até lá o watchdog só loga. `P` · depende do dono
+- [ ] **Ativar alertas do watchdog por e-mail** — código pronto (PR #40); aguarda o dono criar um **e-mail dedicado** (decisão 11/ago: não usar o Gmail pessoal) e setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no worker Cloudflare (ou migrar pro Email Service nativo — fase 2 do ADR-9). Até lá o watchdog só loga. `P` · depende do dono
 - [ ] **Backfill de sentimento** — script (padrão `scripts/backfill-shopping-cards.js`) pra re-analisar resultados com sentimento de fallback (ex.: os 795 "neutral" do censo de 10/ago, gravados durante o 401 da OpenAI). Nota: coluna `sentiment` é NOT NULL — não dá pra anular; o script re-analisa in-place. `P`
 - [ ] **Modelo de custo completo no painel de Custos** — valor do crédito Cloro (pendente) + quota Ahrefs/Semrush. `P`
 

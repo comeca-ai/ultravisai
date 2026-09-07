@@ -361,6 +361,16 @@ async function collectAllAlerts(intervalMin) {
   } catch (err) {
     logger.error({ err }, 'watchdog: consistency sweep failed');
   }
+  // Ultravis (07/set): camada 2 do vigia — os achados do agente LLM semanal
+  // (consistency-llm.js) entram no mesmo ciclo/entrega/anti-spam. Leitura
+  // pura do cache da última rodada (NENHUMA chamada de LLM aqui); lazy
+  // import + best-effort, mesmo padrão da camada 1 acima.
+  try {
+    const { getLlmConsistencyAlerts } = await import('./consistency-llm.js');
+    alerts.push(...getLlmConsistencyAlerts());
+  } catch (err) {
+    logger.error({ err }, 'watchdog: llm consistency merge failed');
+  }
   return alerts;
 }
 

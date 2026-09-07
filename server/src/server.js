@@ -15,6 +15,7 @@ import routes from './routes/index.js';
 import trafficRoutes from './routes/traffic.js';
 import opsRoutes from './routes/ops.js';
 import { startWatchdog } from './lib/watchdog.js';
+import { startConsistencyLlm } from './lib/consistency-llm.js';
 import { startUpstreamWatch } from './lib/upstream-watch.js';
 import { startReviewChecks } from './lib/review-check.js';
 import { startSiteCrawl } from './lib/site-crawl.js';
@@ -563,6 +564,13 @@ server.listen(PORT, '0.0.0.0', async () => {
   // jobs fail, the Cloro queue jams, sentiment silently degrades, or the
   // weekly census goes missing. See lib/watchdog.js.
   startWatchdog();
+
+  // Ultravis addition: consistency watchdog layer 2 — weekly LLM agent that
+  // reads the consolidated post-census numbers and hunts incoherences the
+  // deterministic rules can't catch. Gated by CONSISTENCY_LLM_MODEL (fallback
+  // AUDIT_LLM_MODEL); without either it only logs that it is off. Findings
+  // are merged into the watchdog cycle. See lib/consistency-llm.js.
+  startConsistencyLlm();
 
   // Ultravis addition: watches the upstream project (ansvisor.com + GitHub)
   // every 3 days for news; surfaced in the /ops panel. See lib/upstream-watch.js.

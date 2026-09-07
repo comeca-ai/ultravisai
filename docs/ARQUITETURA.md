@@ -272,6 +272,26 @@ madrugada sem ninguém saber). Solução: ~200 linhas testadas dentro do própri
 server (custo zero, deploy junto), com alerta push via `ALERT_WEBHOOK_URL`.
 Complementos externos (uptime check, Gatus/Prometheus) entram quando escalar.
 
+**ADR‑9 · Server como Cloudflare Container; compute no Cloudflare, dado no
+Supabase (06/set/2026).** O trial do Railway expirou (deploy e env congelados
+— a chave inválida da Anthropic ficou impossível de trocar) e o dono decidiu:
+"a aplicação está toda na Cloudflare". Estratégia: **lift‑and‑shift** — o
+Express de `server/` roda INTACTO num Cloudflare Container (GA abr/2026,
+Firecracker, `standard-1`), mesmo Dockerfile do Railway; um Worker na frente
+roteia todo request e um Cron Trigger de 10 min mantém o container acordado
+pro node‑cron interno (censo/vigia/reviews inalterados). `api.ultravis.ai` é
+Custom Domain do worker (corte 06/set ~23h UTC; Railway removido). Substitui
+o ADR‑1 na camada de hospedagem; ADR‑2/3/5/6/7 seguem valendo. Regras
+aprendidas a caro (runs #1–#12, cookbook §6 da skill `cloudflare`):
+`keep_vars: true` obrigatório (deploy apaga vars do painel), env garantida só
+via `startOptions.envVars` no start + `destroy()` de instância running sem
+healthy (pm2 mascara crash‑loop), segredos como Secret no painel + re‑sync do
+GitHub Secrets a cada deploy, config não‑secreta versionada em `vars`.
+Deploy exclusivamente via GitHub Actions (auditável); sandbox não alcança
+`api.cloudflare.com`. v2 planejada: destilar o node‑cron em Cron Triggers
+nativos (`/api/internal/*` + `CRON_SECRET`), fila (Queues) no caminho do
+Cloro, alertas por Email Service, web via OpenNext por último.
+
 ## 8.1 Observabilidade & operação
 
 | Camada | O quê | Onde |

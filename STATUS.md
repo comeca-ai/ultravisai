@@ -66,7 +66,7 @@ desligado é a pendência nº 1 e este incidente é o argumento definitivo.
 | Quero ver… | Onde |
 |---|---|
 | Resultado da auditoria diária | GitHub → **Issues** com etiqueta `auditoria` (resumo) · Actions → run "Auditoria diária" → artefato `relatorios-auditoria` (detalhe, 14 dias) |
-| Saúde do server / logs | Railway → `ultravis-server` → Logs · painel `/ops` (jobs e rastreamentos) |
+| Saúde do server / logs | Cloudflare → Workers e Pages → `ultravis-server` → aba **Logs** (stdout do container) e Containers (instâncias) · painel `/ops` em api.ultravis.ai/ops (jobs e rastreamentos) |
 | Custos e consumo | App → Custos & Consumo (só operador) |
 | Feedback do cliente (30 itens + status) | `estrategia/feedback-cliente-polar-ago26.md` |
 | Toda decisão tomada | `DECISOES.md` |

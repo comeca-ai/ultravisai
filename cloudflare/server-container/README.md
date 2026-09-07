@@ -37,9 +37,20 @@ v2 (depois): destilar as agendas em Cron Triggers nativos chamando
    espelho (editar o token no painel preserva o valor — o secret no GitHub não
    precisa mudar). Sem `D1:Edit` o deploy **não falha**: o passo do D1 é
    tolerante e só emite aviso no summary;
-3. Secrets do server no worker: `deploy-server-container` re-propaga os 15 a
-   cada deploy; para rotacionar sem redeployar, rodar `sync-cf-secrets`
-   (default já é `cloudflare/server-container`) — ou colar direto no painel.
+3. Secrets do server no worker: `deploy-server-container` re-propaga os 15
+   apenas em dispatch manual ou commit marcado `[secrets]` (um PUT por
+   segredo cria uma versão do worker e um rollout do container — 15 a cada
+   deploy era desperdício); para rotacionar sem redeployar, rodar
+   `sync-cf-secrets` (default já é `cloudflare/server-container`) — ou colar
+   direto no painel.
+
+> **O secret é o VALOR do token, não o ID.** Os runs #14–#16 morreram em
+> `Invalid format for Authorization header [code: 6111]` porque o secret
+> guardava um UUID de 36 caracteres. Na tela *API Tokens* a lista mostra o
+> **ID** do token (UUID, igualzinho ao `database_id` do D1); o **valor** (~40
+> chars, `[A-Za-z0-9_-]`, sem hífen no padrão UUID) só aparece uma vez, ao
+> criar ou dar *Roll*. O passo `Verificar credencial` do deploy detecta esse
+> caso e diz em uma linha — sem nunca imprimir o conteúdo.
 
 ## Deploy e auditoria
 

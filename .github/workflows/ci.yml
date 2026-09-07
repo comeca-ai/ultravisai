@@ -21,6 +21,63 @@ jobs:
             exit 1
           fi
 
+  # O código dos workers não passava por NENHUMA validação no CI. Antes isso
+  # arriscava um experimento; desde 06/set o worker serve api.ultravis.ai, então
+  # um erro de parse aqui derruba a aplicação do cliente. Checagem barata
+  # (segundos) que teria pego o comentário com "*/" que quebrou o run #2.
+  cloudflare:
+    name: cloudflare — sintaxe dos workers e config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: node --check em cada worker
+        run: |
+          falhas=0
+          for f in $(find cloudflare -name '*.js' -path '*/src/*' -not -path '*/node_modules/*'); do
+            if node --input-type=module --check < "$f"; then
+              echo "ok  $f"
+            else
+              echo "::error file=$f::erro de sintaxe no worker"
+              falhas=$((falhas+1))
+            fi
+          done
+          [ "$falhas" -eq 0 ] || exit 1
+      - name: wrangler.jsonc parseável (JSONC → JSON)
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, re, sys
+          def strip_jsonc(s):
+              # remove // fora de string (o parser ingênuo cortava no "https://")
+              out, i, dentro, esc = [], 0, False, False
+              while i < len(s):
+                  c = s[i]
+                  if dentro:
+                      out.append(c)
+                      if esc: esc = False
+                      elif c == '\\': esc = True
+                      elif c == '"': dentro = False
+                      i += 1
+                  elif c == '"':
+                      dentro = True; out.append(c); i += 1
+                  elif c == '/' and i + 1 < len(s) and s[i+1] == '/':
+                      while i < len(s) and s[i] != '\n': i += 1
+                  else:
+                      out.append(c); i += 1
+              return ''.join(out)
+          erros = 0
+          for p in pathlib.Path('cloudflare').rglob('wrangler.jsonc'):
+              try:
+                  d = json.loads(strip_jsonc(p.read_text()))
+                  print(f'ok  {p} -> {d["name"]}')
+              except Exception as e:
+                  print(f'::error file={p}::wrangler.jsonc inválido: {e}')
+                  erros += 1
+          sys.exit(1 if erros else 0)
+          PY
+
   web:
     name: web — format, lint & typecheck
     runs-on: ubuntu-latest

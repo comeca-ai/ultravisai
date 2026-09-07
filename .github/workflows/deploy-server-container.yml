@@ -31,14 +31,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verificar credencial
+      # Diagnóstico de FORMATO do token, nunca do valor. O run #14 morreu em
+      # "Invalid format for Authorization header [code: 6111]" — erro do
+      # wrangler que não diz o que há de errado. Aqui a resposta sai em uma
+      # linha: comprimido? tem espaço? veio com "Bearer"? é um UUID (id do
+      # token em vez do valor)? Só características, jamais o conteúdo.
+      - name: Verificar credencial (formato, nunca o valor)
         id: cred
         env:
           TOK: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          if [ -n "$TOK" ]; then echo "has=1" >> "$GITHUB_OUTPUT"; else
+          if [ -z "$TOK" ]; then
             echo "has=0" >> "$GITHUB_OUTPUT"
             echo "::warning::CLOUDFLARE_API_TOKEN ausente — deploy pulado"
+            exit 0
+          fi
+          echo "has=1" >> "$GITHUB_OUTPUT"
+          limpo=$(printf '%s' "$TOK" | tr -d '[:space:]')
+          n=${#TOK}; nlimpo=${#limpo}
+          echo "comprimento: $n (sem espaços/quebras: $nlimpo)"
+          problema=""
+          [ "$n" -ne "$nlimpo" ] && problema="$problema espaço-ou-quebra-de-linha;"
+          case "$limpo" in
+            Bearer*|bearer*) problema="$problema prefixo-Bearer;" ;;
+          esac
+          case "$limpo" in
+            *@*) problema="$problema parece-e-mail-(Global-API-Key-usa-e-mail,-mas-aqui-é-API-Token);" ;;
+          esac
+          if printf '%s' "$limpo" | grep -qiE '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+            problema="$problema é-um-UUID-(provável-ID-do-token-ou-database_id,-não-o-VALOR);"
+          fi
+          if ! printf '%s' "$limpo" | grep -qE '^[A-Za-z0-9_.-]+$'; then
+            problema="$problema caractere-fora-do-esperado;"
+          fi
+          # Tokens da Cloudflare têm ~40 chars; muito curto/longo é sinal.
+          { [ "$nlimpo" -lt 30 ] || [ "$nlimpo" -gt 120 ]; } && problema="$problema comprimento-atípico;"
+          if [ -n "$problema" ]; then
+            echo "::warning::formato suspeito do CLOUDFLARE_API_TOKEN:$problema — recadastrar o VALOR do token (API Tokens → Create/Roll → copiar), sem espaços e sem prefixo"
+            echo "### Token: formato suspeito —$problema" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "formato plausível (não prova que é válido — só que não tem defeito óbvio)"
           fi
       - name: Deploy (wrangler + build da imagem)
         if: steps.cred.outputs.has == '1'

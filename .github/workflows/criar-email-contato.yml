@@ -1,21 +1,30 @@
 # Cria contato@ultravis.ai via Email Routing da Cloudflare (grátis) —
-# é o canal LGPD referenciado nas páginas de Termos/Privacidade
+# canal LGPD referenciado nas páginas de Termos/Privacidade
 # (pendência nº 3 do STATUS.md).
 #
-# Ordem defensiva (mesmo espírito do cutover-api-dns.yml): (1) habilita
-# Email Routing na zona (idempotente — se já estiver habilitado, segue);
-# (2) lê os destinos já verificados; se o destino pedido não estiver lá,
-# CRIA e avisa que precisa clicar no e-mail de verificação da Cloudflare
-# antes da regra funcionar; (3) cria/atualiza a regra
-# contato@ultravis.ai → destino; (4) imprime o estado final.
+# ⚠️ AÇÃO DESTRUTIVA GUARDADA: este job APAGA os MX atuais da zona.
 #
-# Não apaga nada existente. Roda no merge deste arquivo; depois fica inerte
-# (só re-roda se o arquivo mudar, ou via workflow_dispatch com input).
+# Como chegamos aqui (5 runs, 08/set): os runs #1-#3 morreram em
+# "Authentication error [10000]" genérico; o preflight do #3 fechou que
+# faltava só `Zone → DNS: Edit`. Com o token corrigido, o #4 mudou o erro
+# para "2008 Non-Cloudflare MX records exist" e o #5 imprimiu a causa:
+# a zona tem MX mx1/mx2.hostinger.com — habilitar Email Routing exige
+# substituí-los. **Dono confirmou em 08/set que NÃO há caixa de e-mail
+# em uso no @ultravis.ai**, então remover é seguro e intencional.
 #
-# Runs #1-#3 falharam em "habilitar Email Routing". O preflight do run #3
-# fechou o diagnóstico: faltava só `Zone → DNS: Edit` (habilitar Email
-# Routing provisiona os registros MX/TXT). Token atualizado no GitHub
-# Secrets; este comentário é o gatilho da 4ª tentativa.
+# Ordem defensiva (mesmo espírito do cutover-api-dns.yml):
+# (1) preflight de permissões; (2) lê e IMPRIME os MX atuais — essa
+# impressão É a receita de rollback; (3) só com ARMADO='sim', apaga os
+# MX não-Cloudflare; (4) habilita Email Routing (a Cloudflare cria os MX
+# dela); (5) garante o destino verificado; (6) cria a regra
+# contato@ultravis.ai → destino; (7) imprime o estado final.
+#
+# ROLLBACK: recriar os MX impressos no passo 2 (tipo MX, nome
+# ultravis.ai, conteúdo e prioridade exatos do log) e desabilitar o
+# Email Routing no painel.
+#
+# Convenção do repo pra destrutivo (ver limpar-workers-orfaos.yml): só
+# roda com acionamento explícito e com a linha ARMADO em 'sim'.
 name: criar-email-contato
 
 on:
@@ -41,6 +50,12 @@ jobs:
       ZONE: 'ultravis.ai'
       ENDERECO: 'contato@ultravis.ai'
       DESTINO: ${{ inputs.destino || 'jhonata.emerick@gmail.com' }}
+      # GUARD da remoção dos MX. 'sim' = pode apagar; qualquer outro
+      # valor = só imprime o que faria e segue. Armado em 08/set com
+      # confirmação explícita do dono de que não há e-mail em uso no
+      # domínio. Se um dia voltar a existir caixa em @ultravis.ai,
+      # voltar isto pra 'nao' ANTES de qualquer re-run.
+      ARMADO: 'sim'
     steps:
       # Sonda CADA permissão que os passos abaixo precisam e imprime qual
       # falta — antes de tentar mutação nenhuma. Existe porque os runs #1 e #2
@@ -120,7 +135,7 @@ jobs:
           ZID=$(python3 -c 'import json;r=json.load(open("/tmp/zone.json")).get("result") or [];print(r[0]["id"] if r else "")')
           [ -z "$ZID" ] && { echo "::error::token não enxerga a zona $ZONE (falta Zone:Read) — nada foi alterado"; exit 1; }
 
-          echo "== 1b. MX atuais da zona (leitura — decide se dá pra habilitar) =="
+          echo "== 1b. MX atuais da zona — ESTA IMPRESSAO E O ROLLBACK =="
           curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "$CF/zones/$ZID/dns_records?type=MX" > /tmp/mx.json
           python3 - <<'PY'
@@ -128,16 +143,40 @@ jobs:
           d = json.load(open("/tmp/mx.json"))
           regs = d.get("result") or []
           if not regs:
-              print("nenhum MX na zona — Email Routing pode ser habilitado sem conflito")
+              print("nenhum MX na zona — nada a remover")
           else:
               print("%d registro(s) MX existentes:" % len(regs))
               for r in regs:
-                  print("  prio %-4s %-45s (id %s)" % (
-                      r.get("priority"), r.get("content"), r.get("id")))
+                  print("  prio %-4s %-45s ttl %-6s name %s (id %s)" % (
+                      r.get("priority"), r.get("content"), r.get("ttl"),
+                      r.get("name"), r.get("id")))
               print("")
-              print("ATENCAO: se algum e-mail @ultravis.ai funciona hoje, ele passa por AQUI.")
-              print("Habilitar Email Routing substitui esses MX — decisao do dono, nao deste job.")
+              print("ROLLBACK: recriar exatamente os registros acima (tipo MX) e")
+              print("desabilitar o Email Routing no painel.")
+          # ids num arquivo separado, um por linha, pro passo de remocao
+          open("/tmp/mx_ids.txt", "w").write(
+              "".join("%s %s\n" % (r.get("id"), r.get("content")) for r in regs))
           PY
+
+          echo "== 1c. remover MX nao-Cloudflare (ARMADO=$ARMADO) =="
+          if [ ! -s /tmp/mx_ids.txt ]; then
+            echo "(sem MX pra remover — seguindo)"
+          elif [ "$ARMADO" != "sim" ]; then
+            echo "::warning::ARMADO != 'sim' — os MX acima NAO foram tocados. O passo 2 vai falhar em 2008; é o esperado com o guard fechado."
+          else
+            while read -r ID CONTEUDO; do
+              [ -z "$ID" ] && continue
+              echo "-- apagando MX $CONTEUDO ($ID)"
+              curl -sS -X DELETE -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                "$CF/zones/$ZID/dns_records/$ID" > /tmp/del.json
+              if [ "$(okof < /tmp/del.json)" != "1" ]; then
+                j < /tmp/del.json
+                echo "::error::falha ao apagar o MX $CONTEUDO — ver JSON acima. ROLLBACK: os registros estao impressos no passo 1b."
+                exit 1
+              fi
+            done < /tmp/mx_ids.txt
+            echo "MX removidos."
+          fi
 
           echo "== 2. habilitar Email Routing (idempotente) =="
           curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
@@ -167,7 +206,11 @@ jobs:
               ja)
                 echo "(já estava habilitado — seguindo)" ;;
               mx)
-                echo "::error::A zona já tem MX apontando pra fora da Cloudflare (code 2008). Habilitar Email Routing SUBSTITUIRIA esses registros e quebraria a entrega de e-mail atual de @ultravis.ai — ver a lista impressa no passo 1b. Isto é decisão do dono, não deste job: ou os MX antigos são removidos de propósito, ou o contato@ultravis.ai vai por outro caminho (ex.: alias no provedor de e-mail que já atende o domínio)."
+                if [ "$ARMADO" = "sim" ]; then
+                  echo "::error::Ainda há MX não-Cloudflare na zona depois do passo 1c (code 2008). A remoção não pegou tudo — conferir a lista do passo 1b e o resultado do 1c acima. Nenhum e-mail foi redirecionado; a zona está no estado que o 1c deixou."
+                else
+                  echo "::error::A zona tem MX apontando pra fora da Cloudflare (code 2008) e o guard ARMADO não está em 'sim', então nada foi removido. Ver a lista no passo 1b: habilitar Email Routing substituiria esses registros. Só armar depois de confirmar que nenhum e-mail @ultravis.ai está em uso."
+                fi
                 exit 1 ;;
               perm)
                 echo "::error::Token sem permissão pra habilitar Email Routing — ver o passo de preflight acima, que diz qual escopo deu NAO."

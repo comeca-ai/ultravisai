@@ -17,6 +17,12 @@ on:
     branches: [main]
     paths: ['.github/workflows/verificar-censo.yml']
 
+# Achado P2 da auditoria de 08/set: job `verificar` só lê a produção (secrets
+# próprios do Supabase); `espelho` só chama a Cloudflare com token próprio.
+# Nenhum dos dois precisa de mais que checkout.
+permissions:
+  contents: read
+
 jobs:
   verificar:
     runs-on: ubuntu-latest
@@ -73,8 +79,12 @@ jobs:
           curl -sS -H "$H1" -H "$H2" \
             "$SUPABASE_URL/rest/v1/prompt_results?select=created_at&created_at=gte.${SINCE}T00:00:00Z&limit=10000" > /tmp/semana.json
 
-          python3 - <<'PY' | tee /tmp/resumo.txt
-          import json, collections
+          # || true: o runner roda com `set -eo pipefail` — sem isso, um
+          # sys.exit(1) do python abortaria o step ANTES de escrever o
+          # summary/erro abaixo. O código real é lido de PIPESTATUS logo em
+          # seguida, então nada disso mascara a falha.
+          python3 - <<'PY' | tee /tmp/resumo.txt || true
+          import json, collections, sys
           brands = {b["id"]: b["name"] for b in json.load(open("/tmp/brands.json"))}
           rows = json.load(open("/tmp/today.json"))
           if not rows:
@@ -100,7 +110,16 @@ jobs:
                   print(f"  {d}: {dias[d]}")
           else:
               print("\nNENHUMA coleta nos últimos 8 dias — rastreamento silencioso.")
+          # Achado P2 da auditoria de 08/set: até aqui o job sempre saía com
+          # sucesso, mesmo gritando "rastreamento silencioso" — a notificação
+          # nativa de falha do Actions nunca disparava (causa-raiz de o
+          # silêncio de 13 dias em 06/set só ter sido notado tarde). Zero
+          # coleta HOJE é normal fora do horário do censo; zero coleta nos
+          # últimos 8 dias não é — nesse caso o job precisa falhar de vez.
+          if not dias:
+              sys.exit(1)
           PY
+          rc=${PIPESTATUS[0]}
 
           {
             echo "### Censo de $TODAY — agregados da produção"
@@ -108,6 +127,11 @@ jobs:
             cat /tmp/resumo.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::nenhuma coleta nos últimos 8 dias — rastreamento silencioso (ver resumo acima)"
+            exit 1
+          fi
 
   # Caminho ALTERNATIVO de leitura, sem depender dos secrets do Supabase: o
   # worker (que tem a SERVICE_ROLE) agrega o censo no D1 pelo cron semanal, e

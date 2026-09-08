@@ -38,9 +38,19 @@ export async function GET(request: Request) {
   return NextResponse.redirect(redirectTarget);
 }
 
+// Security: an absolute URL is only honored when its origin matches ours —
+// otherwise this is an open redirect (crafted redirect_to=https://evil.example
+// on a real confirm/invite link). `//host` is rejected too — browsers resolve
+// it as protocol-relative absolute despite the single leading `/`.
 function resolveRedirect(value: string | null, origin: string): string {
   if (!value) return `${origin}/dashboard`;
-  if (/^https?:\/\//i.test(value)) return value;
-  if (value.startsWith('/')) return `${origin}${value}`;
+  if (value.startsWith('/') && !value.startsWith('//')) return `${origin}${value}`;
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      if (new URL(value).origin === origin) return value;
+    } catch {
+      // fall through to default below
+    }
+  }
   return `${origin}/dashboard`;
 }

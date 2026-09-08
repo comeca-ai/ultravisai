@@ -50,10 +50,23 @@ export async function GET(request: Request) {
  * Accept either a full URL (already absolute, e.g. when Supabase expands
  * `{{ .RedirectTo }}` we pass during inviteUserByEmail) or a path; default
  * to /dashboard if neither was provided.
+ *
+ * Security: an absolute URL is only honored when its origin matches ours —
+ * otherwise this is an open redirect (attacker crafts a real confirm/invite
+ * link with `redirect_to=https://evil.example`, post-auth traffic bounces
+ * off our trusted domain). Same reasoning rules out `//host` values, which
+ * browsers resolve as protocol-relative absolute URLs despite starting with
+ * a single `/`.
  */
 function resolveRedirect(value: string | null, origin: string): string {
   if (!value) return `${origin}/dashboard`;
-  if (/^https?:\/\//i.test(value)) return value;
-  if (value.startsWith('/')) return `${origin}${value}`;
+  if (value.startsWith('/') && !value.startsWith('//')) return `${origin}${value}`;
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      if (new URL(value).origin === origin) return value;
+    } catch {
+      // fall through to default below
+    }
+  }
   return `${origin}/dashboard`;
 }

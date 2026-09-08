@@ -67,33 +67,44 @@ Cloudflare. Se forem diferentes, achamos a causa-raiz. Não dá pra ler o
 valor de `SUPABASE_URL` do worker por nenhum caminho disponível nesta sessão
 (é Secret, não aparece em log/diff).
 
-## 🔴 BLOQUEIO ATUAL (07/set, RECONFIRMADO 08/set): o deploy do server está parado
+## ✅ RESOLVIDO (08/set, fim da tarde): deploy do server destravado — run #38 sucesso
 
-`main` está **à frente da produção** no lado do server. Tudo que foi mergeado
-hoje — vigia camada 2 (#123), a ponte do censo pro D1 (#133), o `/espelho`
-autenticado (#131) e a rota de produção versionada (#137) — está no
-repositório e **não** em produção. `api.ultravis.ai` segue no ar rodando o
-código publicado em 06/set; a web (Vercel) deployou normal, então o Insights
-v3 (#122) **está** no ar.
+Sequência completa da novela do token, pra quem chegar depois: token sem
+`Workers Scripts: Edit` (runs #14–#37) → token custom recriado com as 3
+permissões certas (Workers Scripts + D1 + Workers Routes, todas Edit) →
+valor colado em chat por engano → Roll pedido → **valor pós-Roll saiu
+quebrado** (2 tentativas seguidas, runs #36 e #37, falharam com
+`Invalid API Token`/`Unable to get membership roles` — o secret tinha
+valor inválido, não só permissão faltando) → dono reconferiu o valor pela
+3ª vez → **run #38 (24c2f58) passou: deploy + build da imagem (container
+non-root novo) + smokes, tudo verde.** `api.ultravis.ai` está rodando o
+código de hoje (leva de segurança P2 + a correção do próprio deploy).
 
-Causa única: o `CLOUDFLARE_API_TOKEN` autentica e **lê**, mas não tem
-`Workers Scripts: Edit`. Runs #14–#21, três sintomas distintos, todos de
-token (tabela no cookbook §2 da skill `cloudflare`):
+Lição pro próximo token que vazar: depois de um Roll, o valor precisa ser
+copiado nesse exato momento (só aparece uma vez) — colar um valor truncado
+ou o antigo por engano dá o MESMO sintoma de "sem permissão" (Authentication
+error / Unable to get membership), então não dá pra distinguir só pelo log;
+foi preciso reconferir campo a campo.
+
+Histórico do bloqueio original (07-08/set), três sintomas de token, todos
+resolvidos:
 
 | Sintoma | O que era | Estado |
 |---|---|---|
 | `Invalid format ... [6111]` | o secret tinha o **ID** do token (UUID), não o valor | ✅ resolvido |
-| `Unable to get membership` | token de conta em vez de usuário | ✅ nunca ocorreu (token é de usuário) |
-| `Authentication error [10000]` no `PUT /workers/scripts` | falta `Workers Scripts: **Edit**` | 🔴 **aberto — pendência do dono** |
+| `Unable to get membership` (bloqueio original) | token de conta em vez de usuário | ✅ nunca ocorreu (token é de usuário) |
+| `Authentication error [10000]` no `PUT /workers/scripts` | faltava `Workers Scripts: Edit` | ✅ resolvido (token recriado) |
+| `Invalid API Token` (novo, pós-Roll, runs #36-37) | valor colado errado/incompleto em GitHub Secrets | ✅ resolvido (run #38) |
 
-**Reconfirmado 08/set (run do deploy disparado pelo merge do PR #157):** o
-preflight mostra o token lendo tudo (`Workers`, `D1`, `KV`, zonas) mas
-falhando a escrita de teste com "Authentication error"; o `wrangler deploy`
-real falha no mesmo `code: 10000` no `PUT .../workers/scripts/ultravis-server`.
-O e-mail logado (`jhonata.emerick@gmail.com`) tem "Super Administrator — All
-Privileges" na **conta** — isso não é a mesma coisa que o **token** ter o
-escopo `Workers Scripts: Edit` marcado (são permissões separadas). Segue
-sendo só o item 0 abaixo que destrava.
+**Achado que o bloqueio escondia (run #19, ainda válido):** o wrangler
+planejava **apagar** o Custom Domain `api.ultravis.ai` — criado à mão no
+painel em 06/set e nunca versionado. Corrigido no #137 (`routes` no
+`wrangler.jsonc`); `keep_vars` protege variáveis, não rotas.
+
+**Segundo achado (ainda válido):** `OPS_USER`/`OPS_PASS` estão no painel como
+**var de texto** (valor fraco), então aparecem em claro no diff que o
+wrangler imprime no log do CI. São a senha do `/ops` e do `/espelho`.
+Correção é no painel — ver "Pendências SUAS" (item 0b).
 
 **Achado que o bloqueio escondia (run #19):** o wrangler planejava **apagar**
 o Custom Domain `api.ultravis.ai` — criado à mão no painel em 06/set e nunca
@@ -130,9 +141,9 @@ desligado é a pendência nº 1 e este incidente é o argumento definitivo.
 |---|---|
 | Site + app (Vercel, ultravis.ai) | ✅ No ar com o código de 19/ago (#94); a leva 26–29/ago espera o merge do PR #95 |
 | Server de rastreamento (Railway) | ⬛ **APAGADO em 06/set à noite** (trial expirado; dono removeu após o corte) |
-| **Server no Cloudflare (Container)** | 🟡 **No ar, mas congelado no código de 06/set**: `api.ultravis.ai` responde (Custom Domain), porém nenhum deploy passa desde então — token sem `Workers Scripts: Edit` (ver bloqueio acima). Censo de 07/set 06:00 UTC rodou na infra nova; **os números ainda não foram lidos** (a ponte que os publica no D1 depende deste mesmo deploy) |
+| **Server no Cloudflare (Container)** | ✅ **Destravado 08/set (run #38)** — `api.ultravis.ai` rodando o código de hoje (leva de segurança P2 + container non-root). Deploy volta a ser automático em todo merge tocando `server/**`/`cloudflare/server-container/**`. Ainda não confirmado: se a ponte do censo pro D1 já publicou os números do censo de 07-08/set (depende de rodar depois do deploy) |
 | **Workers na conta** | ✅ **UM só desde 07/set** (`ultravis-server`) e **um pipeline** (`deploy-server-container`): o espelho D1 virou a rota `/espelho` do mesmo worker. `/espelho` **já exige HTTP Basic** e responde 503 se as credenciais faltarem (fechado por omissão) — o smoke do deploy exige 401 no anônimo. ⏳ Os dois órfãos (`ultravis-edge-gateway`, `ultravis-d1-espelho`) ainda **não** foram apagados: o workflow `limpar-workers-orfaos` existe mas está travado (`ARMADO: 'nao'`) |
-| Banco (Supabase) | ✅ Ok — 43 migrations (numeradas até 00044; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado |
+| Banco (Supabase) | ✅ Ok — 48 migrations (numeradas até 00048; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado. GRANT ALL residual revogado em 3 tabelas server-only (migration 00048, 08/set) |
 | Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 11 invariantes de consistência** (19/ago + 26/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham, domínios quebrados/com caminho) — 2 alertas que gritavam em falso corrigidos em 26/ago (**na branch, sobem com o PR #95**); alertas por e-mail **desligados** até você configurar um e-mail dedicado. **Camada 2 pronta na branch `vigia-camada2-llm`** (agente LLM semanal pós-censo, 1 chamada/rodada; liga com `CONSISTENCY_LLM_MODEL` ou `AUDIT_LLM_MODEL` no worker) |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |
 
@@ -203,25 +214,11 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
     (mudanças de produto — pesos do Score, ranking unificado — aguardando
     sua revisão) e os 6 PRs do Dependabot com bump major (#138, #139, #141,
     #142, #145, e #146) — não mergear sem testar manualmente.
-0e. 🔴 **Token Cloudflare quebrou DEPOIS do Roll (08/set) — deploy #36 falhou
-    de novo, achado NOVO e diferente do bloqueio antigo.** Sequência: token
-    custom criado nesta sessão (Workers Scripts + D1 + Workers Routes Edit)
-    apareceu em texto puro no chat → Roll pedido → dono confirmou que colou
-    o valor novo em GitHub Secrets → `CLOUDFLARE_API_TOKEN`. O run de deploy
-    **#35** (commit anterior a esta leva) rodou com sucesso — ou seja, o
-    token ainda funcionava naquele momento. O run **#36** (merge de hoje)
-    falhou logo no preflight: `token vivo? NAO: Invalid API Token` e
-    `wrangler deploy` morre em "Unable to get membership roles" — **não é
-    mais falta de permissão, o token em si não autentica**. Log completo:
-    https://github.com/comeca-ai/ultravisai/actions/runs/34275646255/job/102228578502
-    — Diagnóstico mais provável: o valor colado em GitHub Secrets depois do
-    Roll está incompleto/errado (corte de caractere, espaço, ou o valor
-    antigo foi colado por engano). **Ação:** no painel Cloudflare, copiar de
-    novo o valor ATUAL do token (não precisa Roll de novo — só reconferir o
-    que já está lá) e colar limpo em GitHub → Settings → Secrets and
-    variables → Actions → `CLOUDFLARE_API_TOKEN`, sem espaço antes/depois.
-    Depois, disparar o deploy de novo (push trivial em `server/**` ou
-    workflow_dispatch em `deploy-server-container`).
+0e. ✅ **Token Cloudflare — saga fechada (08/set, run #38 sucesso).** Resumo:
+    token custom criado (Workers Scripts + D1 + Workers Routes Edit) → vazou
+    em chat → Roll pedido → 2 recolagens quebradas em GitHub Secrets (runs
+    #36/#37, `Invalid API Token`) → 3ª reconferência funcionou (run #38).
+    Histórico completo na seção "RESOLVIDO" no topo deste arquivo.
     Achado também nesta sessão: o repositório foi renomeado de `ansvisor`
     pra **`ultravisai`** (mesma org `comeca-ai`) — atualizar qualquer
     referência antiga ao nome `ansvisor` em bookmarks/scripts locais.

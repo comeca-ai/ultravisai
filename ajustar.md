@@ -317,6 +317,11 @@ da média.
 
 ### Como virar nota 0–100
 
+> ⚠️ **Superado.** A conversão abaixo (`100 / média`) foi substituída — ela
+> ignora quantos concorrentes existem no campo. Ver a seção final,
+> "Como o Score reflete o ranking". O texto fica aqui só como registro do
+> caminho percorrido.
+
 A média é ilimitada (pode dar #17) e "menor é melhor"; a nota precisa ser
 0–100 e "maior é melhor". A conversão mais simples e defensável:
 
@@ -560,3 +565,115 @@ Uma linha de configuração. Não há migration nem dependência do deploy do
 servidor — os pesos do **Score de Visibilidade** vivem em arquivo, não na
 tabela `index_weights` (essa é do Índice de Citabilidade, que tem seis
 dimensões e **não** é afetado por esta decisão).
+
+---
+
+## Como o Score reflete o ranking — e a correção da proposta anterior
+
+> "Como os pesos devem se comportar para que o Score de Visibilidade também
+> seja reflexo do ranking, na direção correta? O melhor ranking é 3,3, mas no
+> score ele pode ser no máximo 1. Como ajustar isso ou separar os conceitos?"
+
+### Primeiro: os pesos não são a alavanca
+
+A pergunta chega como "peso", mas o problema não está lá. Com 25% para
+Posição, a dimensão já tem espaço suficiente para mover o Score. O que impede
+o Score de refletir o ranking é a **conversão** de posição em nota.
+
+Mexer no peso para compensar uma conversão ruim mascara o defeito e estraga
+as outras três dimensões junto.
+
+### Correção: minha proposta de `100 / média` estava errada
+
+Registrei antes neste arquivo `nota = 100 / ranking_médio`. Está errada, e o
+motivo é exatamente o que a pergunta aponta.
+
+`100 / 3,3 = 30`. Mas **3,3 entre 3 concorrentes é ruim e 3,3 entre 20 é
+excelente** — e a fórmula dá 30 nos dois casos. Pior: uma marca sempre
+segunda colocada fica presa em 50, para sempre, sem jeito de melhorar a não
+ser sendo primeira em tudo. O teto vira uma parede.
+
+### O dado que resolve já existe e nunca foi usado
+
+A migration `00043` grava, junto do `appearance_rank`, a coluna
+**`appearance_rivals`** — quantos concorrentes apareceram naquela resposta
+(`appearance-rank.js:69,132`).
+
+**Ela nunca é lida por ninguém.** Nem pelo Insights, nem pelo Score. É
+justamente o denominador que falta.
+
+### A conversão correta: posição relativa ao campo
+
+Por resposta:
+
+```
+nota = (rivais + 1 − posição) / rivais × 100
+```
+
+Ficar em 1º entre 3 concorrentes = 100. Ficar em último = 0. E o mesmo 3,3
+passa a valer coisas diferentes conforme o tamanho do campo — que é a
+realidade:
+
+| Posição média | Concorrentes no campo | Nota |
+| ------------- | --------------------- | ---- |
+| 3,3           | 3                     | 23   |
+| 3,3           | 5                     | 54   |
+| 3,3           | 10                    | 77   |
+| 3,3           | 20                    | 88   |
+
+Compare com `100 / média`, que devolveria **30 em todos os quatro casos**.
+
+### Uma inversão de ordem em relação ao que escrevi antes
+
+Para o **ranking exibido** (Insights) a regra do dono continua valendo como
+está: soma as posições, divide pelas aparições, pronto.
+
+Para a **nota do Score** a ordem se inverte: calcula a nota **por resposta**
+(cada uma com o seu próprio número de rivais) e só então tira a média das
+notas. Não dá para normalizar depois, porque o tamanho do campo muda de
+resposta para resposta.
+
+São duas agregações diferentes porque respondem a duas perguntas diferentes —
+e é por isso que os dois números não precisam ser iguais.
+
+### Caso de borda: nenhum concorrente citado (`rivais = 0`)
+
+A marca aparece sozinha. A posição é 1 por definição, e não há campo para
+normalizar. Recomendo **nota 100**: a IA citou você e mais ninguém, que é o
+melhor resultado possível. Mas a tela deve mostrar quantas respostas foram
+assim — "em N de M respostas nenhum concorrente foi citado" —, porque 100
+obtido sem adversário é frágil e some no dia em que um concorrente entrar.
+
+### Então: separar ou unir os conceitos?
+
+**Unir o dado, separar a apresentação.** Não são duas métricas, é a mesma
+medida vista de dois ângulos:
+
+|                   | Insights                            | Score                       |
+| ----------------- | ----------------------------------- | --------------------------- |
+| Mostra            | `Ranking médio 3,3`                 | `Posição 77/100`            |
+| Responde          | "em que lugar eu costumo aparecer?" | "quanto do campo eu ganho?" |
+| Direção           | menor é melhor                      | maior é melhor              |
+| Considera o campo | não (número absoluto)               | sim (relativo aos rivais)   |
+
+E a tela do Score mostra **os dois juntos**, com uma linha ligando:
+
+> Posição **77/100** — você aparece em média em **3,3º**, num campo de
+> **10 concorrentes** citados.
+
+Assim o cliente vê o número que entende (3,3) e o número que entra na conta
+(77), e a relação entre eles fica explícita em vez de virar suspeita.
+
+### O que muda em "onde mexer"
+
+Substitui o que registrei na seção da definição do ranking:
+
+| Arquivo                         | O quê                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `visibility-index.ts:524`       | somar `appearance_rivals` ao `select` — hoje nem é lido                  |
+| `visibility-index.ts:487-490`   | nota por resposta `(rivals+1−rank)/rivals×100`; acumular soma e contagem |
+| `visibility-index.ts:592-596`   | nota da dimensão = média das notas por resposta                          |
+| `visibility-index.ts` (retorno) | devolver também a média de posições e a média de rivais, pra tela        |
+| Score (tela)                    | a frase que liga os dois números                                         |
+
+Nenhuma migration: a coluna existe desde 00043 e já está populada.

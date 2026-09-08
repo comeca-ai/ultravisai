@@ -79,11 +79,19 @@ jobs:
           curl -sS -H "$H1" -H "$H2" \
             "$SUPABASE_URL/rest/v1/prompt_results?select=created_at&created_at=gte.${SINCE}T00:00:00Z&limit=10000" > /tmp/semana.json
 
-          # || true: o runner roda com `set -eo pipefail` — sem isso, um
-          # sys.exit(1) do python abortaria o step ANTES de escrever o
-          # summary/erro abaixo. O código real é lido de PIPESTATUS logo em
-          # seguida, então nada disso mascara a falha.
-          python3 - <<'PY' | tee /tmp/resumo.txt || true
+          # `set +e` em vez de `|| true`, e o comentário anterior estava errado
+          # em dois pontos (achado da auditoria de 08/set):
+          #   1. o runner NÃO roda com pipefail — sem `shell:` explícito o
+          #      default é `bash -e {0}`, só errexit;
+          #   2. `|| true` era pior que inútil: se alguém adicionasse
+          #      `shell: bash` (ligando pipefail), o `|| true` passaria a
+          #      EXECUTAR e o `true` sobrescreveria PIPESTATUS com 0 — o
+          #      alarme de 8 dias de silêncio seria engolido, que é
+          #      exatamente o bug que este passo existe pra impedir.
+          # `set +e` desliga o errexit só neste trecho e preserva PIPESTATUS
+          # nos dois modos.
+          set +e
+          python3 - <<'PY' | tee /tmp/resumo.txt
           import json, collections, sys
           brands = {b["id"]: b["name"] for b in json.load(open("/tmp/brands.json"))}
           rows = json.load(open("/tmp/today.json"))
@@ -120,6 +128,7 @@ jobs:
               sys.exit(1)
           PY
           rc=${PIPESTATUS[0]}
+          set -e
 
           {
             echo "### Censo de $TODAY — agregados da produção"

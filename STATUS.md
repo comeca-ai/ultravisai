@@ -76,9 +76,19 @@ valor colado em chat por engano → Roll pedido → **valor pós-Roll saiu
 quebrado** (2 tentativas seguidas, runs #36 e #37, falharam com
 `Invalid API Token`/`Unable to get membership roles` — o secret tinha
 valor inválido, não só permissão faltando) → dono reconferiu o valor pela
-3ª vez → **run #38 (24c2f58) passou: deploy + build da imagem (container
-non-root novo) + smokes, tudo verde.** `api.ultravis.ai` está rodando o
-código de hoje (leva de segurança P2 + a correção do próprio deploy).
+3ª vez → **run #38 (24c2f58) passou: deploy + build da imagem publicados.**
+`api.ultravis.ai` está rodando o código de hoje (leva de segurança P2 + a
+correção do próprio deploy).
+
+⚠️ **O que o run #38 NÃO prova** (achado da auditoria de 08/set): o smoke do
+`deploy-server-container.yml` emite `::warning::` e sai com `exit 0` quando
+não passa (linhas 314-316), então **run verde é compatível com container que
+não sobe**. O `USER node` + `setcap` do Dockerfile depende de o xattr
+`security.capability` sobreviver ao build/push da imagem pela Cloudflare pra
+bindar a porta 80 — isso segue **não verificado**. Confirmar à mão:
+`curl -sS -o /dev/null -w '%{http_code}' https://api.ultravis.ai/` deve dar
+200, e `wrangler tail ultravis-server` não deve mostrar erro de permissão de
+porta no boot.
 
 Lição pro próximo token que vazar: depois de um Roll, o valor precisa ser
 copiado nesse exato momento (só aparece uma vez) — colar um valor truncado
@@ -106,17 +116,6 @@ painel em 06/set e nunca versionado. Corrigido no #137 (`routes` no
 wrangler imprime no log do CI. São a senha do `/ops` e do `/espelho`.
 Correção é no painel — ver "Pendências SUAS" (item 0b).
 
-**Achado que o bloqueio escondia (run #19):** o wrangler planejava **apagar**
-o Custom Domain `api.ultravis.ai` — criado à mão no painel em 06/set e nunca
-versionado. O primeiro deploy bem-sucedido teria derrubado a API inteira sem
-erro no log. Corrigido no #137 (`routes` no `wrangler.jsonc`); `keep_vars`
-protege variáveis, não rotas.
-
-**Segundo achado:** `OPS_USER`/`OPS_PASS` estão no painel como **var de
-texto** (valor fraco), então aparecem em claro no diff que o wrangler imprime
-no log do CI. São a senha do `/ops` e do `/espelho`. Correção é no painel —
-ver "Pendências SUAS".
-
 ## ⚠️ INCIDENTE (06/set): rastreamento parado há 13 dias
 
 O censo de segunda 31/ago **rodou no horário e coletou ZERO resultados** (as 8
@@ -139,11 +138,11 @@ desligado é a pendência nº 1 e este incidente é o argumento definitivo.
 
 | Camada | Estado |
 |---|---|
-| Site + app (Vercel, ultravis.ai) | ✅ No ar com o código de 19/ago (#94); a leva 26–29/ago espera o merge do PR #95 |
+| Site + app (Vercel, ultravis.ai) | ✅ No ar, deploy automático a cada merge em `main` — inclui a leva de 08/set (fix de open redirect em `/auth/confirm`, i18n e o que mais tocou `web/`). A linha anterior dizia "código de 19/ago", defasada desde então (achado da auditoria de 08/set) |
 | Server de rastreamento (Railway) | ⬛ **APAGADO em 06/set à noite** (trial expirado; dono removeu após o corte) |
 | **Server no Cloudflare (Container)** | ✅ **Destravado 08/set (run #38)** — `api.ultravis.ai` rodando o código de hoje (leva de segurança P2 + container non-root). Deploy volta a ser automático em todo merge tocando `server/**`/`cloudflare/server-container/**`. Ainda não confirmado: se a ponte do censo pro D1 já publicou os números do censo de 07-08/set (depende de rodar depois do deploy) |
 | **Workers na conta** | ✅ **UM só desde 07/set** (`ultravis-server`) e **um pipeline** (`deploy-server-container`): o espelho D1 virou a rota `/espelho` do mesmo worker. `/espelho` **já exige HTTP Basic** e responde 503 se as credenciais faltarem (fechado por omissão) — o smoke do deploy exige 401 no anônimo. ⏳ Os dois órfãos (`ultravis-edge-gateway`, `ultravis-d1-espelho`) ainda **não** foram apagados: o workflow `limpar-workers-orfaos` existe mas está travado (`ARMADO: 'nao'`) |
-| Banco (Supabase) | ✅ Ok — 48 migrations (numeradas até 00048; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado. GRANT ALL residual revogado em 3 tabelas server-only (migration 00048, 08/set) |
+| Banco (Supabase) | ✅ Ok — 47 migrations (numeradas até 00048; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado. GRANT ALL residual revogado em 3 tabelas server-only (migration 00048, 08/set) |
 | Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 11 invariantes de consistência** (19/ago + 26/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham, domínios quebrados/com caminho) — 2 alertas que gritavam em falso corrigidos em 26/ago (**na branch, sobem com o PR #95**); alertas por e-mail **desligados** até você configurar um e-mail dedicado. **Camada 2 pronta na branch `vigia-camada2-llm`** (agente LLM semanal pós-censo, 1 chamada/rodada; liga com `CONSISTENCY_LLM_MODEL` ou `AUDIT_LLM_MODEL` no worker) |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |
 
@@ -201,7 +200,7 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 
 0. ✅ **`Workers Scripts` Edit no token** — resolvido, ver item 0e abaixo (token recriado do zero com as 3 permissões, saga fechada no run #38).
 0b. 🔒 **Trocar `OPS_USER`/`OPS_PASS`**: apagar as duas **vars de texto** no painel do worker, cadastrar em GitHub → Secrets → Actions com valor novo e forte, rodar `sync-cf-secrets` (grava como Secret, some do diff e do log).
-1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway (liga os avisos do watchdog).
+1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` **no worker Cloudflare** (liga os avisos do watchdog). *Dizia "no Railway" — que foi apagado em 06/set; corrigido na auditoria de 08/set.*
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
 3. ✅ **`contato@ultravis.ai` NO AR (08/set)** — canal LGPD das páginas de Termos/Privacidade, resolvido via Cloudflare Email Routing. Estado final: MX `route1/2/3.mx.cloudflare.net`, SPF `v=spf1 include:_spf.mx.cloudflare.net ~all`, Email Routing com status **`ready`**, regra `contato@ → jhonata.emerick@gmail.com` + **catch-all** (qualquer endereço `@ultravis.ai` cai no mesmo Gmail, prioridade mínima, então regra específica sempre ganha). Destino já era verificado desde 25/jul — nada a clicar. Automação em `.github/workflows/criar-email-contato.yml`, idempotente (re-run não quebra nada).
    - **Achado que inverteu o diagnóstico:** o Email Routing já existia na zona desde 31/jul (com a regra `jer@ultravis.ai`); os MX da Hostinger não estavam *fornecendo* e-mail, estavam **quebrando** o routing que já existia — daí o status `misconfigured/locked`. Removê-los consertou o `jer@` junto.

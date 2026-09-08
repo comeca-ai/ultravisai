@@ -19,7 +19,8 @@
 # Redeploy manual (sem workflow_dispatch, ver skill cloudflare §"deploy
 # manual"): micro-commit tocando este arquivo, como este comentário — 08/set,
 # CLOUDFLARE_API_TOKEN reconferido/recolado em GitHub Secrets depois do run
-# #36 falhar com "Invalid API Token".
+# #36 falhar com "Invalid API Token". Runs #36 e #37 falharam com a mesma
+# assinatura; este é o 3º disparo, pra verificar se o token está OK agora.
 name: deploy-server-container
 
 on:

@@ -279,6 +279,17 @@ export default function VisibilityScorePage() {
                       (rs.position.score !== null ? (
                         <>
                           <li>{t('dims.position.ev', { samples: rs.position.samples })}</li>
+                          {/* O número que o cliente entende (#2,3) ao lado do que
+                              entra na conta — os dois vêm do mesmo RPC, então a
+                              tela de Insights mostra exatamente este valor. */}
+                          {rs.position.avg !== null && (
+                            <li>{t('dims.position.avg', { avg: rs.position.avg })}</li>
+                          )}
+                          {rs.position.semRival > 0 && (
+                            <li className="text-muted-foreground">
+                              {t('dims.position.semRival', { count: rs.position.semRival })}
+                            </li>
+                          )}
                           {/* Distribuição da premissa de 18/ago: 1º/2º/3º/4º+ por ordem de aparição. */}
                           <li>
                             <span className="mt-1 flex flex-col gap-1">

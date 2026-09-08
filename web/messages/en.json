@@ -209,8 +209,16 @@
       "generic": "An error occurred. Please try again.",
       "emailNotConfirmed": "Please verify your email address first. Check your inbox for the confirmation link.",
       "signOutError": "Failed to sign out. Please try again.",
-      "accountExists": "An account with this email already exists. Sign in with your password — or use “Forgot password” to recover access."
-    }
+      "accountExists": "An account with this email already exists. Sign in with your password — or use “Forgot password” to recover access.",
+      "rateLimited": "Too many attempts in a row. Wait a minute and try again."
+    },
+    "useMagicLink": "Sign in without a password",
+    "usePassword": "Sign in with a password",
+    "sendingMagicLink": "Sending link…",
+    "magicLinkSentTo": "If {email} has an account here, the sign-in link is on its way. Open the message and click to sign in.",
+    "magicLinkResend": "Resend link",
+    "magicLinkResendIn": "Resend in {seconds}s",
+    "magicLinkOtherEmail": "Use a different email"
   },
   "dashboard": {
     "overview": "Overview",
@@ -1312,11 +1320,13 @@
         "brief": "In which position do I appear in the answers I am in?",
         "ev": "Order of appearance in the text, across {samples} answers where you appear:",
         "noSample": "The brand has not appeared in any answer in this window yet (or ranking enrichment is still running — up to 30 min).",
-        "how": "Ranking = order of the first mention in the answer text. Score: 1st=100 · 2nd=60 · 3rd=30 · 4th+=0, averaged over answers.",
+        "how": "Ranking = order of the first mention in the text. The score compares against the field: (competitors + 1 − your position) ÷ competitors × 100, per answer. 1st place = 100, last = 0 — so 3.3rd among 20 competitors is worth far more than 3.3rd among 3.",
         "p1": "1st place",
         "p2": "2nd place",
         "p3": "3rd place",
-        "p4": "4th or worse"
+        "p4": "4th or worse",
+        "avg": "Average ranking: {avg} — the same number as the Insights screen, read from the same query.",
+        "semRival": "In {count, plural, one {# answer} other {# answers}} no competitor was cited: the score is 100 with no rival, and drops the day one shows up."
       },
       "sentiment": {
         "name": "Sentiment",

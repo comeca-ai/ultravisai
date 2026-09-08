@@ -420,10 +420,20 @@ app.post('/cloro/callback', async (req, res) => {
       return;
     }
 
+    // Claim atomically: DELETE...RETURNING is a single statement, so of two
+    // concurrent deliveries of the same taskId (webhook retry, or a replay
+    // inside the signature's timestamp tolerance window), only one gets a
+    // row back — the other gets null and exits at the `!pending` check
+    // below. The previous SELECT-then-process-then-DELETE left a window
+    // (including an AI call) where both requests could pass the "pending
+    // exists" check before either deleted it, producing duplicate
+    // prompt_results rows (prompt_results has no UNIQUE constraint to catch
+    // this at the DB level) — audit finding P1, 08/set.
     const { data: pending } = await supabaseAdmin
       .from('cloro_pending_tasks')
-      .select('*')
+      .delete()
       .eq('task_id', taskId)
+      .select()
       .maybeSingle();
 
     if (!pending) {
@@ -433,7 +443,6 @@ app.post('/cloro/callback', async (req, res) => {
 
     if (status === 'FAILED') {
       req.log.error({ taskId, scraperId: pending.scraper_id }, 'cloro callback: task failed');
-      await supabaseAdmin.from('cloro_pending_tasks').delete().eq('task_id', taskId);
       return;
     }
 
@@ -444,55 +453,66 @@ app.post('/cloro/callback', async (req, res) => {
 
     if (!response) {
       req.log.error({ taskId }, 'cloro callback: task completed but missing response');
-      await supabaseAdmin.from('cloro_pending_tasks').delete().eq('task_id', taskId);
       return;
     }
 
-    // Fetch context for result handler
-    const [{ data: brand }, { data: domains }, { data: competitorRows }] = await Promise.all([
-      supabaseAdmin.from('brands').select('id, name, aliases').eq('id', pending.brand_id).single(),
-      supabaseAdmin.from('brand_domains').select('domain').eq('brand_id', pending.brand_id),
-      supabaseAdmin.from('competitors').select('id, name, domain').eq('brand_id', pending.brand_id),
-    ]);
+    try {
+      // Fetch context for result handler
+      const [{ data: brand }, { data: domains }, { data: competitorRows }] = await Promise.all([
+        supabaseAdmin
+          .from('brands')
+          .select('id, name, aliases')
+          .eq('id', pending.brand_id)
+          .single(),
+        supabaseAdmin.from('brand_domains').select('domain').eq('brand_id', pending.brand_id),
+        supabaseAdmin
+          .from('competitors')
+          .select('id, name, domain')
+          .eq('brand_id', pending.brand_id),
+      ]);
 
-    if (!brand) {
-      req.log.error(
-        { taskId, brandId: pending.brand_id },
-        'cloro callback: brand not found — dropping',
+      if (!brand) {
+        req.log.error(
+          { taskId, brandId: pending.brand_id },
+          'cloro callback: brand not found — dropping',
+        );
+        return;
+      }
+
+      const brandInfo = {
+        brandName: brand.name,
+        domains: (domains || []).map((d) => d.domain),
+        aliases: brand.aliases || [],
+      };
+      const competitors = (competitorRows || []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        domain: c.domain || '',
+      }));
+
+      const aiResponse = parseScraperResponse(response, pending.scraper_id);
+
+      await handleScraperResult({
+        aiResponse,
+        scraperId: pending.scraper_id,
+        promptId: pending.prompt_id,
+        brandId: pending.brand_id,
+        region: pending.region,
+        brandInfo,
+        competitors,
+      });
+
+      req.log.info(
+        { taskId, scraperId: pending.scraper_id },
+        'cloro callback: task processed and inserted',
       );
-      await supabaseAdmin.from('cloro_pending_tasks').delete().eq('task_id', taskId);
-      return;
+    } catch (err) {
+      // Processing failed after the claim already removed the row — put it
+      // back so the task isn't silently lost (matches the old behavior,
+      // where an exception here left the row for a future delivery/retry).
+      await supabaseAdmin.from('cloro_pending_tasks').insert(pending);
+      throw err;
     }
-
-    const brandInfo = {
-      brandName: brand.name,
-      domains: (domains || []).map((d) => d.domain),
-      aliases: brand.aliases || [],
-    };
-    const competitors = (competitorRows || []).map((c) => ({
-      id: c.id,
-      name: c.name,
-      domain: c.domain || '',
-    }));
-
-    const aiResponse = parseScraperResponse(response, pending.scraper_id);
-
-    await handleScraperResult({
-      aiResponse,
-      scraperId: pending.scraper_id,
-      promptId: pending.prompt_id,
-      brandId: pending.brand_id,
-      region: pending.region,
-      brandInfo,
-      competitors,
-    });
-
-    await supabaseAdmin.from('cloro_pending_tasks').delete().eq('task_id', taskId);
-
-    req.log.info(
-      { taskId, scraperId: pending.scraper_id },
-      'cloro callback: task processed and inserted',
-    );
   } catch (err) {
     req.log.error({ err }, 'cloro callback: error processing webhook');
   }
@@ -530,10 +550,14 @@ const PORT = process.env.PORT || 80;
 // de qualquer formatação do pino. Barato o bastante pra ficar.
 console.log(
   'BOOT env-check',
-  'SUPABASE?', Boolean(process.env.SUPABASE_URL),
-  'PORT', process.env.PORT || '(default 80)',
-  'HOST', process.env.HOST || '(n/a)',
-  'NODE_ENV', process.env.NODE_ENV || '(unset)',
+  'SUPABASE?',
+  Boolean(process.env.SUPABASE_URL),
+  'PORT',
+  process.env.PORT || '(default 80)',
+  'HOST',
+  process.env.HOST || '(n/a)',
+  'NODE_ENV',
+  process.env.NODE_ENV || '(unset)',
 );
 
 // Bugfix pontual do fork (Cloudflare Containers, 06/set): bind explícito em

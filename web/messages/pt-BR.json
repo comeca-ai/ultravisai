@@ -209,8 +209,16 @@
       "generic": "Ocorreu um erro. Tente de novo.",
       "emailNotConfirmed": "Verifique seu e-mail primeiro. Confira sua caixa de entrada pelo link de confirmação.",
       "signOutError": "Não foi possível sair. Tente de novo.",
-      "accountExists": "Já existe uma conta com este e-mail. Entre com sua senha — ou use “Esqueci a senha” para recuperar o acesso."
-    }
+      "accountExists": "Já existe uma conta com este e-mail. Entre com sua senha — ou use “Esqueci a senha” para recuperar o acesso.",
+      "rateLimited": "Muitas tentativas seguidas. Espere um minuto e peça de novo."
+    },
+    "useMagicLink": "Entrar sem senha",
+    "usePassword": "Entrar com senha",
+    "sendingMagicLink": "Enviando link…",
+    "magicLinkSentTo": "Se {email} tiver conta aqui, o link de acesso já está a caminho. Abra a mensagem e clique para entrar.",
+    "magicLinkResend": "Reenviar link",
+    "magicLinkResendIn": "Reenviar em {seconds}s",
+    "magicLinkOtherEmail": "Usar outro e-mail"
   },
   "dashboard": {
     "overview": "Visão geral",
@@ -1312,11 +1320,13 @@
         "brief": "Em que posição apareço nas respostas em que estou?",
         "ev": "Ordem de aparição no texto, em {samples} respostas em que você aparece:",
         "noSample": "A marca ainda não apareceu em nenhuma resposta da janela (ou o cálculo de ranking está em andamento — leva até 30 min).",
-        "how": "Ranking = ordem da 1ª menção no texto da resposta. Nota: 1º=100 · 2º=60 · 3º=30 · 4º+=0, na média das respostas.",
+        "how": "Ranking = ordem da 1ª menção no texto. A nota compara com o campo: (concorrentes + 1 − sua posição) ÷ concorrentes × 100, por resposta. 1º lugar = 100, último = 0 — então 3,3º entre 20 concorrentes vale muito mais que 3,3º entre 3.",
         "p1": "1º lugar",
         "p2": "2º lugar",
         "p3": "3º lugar",
-        "p4": "4º ou pior"
+        "p4": "4º ou pior",
+        "avg": "Ranking médio: {avg}º — o mesmo número da tela de Insights, lido da mesma consulta.",
+        "semRival": "Em {count, plural, one {# resposta} other {# respostas}} nenhum concorrente foi citado: a nota é 100 sem adversário, e cai no dia em que um aparecer."
       },
       "sentiment": {
         "name": "Sentimento",

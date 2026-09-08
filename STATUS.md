@@ -3,9 +3,29 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 07/set/2026 (noite).**
+> `BACKLOG.md` (o que vem). **Atualizado: 08/set/2026.**
 
-## 🔴 BLOQUEIO ATUAL (07/set): o deploy do server está parado
+## 🔴 INCIDENTE ABERTO (08/set): 401 em 5 telas (auditoria, citabilidade, conteúdo, tópicos, prompts)
+
+Desde ~07/set 20h, a Vercel registra `Unauthorized API Request` /
+`Server error: 401` toda vez que o front chama `api.ultravis.ai` nessas 5
+telas (Insights e Score não passam pelo servidor, por isso seguem normais).
+É literalmente a mensagem que `server/src/middleware/index.js` devolve
+quando `supabaseAdmin.auth.getUser(token)` falha — o container não está
+conseguindo validar sessão no Supabase.
+
+**Hipótese forte, ainda não confirmada:** `SUPABASE_URL` errado no painel do
+worker. Existem **3 projetos Supabase** com nomes parecidos em contas
+diferentes — produção é `twhqjfbealruvcbvkegc`, mas a conta conectada nesta
+sessão só enxerga dois outros que NÃO são produção (um pausado, um vazio —
+ver `DECISOES.md` 08/set). Conferência de 30s pro dono: abrir `ultravis.ai`
+logado → F12 → Application → Cookies → o `ref` no nome do cookie
+`sb-<ref>-auth-token` tem que bater com o `SUPABASE_URL` do painel do worker
+`ultravis-server`. **`SUPABASE_URL` não é segredo** (é público, vai no
+bundle do navegador) — se estiver como Secret no painel, vale trocar pra
+Text também, só pra dar pra conferir de novo sem precisar deste rodeio.
+
+## 🔴 BLOQUEIO (07/set, segue aberto): o deploy do server está parado
 
 `main` está **à frente da produção** no lado do server. Tudo que foi mergeado
 hoje — vigia camada 2 (#123), a ponte do censo pro D1 (#133), o `/espelho`
@@ -23,6 +43,15 @@ token (tabela no cookbook §2 da skill `cloudflare`):
 | `Invalid format ... [6111]` | o secret tinha o **ID** do token (UUID), não o valor | ✅ resolvido |
 | `Unable to get membership` | token de conta em vez de usuário | ✅ nunca ocorreu (token é de usuário) |
 | `Authentication error [10000]` no `PUT /workers/scripts` | falta `Workers Scripts: **Edit**` | 🔴 **aberto — pendência do dono** |
+
+**Reconfirmado 08/set (run do deploy disparado pelo merge do PR #157):** o
+preflight mostra o token lendo tudo (`Workers`, `D1`, `KV`, zonas) mas
+falhando a escrita de teste com "Authentication error"; o `wrangler deploy`
+real falha no mesmo `code: 10000` no `PUT .../workers/scripts/ultravis-server`.
+O e-mail logado (`jhonata.emerick@gmail.com`) tem "Super Administrator — All
+Privileges" na **conta** — isso não é a mesma coisa que o **token** ter o
+escopo `Workers Scripts: Edit` marcado (são permissões separadas). Segue
+sendo só o item 0 abaixo que destrava.
 
 **Achado que o bloqueio escondia (run #19):** o wrangler planejava **apagar**
 o Custom Domain `api.ultravis.ai` — criado à mão no painel em 06/set e nunca
@@ -117,12 +146,26 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 
 ## Pendências SUAS (curtas)
 
+-1. 🔴 **Conferir `SUPABASE_URL` no painel do worker** — é o incidente ativo (401 em 5 telas). Ver bloco no topo deste arquivo; não é segredo, então dá pra simplesmente olhar e comparar com o ref do cookie de `ultravis.ai`.
 0. 🔴 **`Workers Scripts` de Read → Edit** no token (dash.cloudflare.com/profile/api-tokens → seu token → Edit). Marcar também `Zone → Workers Routes: Edit` (Custom Domain) e `D1: Edit` (schema do espelho). **Não** clicar em Roll — o valor mudaria e teria que recolar no GitHub. Isto destrava, em cadeia: worker consolidado, `/espelho` autenticado, schema D1, ponte do censo e os números da Polar.
 0b. 🔒 **Trocar `OPS_USER`/`OPS_PASS`**: apagar as duas **vars de texto** no painel do worker, cadastrar em GitHub → Secrets → Actions com valor novo e forte, rodar `sync-cf-secrets` (grava como Secret, some do diff e do log).
+0c. 🔒 **Rotacionar `CLOUDFLARE_API_TOKEN` e `CLORO_API_KEY`** — os dois foram colados em claro nesta conversa em algum momento; role os dois no painel de origem antes de considerar o incidente de segurança fechado (o valor novo vai direto no painel/GitHub Secrets, nunca aqui).
+0d. **Decidir sobre os PRs abertos**: 3 de produto esperando você tirar do rascunho — #152 (kit de citabilidade), #153 (magic link + Turnstile), #154 (ranking unificado + pesos 25% + definição de citação, parcialmente já em código). Mais 10 do Dependabot; 4 seguros pra mergear, 6 majors que pedem teste manual (lista completa na conversa e no PR do dono). O check "server" delas voltou a rodar de verdade depois do PR #155 (08/set) — antes disso, 0 das 14 PRs abertas tinha o Vitest do servidor realmente executado na CI.
 1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway (liga os avisos do watchdog).
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
 3. **Criar `contato@ultravis.ai`** (Cloudflare Email Routing, grátis) — é o canal LGPD das páginas de Termos/Privacidade.
 4. Decidir: logado → home ou dashboard (item #23 do feedback).
+0c. 🔒 **Rotacionar 2 credenciais coladas em chat nesta sessão** (nunca usadas
+    nem commitadas por mim, mas o valor apareceu na conversa): a **Cloro API
+    key** (`sk_live_...`, painel do Cloro) e o token Cloudflare mencionado
+    antes. Gerar novo valor no painel de origem e colar só lá/no GitHub
+    Secrets — nunca de volta aqui.
+0d. **Decidir os PRs em draft que ainda dependem de você**: #152/#153/#154
+    (mudanças de produto — pesos do Score, ranking unificado — aguardando
+    sua revisão) e os 6 PRs do Dependabot com bump major (#138, #139, #141,
+    #142, #145, e #146) — não mergear sem testar manualmente.
+5. **Comparar `SUPABASE_URL` do worker com o cookie de login do site** — ver
+   o incidente de 401 acima; é o único jeito de confirmar a causa.
 
 ## Próximo trabalho de produto
 

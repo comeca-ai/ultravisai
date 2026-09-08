@@ -37,6 +37,71 @@ jobs:
       ENDERECO: 'contato@ultravis.ai'
       DESTINO: ${{ inputs.destino || 'jhonata.emerick@gmail.com' }}
     steps:
+      # Sonda CADA permissão que os passos abaixo precisam e imprime qual
+      # falta — antes de tentar mutação nenhuma. Existe porque os runs #1 e #2
+      # morreram os dois em "Authentication error [10000]" genérico, que não
+      # diz QUAL escopo falta: gastamos duas rodadas formulando hipótese
+      # quando o próprio job podia ter respondido. Nada aqui altera estado:
+      # as sondas de escrita usam alvo inexistente (a API checa permissão
+      # ANTES de existência, então 10000 = sem permissão e "not found" = tem).
+      - name: Preflight — o que este token pode de verdade
+        continue-on-error: true
+        run: |
+          CF="https://api.cloudflare.com/client/v4"
+          H="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && { echo "::error::sem CLOUDFLARE_API_TOKEN"; exit 1; }
+
+          veredito() { # <arquivo json> <rotulo>
+            python3 - "$1" "$2" <<'PY'
+          import json, sys
+          try:
+              d = json.load(open(sys.argv[1]))
+          except Exception:
+              print("%-38s INDETERMINADO (resposta nao-JSON)" % sys.argv[2]); raise SystemExit
+          if d.get("success"):
+              print("%-38s SIM" % sys.argv[2]); raise SystemExit
+          erros = d.get("errors") or []
+          cods = [e.get("code") for e in erros]
+          msgs = "; ".join(str(e.get("message")) for e in erros)
+          if 10000 in cods or "authentication error" in msgs.lower():
+              print("%-38s NAO — falta permissao (%s)" % (sys.argv[2], msgs))
+          elif any("not found" in str(e.get("message", "")).lower() for e in erros):
+              print("%-38s SIM (permissao ok; alvo inexistente)" % sys.argv[2])
+          else:
+              print("%-38s ? %s %s" % (sys.argv[2], cods, msgs))
+          PY
+          }
+
+          curl -sS -H "$H" "$CF/zones?name=$ZONE" > /tmp/p_zone.json
+          ZID=$(python3 -c 'import json;r=json.load(open("/tmp/p_zone.json")).get("result") or [];print(r[0]["id"] if r else "")')
+
+          echo "== LEITURA =="
+          veredito /tmp/p_zone.json "Zone: Read"
+          if [ -n "$ZID" ]; then
+            curl -sS -H "$H" "$CF/zones/$ZID/email/routing" > /tmp/p_er.json
+            veredito /tmp/p_er.json "Email Routing Rules: Read"
+            curl -sS -H "$H" "$CF/zones/$ZID/dns_records?per_page=1" > /tmp/p_dns.json
+            veredito /tmp/p_dns.json "DNS: Read"
+          fi
+          curl -sS -H "$H" "$CF/accounts/$ACC/email/routing/addresses" > /tmp/p_addr.json
+          veredito /tmp/p_addr.json "Email Routing Addresses: Read"
+
+          echo "== ESCRITA (alvo inexistente — nao altera nada) =="
+          if [ -n "$ZID" ]; then
+            curl -sS -X DELETE -H "$H" \
+              "$CF/zones/$ZID/dns_records/00000000000000000000000000000000" > /tmp/p_dnsw.json
+            veredito /tmp/p_dnsw.json "DNS: Edit"
+            curl -sS -X DELETE -H "$H" \
+              "$CF/zones/$ZID/email/routing/rules/00000000000000000000000000000000" > /tmp/p_erw.json
+            veredito /tmp/p_erw.json "Email Routing Rules: Edit"
+          fi
+          curl -sS -X DELETE -H "$H" \
+            "$CF/accounts/$ACC/email/routing/addresses/00000000000000000000000000000000" > /tmp/p_addrw.json
+          veredito /tmp/p_addrw.json "Email Routing Addresses: Edit"
+
+          echo ""
+          echo "Se alguma linha de ESCRITA disser NAO, é essa a permissão que falta no token."
+
       - name: Habilitar Email Routing + criar endereço e regra
         run: |
           CF="https://api.cloudflare.com/client/v4"

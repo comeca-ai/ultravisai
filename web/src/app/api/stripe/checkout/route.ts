@@ -14,14 +14,28 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { planId, organizationId } = body as {
+    const { planId } = body as {
       planId: 'starter' | 'growth';
-      organizationId: string;
     };
 
-    if (!planId || !organizationId) {
+    if (!planId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // organizationId never comes from the client — derive it from the
+    // authenticated user's own profile, same as /portal and /subscription,
+    // so a caller can't checkout (and later have the webhook overwrite
+    // billing) for an organization they don't belong to.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.organization_id) {
+      return NextResponse.json({ error: 'No organization found' }, { status: 400 });
+    }
+    const organizationId = profile.organization_id as string;
 
     const priceId = PRICE_IDS[planId]?.monthly;
     if (!priceId) {

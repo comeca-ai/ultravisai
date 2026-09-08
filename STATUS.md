@@ -44,6 +44,15 @@ token (tabela no cookbook §2 da skill `cloudflare`):
 | `Unable to get membership` | token de conta em vez de usuário | ✅ nunca ocorreu (token é de usuário) |
 | `Authentication error [10000]` no `PUT /workers/scripts` | falta `Workers Scripts: **Edit**` | 🔴 **aberto — pendência do dono** |
 
+**Reconfirmado 08/set (run do deploy disparado pelo merge do PR #157):** o
+preflight mostra o token lendo tudo (`Workers`, `D1`, `KV`, zonas) mas
+falhando a escrita de teste com "Authentication error"; o `wrangler deploy`
+real falha no mesmo `code: 10000` no `PUT .../workers/scripts/ultravis-server`.
+O e-mail logado (`jhonata.emerick@gmail.com`) tem "Super Administrator — All
+Privileges" na **conta** — isso não é a mesma coisa que o **token** ter o
+escopo `Workers Scripts: Edit` marcado (são permissões separadas). Segue
+sendo só o item 0 abaixo que destrava.
+
 **Achado que o bloqueio escondia (run #19):** o wrangler planejava **apagar**
 o Custom Domain `api.ultravis.ai` — criado à mão no painel em 06/set e nunca
 versionado. O primeiro deploy bem-sucedido teria derrubado a API inteira sem
@@ -146,6 +155,17 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
 3. **Criar `contato@ultravis.ai`** (Cloudflare Email Routing, grátis) — é o canal LGPD das páginas de Termos/Privacidade.
 4. Decidir: logado → home ou dashboard (item #23 do feedback).
+0c. 🔒 **Rotacionar 2 credenciais coladas em chat nesta sessão** (nunca usadas
+    nem commitadas por mim, mas o valor apareceu na conversa): a **Cloro API
+    key** (`sk_live_...`, painel do Cloro) e o token Cloudflare mencionado
+    antes. Gerar novo valor no painel de origem e colar só lá/no GitHub
+    Secrets — nunca de volta aqui.
+0d. **Decidir os PRs em draft que ainda dependem de você**: #152/#153/#154
+    (mudanças de produto — pesos do Score, ranking unificado — aguardando
+    sua revisão) e os 6 PRs do Dependabot com bump major (#138, #139, #141,
+    #142, #145, e #146) — não mergear sem testar manualmente.
+5. **Comparar `SUPABASE_URL` do worker com o cookie de login do site** — ver
+   o incidente de 401 acima; é o único jeito de confirmar a causa.
 
 ## Próximo trabalho de produto
 

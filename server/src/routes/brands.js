@@ -4,6 +4,7 @@ import { generateText } from 'ai';
 import { resolveModel } from '../lib/ai-provider.js';
 import { withRetry } from '../lib/retry.js';
 import { getLanguageName } from '../lib/languages.js';
+import { validarUrlExterna } from '../lib/ssrf-guard.js';
 
 const router = Router();
 
@@ -34,7 +35,8 @@ export function normalizeWebsiteUrl(website) {
  * the positioning, which is enough for a first-draft description.
  */
 async function fetchSiteText(url) {
-  const res = await fetch(url, {
+  const urlValidada = await validarUrlExterna(url);
+  const res = await fetch(urlValidada, {
     redirect: 'follow',
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     headers: {

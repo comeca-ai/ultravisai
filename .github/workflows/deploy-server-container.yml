@@ -15,6 +15,11 @@
 #
 # Auditoria: todo deploy nasce de push na main (PR mergeado) e fica com log
 # completo neste workflow.
+#
+# Redeploy manual (sem workflow_dispatch, ver skill cloudflare §"deploy
+# manual"): micro-commit tocando este arquivo, como este comentário — 08/set,
+# CLOUDFLARE_API_TOKEN reconferido/recolado em GitHub Secrets depois do run
+# #36 falhar com "Invalid API Token".
 name: deploy-server-container
 
 on:

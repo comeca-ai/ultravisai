@@ -3,9 +3,58 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 07/set/2026 (noite).**
+> `BACKLOG.md` (o que vem). **Atualizado: 08/set/2026.**
 
-## 🔴 BLOQUEIO ATUAL (07/set): o deploy do server está parado
+## ✅ 08/set: auditoria de segurança completa — 7 de 9 P0/P1 corrigidos
+
+Rodada `/auditor-de-codigo` completa (8 caçadores + verificação adversarial).
+Achados e correções em `AUDITORIA.md` (raiz do repo). Resumo:
+
+- **Corrigido e no ar (PRs #156, #157, todos mergeados em `main`):**
+  IDOR em `GET /api/content/brand/:brandId` (vazava dado de conteúdo entre
+  organizações) · SSRF em `POST /api/content/webhook-test` e em
+  `POST /api/brands/describe-from-site` · **P0 real**: 5 policies de RLS em
+  `prompt_results`/`ai_traffic_logs`/`prompt_result_shopping_cards` sem
+  `TO service_role` deixavam a **anon key pública apagar/forjar dado de
+  produção sem login** (migration `00047`) · IDOR de billing em
+  `POST /api/stripe/checkout` (sequestro de assinatura entre organizações) ·
+  corrida de idempotência no `/cloro/callback` (duplicava métricas) · deploy
+  não esperava o CI (novo job `check-ci`, **testado em produção nesta mesma
+  sessão — funcionou**: bloqueou o `deploy` até o CI do mesmo commit fechar
+  verde).
+- **Deferido, não é fix de código:** suíte de teste de isolamento RLS entre
+  organizações (proposta no roadmap de `AUDITORIA.md`) e ligar os canais de
+  alerta do watchdog (pendência nº 1 abaixo, precisa de credencial real no
+  painel).
+- Também mergeadas hoje: 4 PRs do Dependabot já avaliados como seguros
+  (#140, #143, #144, #147 — patch/minor, checks verdes). Os 6 restantes
+  (bumps major) e o PR #146 continuam sem revisão manual — não mergear sem
+  testar.
+
+## 🔴 INCIDENTE ABERTO (08/set): 401 em 5 telas (auditoria, citabilidade,
+conteúdo, tópicos, prompts) — hipótese forte, precisa do dono pra confirmar
+
+Investigação nesta sessão chegou a uma hipótese concreta mas não conseguiu
+confirmar: a conta Supabase que este ambiente enxerga (via MCP) tem **3
+projetos distintos**, e nenhum deles bate com a produção documentada
+(`twhqjfbealruvcbvkegc`, inacessível daqui). Dois projetos visíveis: um
+pausado, e um projeto vazio/upstream sem uso (`kepunaqlwhpbmtrcoscx` — 44
+migrations aplicadas mas **sem** a coluna `appearance_rivals` nem as tabelas
+`index_weights`/`brand_archives` do fork, ou seja, é uma instalação Ansvisor
+upstream nunca customizada, não a Ultravis). Hipótese: o `SUPABASE_URL`
+configurado no painel do worker Cloudflare (`ultravis-server` → Settings →
+Variables and Secrets) pode estar apontando pra um projeto errado — o que
+explicaria 401 em telas que dependem de RPC/tabelas específicas do fork.
+
+**O que só o dono consegue fazer:** abrir `ultravis.ai` logado, DevTools →
+Application → Cookies, achar o cookie `sb-<ref>-auth-token` (o `<ref>` é o id
+do projeto Supabase que o **navegador** está usando pra login) e comparar
+esse `<ref>` com o valor de `SUPABASE_URL` nas vars do worker no painel
+Cloudflare. Se forem diferentes, achamos a causa-raiz. Não dá pra ler o
+valor de `SUPABASE_URL` do worker por nenhum caminho disponível nesta sessão
+(é Secret, não aparece em log/diff).
+
+## 🔴 BLOQUEIO ATUAL (07/set, RECONFIRMADO 08/set): o deploy do server está parado
 
 `main` está **à frente da produção** no lado do server. Tudo que foi mergeado
 hoje — vigia camada 2 (#123), a ponte do censo pro D1 (#133), o `/espelho`
@@ -23,6 +72,15 @@ token (tabela no cookbook §2 da skill `cloudflare`):
 | `Invalid format ... [6111]` | o secret tinha o **ID** do token (UUID), não o valor | ✅ resolvido |
 | `Unable to get membership` | token de conta em vez de usuário | ✅ nunca ocorreu (token é de usuário) |
 | `Authentication error [10000]` no `PUT /workers/scripts` | falta `Workers Scripts: **Edit**` | 🔴 **aberto — pendência do dono** |
+
+**Reconfirmado 08/set (run do deploy disparado pelo merge do PR #157):** o
+preflight mostra o token lendo tudo (`Workers`, `D1`, `KV`, zonas) mas
+falhando a escrita de teste com "Authentication error"; o `wrangler deploy`
+real falha no mesmo `code: 10000` no `PUT .../workers/scripts/ultravis-server`.
+O e-mail logado (`jhonata.emerick@gmail.com`) tem "Super Administrator — All
+Privileges" na **conta** — isso não é a mesma coisa que o **token** ter o
+escopo `Workers Scripts: Edit` marcado (são permissões separadas). Segue
+sendo só o item 0 abaixo que destrava.
 
 **Achado que o bloqueio escondia (run #19):** o wrangler planejava **apagar**
 o Custom Domain `api.ultravis.ai` — criado à mão no painel em 06/set e nunca
@@ -123,6 +181,17 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
 3. **Criar `contato@ultravis.ai`** (Cloudflare Email Routing, grátis) — é o canal LGPD das páginas de Termos/Privacidade.
 4. Decidir: logado → home ou dashboard (item #23 do feedback).
+0c. 🔒 **Rotacionar 2 credenciais coladas em chat nesta sessão** (nunca usadas
+    nem commitadas por mim, mas o valor apareceu na conversa): a **Cloro API
+    key** (`sk_live_...`, painel do Cloro) e o token Cloudflare mencionado
+    antes. Gerar novo valor no painel de origem e colar só lá/no GitHub
+    Secrets — nunca de volta aqui.
+0d. **Decidir os PRs em draft que ainda dependem de você**: #152/#153/#154
+    (mudanças de produto — pesos do Score, ranking unificado — aguardando
+    sua revisão) e os 6 PRs do Dependabot com bump major (#138, #139, #141,
+    #142, #145, e #146) — não mergear sem testar manualmente.
+5. **Comparar `SUPABASE_URL` do worker com o cookie de login do site** — ver
+   o incidente de 401 acima; é o único jeito de confirmar a causa.
 
 ## Próximo trabalho de produto
 

@@ -12,6 +12,7 @@ import { createJob, getJob } from '../lib/job-manager.js';
 import { runContentJob } from '../lib/job-runner.js';
 import { resolveModel } from '../lib/ai-provider.js';
 import supabaseAdmin from '../config/supabase.js';
+import { validarUrlExterna } from '../lib/ssrf-guard.js';
 import {
   assertBrandAccess,
   assertOpportunitiesAccess,
@@ -128,6 +129,12 @@ router.get('/job/:jobId', async (req, res) => {
 router.get('/brand/:brandId', async (req, res) => {
   try {
     const { brandId } = req.params;
+    // P0 corrigido (auditoria 08/set): era a única rota deste arquivo sem
+    // checagem de posse — qualquer usuário autenticado, de qualquer
+    // organização, conseguia ler oportunidades de conteúdo (com brief e
+    // keywords gerados por IA) de marca de outro cliente só trocando o id
+    // na URL. Mesmo padrão das demais rotas do arquivo.
+    await assertBrandAccess(brandId, req.user.id);
     const { status, impact, type, limit = 50, offset = 0, sort = 'score' } = req.query;
 
     let query = supabaseAdmin
@@ -157,7 +164,7 @@ router.get('/brand/:brandId', async (req, res) => {
     });
   } catch (error) {
     req.log.error({ err: error }, 'list opportunities error');
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       error: 'Failed to list opportunities',
       details: error.message,
     });
@@ -495,6 +502,13 @@ router.post('/webhook-test', async (req, res) => {
       return res.status(400).json({ error: 'webhookUrl is required' });
     }
 
+    // P1 corrigido (auditoria 08/set, SSRF): sem isto, qualquer usuário
+    // autenticado de QUALQUER organização usava este endpoint como oráculo
+    // de rede pra sondar host interno (loopback, rede privada do container,
+    // endpoint de metadata de nuvem) — a resposta devolvia status/erro de
+    // conexão, suficiente pra portscan de infraestrutura interna.
+    const urlValidada = await validarUrlExterna(webhookUrl);
+
     const payload = {
       event: 'webhook.test',
       message: 'This is a test webhook from AEO platform.',
@@ -506,7 +520,7 @@ router.post('/webhook-test', async (req, res) => {
       headers['X-Webhook-Secret'] = webhookSecret;
     }
 
-    const webhookRes = await fetch(webhookUrl, {
+    const webhookRes = await fetch(urlValidada, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
@@ -519,6 +533,9 @@ router.post('/webhook-test', async (req, res) => {
       statusText: webhookRes.statusText,
     });
   } catch (error) {
+    if (error.status === 400) {
+      return res.status(400).json({ success: false, status: 0, error: error.message });
+    }
     return res.json({
       success: false,
       status: 0,

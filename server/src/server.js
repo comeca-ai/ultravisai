@@ -530,10 +530,14 @@ const PORT = process.env.PORT || 80;
 // de qualquer formatação do pino. Barato o bastante pra ficar.
 console.log(
   'BOOT env-check',
-  'SUPABASE?', Boolean(process.env.SUPABASE_URL),
-  'PORT', process.env.PORT || '(default 80)',
-  'HOST', process.env.HOST || '(n/a)',
-  'NODE_ENV', process.env.NODE_ENV || '(unset)',
+  'SUPABASE?',
+  Boolean(process.env.SUPABASE_URL),
+  'PORT',
+  process.env.PORT || '(default 80)',
+  'HOST',
+  process.env.HOST || '(n/a)',
+  'NODE_ENV',
+  process.env.NODE_ENV || '(unset)',
 );
 
 // Bugfix pontual do fork (Cloudflare Containers, 06/set): bind explícito em

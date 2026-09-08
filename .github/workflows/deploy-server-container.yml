@@ -86,18 +86,27 @@ jobs:
           ACC: '749b2e9b3642e4b03321d5830e81c195'
         run: |
           api() { curl -sS -m 20 -H "Authorization: Bearer $TOK" "$@" || echo '{"success":false,"errors":[{"message":"curl falhou"}]}'; }
-          ok() { python3 -c "import json,sys;d=json.load(sys.stdin);print('sim' if d.get('success') else 'NAO: '+'; '.join(str(e.get('message')) for e in d.get('errors') or []))"; }
+          B=https://api.cloudflare.com/client/v4
+          PF="python3 $GITHUB_WORKSPACE/.github/scripts/cf-preflight.py"
+          ALVO="preflight-inexistente-${GITHUB_RUN_ID}"
+          {
+            echo "== LEITURA =="
+            echo "token vivo?        $(api $B/user/tokens/verify | $PF ler)"
+            echo "le Workers?        $(api $B/accounts/$ACC/workers/scripts | $PF ler)"
+            echo "le D1?             $(api $B/accounts/$ACC/d1/database | $PF ler)"
+            echo "le KV?             $(api $B/accounts/$ACC/storage/kv/namespaces | $PF ler)"
+            echo "le zonas?          $(api $B/zones | $PF ler)"
+            echo "== ESCRITA (sem efeito: DELETE de script que nao existe) =="
+            echo "escreve Workers?   $(api -X DELETE $B/accounts/$ACC/workers/scripts/$ALVO | $PF escrever)"
+            echo "== PERMISSOES NOMINAIS =="
+            api $B/user/tokens | $PF politicas
+          } | tee /tmp/preflight.txt
 
-          echo "1) token vivo?          $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
-          echo "2) LÊ Workers?          $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
-          echo "3) LÊ D1?               $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
           {
             echo "### Preflight do token"
-            echo "- vivo: $(api https://api.cloudflare.com/client/v4/user/tokens/verify | ok)"
-            echo "- lê Workers: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts | ok)"
-            echo "- lê D1: $(api https://api.cloudflare.com/client/v4/accounts/$ACC/d1/database | ok)"
-            echo ""
-            echo "Escrita não é testada aqui (criaria worker de teste em produção) — quem prova é o deploy abaixo."
+            echo '```'
+            cat /tmp/preflight.txt
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy (wrangler + build da imagem)

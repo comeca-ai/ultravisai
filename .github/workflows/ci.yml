@@ -45,6 +45,22 @@ jobs:
             fi
           done
           [ "$falhas" -eq 0 ] || exit 1
+      # O run #22 do deploy morreu com IndentationError num parser embutido
+      # como heredoc no workflow: script de CI não passava por validação
+      # nenhuma. Agora passa — e o parser virou arquivo (.github/scripts/),
+      # que é o que torna esta checagem possível.
+      - name: scripts de CI compilam (py_compile)
+        run: |
+          falhas=0
+          for f in $(find .github/scripts -name '*.py' 2>/dev/null); do
+            if python3 -m py_compile "$f"; then
+              echo "ok  $f"
+            else
+              echo "::error file=$f::erro de sintaxe no script de CI"
+              falhas=$((falhas+1))
+            fi
+          done
+          [ "$falhas" -eq 0 ] || exit 1
       - name: wrangler.jsonc parseável (JSONC → JSON)
         run: |
           python3 - <<'PY'

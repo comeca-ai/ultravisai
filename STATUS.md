@@ -3,9 +3,39 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 06/set/2026.**
+> `BACKLOG.md` (o que vem). **Atualizado: 07/set/2026 (noite).**
 
-## ⚠️ INCIDENTE ABERTO (06/set): rastreamento parado há 13 dias
+## 🔴 BLOQUEIO ATUAL (07/set): o deploy do server está parado
+
+`main` está **à frente da produção** no lado do server. Tudo que foi mergeado
+hoje — vigia camada 2 (#123), a ponte do censo pro D1 (#133), o `/espelho`
+autenticado (#131) e a rota de produção versionada (#137) — está no
+repositório e **não** em produção. `api.ultravis.ai` segue no ar rodando o
+código publicado em 06/set; a web (Vercel) deployou normal, então o Insights
+v3 (#122) **está** no ar.
+
+Causa única: o `CLOUDFLARE_API_TOKEN` autentica e **lê**, mas não tem
+`Workers Scripts: Edit`. Runs #14–#21, três sintomas distintos, todos de
+token (tabela no cookbook §2 da skill `cloudflare`):
+
+| Sintoma | O que era | Estado |
+|---|---|---|
+| `Invalid format ... [6111]` | o secret tinha o **ID** do token (UUID), não o valor | ✅ resolvido |
+| `Unable to get membership` | token de conta em vez de usuário | ✅ nunca ocorreu (token é de usuário) |
+| `Authentication error [10000]` no `PUT /workers/scripts` | falta `Workers Scripts: **Edit**` | 🔴 **aberto — pendência do dono** |
+
+**Achado que o bloqueio escondia (run #19):** o wrangler planejava **apagar**
+o Custom Domain `api.ultravis.ai` — criado à mão no painel em 06/set e nunca
+versionado. O primeiro deploy bem-sucedido teria derrubado a API inteira sem
+erro no log. Corrigido no #137 (`routes` no `wrangler.jsonc`); `keep_vars`
+protege variáveis, não rotas.
+
+**Segundo achado:** `OPS_USER`/`OPS_PASS` estão no painel como **var de
+texto** (valor fraco), então aparecem em claro no diff que o wrangler imprime
+no log do CI. São a senha do `/ops` e do `/espelho`. Correção é no painel —
+ver "Pendências SUAS".
+
+## ⚠️ INCIDENTE (06/set): rastreamento parado há 13 dias
 
 O censo de segunda 31/ago **rodou no horário e coletou ZERO resultados** (as 8
 marcas, `resultCount: 0`). Causa dupla, provada nos logs de 06:00 UTC:
@@ -29,8 +59,8 @@ desligado é a pendência nº 1 e este incidente é o argumento definitivo.
 |---|---|
 | Site + app (Vercel, ultravis.ai) | ✅ No ar com o código de 19/ago (#94); a leva 26–29/ago espera o merge do PR #95 |
 | Server de rastreamento (Railway) | ⬛ **APAGADO em 06/set à noite** (trial expirado; dono removeu após o corte) |
-| **Server no Cloudflare (Container)** | ✅ **OFICIAL desde 06/set ~23h UTC**: `api.ultravis.ai` cortado pro worker (Custom Domain) — mesmo código, 10 segredos + vars versionadas, deploy auditado via Actions. Censo de 07/set 06:00 UTC é o primeiro na infra nova |
-| **Workers na conta** | ✅ **UM só desde 07/set** (`ultravis-server`) e **um pipeline** (`deploy-server-container`): o espelho D1 virou a rota `/espelho` do mesmo worker e os dois workers órfãos (`ultravis-edge-gateway`, `ultravis-d1-espelho`) foram apagados. ⚠️ `/espelho` está público sem senha — inofensivo com o banco vazio, **proteger antes de carregar dados** (BACKLOG) |
+| **Server no Cloudflare (Container)** | 🟡 **No ar, mas congelado no código de 06/set**: `api.ultravis.ai` responde (Custom Domain), porém nenhum deploy passa desde então — token sem `Workers Scripts: Edit` (ver bloqueio acima). Censo de 07/set 06:00 UTC rodou na infra nova; **os números ainda não foram lidos** (a ponte que os publica no D1 depende deste mesmo deploy) |
+| **Workers na conta** | ✅ **UM só desde 07/set** (`ultravis-server`) e **um pipeline** (`deploy-server-container`): o espelho D1 virou a rota `/espelho` do mesmo worker. `/espelho` **já exige HTTP Basic** e responde 503 se as credenciais faltarem (fechado por omissão) — o smoke do deploy exige 401 no anônimo. ⏳ Os dois órfãos (`ultravis-edge-gateway`, `ultravis-d1-espelho`) ainda **não** foram apagados: o workflow `limpar-workers-orfaos` existe mas está travado (`ARMADO: 'nao'`) |
 | Banco (Supabase) | ✅ Ok — 43 migrations (numeradas até 00044; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado |
 | Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 11 invariantes de consistência** (19/ago + 26/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham, domínios quebrados/com caminho) — 2 alertas que gritavam em falso corrigidos em 26/ago (**na branch, sobem com o PR #95**); alertas por e-mail **desligados** até você configurar um e-mail dedicado. **Camada 2 pronta na branch `vigia-camada2-llm`** (agente LLM semanal pós-censo, 1 chamada/rodada; liga com `CONSISTENCY_LLM_MODEL` ou `AUDIT_LLM_MODEL` no worker) |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |
@@ -87,6 +117,8 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 
 ## Pendências SUAS (curtas)
 
+0. 🔴 **`Workers Scripts` de Read → Edit** no token (dash.cloudflare.com/profile/api-tokens → seu token → Edit). Marcar também `Zone → Workers Routes: Edit` (Custom Domain) e `D1: Edit` (schema do espelho). **Não** clicar em Roll — o valor mudaria e teria que recolar no GitHub. Isto destrava, em cadeia: worker consolidado, `/espelho` autenticado, schema D1, ponte do censo e os números da Polar.
+0b. 🔒 **Trocar `OPS_USER`/`OPS_PASS`**: apagar as duas **vars de texto** no painel do worker, cadastrar em GitHub → Secrets → Actions com valor novo e forte, rodar `sync-cf-secrets` (grava como Secret, some do diff e do log).
 1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway (liga os avisos do watchdog).
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
 3. **Criar `contato@ultravis.ai`** (Cloudflare Email Routing, grátis) — é o canal LGPD das páginas de Termos/Privacidade.

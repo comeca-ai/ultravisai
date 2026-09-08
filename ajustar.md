@@ -677,3 +677,114 @@ Substitui o que registrei na seção da definição do ranking:
 | Score (tela)                    | a frase que liga os dois números                                         |
 
 Nenhuma migration: a coluna existe desde 00043 e já está populada.
+
+---
+
+## Validação: o método é o mesmo? — **Não é. Hoje nem existe dos dois lados.**
+
+> "A conta para o ranking do item 3 do Score de Visibilidade precisa bater com
+> o ranking médio da tela principal. Valide que o método é o mesmo."
+
+Validei condição por condição, comparando a CTE `filtered` do RPC
+(`00044_insights_summary_v2.sql:31-46`) com a consulta e a agregação em
+memória do Score (`visibility-index.ts:520-534` e `:486-491`).
+
+| #   | Condição                                 | Insights                        | Score                        | Batem?                 |
+| --- | ---------------------------------------- | ------------------------------- | ---------------------------- | ---------------------- |
+| 1   | Marca                                    | `brand_id = p_brand_id`         | `.eq('brand_id', …)`         | ✅                     |
+| 2   | Exclui `chatgpt-shopping`                | sim                             | sim                          | ✅                     |
+| 3   | Linhas que entram                        | `appearance_rank >= 1`          | `rank >= 1`                  | ✅                     |
+| 4   | Rank pendente (`null`)                   | fora                            | fora                         | ✅                     |
+| 5   | Rank `0` (não computável)                | fora                            | fora                         | ✅                     |
+| 6   | Filtro motor/modelo/região/prompt/tópico | **aplica**                      | **ignora**                   | ❌                     |
+| 7   | Data inicial                             | `>= p_date_from` (`24h…custom`) | `>= from` (`7d/30d/all`)     | ❌ na prática          |
+| 8   | Data final                               | suporta (`p_date_to`)           | **não existe**               | ❌ em intervalo custom |
+| 9   | Teto de linhas                           | sem teto                        | **50 000** (`SCAN_MAX_ROWS`) | ❌ acima disso         |
+| 10  | **A conta em si**                        | `SUM(rank) / COUNT(rank)`       | **não calcula média**        | ❌                     |
+
+**A linha 10 é a resposta direta:** o Score **não tem** ranking médio. Ele só
+distribui as respostas em `p1/p2/p3/p4+` e transforma isso na nota de pódio.
+Não há uma média para comparar com a da tela principal — por isso os dois
+"não batem": um existe e o outro não.
+
+E mesmo implementando a fórmula idêntica no Score, as linhas 6 a 9 fariam os
+números divergirem em uso normal: basta o cliente filtrar por um motor, ou
+escolher `90d`, para as duas telas falarem de populações diferentes.
+
+### O jeito de garantir que batem — e não é disciplina
+
+Escrever a mesma fórmula duas vezes (uma em SQL, outra em TypeScript) é
+convite à divergência: a primeira mudança que entrar de um lado só já quebra
+o acordo, e ninguém percebe até um cliente reclamar.
+
+**Uma fonte só:** o Score passa a ler `rank_sum` e `rank_count` do **mesmo
+RPC** `insights_aggregates`, com os **mesmos argumentos** que a tela de
+Insights usa. Aí "o método é o mesmo" deixa de ser promessa e vira identidade
+— não há como divergir, porque é literalmente a mesma consulta.
+
+Isso resolve de uma vez as linhas 6, 7, 8, 9 e 10 da tabela.
+
+### Para a nota relativa ao campo, estender o mesmo RPC
+
+A nota que considera o tamanho do campo precisa de `appearance_rivals` por
+resposta, que o RPC hoje não devolve. Em vez de o Score ir buscar as linhas
+por fora (o que reabriria a divergência), **a conta desce para o mesmo RPC**:
+
+```sql
+-- somar ao bloco `totals` do insights_aggregates
+COALESCE(SUM(
+  CASE
+    WHEN appearance_rank >= 1 AND appearance_rivals >= 1
+      THEN (appearance_rivals + 1 - appearance_rank)::numeric
+           / appearance_rivals * 100
+    WHEN appearance_rank >= 1                     -- sozinha no texto
+      THEN 100
+  END
+) FILTER (WHERE appearance_rank >= 1), 0)                AS pos_score_sum,
+COUNT(*) FILTER (WHERE appearance_rank >= 1
+                   AND appearance_rivals = 0)            AS pos_sem_rival
+```
+
+E aí:
+
+- **ranking exibido** = `rank_sum / rank_count` — o mesmo número nas duas telas;
+- **nota da dimensão** = `pos_score_sum / rank_count`;
+- **transparência** = `pos_sem_rival` diz em quantas respostas a marca estava
+  sozinha, que é o número que impede o "100" de enganar.
+
+Os três saem da **mesma linha de código**, sobre as **mesmas linhas do banco**,
+com os **mesmos filtros**. Impossível divergirem.
+
+### Teste que prova a igualdade
+
+Depois de implementar, isto tem que dar zero. Roda sobre a produção, sem
+alterar nada:
+
+```sql
+-- ranking médio calculado pelas duas rotas sobre a mesma janela
+with pelo_rpc as (
+  select (insights_aggregates('<BRAND_ID>'::uuid, null, null, null,
+                              now() - interval '30 days', now(), null, null)
+         ->>'rank_avg')::numeric as valor
+),
+na_mao as (
+  select round(avg(appearance_rank)::numeric, 1) as valor
+  from prompt_results
+  where brand_id = '<BRAND_ID>'
+    and platform <> 'chatgpt-shopping'
+    and appearance_rank >= 1
+    and created_at >= now() - interval '30 days'
+)
+select pelo_rpc.valor as rpc, na_mao.valor as manual,
+       pelo_rpc.valor - na_mao.valor as diferenca
+from pelo_rpc, na_mao;
+```
+
+`diferenca <> 0` significa que alguma das dez condições da tabela acima voltou
+a divergir. Vale virar teste de CI com uma marca de referência, para a
+próxima mudança no RPC não desfazer isto em silêncio.
+
+> Ajuste na assinatura: o RPC precisa passar a devolver `rank_avg` pronto (é
+> `rank_sum / rank_count` arredondado) em vez de deixar cada consumidor
+> dividir por conta própria — mesmo motivo: divisão duplicada é divergência
+> esperando acontecer.

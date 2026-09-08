@@ -80,7 +80,9 @@ describe('leitura da página', () => {
   });
 
   it('sem meta nem rascunho, usa a primeira frase do corpo', () => {
-    const ctx = ctxFromHtml('<html><head></head><body><p>Primeira frase. Segunda.</p></body></html>');
+    const ctx = ctxFromHtml(
+      '<html><head></head><body><p>Primeira frase. Segunda.</p></body></html>',
+    );
     expect(resumoDoSite(ctx, [])).toBe('Primeira frase.');
   });
 });
@@ -197,7 +199,9 @@ describe('montarKitCitabilidade', () => {
     const ctx = ctxFromHtml('<html><head><title>Marca</title></head><body><p>oi</p></body></html>');
     const kit = montarKitCitabilidade(ctx, { results: [falha('brand-entity')] });
     const peca = kit.pecas.find((p) => p.id === 'jsonld-organization');
-    expect(JSON.parse(peca.conteudo.replace(/<\/?script[^>]*>/g, '').trim()).sameAs).toBeUndefined();
+    expect(
+      JSON.parse(peca.conteudo.replace(/<\/?script[^>]*>/g, '').trim()).sameAs,
+    ).toBeUndefined();
     expect(peca.porque).toContain('Não achei perfis sociais');
   });
 

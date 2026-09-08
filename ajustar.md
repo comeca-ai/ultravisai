@@ -788,3 +788,105 @@ próxima mudança no RPC não desfazer isto em silêncio.
 > `rank_sum / rank_count` arredondado) em vez de deixar cada consumidor
 > dividir por conta própria — mesmo motivo: divisão duplicada é divergência
 > esperando acontecer.
+
+---
+
+# Parte 3 — Como apresentar o resultado da auditoria (slide P3 do Igor)
+
+O slide define o formato da entrega, não só o conteúdo:
+
+> "O mais importante é que o cliente tenha claro **o quê** e **onde ele deve
+> começar atuando**." — em função dos prompts a otimizar e baseado no
+> resultado da varredura, índices e score.
+
+E a estrutura pedida tem dois blocos:
+
+- **Legibilidade** (apenas do site e conteúdo da marca) — 9 itens;
+- **Conteúdo** — "está ok, apenas recomendar onde publicar".
+
+## Como a auditoria de hoje se compara aos 9 itens
+
+| Item do slide                           | Sinal na auditoria                                  | Peça no kit (#152)           | Situação                                 |
+| --------------------------------------- | --------------------------------------------------- | ---------------------------- | ---------------------------------------- |
+| Schema.org                              | `json-ld-presence` · `json-ld-validity`             | JSON-LD de organização       | ✅                                       |
+| JSON-LD                                 | `json-ld-relevance`                                 | JSON-LD de organização e FAQ | ✅                                       |
+| LLM.txt                                 | `llms-txt-presence`                                 | `llms.txt` pronto            | ✅                                       |
+| **Product**                             | —                                                   | —                            | ❌ **não existe**                        |
+| **Sitemap**                             | —                                                   | —                            | ❌ **não existe**                        |
+| Wikidata/Wikipedia                      | `brand-entity` (consulta Wikidata)                  | —                            | ⚠️ diagnostica, não entrega              |
+| Página de produto sem título descritivo | `h1-quality` · `meta-description`                   | bloco de meta tags           | ⚠️ parcial — não é específico de produto |
+| meta tags sociais                       | `open-graph` · `twitter-card`                       | bloco de meta tags           | ✅                                       |
+| Trust/reputação                         | `privacy-terms` · `contact-info` · `press-mentions` | —                            | ⚠️ diagnostica, não entrega              |
+
+Dos 9, **5 estão cobertos ponta a ponta**, 2 diagnosticam sem entregar e
+**2 não existem**: `Product` e `Sitemap`. Nenhum dos 47 sinais olha para o
+sitemap — nem se existe, nem se está no `robots.txt`, nem se cobre as páginas
+de produto.
+
+## O que falta implementar
+
+**Dois sinais novos** (aditivos, no molde dos existentes):
+
+- `sitemap-presence` — busca `/sitemap.xml` e a diretiva `Sitemap:` no
+  `robots.txt`. O `fetcher.js` já sabe buscar arquivo auxiliar (é o mesmo
+  caminho do `llms.txt`), então é barato;
+- `product-schema` — para página de produto, verifica JSON-LD do tipo
+  `Product` com `name`, `offers` e `aggregateRating`. É o schema que os
+  motores usam para montar comparativo — e é o que separa "a IA sabe que
+  existe" de "a IA sabe o preço e a nota".
+
+**Duas peças novas no kit**, para os itens que hoje só diagnosticam:
+
+- JSON-LD de `Product` pronto, montado do que a página já tem;
+- bloco de `sitemap` no `robots.txt`, na mesma linha da liberação dos bots.
+
+## A mudança de apresentação — que é o pedido central
+
+Hoje o relatório lista **47 sinais** por categoria técnica (Estrutura,
+Conteúdo, Autoridade, E-E-A-T, Confiança). É uma boa organização para quem
+audita e a errada para quem vai **agir**: o cliente lê 47 linhas e não sabe
+por onde começar.
+
+O slide pede o inverso — abrir por **"O QUE FAZER"**, com o diagnóstico
+disponível abaixo para quem quiser conferir:
+
+```
+O QUE FAZER
+
+  LEGIBILIDADE          ← só site e conteúdo da marca
+    ▸ 3 itens a corrigir, com o arquivo pronto pra colar
+    ▸ 2 itens a corrigir, sem peça automática
+
+  CONTEÚDO
+    ▸ onde publicar     ← derivado dos prompts a otimizar
+
+  ————————————————————
+  Diagnóstico completo (47 sinais)   [recolhido]
+```
+
+Duas regras de ordenação que o slide implica:
+
+1. **Ordem por onde começar**, não por categoria. O primeiro item da lista
+   tem de ser o de maior impacto ainda não resolvido — e "impacto" já existe
+   na rubrica como `impactTier`.
+2. **Só o que falta aparece no topo.** Sinal que passa não é ação; desce para
+   o diagnóstico. Hoje passa e falha convivem na mesma lista.
+
+O bloco "Conteúdo" fecha o laço que o slide desenha com a seta: as
+recomendações de onde publicar saem **dos prompts a otimizar**, não da página
+auditada. É a ligação entre a auditoria (uma página) e o rastreamento (os
+prompts) — hoje as duas telas não conversam.
+
+## Onde mexer
+
+| Arquivo                                     | O quê                                        |
+| ------------------------------------------- | -------------------------------------------- |
+| `server/src/lib/audit/signals/structure.js` | sinal `sitemap-presence`                     |
+| `server/src/lib/audit/signals/structure.js` | sinal `product-schema`                       |
+| `server/src/lib/audit/rubric.json`          | os dois sinais novos (47 → 49)               |
+| `server/src/lib/audit/citability-kit.js`    | peças de `Product` e de sitemap              |
+| `web/src/components/audit/audit-report.tsx` | "O QUE FAZER" no topo; diagnóstico recolhido |
+| `messages/*.json`                           | textos nos dois idiomas                      |
+
+Os dois sinais e as duas peças tocam o servidor — só chegam em produção com
+o deploy destravado. A reordenação da tela é web e sobe pela Vercel.

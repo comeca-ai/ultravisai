@@ -5,6 +5,8 @@
  * by convention and not worth a Scrape.do credit each.
  */
 
+import { validarUrlExterna } from '../ssrf-guard.js';
+
 const SCRAPEDO_API = 'https://api.scrape.do';
 
 function getToken() {
@@ -49,10 +51,22 @@ export async function fetchViaScrapeDo(targetUrl, { render = true, retries = 1 }
  * @returns {Promise<string|null>}
  */
 async function fetchTextDirect(url, { timeoutMs = 8000 } = {}) {
+  // SSRF (auditoria 08/set): a URL da página auditada vem de quem chama a
+  // API. O fetch principal passa pelo Scrape.do (proxy de terceiro — o host
+  // interno nunca é alcançado por nós), mas este busca robots.txt/llms.txt
+  // DIRETO do host informado, e devolve o CONTEÚDO — pior que um oráculo de
+  // status, é leitura de arquivo de host interno se a URL apontar pra lá.
+  let urlValidada;
+  try {
+    urlValidada = await validarUrlExterna(url);
+  } catch {
+    return { body: null, blocked: false };
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, {
+    const res = await fetch(urlValidada, {
       signal: controller.signal,
       headers: { 'user-agent': 'AnsvisorSiteAudit/1.0 (+https://ansvisor.com)' },
       redirect: 'follow',

@@ -203,7 +203,7 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 0b. 🔒 **Trocar `OPS_USER`/`OPS_PASS`**: apagar as duas **vars de texto** no painel do worker, cadastrar em GitHub → Secrets → Actions com valor novo e forte, rodar `sync-cf-secrets` (grava como Secret, some do diff e do log).
 1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway (liga os avisos do watchdog).
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
-3. **Criar `contato@ultravis.ai`** (Cloudflare Email Routing, grátis) — é o canal LGPD das páginas de Termos/Privacidade.
+3. 🔴 **Criar `contato@ultravis.ai`** (Cloudflare Email Routing, grátis) — é o canal LGPD das páginas de Termos/Privacidade. **Em andamento (08/set):** workflow `criar-email-contato.yml` pronto e testado 2x (runs #1 e #2), ambos falhando no mesmo ponto — `POST /zones/{id}/email/routing/enable` retorna `Authentication error [code: 10000]`. Dono confirmou ter atualizado o token 2x sem o erro mudar. Hipótese em aberto: falta `Zone → DNS: Edit` além de `Zone → Email Routing Rules: Edit` (habilitar Email Routing cria registros MX/TXT por baixo dos panos). Aguardando o dono listar as permissões exatas marcadas no token antes de tentar de novo — ver runs em `.github/workflows/criar-email-contato.yml` (Actions → criar-email-contato).
 4. Decidir: logado → home ou dashboard (item #23 do feedback).
 0c. 🔒 **Rotacionar 2 credenciais coladas em chat nesta sessão** (nunca usadas
     nem commitadas por mim, mas o valor apareceu na conversa): a **Cloro API

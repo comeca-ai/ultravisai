@@ -120,17 +120,62 @@ jobs:
           ZID=$(python3 -c 'import json;r=json.load(open("/tmp/zone.json")).get("result") or [];print(r[0]["id"] if r else "")')
           [ -z "$ZID" ] && { echo "::error::token não enxerga a zona $ZONE (falta Zone:Read) — nada foi alterado"; exit 1; }
 
+          echo "== 1b. MX atuais da zona (leitura — decide se dá pra habilitar) =="
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "$CF/zones/$ZID/dns_records?type=MX" > /tmp/mx.json
+          python3 - <<'PY'
+          import json
+          d = json.load(open("/tmp/mx.json"))
+          regs = d.get("result") or []
+          if not regs:
+              print("nenhum MX na zona — Email Routing pode ser habilitado sem conflito")
+          else:
+              print("%d registro(s) MX existentes:" % len(regs))
+              for r in regs:
+                  print("  prio %-4s %-45s (id %s)" % (
+                      r.get("priority"), r.get("content"), r.get("id")))
+              print("")
+              print("ATENCAO: se algum e-mail @ultravis.ai funciona hoje, ele passa por AQUI.")
+              print("Habilitar Email Routing substitui esses MX — decisao do dono, nao deste job.")
+          PY
+
           echo "== 2. habilitar Email Routing (idempotente) =="
           curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "$CF/zones/$ZID/email/routing/enable" > /tmp/enable.json
           j < /tmp/enable.json
           if [ "$(okof < /tmp/enable.json)" != "1" ]; then
-            JA_HABILITADO=$(python3 -c 'import json;d=json.load(open("/tmp/enable.json"));print(1 if any("already" in str(e.get("message","")).lower() or "enabled" in str(e.get("message","")).lower() for e in d.get("errors",[])) else 0)')
-            if [ "$JA_HABILITADO" != "1" ]; then
-              echo "::error::Email Routing não habilitou — falta a permissão 'Email Routing Rules: Edit' (ou 'Email Routing Addresses: Edit') no token. JSON acima."
-              exit 1
-            fi
-            echo "(já estava habilitado — seguindo)"
+            # Distingue os 3 desfechos possíveis; antes qualquer falha era
+            # reportada como "falta permissão", o que passou a mentir assim
+            # que a permissão foi corrigida (run #4 morreu em 2008 e a
+            # mensagem culpou o token).
+            CASO=$(python3 -c '
+          import json
+          d = json.load(open("/tmp/enable.json"))
+          erros = d.get("errors") or []
+          cods = [e.get("code") for e in erros]
+          msgs = " ".join(str(e.get("message","")).lower() for e in erros)
+          if 2008 in cods or "mx records exist" in msgs:
+              print("mx")
+          elif "already" in msgs or "enabled" in msgs:
+              print("ja")
+          elif 10000 in cods or "authentication" in msgs:
+              print("perm")
+          else:
+              print("outro")
+          ')
+            case "$CASO" in
+              ja)
+                echo "(já estava habilitado — seguindo)" ;;
+              mx)
+                echo "::error::A zona já tem MX apontando pra fora da Cloudflare (code 2008). Habilitar Email Routing SUBSTITUIRIA esses registros e quebraria a entrega de e-mail atual de @ultravis.ai — ver a lista impressa no passo 1b. Isto é decisão do dono, não deste job: ou os MX antigos são removidos de propósito, ou o contato@ultravis.ai vai por outro caminho (ex.: alias no provedor de e-mail que já atende o domínio)."
+                exit 1 ;;
+              perm)
+                echo "::error::Token sem permissão pra habilitar Email Routing — ver o passo de preflight acima, que diz qual escopo deu NAO."
+                exit 1 ;;
+              *)
+                echo "::error::Email Routing não habilitou por um motivo não mapeado — JSON acima."
+                exit 1 ;;
+            esac
           fi
 
           echo "== 3. endereços de destino já verificados =="

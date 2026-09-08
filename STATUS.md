@@ -203,6 +203,14 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
     (mudanças de produto — pesos do Score, ranking unificado — aguardando
     sua revisão) e os 6 PRs do Dependabot com bump major (#138, #139, #141,
     #142, #145, e #146) — não mergear sem testar manualmente.
+0e. ✅ **Token Cloudflare definitivo rotacionado (08/set)** — o token custom
+    criado nesta sessão (Workers Scripts + D1 + Workers Routes Edit,
+    escopado à conta/zona) apareceu em texto puro no chat antes de ser
+    salvo; valor foi Rollado no painel e o novo já está só em GitHub
+    Secrets → `CLOUDFLARE_API_TOKEN` (confirmado pelo dono). Também achado
+    nesta sessão: o repositório foi renomeado de `ansvisor` pra
+    **`ultravisai`** (mesma org `comeca-ai`) — atualizar qualquer referência
+    antiga ao nome `ansvisor` em bookmarks/scripts locais.
 5. **Comparar `SUPABASE_URL` do worker com o cookie de login do site** — ver
    o incidente de 401 acima; é o único jeito de confirmar a causa.
 

@@ -35,6 +35,23 @@ export interface AuditRecommendation {
   draft: string | null;
 }
 
+/**
+ * Peça pronta pra publicar gerada a partir dos sinais que falharam.
+ * Os nomes de campo vêm do servidor em português — mantidos como estão pra não
+ * criar uma camada de tradução que só existiria pra ser mais uma coisa a
+ * desalinhar entre as duas pontas.
+ */
+export interface CitabilityKitPiece {
+  id: string;
+  titulo: string;
+  onde: string;
+  linguagem: 'markdown' | 'html' | 'json' | 'text';
+  conteudo: string;
+  porque: string;
+  sinais: string[];
+  origem: 'deterministico' | 'rascunho-ia';
+}
+
 export interface AuditResult {
   id: string;
   brandId: string;
@@ -51,6 +68,8 @@ export interface AuditResult {
   completedAt: string | null;
   signals: AuditSignal[];
   recommendations: AuditRecommendation[];
+  /** null = auditoria anterior ao recurso; [] = nada a corrigir. */
+  citabilityKit: CitabilityKitPiece[] | null;
 }
 
 export interface AuditQuota {

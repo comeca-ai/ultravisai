@@ -27,6 +27,7 @@ import { runSignals } from '../lib/audit/engine.js';
 import { evaluateLlmSignals } from '../lib/audit/llm-signals.js';
 import { evaluateBrandEntity } from '../lib/audit/external-signals.js';
 import { generateRecommendations } from '../lib/audit/recommendations.js';
+import { montarKitCitabilidade } from '../lib/audit/citability-kit.js';
 import { scoreAudit } from '../lib/audit/scorer.js';
 import { signalsByKey, TOTAL_SIGNALS, RUBRIC_VERSION } from '../lib/audit/rubric.js';
 
@@ -69,6 +70,9 @@ function assembleAudit(audit, signalRows) {
     completedAt: audit.completed_at ?? null,
     signals,
     recommendations: audit.recommendations ?? [],
+    // null (e não []) quando a auditoria é anterior ao kit: a tela precisa
+    // distinguir "não existia" de "rodou e não achou nada a corrigir".
+    citabilityKit: audit.citability_kit ?? null,
   };
 }
 
@@ -119,6 +123,21 @@ async function runAuditJob(auditId, brandId, url, orgId) {
     // degrades to [] on failure so it never blocks completion).
     const recommendations = await generateRecommendations(ctx, { results });
 
+    // Kit de citabilidade: transforma os sinais que falharam em arquivos prontos
+    // pra publicar. Montagem determinística sobre o que já foi lido — sem
+    // chamada de LLM própria, então não custa token nem pode travar. Um erro
+    // aqui jamais pode derrubar uma auditoria que já terminou de pontuar.
+    let citabilityKit = [];
+    try {
+      citabilityKit = montarKitCitabilidade(ctx, {
+        results,
+        recommendations,
+        marca: brandRow ?? null,
+      }).pecas;
+    } catch (err) {
+      logger.error({ err, auditId }, '[audit] kit de citabilidade falhou');
+    }
+
     const { error: completeErr } = await supabaseAdmin
       .from('site_audits')
       .update({
@@ -129,6 +148,7 @@ async function runAuditJob(auditId, brandId, url, orgId) {
         signals_evaluated: signalsEvaluated,
         signals_total: TOTAL_SIGNALS,
         recommendations,
+        citability_kit: citabilityKit,
         completed_at: new Date().toISOString(),
       })
       .eq('id', auditId);

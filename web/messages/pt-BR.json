@@ -149,7 +149,18 @@
     "signals": "Sinais",
     "impactHigh": "impacto alto",
     "impactMedium": "impacto médio",
-    "impactLow": "impacto baixo"
+    "impactLow": "impacto baixo",
+    "kit": {
+      "title": "Kit de citabilidade",
+      "subtitle": "{count, plural, one {# peça pronta pra publicar} other {# peças prontas pra publicar}} — copie e cole no lugar indicado.",
+      "emptySubtitle": "Nada a publicar nesta página.",
+      "empty": "A página já passa em todos os sinais que geram arquivo — llms.txt, acesso dos bots de IA, dado estruturado e meta tags estão em ordem.",
+      "where": "Onde publicar",
+      "copy": "Copiar conteúdo",
+      "download": "Baixar arquivo",
+      "originSite": "montado do seu site",
+      "originAi": "rascunho da IA"
+    }
   },
   "auth": {
     "signIn": "Entrar",

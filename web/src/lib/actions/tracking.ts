@@ -617,6 +617,25 @@ async function getBrandResultsTotal(brandId: string): Promise<number> {
   return count ?? 0;
 }
 
+/**
+ * Date of the brand's most recent result, ignoring the caller's date window —
+ * used by getInsightsData to fall back to the last real collection when the
+ * requested period is empty (ajustar.md Parte 2: com censo semanal, "24h" ou
+ * um período sem coleta não pode virar tela vazia pra quem já tem histórico).
+ */
+async function getBrandLastCollectionDate(brandId: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('prompt_results')
+    .select('created_at')
+    .eq('brand_id', brandId)
+    .neq('platform', 'chatgpt-shopping')
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) throw new Error(error.message);
+  return data?.[0]?.created_at ?? null;
+}
+
 export interface InsightsData {
   summary: InsightsSummary;
   competitors: CompetitorComparisonData;
@@ -626,6 +645,14 @@ export interface InsightsData {
   filterOptions: InsightsFilterOptions;
   recommendations: InsightsRecommendations;
   hasAnyData: boolean;
+  /**
+   * Set when the requested period had zero results but the brand has older
+   * history: the data returned is from that last collection instead (its
+   * date), not the requested window. The UI must show this explicitly and
+   * hide period-over-period deltas — comparing against "the period before a
+   * date we didn't ask for" means nothing.
+   */
+  fallbackTo: string | null;
 }
 
 /**
@@ -651,6 +678,40 @@ export async function getInsightsData(
     checkUnfiltered?: boolean;
   },
 ): Promise<InsightsData> {
+  const result = await getInsightsDataForWindow(brandId, opts);
+  if (result.summary.totalResults > 0 || !result.hasAnyData) {
+    // Normal path (data in the window), or genuinely nothing ever collected
+    // — NoDataForPeriod's onboarding copy is correct for that second case.
+    return { ...result, fallbackTo: null };
+  }
+
+  // The requested window is empty but the brand has older history: fall back
+  // to its last real collection instead of an empty page (ajustar.md Parte 2
+  // — with a weekly census, "24h" or a stale period hits this on most days).
+  const lastDate = await getBrandLastCollectionDate(brandId);
+  if (!lastDate) return { ...result, fallbackTo: null };
+
+  const fallbackFrom = new Date(new Date(lastDate).getTime() - 24 * 3600 * 1000).toISOString();
+  const fallback = await getInsightsDataForWindow(brandId, {
+    ...opts,
+    dateFrom: fallbackFrom,
+    dateTo: lastDate,
+    checkUnfiltered: false,
+  });
+  return { ...fallback, hasAnyData: true, fallbackTo: lastDate };
+}
+
+async function getInsightsDataForWindow(
+  brandId: string,
+  opts: {
+    model?: string;
+    region?: string;
+    topicId?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    checkUnfiltered?: boolean;
+  },
+): Promise<Omit<InsightsData, 'fallbackTo'>> {
   const filterOpts = {
     model: opts.model,
     region: opts.region,

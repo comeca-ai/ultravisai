@@ -298,6 +298,7 @@
     "noCompetitorsBody": "Adicione concorrentes para ver como você se compara nas respostas de IA.",
     "headToHead": "Comparação Direta",
     "lastRun": "Última análise: {when}",
+    "fallbackBanner": "Sem coleta neste período — mostrando a última disponível ({date}).",
     "never": "Nunca",
     "justNow": "agora mesmo",
     "minutesAgo": "{count}min atrás",

@@ -125,7 +125,9 @@ interface InsightsFilters {
 }
 
 const DEFAULT_FILTERS: InsightsFilters = {
-  datePreset: '24h',
+  // ajustar.md Parte 2: com censo semanal, "24h" acerta 1 dia em 7 — "30d" é
+  // a janela em que quase sempre existe pelo menos uma coleta.
+  datePreset: '30d',
   dateFrom: '',
   dateTo: '',
   region: '',
@@ -846,6 +848,10 @@ export default function InsightsPage() {
   const [showRunConfirm, setShowRunConfirm] = useState(false);
   const [filters, setFilters] = useState<InsightsFilters>(DEFAULT_FILTERS);
   const [hasAnyData, setHasAnyData] = useState<boolean | null>(null);
+  // Set when the loaded data isn't from the requested period — it fell back
+  // to the brand's last real collection because the window was empty
+  // (ajustar.md Parte 2). Holds that collection's date for the banner.
+  const [fallbackTo, setFallbackTo] = useState<string | null>(null);
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [availableTopics, setAvailableTopics] = useState<Topic[]>([]);
@@ -901,6 +907,7 @@ export default function InsightsPage() {
         setCompetitorData(insights.competitors.brands.length > 1 ? insights.competitors : null);
         setSovData(insights.sov.byPlatform.length > 0 ? insights.sov : null);
         setHasAnyData(insights.hasAnyData);
+        setFallbackTo(insights.fallbackTo);
 
         // Group raw model slugs by their resolved display name so different
         // ChatGPT versions ("gpt-5-3-mini" + "gpt-5-5") collapse into one
@@ -1330,6 +1337,16 @@ export default function InsightsPage() {
             <NoDataForPeriod datePreset={filters.datePreset} onReset={handleResetFilters} />
           ) : (
             <>
+              {fallbackTo && (
+                <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+                  <CalendarX2 className="h-4 w-4 shrink-0" />
+                  <span>
+                    {t('fallbackBanner', {
+                      date: formatTimeAgo(new Date(fallbackTo), t),
+                    })}
+                  </span>
+                </div>
+              )}
               {/* Resumo de visibilidade (reunião 19/ago): três coisas, sem
               nota ponderada — presença "X de N prompts", ranking médio e
               sentimento overall (Igor 42:22: "eu não preciso ter uma nota

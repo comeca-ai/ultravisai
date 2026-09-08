@@ -5,27 +5,69 @@
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
 > `BACKLOG.md` (o que vem). **Atualizado: 08/set/2026.**
 
-## 🔴 INCIDENTE ABERTO (08/set): 401 em 5 telas (auditoria, citabilidade, conteúdo, tópicos, prompts)
+## ✅ 08/set: auditoria de segurança completa — 7 de 9 P0/P1 corrigidos
 
-Desde ~07/set 20h, a Vercel registra `Unauthorized API Request` /
-`Server error: 401` toda vez que o front chama `api.ultravis.ai` nessas 5
-telas (Insights e Score não passam pelo servidor, por isso seguem normais).
-É literalmente a mensagem que `server/src/middleware/index.js` devolve
-quando `supabaseAdmin.auth.getUser(token)` falha — o container não está
-conseguindo validar sessão no Supabase.
+Rodada `/auditor-de-codigo` completa (8 caçadores + verificação adversarial).
+Achados e correções em `AUDITORIA.md` (raiz do repo). Resumo:
 
-**Hipótese forte, ainda não confirmada:** `SUPABASE_URL` errado no painel do
-worker. Existem **3 projetos Supabase** com nomes parecidos em contas
-diferentes — produção é `twhqjfbealruvcbvkegc`, mas a conta conectada nesta
-sessão só enxerga dois outros que NÃO são produção (um pausado, um vazio —
-ver `DECISOES.md` 08/set). Conferência de 30s pro dono: abrir `ultravis.ai`
-logado → F12 → Application → Cookies → o `ref` no nome do cookie
-`sb-<ref>-auth-token` tem que bater com o `SUPABASE_URL` do painel do worker
-`ultravis-server`. **`SUPABASE_URL` não é segredo** (é público, vai no
-bundle do navegador) — se estiver como Secret no painel, vale trocar pra
-Text também, só pra dar pra conferir de novo sem precisar deste rodeio.
+- **Corrigido e no ar (PRs #156, #157, todos mergeados em `main`):**
+  IDOR em `GET /api/content/brand/:brandId` (vazava dado de conteúdo entre
+  organizações) · SSRF em `POST /api/content/webhook-test` e em
+  `POST /api/brands/describe-from-site` · **P0 real**: 5 policies de RLS em
+  `prompt_results`/`ai_traffic_logs`/`prompt_result_shopping_cards` sem
+  `TO service_role` deixavam a **anon key pública apagar/forjar dado de
+  produção sem login** (migration `00047`) · IDOR de billing em
+  `POST /api/stripe/checkout` (sequestro de assinatura entre organizações) ·
+  corrida de idempotência no `/cloro/callback` (duplicava métricas) · deploy
+  não esperava o CI (novo job `check-ci`, **testado em produção nesta mesma
+  sessão — funcionou**: bloqueou o `deploy` até o CI do mesmo commit fechar
+  verde).
+- **Deferido, não é fix de código:** suíte de teste de isolamento RLS entre
+  organizações (proposta no roadmap de `AUDITORIA.md`) e ligar os canais de
+  alerta do watchdog (pendência nº 1 abaixo, precisa de credencial real no
+  painel).
+- Também mergeadas hoje: 4 PRs do Dependabot já avaliados como seguros
+  (#140, #143, #144, #147 — patch/minor, checks verdes). Os 6 restantes
+  (bumps major) e o PR #146 continuam sem revisão manual — não mergear sem
+  testar.
 
-## 🔴 BLOQUEIO (07/set, segue aberto): o deploy do server está parado
+**🔴 Atualização (mesma tarde): 4 dos PRs "não mergear sem testar" foram
+mergeados assim mesmo** (#139 `ai`, #142 `@ai-sdk/openai`, #145 `@types/node`,
+#148 `@ai-sdk/react`) — o `check-ci` funcionou de novo e travou o deploy
+corretamente, mas o CI ficou vermelho: `@ai-sdk/react@4.0.96` exige Node ≥22,
+e tanto o runner do CI quanto `server/Dockerfile` (produção) usam Node 20.
+Revertidas as 4 bumps (`git revert`, branch `fix-ci-ai-sdk-node20`) — não é
+código quebrado, é infraestrutura incompatível; qualquer bump desses precisa
+vir junto com upgrade de Node em CI + Dockerfile, decisão maior que não cabe
+num merge automático. PR #146 (fix de UI, não-bump) não foi tocado — sem
+relação com a quebra. Também achado no mesmo lote: `schema.sql` e 2 arquivos
+sem `prettier` ficaram defasados por um merge de PR antigo baseado em `main`
+desatualizado (mesma causa-raiz do achado do `STATUS.md` — ver `DECISOES.md`).
+
+## 🔴 INCIDENTE ABERTO (08/set): 401 em 5 telas (auditoria, citabilidade,
+conteúdo, tópicos, prompts) — hipótese forte, precisa do dono pra confirmar
+
+Investigação nesta sessão chegou a uma hipótese concreta mas não conseguiu
+confirmar: a conta Supabase que este ambiente enxerga (via MCP) tem **3
+projetos distintos**, e nenhum deles bate com a produção documentada
+(`twhqjfbealruvcbvkegc`, inacessível daqui). Dois projetos visíveis: um
+pausado, e um projeto vazio/upstream sem uso (`kepunaqlwhpbmtrcoscx` — 44
+migrations aplicadas mas **sem** a coluna `appearance_rivals` nem as tabelas
+`index_weights`/`brand_archives` do fork, ou seja, é uma instalação Ansvisor
+upstream nunca customizada, não a Ultravis). Hipótese: o `SUPABASE_URL`
+configurado no painel do worker Cloudflare (`ultravis-server` → Settings →
+Variables and Secrets) pode estar apontando pra um projeto errado — o que
+explicaria 401 em telas que dependem de RPC/tabelas específicas do fork.
+
+**O que só o dono consegue fazer:** abrir `ultravis.ai` logado, DevTools →
+Application → Cookies, achar o cookie `sb-<ref>-auth-token` (o `<ref>` é o id
+do projeto Supabase que o **navegador** está usando pra login) e comparar
+esse `<ref>` com o valor de `SUPABASE_URL` nas vars do worker no painel
+Cloudflare. Se forem diferentes, achamos a causa-raiz. Não dá pra ler o
+valor de `SUPABASE_URL` do worker por nenhum caminho disponível nesta sessão
+(é Secret, não aparece em log/diff).
+
+## 🔴 BLOQUEIO ATUAL (07/set, RECONFIRMADO 08/set): o deploy do server está parado
 
 `main` está **à frente da produção** no lado do server. Tudo que foi mergeado
 hoje — vigia camada 2 (#123), a ponte do censo pro D1 (#133), o `/espelho`
@@ -146,11 +188,8 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 
 ## Pendências SUAS (curtas)
 
--1. 🔴 **Conferir `SUPABASE_URL` no painel do worker** — é o incidente ativo (401 em 5 telas). Ver bloco no topo deste arquivo; não é segredo, então dá pra simplesmente olhar e comparar com o ref do cookie de `ultravis.ai`.
 0. 🔴 **`Workers Scripts` de Read → Edit** no token (dash.cloudflare.com/profile/api-tokens → seu token → Edit). Marcar também `Zone → Workers Routes: Edit` (Custom Domain) e `D1: Edit` (schema do espelho). **Não** clicar em Roll — o valor mudaria e teria que recolar no GitHub. Isto destrava, em cadeia: worker consolidado, `/espelho` autenticado, schema D1, ponte do censo e os números da Polar.
 0b. 🔒 **Trocar `OPS_USER`/`OPS_PASS`**: apagar as duas **vars de texto** no painel do worker, cadastrar em GitHub → Secrets → Actions com valor novo e forte, rodar `sync-cf-secrets` (grava como Secret, some do diff e do log).
-0c. 🔒 **Rotacionar `CLOUDFLARE_API_TOKEN` e `CLORO_API_KEY`** — os dois foram colados em claro nesta conversa em algum momento; role os dois no painel de origem antes de considerar o incidente de segurança fechado (o valor novo vai direto no painel/GitHub Secrets, nunca aqui).
-0d. **Decidir sobre os PRs abertos**: 3 de produto esperando você tirar do rascunho — #152 (kit de citabilidade), #153 (magic link + Turnstile), #154 (ranking unificado + pesos 25% + definição de citação, parcialmente já em código). Mais 10 do Dependabot; 4 seguros pra mergear, 6 majors que pedem teste manual (lista completa na conversa e no PR do dono). O check "server" delas voltou a rodar de verdade depois do PR #155 (08/set) — antes disso, 0 das 14 PRs abertas tinha o Vitest do servidor realmente executado na CI.
 1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway (liga os avisos do watchdog).
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
 3. **Criar `contato@ultravis.ai`** (Cloudflare Email Routing, grátis) — é o canal LGPD das páginas de Termos/Privacidade.

@@ -386,7 +386,10 @@ export function escaparAtributo(valor) {
  * }} opts
  * @returns {{ pecas: Array<object>, resumo: {total:number, deterministicas:number, comIa:number} }}
  */
-export function montarKitCitabilidade(ctx, { results = [], recommendations = [], marca = null } = {}) {
+export function montarKitCitabilidade(
+  ctx,
+  { results = [], recommendations = [], marca = null } = {},
+) {
   const porChave = new Map((results || []).map((r) => [r.key, r]));
   const pecas = [];
 

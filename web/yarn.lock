@@ -19,25 +19,6 @@
     "@ai-sdk/provider-utils" "4.0.27"
     "@vercel/oidc" "3.2.0"
 
-"@ai-sdk/gateway@4.0.75":
-  version "4.0.75"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-4.0.75.tgz#911f6d681b94bb4a2d1cacb058485d62035feb19"
-  integrity sha512-HOnhw3oXtBnboBF7kAKipjToCN6+5w6EuukiUKiULcxBitS+vbHRRv9IUBcq+Z1wkXcJjfywKrt5r++I6OYyXg==
-  dependencies:
-    "@ai-sdk/provider" "4.0.10"
-    "@ai-sdk/provider-utils" "5.0.36"
-    "@vercel/oidc" "3.2.0"
-
-"@ai-sdk/mcp@2.0.45":
-  version "2.0.45"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/mcp/-/mcp-2.0.45.tgz#cfbb352b28360120596c00367f42d466ea72011e"
-  integrity sha512-ROukI/LfoPHf5F4gi1GKQebK5658fR1EG3kt0P0vzrfSy1FAGQ5FyKr9j2lbkXAV9X3kfpf9LJdif7w67XDtgw==
-  dependencies:
-    "@ai-sdk/provider" "4.0.10"
-    "@ai-sdk/provider-utils" "5.0.36"
-    cross-spawn "^7.0.6"
-    pkce-challenge "^5.0.1"
-
 "@ai-sdk/provider-utils@4.0.27":
   version "4.0.27"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-4.0.27.tgz#d2183685768626bcf1c968b7d73ea2b974da59b9"
@@ -47,17 +28,6 @@
     "@standard-schema/spec" "^1.1.0"
     eventsource-parser "^3.0.8"
 
-"@ai-sdk/provider-utils@5.0.36":
-  version "5.0.36"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-5.0.36.tgz#57e5c50efc3798fce4e81cd20c7ec93b244a466a"
-  integrity sha512-MFXBn6XDyf37PNQAge/HTatPJE8Vmg/g/w4WPtjSV53jq8FKAzoaN5+43hsdQa9bqgN+/13jxug9ChvsG+godQ==
-  dependencies:
-    "@ai-sdk/provider" "4.0.10"
-    "@standard-schema/spec" "^1.1.0"
-    "@workflow/serde" "4.1.0"
-    eventsource-parser "^3.0.8"
-    undici "^7.29.0"
-
 "@ai-sdk/provider@3.0.10":
   version "3.0.10"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-3.0.10.tgz#abfb6776f699951f9b8ac20cf1d42a3fc7d79752"
@@ -65,23 +35,14 @@
   dependencies:
     json-schema "^0.4.0"
 
-"@ai-sdk/provider@4.0.10":
-  version "4.0.10"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-4.0.10.tgz#1c51d4e0991dea5773c8a74f9da16c52527bef8c"
-  integrity sha512-fX2ENAc7iDpZ+Wp4+Rk06Usn/Ys7dI9uAkGv0jlF6XVrW13NkRWx5Ou+U6lIM2E1fTLkCs16GGrUAaVvroag7A==
+"@ai-sdk/react@^3.0.81":
+  version "3.0.195"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/react/-/react-3.0.195.tgz#dc74b0b27cddbc316433119edb9aaba161b4aa49"
+  integrity sha512-+yIH84d4bBNzLKfaDDf4EocEH0XQKKNwNShxbrz5xAiJMNIPnWVWT9cyrSerYaGH3iNVS/g2io42PE4HNbc4RA==
   dependencies:
-    json-schema "^0.4.0"
-
-"@ai-sdk/react@^4.0.96":
-  version "4.0.96"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/react/-/react-4.0.96.tgz#e50bf5866c2186369610c90ff128770e6a34b450"
-  integrity sha512-m4823/q+obDgJot9+UOtVFij3DJIEYdv7x/AC4rc6KCMfRP4GR030DJyKjhtzC9xfDmTGttv3tMpqbknh6uUXA==
-  dependencies:
-    "@ai-sdk/mcp" "2.0.45"
-    "@ai-sdk/provider" "4.0.10"
-    "@ai-sdk/provider-utils" "5.0.36"
-    ai "7.0.93"
-    swr "^2.4.1"
+    "@ai-sdk/provider-utils" "4.0.27"
+    ai "6.0.193"
+    swr "^2.2.5"
     throttleit "2.1.0"
 
 "@alloc/quick-lru@^5.2.0":
@@ -2132,12 +2093,19 @@
   resolved "https://registry.yarnpkg.com/@types/ms/-/ms-2.1.0.tgz#052aa67a48eccc4309d7f0191b7e41434b90bb78"
   integrity sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==
 
-"@types/node@*", "@types/node@^26":
-  version "26.4.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-26.4.1.tgz#3d8dc80515894958448ee266cf5d6bc3e5205bd5"
-  integrity sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==
+"@types/node@*":
+  version "25.3.5"
+  resolved "https://registry.npmjs.org/@types/node/-/node-25.3.5.tgz"
+  integrity sha512-oX8xrhvpiyRCQkG1MFchB09f+cXftgIXb3a7UUa4Y3wpmZPw5tyZGTLWhlESOLq1Rq6oDlc8npVU2/9xiCuXMA==
   dependencies:
-    undici-types "~8.3.0"
+    undici-types "~7.18.0"
+
+"@types/node@^20":
+  version "20.19.37"
+  resolved "https://registry.npmjs.org/@types/node/-/node-20.19.37.tgz"
+  integrity sha512-8kzdPJ3FsNsVIurqBs7oodNnCEVbni9yUEkaHbgptDACOPW04jimGagZ51E6+lXUwJjgnBw+hyko/lkFWCldqw==
+  dependencies:
+    undici-types "~6.21.0"
 
 "@types/phoenix@^1.6.6":
   version "1.6.7"
@@ -2462,11 +2430,6 @@
     loupe "^3.1.4"
     tinyrainbow "^2.0.0"
 
-"@workflow/serde@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@workflow/serde/-/serde-4.1.0.tgz#82dbbaf2370f7b8ae46d9a9a4ab0917258f8db62"
-  integrity sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==
-
 abs-svg-path@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/abs-svg-path/-/abs-svg-path-0.1.1.tgz#df601c8e8d2ba10d4a76d625e236a9a39c2723bf"
@@ -2495,16 +2458,7 @@ agent-base@^7.1.0, agent-base@^7.1.2:
   resolved "https://registry.npmjs.org/agent-base/-/agent-base-7.1.4.tgz"
   integrity sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==
 
-ai@7.0.93:
-  version "7.0.93"
-  resolved "https://registry.yarnpkg.com/ai/-/ai-7.0.93.tgz#744c0631415c7772e28e4425132a2363fa209384"
-  integrity sha512-CJss6zb9mlltk/mCr8qom20NBnqEQxVawkqwtT62tCwsxilZpXfHNRMRwcS3XRpzdP1kEluVuDBUayYWEEd95g==
-  dependencies:
-    "@ai-sdk/gateway" "4.0.75"
-    "@ai-sdk/provider" "4.0.10"
-    "@ai-sdk/provider-utils" "5.0.36"
-
-ai@^6.0.116:
+ai@6.0.193, ai@^6.0.116:
   version "6.0.193"
   resolved "https://registry.yarnpkg.com/ai/-/ai-6.0.193.tgz#f35c21dda142e8c7fb55f8932562b1b586e404b7"
   integrity sha512-VQOTOse8+X8kMtg61DNSXlYJzwOW4NjMLDJNk/qxClWsFe4oiyFJDHGGG1oezfGcFzuYuQe/8Z7r4kwiZWh2YQ==
@@ -6263,7 +6217,7 @@ picomatch@^4.0.4:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.4.tgz#fd6f5e00a143086e074dffe4c924b8fb293b0589"
   integrity sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==
 
-pkce-challenge@^5.0.0, pkce-challenge@^5.0.1:
+pkce-challenge@^5.0.0:
   version "5.0.1"
   resolved "https://registry.npmjs.org/pkce-challenge/-/pkce-challenge-5.0.1.tgz"
   integrity sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==
@@ -7294,10 +7248,10 @@ svg-arc-to-cubic-bezier@^3.0.0, svg-arc-to-cubic-bezier@^3.2.0:
   resolved "https://registry.yarnpkg.com/svg-arc-to-cubic-bezier/-/svg-arc-to-cubic-bezier-3.2.0.tgz#390c450035ae1c4a0104d90650304c3bc814abe6"
   integrity sha512-djbJ/vZKZO+gPoSDThGNpKDO+o+bAeA4XQKovvkNCqnIS2t+S4qnLAGQhyyrulhCFRl1WWzAp0wUDV8PpTVU3g==
 
-swr@^2.4.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/swr/-/swr-2.5.1.tgz#3d1801fafe06d13b149bc52c62323dcd43ca570c"
-  integrity sha512-BRw55e8r0B7SpDN20CAzoQAHl7y1yP7/Zt7oqUjMv0vSt2u2Xnkm88Ws+VypbV9BXHQVuSuyVq7zMjO16wSExw==
+swr@^2.2.5:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/swr/-/swr-2.4.1.tgz#c9e48abff6bf4b04846342e2f1f6be108a078cf6"
+  integrity sha512-2CC6CiKQtEwaEeNiqWTAw9PGykW8SR5zZX8MZk6TeAvEAnVS7Visz8WzphqgtQ8v2xz/4Q5K+j+SeMaKXeeQIA==
   dependencies:
     dequal "^2.0.3"
     use-sync-external-store "^1.6.0"
@@ -7595,15 +7549,15 @@ unbox-primitive@^1.1.0:
     has-symbols "^1.1.0"
     which-boxed-primitive "^1.1.1"
 
-undici-types@~8.3.0:
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-8.3.0.tgz#44e9fc9f3244648cdea35e4f9bb2d681e9410809"
-  integrity sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==
+undici-types@~6.21.0:
+  version "6.21.0"
+  resolved "https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz"
+  integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
-undici@^7.29.0:
-  version "7.29.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-7.29.1.tgz#7741c6fc8b3e1a48e30323833642bfbe841443ad"
-  integrity sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==
+undici-types@~7.18.0:
+  version "7.18.2"
+  resolved "https://registry.npmjs.org/undici-types/-/undici-types-7.18.2.tgz"
+  integrity sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==
 
 unicode-properties@^1.4.0, unicode-properties@^1.4.1:
   version "1.4.1"

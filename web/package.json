@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",
-    "@ai-sdk/react": "^4.0.96",
+    "@ai-sdk/react": "^3.0.81",
     "@base-ui/react": "^1.2.0",
     "@marsidev/react-turnstile": "^1.6.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -60,7 +60,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.20",
-    "@types/node": "^26",
+    "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

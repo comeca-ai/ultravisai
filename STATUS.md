@@ -203,14 +203,28 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
     (mudanças de produto — pesos do Score, ranking unificado — aguardando
     sua revisão) e os 6 PRs do Dependabot com bump major (#138, #139, #141,
     #142, #145, e #146) — não mergear sem testar manualmente.
-0e. ✅ **Token Cloudflare definitivo rotacionado (08/set)** — o token custom
-    criado nesta sessão (Workers Scripts + D1 + Workers Routes Edit,
-    escopado à conta/zona) apareceu em texto puro no chat antes de ser
-    salvo; valor foi Rollado no painel e o novo já está só em GitHub
-    Secrets → `CLOUDFLARE_API_TOKEN` (confirmado pelo dono). Também achado
-    nesta sessão: o repositório foi renomeado de `ansvisor` pra
-    **`ultravisai`** (mesma org `comeca-ai`) — atualizar qualquer referência
-    antiga ao nome `ansvisor` em bookmarks/scripts locais.
+0e. 🔴 **Token Cloudflare quebrou DEPOIS do Roll (08/set) — deploy #36 falhou
+    de novo, achado NOVO e diferente do bloqueio antigo.** Sequência: token
+    custom criado nesta sessão (Workers Scripts + D1 + Workers Routes Edit)
+    apareceu em texto puro no chat → Roll pedido → dono confirmou que colou
+    o valor novo em GitHub Secrets → `CLOUDFLARE_API_TOKEN`. O run de deploy
+    **#35** (commit anterior a esta leva) rodou com sucesso — ou seja, o
+    token ainda funcionava naquele momento. O run **#36** (merge de hoje)
+    falhou logo no preflight: `token vivo? NAO: Invalid API Token` e
+    `wrangler deploy` morre em "Unable to get membership roles" — **não é
+    mais falta de permissão, o token em si não autentica**. Log completo:
+    https://github.com/comeca-ai/ultravisai/actions/runs/34275646255/job/102228578502
+    — Diagnóstico mais provável: o valor colado em GitHub Secrets depois do
+    Roll está incompleto/errado (corte de caractere, espaço, ou o valor
+    antigo foi colado por engano). **Ação:** no painel Cloudflare, copiar de
+    novo o valor ATUAL do token (não precisa Roll de novo — só reconferir o
+    que já está lá) e colar limpo em GitHub → Settings → Secrets and
+    variables → Actions → `CLOUDFLARE_API_TOKEN`, sem espaço antes/depois.
+    Depois, disparar o deploy de novo (push trivial em `server/**` ou
+    workflow_dispatch em `deploy-server-container`).
+    Achado também nesta sessão: o repositório foi renomeado de `ansvisor`
+    pra **`ultravisai`** (mesma org `comeca-ai`) — atualizar qualquer
+    referência antiga ao nome `ansvisor` em bookmarks/scripts locais.
 5. **Comparar `SUPABASE_URL` do worker com o cookie de login do site** — ver
    o incidente de 401 acima; é o único jeito de confirmar a causa.
 

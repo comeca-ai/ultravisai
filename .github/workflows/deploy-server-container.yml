@@ -194,9 +194,15 @@ jobs:
       - name: Decidir se sincroniza segredos
         id: sync
         if: steps.cred.outputs.has == '1'
+        env:
+          # Nunca interpolar a mensagem de commit direto no script (`${{ }}`
+          # colado no run:) — vira código shell arbitrário se a mensagem tiver
+          # aspas/parênteses/backtick (aconteceu no run #34: um parêntese comum
+          # de commit quebrou a sintaxe). Passar por env: mantém como dado.
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] || \
-             printf '%s' "${{ github.event.head_commit.message }}" | grep -qi '\[secrets\]'; then
+             printf '%s' "$COMMIT_MSG" | grep -qi '\[secrets\]'; then
             echo "go=1" >> "$GITHUB_OUTPUT"; echo "sync de segredos: SIM"
           else
             echo "go=0" >> "$GITHUB_OUTPUT"

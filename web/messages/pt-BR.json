@@ -198,8 +198,16 @@
       "generic": "Ocorreu um erro. Tente de novo.",
       "emailNotConfirmed": "Verifique seu e-mail primeiro. Confira sua caixa de entrada pelo link de confirmação.",
       "signOutError": "Não foi possível sair. Tente de novo.",
-      "accountExists": "Já existe uma conta com este e-mail. Entre com sua senha — ou use “Esqueci a senha” para recuperar o acesso."
-    }
+      "accountExists": "Já existe uma conta com este e-mail. Entre com sua senha — ou use “Esqueci a senha” para recuperar o acesso.",
+      "rateLimited": "Muitas tentativas seguidas. Espere um minuto e peça de novo."
+    },
+    "useMagicLink": "Entrar sem senha",
+    "usePassword": "Entrar com senha",
+    "sendingMagicLink": "Enviando link…",
+    "magicLinkSentTo": "Se {email} tiver conta aqui, o link de acesso já está a caminho. Abra a mensagem e clique para entrar.",
+    "magicLinkResend": "Reenviar link",
+    "magicLinkResendIn": "Reenviar em {seconds}s",
+    "magicLinkOtherEmail": "Usar outro e-mail"
   },
   "dashboard": {
     "overview": "Visão geral",

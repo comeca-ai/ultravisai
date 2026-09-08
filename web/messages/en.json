@@ -198,8 +198,16 @@
       "generic": "An error occurred. Please try again.",
       "emailNotConfirmed": "Please verify your email address first. Check your inbox for the confirmation link.",
       "signOutError": "Failed to sign out. Please try again.",
-      "accountExists": "An account with this email already exists. Sign in with your password — or use “Forgot password” to recover access."
-    }
+      "accountExists": "An account with this email already exists. Sign in with your password — or use “Forgot password” to recover access.",
+      "rateLimited": "Too many attempts in a row. Wait a minute and try again."
+    },
+    "useMagicLink": "Sign in without a password",
+    "usePassword": "Sign in with a password",
+    "sendingMagicLink": "Sending link…",
+    "magicLinkSentTo": "If {email} has an account here, the sign-in link is on its way. Open the message and click to sign in.",
+    "magicLinkResend": "Resend link",
+    "magicLinkResendIn": "Resend in {seconds}s",
+    "magicLinkOtherEmail": "Use a different email"
   },
   "dashboard": {
     "overview": "Overview",

@@ -178,6 +178,67 @@ jobs:
             echo "MX removidos."
           fi
 
+          echo "== 1d. SPF órfão da Hostinger — ESTA IMPRESSAO E O ROLLBACK =="
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "$CF/zones/$ZID/dns_records?type=TXT" > /tmp/txt.json
+          # SELETIVO de propósito: só TXT que é SPF *e* cita hostinger. TXT de
+          # verificação de domínio e DKIM ficam intactos — apagar TXT em bloco
+          # aqui derrubaria coisa sem relação nenhuma com e-mail.
+          python3 - <<'PY'
+          import json
+          d = json.load(open("/tmp/txt.json"))
+          regs = d.get("result") or []
+          print("%d registro(s) TXT na zona (todos, pra rollback):" % len(regs))
+          alvos = []
+          for r in regs:
+              c = (r.get("content") or "")
+              marca = ""
+              if "v=spf1" in c.lower() and "hostinger" in c.lower():
+                  alvos.append(r)
+                  marca = "   <-- ALVO (SPF da Hostinger)"
+              print("  %-58s ttl %-6s (id %s)%s" % (
+                  c[:58], r.get("ttl"), r.get("id"), marca))
+          print("")
+          print("ROLLBACK: recriar os TXT marcados como ALVO com o conteudo exato acima.")
+          open("/tmp/spf_ids.txt", "w").write(
+              "".join("%s\n" % r.get("id") for r in alvos))
+          # sobra algum SPF depois da limpeza?
+          resta = [r for r in regs
+                   if "v=spf1" in (r.get("content") or "").lower() and r not in alvos]
+          open("/tmp/spf_resta.txt", "w").write("1" if resta else "0")
+          PY
+
+          if [ ! -s /tmp/spf_ids.txt ]; then
+            echo "(nenhum SPF da Hostinger — nada a limpar)"
+          elif [ "$ARMADO" != "sim" ]; then
+            echo "::warning::ARMADO != 'sim' — SPF órfão NAO removido."
+          else
+            while read -r ID; do
+              [ -z "$ID" ] && continue
+              echo "-- apagando TXT SPF da Hostinger ($ID)"
+              curl -sS -X DELETE -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                "$CF/zones/$ZID/dns_records/$ID" > /tmp/deltxt.json
+              if [ "$(okof < /tmp/deltxt.json)" != "1" ]; then
+                j < /tmp/deltxt.json
+                echo "::error::falha ao apagar o TXT SPF — ROLLBACK no passo 1d."
+                exit 1
+              fi
+            done < /tmp/spf_ids.txt
+            # Sem NENHUM SPF a Cloudflare segue reclamando; publica o dela.
+            if [ "$(cat /tmp/spf_resta.txt)" = "0" ]; then
+              echo "-- publicando o SPF da Cloudflare (nenhum outro SPF restou)"
+              curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                -H "Content-Type: application/json" "$CF/zones/$ZID/dns_records" \
+                --data "{\"type\":\"TXT\",\"name\":\"$ZONE\",\"content\":\"v=spf1 include:_spf.mx.cloudflare.net ~all\",\"ttl\":1}" > /tmp/spfnovo.json
+              j < /tmp/spfnovo.json
+              if [ "$(okof < /tmp/spfnovo.json)" != "1" ]; then
+                echo "::warning::não deu pra publicar o SPF da Cloudflare — conferir no painel (Email → Routing → DNS)."
+              fi
+            else
+              echo "(já existe outro SPF na zona — não vou publicar um segundo; conferir manualmente)"
+            fi
+          fi
+
           echo "== 2. habilitar Email Routing (idempotente) =="
           curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "$CF/zones/$ZID/email/routing/enable" > /tmp/enable.json
@@ -260,6 +321,19 @@ jobs:
               exit 1
             fi
             echo "(regra já existia — seguindo)"
+          fi
+
+          # Catch-all: qualquer endereço @ultravis.ai que não bata numa regra
+          # específica cai no destino, em vez de bounce. Endpoint próprio
+          # (PUT .../rules/catch_all), não é uma regra da lista normal.
+          echo "== 4b. catch-all → $DESTINO =="
+          curl -sS -X PUT -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "$CF/zones/$ZID/email/routing/rules/catch_all" \
+            --data "{\"matchers\":[{\"type\":\"all\"}],\"actions\":[{\"type\":\"forward\",\"value\":[\"$DESTINO\"]}],\"enabled\":true,\"name\":\"catch-all para $DESTINO\"}" > /tmp/catchall.json
+          j < /tmp/catchall.json
+          if [ "$(okof < /tmp/catchall.json)" != "1" ]; then
+            echo "::warning::catch-all não configurado — as regras específicas seguem valendo; conferir no painel."
           fi
 
           echo "== 5. estado final das regras =="

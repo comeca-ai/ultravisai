@@ -5,6 +5,12 @@ on:
   push:
     branches: [main]
 
+# Achado P2 da auditoria de 08/set: sem isto o GITHUB_TOKEN herda o default
+# do repo em jobs que rodam `npm install` de terceiros. Nenhum job aqui
+# escreve no repo (só checkout + build/test/lint).
+permissions:
+  contents: read
+
 jobs:
   schema:
     name: schema — consolidated schema.sql is up to date

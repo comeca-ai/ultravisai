@@ -30,7 +30,10 @@ export async function fetchViaScrapeDo(targetUrl, { render = true, retries = 1 }
   let last = { ok: false, status: 0, html: '', contentType: null };
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
-      const res = await fetch(endpoint);
+      // P2 da auditoria de 08/set: sem timeout, um Scrape.do lento pendurava
+      // o audit síncrono (chamado dentro do request HTTP) por minutos. 30s
+      // cobre o render de página real; mais que isso é sinal de travar mesmo.
+      const res = await fetch(endpoint, { signal: AbortSignal.timeout(30_000) });
       const html = await res.text();
       last = { ok: res.ok, status: res.status, html, contentType: res.headers.get('content-type') };
       // Retry only on proxy-side 5xx (transient); 4xx is the target's verdict.

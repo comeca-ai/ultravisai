@@ -26,6 +26,12 @@ on:
       - 'server/**'
       - '.github/workflows/deploy-server-container.yml'
 
+# Achado P2 da auditoria de 08/set: default do workflow. O job check-ci já
+# escopa o próprio `actions: read` (precisa disso, não de contents); deploy
+# só faz checkout + chama a Cloudflare com token próprio.
+permissions:
+  contents: read
+
 jobs:
   # Achado P1 da auditoria de 08/set: este deploy e o CI (ci.yml) disparavam
   # em paralelo no mesmo push a main, sem nenhuma dependência entre eles — um

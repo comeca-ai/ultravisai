@@ -1,3 +1,16 @@
+# ⚠️ NÃO É O CAMINHO — mantido como registro da investigação (08/set).
+#
+# Conclusão dos 5 runs: a zona ultravis.ai tem MX mx1/mx2.hostinger.com,
+# ou seja, o e-mail do domínio JÁ MORA NA HOSTINGER. Habilitar Email
+# Routing aqui exigiria apagar esses MX e derrubaria a entrega de e-mail
+# em uso — por isso a API recusa com "2008 Non-Cloudflare MX records
+# exist", e por isso este workflow deve continuar falhando.
+#
+# O contato@ultravis.ai se cria no painel da HOSTINGER (Emails → domínio),
+# sem tocar em DNS. Se um dia o e-mail do domínio migrar pra Cloudflare,
+# este arquivo já tem o caminho pronto (e o preflight que diz qual
+# permissão falta). Até lá, re-disparar só gasta run.
+#
 # Cria contato@ultravis.ai via Email Routing da Cloudflare (grátis) —
 # é o canal LGPD referenciado nas páginas de Termos/Privacidade
 # (pendência nº 3 do STATUS.md).
@@ -18,6 +31,9 @@
 # Secrets; este comentário é o gatilho da 4ª tentativa.
 name: criar-email-contato
 
+# Só manual. O gatilho por push foi REMOVIDO em 08/set: enquanto os MX
+# apontarem pra Hostinger este job falha por definição, e disparar a cada
+# edição do arquivo só gerava run vermelho de graça.
 on:
   workflow_dispatch:
     inputs:
@@ -25,9 +41,6 @@ on:
         description: 'E-mail de destino do forward (padrão: jhonata.emerick@gmail.com)'
         required: false
         type: string
-  push:
-    branches: [main]
-    paths: ['.github/workflows/criar-email-contato.yml']
 
 permissions:
   contents: read

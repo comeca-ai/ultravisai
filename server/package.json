@@ -28,7 +28,7 @@
     "@ai-sdk/openai": "^4.0.58",
     "@anthropic-ai/sdk": "^0.78.0",
     "@supabase/supabase-js": "^2.49.1",
-    "ai": "^6.0.116",
+    "ai": "^7.0.93",
     "body-parser": "^1.20.2",
     "cheerio": "^1.2.0",
     "cors": "^2.8.5",

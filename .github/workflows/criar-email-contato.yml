@@ -142,20 +142,34 @@ jobs:
           import json
           d = json.load(open("/tmp/mx.json"))
           regs = d.get("result") or []
+
+          def da_cloudflare(r):
+              # MX do próprio Email Routing (routeN.mx.cloudflare.net). A API
+              # recusa apagar esses com "1046 managed by Email Routing", então
+              # incluí-los na lista só faz o job abortar sem motivo — foi o que
+              # derrubou o run #7. O filtro estava no NOME do passo mas nunca
+              # no código; a proteção vinha só do lado da Cloudflare.
+              return (r.get("content") or "").lower().endswith("mx.cloudflare.net")
+
           if not regs:
               print("nenhum MX na zona — nada a remover")
           else:
               print("%d registro(s) MX existentes:" % len(regs))
               for r in regs:
-                  print("  prio %-4s %-45s ttl %-6s name %s (id %s)" % (
+                  print("  prio %-4s %-45s ttl %-6s name %s (id %s)%s" % (
                       r.get("priority"), r.get("content"), r.get("ttl"),
-                      r.get("name"), r.get("id")))
+                      r.get("name"), r.get("id"),
+                      "   [Cloudflare — preservado]" if da_cloudflare(r) else "   <-- ALVO"))
               print("")
-              print("ROLLBACK: recriar exatamente os registros acima (tipo MX) e")
-              print("desabilitar o Email Routing no painel.")
+              print("ROLLBACK: recriar os registros marcados ALVO (tipo MX, conteudo,")
+              print("prioridade e ttl exatos acima) e desabilitar o Email Routing.")
+
+          alvos = [r for r in regs if not da_cloudflare(r)]
+          print("%d alvo(s) de remocao, %d preservado(s) da Cloudflare"
+                % (len(alvos), len(regs) - len(alvos)))
           # ids num arquivo separado, um por linha, pro passo de remocao
           open("/tmp/mx_ids.txt", "w").write(
-              "".join("%s %s\n" % (r.get("id"), r.get("content")) for r in regs))
+              "".join("%s %s\n" % (r.get("id"), r.get("content")) for r in alvos))
           PY
 
           echo "== 1c. remover MX nao-Cloudflare (ARMADO=$ARMADO) =="

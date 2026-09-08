@@ -298,6 +298,7 @@
     "noCompetitorsBody": "Add competitors to see how you compare in AI answers.",
     "headToHead": "Head-to-Head Comparison",
     "lastRun": "Last run: {when}",
+    "fallbackBanner": "No data in this period — showing the last available collection ({date}).",
     "never": "Never",
     "justNow": "just now",
     "minutesAgo": "{count}m ago",

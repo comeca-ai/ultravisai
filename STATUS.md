@@ -199,7 +199,7 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 
 ## Pendências SUAS (curtas)
 
-0. 🔴 **`Workers Scripts` de Read → Edit** no token (dash.cloudflare.com/profile/api-tokens → seu token → Edit). Marcar também `Zone → Workers Routes: Edit` (Custom Domain) e `D1: Edit` (schema do espelho). **Não** clicar em Roll — o valor mudaria e teria que recolar no GitHub. Isto destrava, em cadeia: worker consolidado, `/espelho` autenticado, schema D1, ponte do censo e os números da Polar.
+0. ✅ **`Workers Scripts` Edit no token** — resolvido, ver item 0e abaixo (token recriado do zero com as 3 permissões, saga fechada no run #38).
 0b. 🔒 **Trocar `OPS_USER`/`OPS_PASS`**: apagar as duas **vars de texto** no painel do worker, cadastrar em GitHub → Secrets → Actions com valor novo e forte, rodar `sync-cf-secrets` (grava como Secret, some do diff e do log).
 1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no Railway (liga os avisos do watchdog).
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).

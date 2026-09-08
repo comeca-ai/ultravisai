@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultravis — Painel de Operações e Negócios</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5; --mut:#B6B2A4;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --red:#C0492A; --redSoft:#FBEEEA;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:0 30px}
+
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:48px 0 38px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2.2rem;letter-spacing:-.02em;margin-top:13px;text-wrap:balance}
+.covsub{color:var(--ink2);margin-top:9px;max-width:76ch}
+.instr{background:var(--sunk);border-bottom:1px solid var(--rule2);padding:9px 0;position:sticky;top:0;z-index:20}
+.instr-in{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:.68rem;color:var(--ink2)}
+.instr-in b{color:var(--ink)}
+.prov{font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--goodSoft);color:var(--good);border:1px solid var(--good)}
+.sep{width:1px;height:13px;background:var(--rule2)}
+
+.page{padding:30px 0 60px}
+h2{font-family:var(--serif);font-size:1.35rem;font-weight:500;margin-top:38px}
+h3{font-family:var(--serif);font-size:1.15rem;font-weight:500;margin-top:32px}
+.note{color:var(--ink2);font-size:.87rem;margin-top:6px;max-width:82ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px 23px;margin-top:14px}
+.leitura{margin-top:14px;padding-top:12px;border-top:1px dashed var(--rule2);font-size:.87rem;color:var(--ink2)}
+.leitura b{color:var(--ink)}
+
+.stats{display:flex;gap:32px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--rule)}
+.stat b{display:block;font-family:var(--mono);font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
+.stat span{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+
+table{width:100%;border-collapse:collapse;margin-top:12px;background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+th{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;text-align:left;padding:10px 13px;background:var(--sunk);border-bottom:1px solid var(--rule2)}
+td{padding:10px 13px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:top;color:var(--ink2)}
+td:first-child{color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+.cap{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:26px}
+.mono{font-family:var(--mono);font-size:.78rem}
+
+.foot{font-family:var(--mono);font-size:.68rem;color:var(--ink2);line-height:1.9;border-top:1px solid var(--rule);padding-top:20px;margin-top:40px}
+.foot b{color:var(--good)}
+
+@media (max-width:800px){.wrap{padding:0 18px}h1{font-size:1.7rem}}
+@media print{body{background:#fff}.card,table{break-inside:avoid}}
+
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px}
+.num-card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:18px 20px}
+.num-card .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.num-card .n{font-family:var(--mono);font-size:2.1rem;font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-top:6px}
+.num-card .n .u{font-size:1.1rem;font-weight:500;color:var(--ink2)}
+.num-card .s{font-size:.8rem;color:var(--ink2);margin-top:4px}
+.num-card.na{border-style:dashed;background:transparent}
+.num-card.na .n{color:var(--rule2)}
+.num-card.na .s{color:var(--faint);font-style:italic}
+.num-card.good{border-color:var(--good)}
+.num-card.good .n{color:var(--good)}
+.num-card.amber{border-color:var(--amber)}
+.num-card.amber .n{color:var(--amber)}
+
+.seg{display:flex;height:15px;border-radius:8px;overflow:hidden;margin-top:16px;background:var(--sunk)}
+.seg span{display:block;height:100%}
+.legend{list-style:none;display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;font-size:.8rem;color:var(--ink2)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+.legend b{font-family:var(--mono);color:var(--ink)}
+
+table.bars{border:none;background:transparent}
+table.bars th{background:transparent;border:none;font-family:var(--sans);font-size:.83rem;font-weight:600;
+  color:var(--ink);text-transform:none;letter-spacing:0;width:34%;padding:5px 12px 5px 0;text-align:left}
+table.bars td{border:none;padding:5px 0}
+table.bars td span{display:block;height:13px;border-radius:3px;background:var(--ink2)}
+table.bars .me td span{background:var(--amber)}
+table.bars .me th{color:var(--amber)}
+table.bars .v{font-family:var(--mono);font-size:.78rem;width:52px;text-align:right;padding-left:12px}
+
+.funnel{list-style:none;margin-top:16px}
+.funnel li{display:grid;grid-template-columns:32% 1fr 46px;align-items:center;gap:12px;padding:5px 0}
+.funnel .lbl{font-size:.83rem;font-weight:600}
+.funnel .track{display:block}
+.funnel .bar{display:block;background:var(--ink);color:#fff;font-family:var(--mono);font-size:.75rem;
+  font-weight:700;padding:5px 10px;border-radius:4px;text-align:right;min-width:44px}
+.funnel .pct{font-family:var(--mono);font-size:.72rem;color:var(--faint);text-align:right}
+
+table.heat td{text-align:center;font-family:var(--mono);font-size:.8rem;color:var(--ink);font-weight:600}
+table.heat th{text-align:center}
+table.heat tbody th{background:var(--card);text-transform:none;font-family:var(--sans);font-size:.8rem;
+  font-weight:600;color:var(--ink);text-align:left;letter-spacing:0}
+.h0{background:transparent;color:var(--rule2)!important}
+.h1{background:#EDF3EF}.h2{background:#D6E7DD}.h3{background:#B3D4C2}.h4{background:#8CC0A6}
+
+.num,td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.gap{background:var(--card);border:1px dashed var(--rule2);border-radius:12px;padding:20px 23px;margin-top:20px}
+.gap ul{margin-top:10px;padding-left:20px}
+.gap li{font-size:.85rem;color:var(--ink2);margin-top:7px}
+.gap li b{color:var(--ink)}
+
+.scroll{overflow-x:auto}
+
+/* pílulas de status específicas deste painel */
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;
+  font-weight:700;padding:2px 8px;border-radius:20px}
+.pill.done{background:var(--goodSoft);color:var(--good);border:1px solid var(--good)}
+.pill.blocked{background:var(--redSoft);color:var(--red);border:1px solid var(--red)}
+.pill.owner{background:var(--amberSoft);color:var(--amber);border:1px solid var(--amber)}
+</style>
+</head>
+<body>
+
+<header class="cover"><div class="wrap">
+  <p class="eyebrow">Ultravis · painel de operações e negócios · v1</p>
+  <h1>Do anotado ao resolvido — 08/set/2026</h1>
+  <p class="covsub">Consolidado do backlog, das pendências operacionais e das decisões
+     registradas no repo — separado da seção "Funil" do <code>BACKLOG.md</code> (essa é sobre
+     paridade com o upstream; este painel é sobre o que a Ultravis pediu e o que já saiu do papel).
+     Gerado em 08/set/2026 a partir de <code>BACKLOG.md</code>, <code>STATUS.md</code> e
+     <code>DECISOES.md</code> em produção no repo.</p>
+</div></header>
+
+<div class="instr"><div class="wrap instr-in">
+  <span class="prov">dados reais</span>
+  <span><b>Medido</b> itens do backlog · pendências operacionais · decisões registradas · PRs mergeados</span>
+  <span class="sep"></span>
+  <span><b>Não medido</b> horas/custo por item · ROI · receita</span>
+  <span class="sep"></span>
+  <span><b>Janela</b> sessão de 08/set/2026 · contagem sobre o estado atual dos 3 arquivos</span>
+</div></div>
+
+<main class="page"><div class="wrap">
+
+  <h2>O dia em 5 números</h2>
+  <div class="nums">
+    <div class="num-card good">
+      <p class="k">PRs mergeados hoje</p>
+      <p class="n">5</p>
+      <p class="s">#164–#168, todos em <code>comeca-ai/ultravisai</code></p>
+    </div>
+    <div class="num-card good">
+      <p class="k">Achados P2 da auditoria corrigidos</p>
+      <p class="n">6</p>
+      <p class="s">container non-root · permissions em CI · open redirect · timeout · npm audit fix · GRANT residual</p>
+    </div>
+    <div class="num-card good">
+      <p class="k">Bloqueio de deploy</p>
+      <p class="n">Resolvido</p>
+      <p class="s">token Cloudflare — 3 tentativas até o run #38 passar</p>
+    </div>
+    <div class="num-card amber">
+      <p class="k">Pendências que só o dono resolve</p>
+      <p class="n">8<span class="u">/10</span></p>
+      <p class="s"><code>STATUS.md</code> § Pendências SUAS — 2 fechadas hoje</p>
+    </div>
+    <div class="num-card">
+      <p class="k">Itens no backlog</p>
+      <p class="n">87<span class="u">/108</span></p>
+      <p class="s">abertos, de todos os itens já registrados no <code>BACKLOG.md</code></p>
+    </div>
+  </div>
+  <p class="leitura"><b>Leitura:</b> o dia foi majoritariamente operação (destravar o deploy,
+     fechar a leva P2 da auditoria) — só 1 decisão de produto nova entrou no <code>DECISOES.md</code>
+     hoje. O backlog de produto não andou; ele segue do jeito que estava desde a última sessão.</p>
+
+  <h2>Funil do backlog — do anotado ao concluído</h2>
+  <p class="note">Todo item do <code>BACKLOG.md</code> nasce como anotação numa seção temática
+     (Funil, Reconciliação, Redesign, Produto, Bugs, Operacional). Só uma parte ganha prioridade
+     declarada (<code>P0</code>–<code>P3</code>) — é isso que tira o item da lista de ideias e
+     bota na fila de execução.</p>
+  <div class="card">
+    <ol class="funnel">
+      <li><span class="lbl">Anotado (todas as seções)</span>
+          <span class="track"><span class="bar" style="width:100%">108</span></span>
+          <span class="pct">—</span></li>
+      <li><span class="lbl">Priorizado (P0–P3 declarado)</span>
+          <span class="track"><span class="bar" style="width:50%">54</span></span>
+          <span class="pct">50%</span></li>
+      <li><span class="lbl">Concluído</span>
+          <span class="track"><span class="bar" style="width:14%">15</span></span>
+          <span class="pct">28%</span></li>
+    </ol>
+    <p class="leitura"><b>Onde está a perda:</b> metade do que é anotado (54 de 108) nunca chega
+       a ganhar uma prioridade — fica em seções que esperam decisão conjunta com o Igor (Funil,
+       Reconciliação IC×Score, Redesign Insights v3). Dos 54 que são priorizados, só 28% (15)
+       saíram — os outros 39 seguem abertos, a maioria em P1 (21 dos 39).</p>
+  </div>
+
+  <h3>Priorizado × concluído, por prioridade</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Prioridade</th><th class="num">Aberto</th><th class="num">Concluído</th><th class="num">Total</th></tr></thead>
+    <tbody>
+      <tr><td>P0 — agora</td><td class="num">5</td><td class="num">7</td><td class="num">12</td></tr>
+      <tr><td>P1 — próximo</td><td class="num">21</td><td class="num">5</td><td class="num">26</td></tr>
+      <tr><td>P2 — depois</td><td class="num">10</td><td class="num">3</td><td class="num">13</td></tr>
+      <tr><td>P3 — algum dia</td><td class="num">3</td><td class="num">0</td><td class="num">3</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="cap">Contagem de linhas com checkbox sob cada cabeçalho de prioridade no BACKLOG.md</div>
+
+  <h2>Operações — o que travava e o que destravou hoje</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Item</th><th>Estado</th><th>Nota</th></tr></thead>
+    <tbody>
+      <tr><td>Token Cloudflare / deploy do server</td><td><span class="pill done">resolvido</span></td>
+          <td>3 tentativas (runs #36, #37, #38) — o valor pós-Roll saiu quebrado 2x antes de validar. <code>api.ultravis.ai</code> no ar com o código de hoje.</td></tr>
+      <tr><td>Container do server roda como root</td><td><span class="pill done">resolvido</span></td>
+          <td><code>USER node</code> + <code>setcap</code> mantém a porta 80 sem root — confirmado no build real do deploy.</td></tr>
+      <tr><td>7 workflows sem <code>permissions:</code></td><td><span class="pill done">resolvido</span></td>
+          <td><code>contents: read</code> em todos — nenhum precisava de mais que isso.</td></tr>
+      <tr><td>Open redirect em <code>/auth/confirm</code></td><td><span class="pill done">resolvido</span></td>
+          <td>2 arquivos — URL absoluta só aceita se a origin bater com a nossa.</td></tr>
+      <tr><td><code>verificar-censo.yml</code> nunca falhava</td><td><span class="pill done">resolvido</span></td>
+          <td>Falha de verdade agora com silêncio de 8 dias — era a lacuna que escondeu o incidente de 06/set.</td></tr>
+      <tr><td>GRANT ALL residual (3 tabelas server-only)</td><td><span class="pill done">resolvido</span></td>
+          <td>Migration 00048 — mesma classe de risco do P0 real corrigido de manhã (migration 00047).</td></tr>
+      <tr><td><code>npm audit</code> no server</td><td><span class="pill done">resolvido</span></td>
+          <td>22 → 4 vulnerabilidades; as 4 restantes exigem bump major (pm2/uuid), não forçado de propósito.</td></tr>
+      <tr><td>Suíte de teste de isolamento RLS entre orgs</td><td><span class="pill blocked">aberto</span></td>
+          <td>Esforço M — no roadmap da auditoria, não atacado hoje.</td></tr>
+      <tr><td>Rotacionar <code>OPS_USER</code>/<code>OPS_PASS</code></td><td><span class="pill owner">dono</span></td>
+          <td>Estão como var de texto no painel do worker — aparecem em claro no log do CI.</td></tr>
+      <tr><td>Comparar <code>SUPABASE_URL</code> do worker com o cookie do site</td><td><span class="pill owner">dono</span></td>
+          <td>Único jeito de confirmar a causa do 401 em 5 telas (incidente aberto).</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Negócios — o cliente piloto (Polar)</h2>
+  <p class="note">Números já publicados no <code>STATUS.md</code> — repetidos aqui pra este painel
+     não obrigar ninguém a abrir dois documentos pra ver o estado do negócio junto com o da operação.</p>
+  <div class="nums">
+    <div class="num-card">
+      <p class="k">Share of Voice</p>
+      <p class="n">6,7<span class="u">%</span></p>
+      <p class="s">163 menções vs 2.262 dos concorrentes — Garmin domina com 1.096</p>
+    </div>
+    <div class="num-card">
+      <p class="k">Índice de Visibilidade</p>
+      <p class="n">66,7<span class="u">%</span></p>
+      <p class="s">aparece em 10 de 15 prompts rastreados</p>
+    </div>
+    <div class="num-card">
+      <p class="k">Sentimento</p>
+      <p class="n">27<span class="u">+ / 2−</span></p>
+      <p class="s">27 respostas positivas, 2 negativas</p>
+    </div>
+  </div>
+
+  <h3>Decisões de negócio pendentes (precisam do dono)</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Decisão</th><th>Nota</th></tr></thead>
+    <tbody>
+      <tr><td>Por qual item da Onda 0 começar</td><td>Alertas vs grader grátis — bloqueia priorização de P1</td></tr>
+      <tr><td>Pricing final</td><td>Faixa R$690–990? Alinhar código (49/249) × landing (390/1.290) antes do Stripe</td></tr>
+      <tr><td>Quando ligar <code>IS_CLOUD=true</code></td><td>Só ao monetizar — degrada a POC antes disso</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="cap">BACKLOG.md § Decisões pendentes (precisam de você)</div>
+
+  <section class="gap">
+    <h2>O que este painel não mostra</h2>
+    <ul>
+      <li><b>Custo/hora por item do backlog</b> — não coletamos os dados; não existe apontamento de tempo por tarefa.</li>
+      <li><b>Receita ou MRR</b> — não coletamos os dados aqui; o cliente piloto ainda não está em cobrança ativa (decisão de pricing pendente, ver tabela acima).</li>
+      <li><b>Itens do Funil de concorrentes (upstream)</b> — de propósito fora deste painel; ver a seção "Funil" do <code>BACKLOG.md</code>, que já cobre isso com o próprio vigia do upstream.</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <h3>Método</h3>
+    <p><b>Backlog (anotado/priorizado/concluído)</b> = contagem de linhas <code>- [ ]</code> e
+       <code>- [x]</code> no <code>BACKLOG.md</code>, agrupadas pelo cabeçalho <code>### P0</code>–<code>P3</code>
+       mais próximo acima de cada linha. Itens fora de qualquer cabeçalho de prioridade (seções
+       Funil, Reconciliação, Redesign) contam só no total "anotado", não no "priorizado".</p>
+    <p><b>Pendências operacionais</b> = itens numerados em <code>STATUS.md</code> § Pendências SUAS,
+       na versão do arquivo consolidada nesta sessão (PR #168).</p>
+    <p><b>Achados da auditoria</b> = itens P2 do <code>AUDITORIA.md</code> atacados no PR #164 desta sessão.</p>
+    <p><b>Polar (negócios)</b> = números já publicados em <code>STATUS.md</code> § "O cliente piloto",
+       sem recálculo nesta sessão.</p>
+    <p>v1 · gerado em 08/set/2026 a partir do estado do repo <code>comeca-ai/ultravisai</code> ao
+       fim da sessão (PR #168 mergeado).</p>
+  </footer>
+
+</div></main>
+</body>
+</html>

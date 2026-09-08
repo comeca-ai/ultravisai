@@ -16,6 +16,8 @@ import { Separator } from '@/components/ui/separator';
 import { siteConfig } from '@/config/site';
 import { track } from '@/lib/analytics';
 
+import { useTurnstile } from '@/components/auth/turnstile-gate';
+
 export function SignUpForm() {
   const t = useTranslations('auth');
   const router = useRouter();
@@ -26,6 +28,7 @@ export function SignUpForm() {
   const [email, setEmail] = useState(invitedEmail);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const turnstile = useTurnstile();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -45,8 +48,11 @@ export function SignUpForm() {
         data: {
           full_name: fullName,
         },
+        captchaToken: turnstile.captchaToken,
       },
     });
+    // Uso único: sem reset, uma segunda tentativa morre com token gasto.
+    turnstile.reset();
 
     if (error) {
       const alreadyExists = /already (registered|exists)|user exists/i.test(error.message);
@@ -126,6 +132,8 @@ export function SignUpForm() {
             disabled={isLoading}
           />
         </div>
+
+        {turnstile.widget}
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (

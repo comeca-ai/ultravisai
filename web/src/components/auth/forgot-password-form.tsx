@@ -8,12 +8,14 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, MailCheck } from 'lucide-react';
+import { useTurnstile } from '@/components/auth/turnstile-gate';
 
 export function ForgotPasswordForm() {
   const t = useTranslations('auth');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const turnstile = useTurnstile();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,7 +26,9 @@ export function ForgotPasswordForm() {
 
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${appUrl}/auth/confirm?next=/reset-password`,
+      captchaToken: turnstile.captchaToken,
     });
+    turnstile.reset();
 
     // Always show the generic success state regardless of whether the email is
     // registered — prevents account enumeration.
@@ -64,6 +68,8 @@ export function ForgotPasswordForm() {
           disabled={isLoading}
         />
       </div>
+
+      {turnstile.widget}
 
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? (

@@ -14,6 +14,7 @@ import { Loader2, MailCheck } from 'lucide-react';
 import { OAuthButtons } from '@/components/auth/oauth-buttons';
 import { Separator } from '@/components/ui/separator';
 import { track } from '@/lib/analytics';
+import { useTurnstile } from '@/components/auth/turnstile-gate';
 
 /** Janela do rate limit do Supabase para reenvio de OTP. */
 const ESPERA_REENVIO_S = 60;
@@ -34,6 +35,9 @@ export function SignInForm() {
   const [semSenha, setSemSenha] = useState(false);
   const [linkEnviado, setLinkEnviado] = useState(false);
   const [esperaReenvio, setEsperaReenvio] = useState(0);
+  // Desligado enquanto não houver NEXT_PUBLIC_TURNSTILE_SITE_KEY — aí o token
+  // vai como undefined, que é o que as chamadas já mandam hoje.
+  const turnstile = useTurnstile();
 
   useEffect(() => {
     if (esperaReenvio <= 0) return;
@@ -50,7 +54,11 @@ export function SignInForm() {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: { captchaToken: turnstile.captchaToken },
     });
+    // Token é de uso único: sem resetar, a segunda tentativa morre com um
+    // token já gasto e a pessoa não entende por quê.
+    turnstile.reset();
 
     if (error) {
       const msg = error.message.toLowerCase();
@@ -90,8 +98,10 @@ export function SignInForm() {
         // /auth/callback já troca o code por sessão e respeita ?next — o mesmo
         // caminho do OAuth, então nada de novo pra manter.
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(destino)}`,
+        captchaToken: turnstile.captchaToken,
       },
     });
+    turnstile.reset();
 
     if (error) {
       const msg = error.message.toLowerCase();
@@ -215,6 +225,8 @@ export function SignInForm() {
             />
           </div>
         )}
+
+        {turnstile.widget}
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (

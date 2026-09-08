@@ -5,6 +5,39 @@
 > do jeito que estão hoje. Este arquivo separa o que é diferença legítima de
 > desenho do que é inconsistência a corrigir.
 
+## Índice
+
+- **Parte 1** — Ranking médio × Posição: por que os dois números divergem
+- **Parte 2** — Resumo de Visibilidade vazio entre censos
+- **Parte 3** — As decisões técnicas: ranking, citação, pesos, validação do método
+- **Parte 4** — Apresentação da auditoria (slide P3 do Igor)
+- **Estado da implementação** — o que já está em código e o que ainda é só decisão (logo abaixo)
+
+## Estado da implementação (atualizado 08/set)
+
+Este arquivo mistura levantamento, decisão e implementação — nasceu de uma
+conversa ao vivo, não de um plano escrito do zero. Pra não obrigar quem lê a
+adivinhar o que já existe, o resumo:
+
+| Decisão | Implementado? | Onde |
+| --- | --- | --- |
+| Ranking = Σ posições ÷ aparições | ✅ já era assim no Insights (nada mudou lá) | RPC `insights_aggregates` |
+| Nota de Posição relativa ao campo (`appearance_rivals`), pódio fora | ✅ código pronto | migration `00046`, `visibility-index.ts`, branch `ajustar-analise` (PR #154) |
+| Score e Insights lendo o mesmo RPC (resolve filtros/período/teto de 50k) | ✅ código pronto | `visibility-index.ts` chama `insights_aggregates` diretamente |
+| Pesos do Score 25% cada | ✅ código pronto | `web/src/config/visibility-score.ts` |
+| Citação = link que traz o produto, de qualquer fonte | ❌ só decisão, sem código ainda | Parte 3 → Definição de citação |
+| Resumo de Visibilidade cai pro último resultado + tarja | ❌ só decisão | Parte 2 |
+| Padrão do período `24h` → `30d` | ❌ pendente | Parte 2 |
+| Sinais de sitemap e Product schema (slide do Igor) | ❌ pendente | Parte 4 |
+| "O QUE FAZER" no topo da auditoria, diagnóstico recolhido | ❌ pendente | Parte 4 |
+
+O que já está em código está no PR **#154** (`ajustar-analise`), em draft —
+esperando você tirar do rascunho. Nenhum item marcado ✅ chegou em produção
+ainda: depende do deploy do Cloudflare, que segue travado por permissão do
+token.
+
+---
+
 ## Onde cada número é calculado
 
 |              | Ranking médio (Insights)                                       | Posição (Score de Visibilidade)                                    |
@@ -138,6 +171,10 @@ até lá.
 
 Em ordem de retorno pelo esforço.
 
+> Esta lista P0-P3 é o primeiro corte, escrito antes das decisões técnicas
+> da Parte 3. A tabela final e completa — com os 8 itens e o status real de
+> cada um — está em "Ordem sugerida de execução", mais abaixo.
+
 ### P0 — Alinhar os filtros (é o único que produz número errado)
 
 Hoje um filtro no Insights faz os dois números falarem de coisas diferentes
@@ -156,8 +193,9 @@ Custo de (a): a consulta já lê `platform`; falta propagar `model_used`,
 O card "Ranking médio" leva ao Score. Deve dizer, no tooltip, algo como:
 
 > Posição média em que a marca aparece no texto. **Não é** a nota de Posição
-> do Score — lá o cálculo é de pódio (1º=100 · 2º=60 · 3º=30 · 4º ou pior=0),
-> então melhorar de 7º para 4º muda esta média e não muda aquela nota.
+> do Score — lá o cálculo compara com o campo: quantos concorrentes foram
+> citados na mesma resposta. O mesmo 3,3º vale nota bem diferente num campo
+> de 3 concorrentes ou de 20 (ver "Como o Score reflete o ranking").
 
 E o Score, no sentido inverso, deve exibir a **média** ao lado da nota. Custo:
 i18n nos dois idiomas + um campo a mais no retorno do índice.
@@ -267,18 +305,39 @@ do servidor — é tela e action, sobe pela Vercel.
 
 # Ordem sugerida de execução
 
-| #   | O quê                                       | Por quê primeiro                                             | Depende de |
-| --- | ------------------------------------------- | ------------------------------------------------------------ | ---------- |
-| 1   | Padrão do período `24h` → `30d`             | uma linha, e tira a tela vazia do caminho do cliente hoje    | nada       |
-| 2   | Fallback pro último resultado + tarja       | é o que faz o produto parar de parecer quebrado entre censos | nada       |
-| 3   | Score aceitar os mesmos filtros do Insights | é o único item que produz número divergente de verdade       | nada       |
-| 4   | Tooltips explicando média × nota de pódio   | barato, e evita a conversa "seu número está errado"          | 3          |
-| 5   | Igualar períodos (`24h`, `90d` no Score)    | fecha a comparação entre as duas telas                       | 3          |
+> Tabela reescrita em 08/set — a versão original listava 5 itens mas o texto
+> abaixo dela falava em "sete primeiros" e "item 8": foi escrita antes das
+> decisões maiores do arquivo (fórmula final do ranking, definição de
+> citação, pesos 25%) e nunca foi atualizada com elas. Esta versão reflete
+> as 8 decisões reais e o estado de cada uma — ver também "Estado da
+> implementação" no topo do arquivo.
 
-Os sete primeiros não dependem do deploy do servidor nem de credencial nova: são
-tela e server action, sobem pela Vercel. O item 8 toca o parser do servidor e só chega em produção quando o deploy destravar.
+| # | O quê | Status | Por quê nesta ordem | Depende de |
+| --- | --- | --- | --- | --- |
+| 1 | Nota de Posição relativa ao campo, pódio fora | ✅ código pronto (PR #154) | corrige o teto artificial que a pergunta do dono expôs | nada |
+| 2 | Score lendo o mesmo RPC do Insights | ✅ código pronto (PR #154) | é o que faz "ranking médio" e "nota de Posição" pararem de divergir | 1 |
+| 3 | Pesos do Score 25% cada | ✅ código pronto (PR #154) | resolve de brinde a soma 65≠100 que ninguém conseguia ler | nada |
+| 4 | Padrão do período `24h` → `30d` | ⏳ pendente | uma linha, tira a tela vazia do caminho do cliente hoje | nada |
+| 5 | Fallback pro último resultado + tarja | ⏳ pendente | é o que faz o produto parar de parecer quebrado entre censos | nada |
+| 6 | Citação = link que traz o produto, de qualquer fonte | ⏳ pendente | hoje só conta domínio próprio; autoridade externa some do número | decisão sobre recálculo retroativo do `visibility_score` |
+| 7 | Tooltips explicando posição relativa ao campo | ⏳ pendente | evita a conversa "seu número está errado" | 1, 2 |
+| 8 | Igualar períodos (`24h`, `90d` no Score) | ⏳ pendente | fecha a comparação entre as duas telas | 2 |
+
+Os itens 1-2-3 já estão implementados na branch `ajustar-analise` (PR #154,
+draft) — faltam merge e o deploy do Cloudflare destravar pra chegarem em
+produção. Os itens 4-5-7-8 são só tela e server action (Vercel, sem
+depender do deploy do servidor). O item 6 toca o parser do servidor
+(`response-parser.js`) e só chega em produção quando o deploy destravar.
 
 ---
+
+---
+
+# Parte 3 — As decisões técnicas (ranking, citação, pesos, validação)
+
+As cinco seções abaixo nasceram de perguntas separadas na mesma sessão e
+formam um bloco só: são as decisões que substituem o que a Parte 1
+diagnosticou como divergência entre "ranking médio" e "nota de Posição".
 
 ## Definição do ranking — decisão do dono (07/set)
 
@@ -315,78 +374,20 @@ Insights. O problema nunca esteve aqui.
 "somatório de posicionamento ÷ vezes que apareceu". Precisa passar a derivar
 da média.
 
-### Como virar nota 0–100
+### Como virar nota 0–100 — caminho percorrido, hoje SUPERADO por inteiro
 
-> ⚠️ **Superado.** A conversão abaixo (`100 / média`) foi substituída — ela
-> ignora quantos concorrentes existem no campo. Ver a seção final,
-> "Como o Score reflete o ranking". O texto fica aqui só como registro do
-> caminho percorrido.
-
-A média é ilimitada (pode dar #17) e "menor é melhor"; a nota precisa ser
-0–100 e "maior é melhor". A conversão mais simples e defensável:
-
-```
-nota = 100 / ranking_médio
-```
-
-| Ranking médio | Nota |
-| ------------- | ---- |
-| 1,0           | 100  |
-| 1,5           | 67   |
-| 2,0           | 50   |
-| 2,6           | 38   |
-| 3,8           | 26   |
-| 5,0           | 20   |
-
-Decai suave, nunca chega a zero (aparecer em #20 vale mais que não aparecer,
-o que está certo) e é a mesma curva que o mercado usa para posição em busca.
-
-**Um detalhe que não pode ser trocado:** a média é calculada **primeiro** e a
-nota depois — `100 / média(posições)`. Fazer o contrário (média das notas
-`100/posição` de cada resposta) dá número diferente e não é o que a definição
-diz. Exemplo com 2 respostas, #1 e #3: `100/média(1,3) = 100/2 = 50`, mas
-`média(100/1, 100/3) = média(100, 33) = 67`. **A ordem correta é a primeira.**
-
-### O que muda na prática
-
-Retomando os exemplos da Parte 1, agora sob a regra nova:
-
-**Exemplo A — a nota volta a se mexer.** 3×#1, 2×#2, 1×#3, 4×#7:
-
-```
-                    hoje (pódio)   com a regra nova
-média 3,8    →      nota 45        nota 26
-as de #7 vão pra #4:
-média 2,6    →      nota 45        nota 38   ← agora acompanha
-```
-
-Era exatamente o defeito relatado: a marca melhorava e o Score não se mexia.
-
-**Exemplo B — e o que se perde.** 5×#1 + 5×#3 versus 10×#2, ambos média 2,0:
-
-```
-                    hoje (pódio)   com a regra nova
-5×#1 + 5×#3  →      nota 65        nota 50
-10×#2        →      nota 60        nota 50   ← agora empatam
-```
-
-O pódio premiava a marca que às vezes é a primeira citada. A regra nova diz
-que os dois perfis valem o mesmo. É consequência direta da definição — média
-é média — e está registrada aqui para não virar surpresa depois.
-
-### Onde mexer
-
-| Arquivo                       | O quê                                                               |
-| ----------------------------- | ------------------------------------------------------------------- |
-| `visibility-index.ts:487-490` | somar `rankSum` e `rankCount` em vez de distribuir em `p1..p4`      |
-| `visibility-index.ts:592-596` | nota = `100 / (rankSum / rankCount)`; `null` quando `rankCount = 0` |
-| Score (tela)                  | exibir a média junto da nota — é o número que o cliente entende     |
-| `messages/*.json`             | textos nos dois idiomas                                             |
-
-A distribuição `#1/#2/#3/#4+` **continua sendo exibida** (é ótima para leitura
-qualitativa); ela só deixa de ser a origem da nota.
-
-Nenhuma migration: `appearance_rank` já tem tudo o que a fórmula precisa.
+> ⚠️ **Toda esta subseção foi substituída** — fórmula, exemplos numéricos E a
+> tabela "onde mexer" que vinha com ela. `100 / média` ignora quantos
+> concorrentes existem no campo: dava o mesmo número (30) pra um 3,3º lugar
+> ruim (campo de 3) e um 3,3º lugar excelente (campo de 20), e travava
+> qualquer marca sempre-segunda-colocada num teto de 50 pra sempre.
+>
+> A fórmula e a tabela "onde mexer" que valem de verdade — a que considera o
+> tamanho do campo (`appearance_rivals`) e que está implementada — estão na
+> seção "Como o Score reflete o ranking", mais abaixo. Fica só este resumo
+> aqui como registro de que o caminho foi percorrido e por quê foi
+> abandonado; não implemente nada a partir do que estava escrito nesta
+> subseção antes.
 
 ---
 
@@ -791,7 +792,7 @@ próxima mudança no RPC não desfazer isto em silêncio.
 
 ---
 
-# Parte 3 — Como apresentar o resultado da auditoria (slide P3 do Igor)
+# Parte 4 — Como apresentar o resultado da auditoria (slide P3 do Igor)
 
 O slide define o formato da entrega, não só o conteúdo:
 

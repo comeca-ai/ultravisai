@@ -184,8 +184,9 @@ export function findingsToAlerts(findings) {
     seen.set(base, n);
     const evidence = String(f.evidence ?? '').trim();
     const message =
-      String(f.message ?? '').trim().slice(0, 400) +
-      (evidence ? ` — evidência: ${evidence.slice(0, 300)}` : '');
+      String(f.message ?? '')
+        .trim()
+        .slice(0, 400) + (evidence ? ` — evidência: ${evidence.slice(0, 300)}` : '');
     alerts.push({
       key: n === 1 ? base : `${base}-${n}`,
       severity: f.severity === 'critical' ? 'critical' : 'warning',
@@ -347,7 +348,12 @@ export async function runConsistencyLlmOnce() {
     const alerts = findingsToAlerts(findings);
     lastRun = { at: Date.now(), alerts };
     logger.info(
-      { model: modelString, brands: summary.length, findings: findings.length, alerts: alerts.length },
+      {
+        model: modelString,
+        brands: summary.length,
+        findings: findings.length,
+        alerts: alerts.length,
+      },
       'consistency-llm: weekly run complete',
     );
     return alerts;

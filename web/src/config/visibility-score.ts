@@ -32,9 +32,20 @@ export interface ScoreDimension {
   measured: boolean;
 }
 
+// Pesos iguais (decisão do dono, 07/set): as quatro dimensões valem 25% cada.
+//
+// Antes eram 20/20/15/10 — que somam 65, não 100, e a tela renormalizava na
+// hora de calcular. O número exibido saía certo, mas ninguém conseguia ler os
+// pesos e prever o resultado (foi essa a origem do bug de 29/ago, em que a
+// fórmula impressa não fechava com o valor). Somando 100, a renormalização
+// vira identidade quando todas as dimensões têm amostra.
+//
+// O que a decisão troca: Sentimento sobe de 15,4% para 25% de peso efetivo, e
+// Citação e Presença caem de 30,8% para 25%. Ser citado deixa de valer o
+// dobro de ser bem falado.
 export const SCORE_DIMENSIONS: ScoreDimension[] = [
-  { key: 'citation', n: '01', weight: 20, measured: true },
-  { key: 'presence', n: '02', weight: 20, measured: true },
-  { key: 'position', n: '03', weight: 15, measured: true },
-  { key: 'sentiment', n: '04', weight: 10, measured: true },
+  { key: 'citation', n: '01', weight: 25, measured: true },
+  { key: 'presence', n: '02', weight: 25, measured: true },
+  { key: 'position', n: '03', weight: 25, measured: true },
+  { key: 'sentiment', n: '04', weight: 25, measured: true },
 ];

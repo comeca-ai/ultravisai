@@ -1301,11 +1301,13 @@
         "brief": "In which position do I appear in the answers I am in?",
         "ev": "Order of appearance in the text, across {samples} answers where you appear:",
         "noSample": "The brand has not appeared in any answer in this window yet (or ranking enrichment is still running — up to 30 min).",
-        "how": "Ranking = order of the first mention in the answer text. Score: 1st=100 · 2nd=60 · 3rd=30 · 4th+=0, averaged over answers.",
+        "how": "Ranking = order of the first mention in the text. The score compares against the field: (competitors + 1 − your position) ÷ competitors × 100, per answer. 1st place = 100, last = 0 — so 3.3rd among 20 competitors is worth far more than 3.3rd among 3.",
         "p1": "1st place",
         "p2": "2nd place",
         "p3": "3rd place",
-        "p4": "4th or worse"
+        "p4": "4th or worse",
+        "avg": "Average ranking: {avg} — the same number as the Insights screen, read from the same query.",
+        "semRival": "In {count, plural, one {# answer} other {# answers}} no competitor was cited: the score is 100 with no rival, and drops the day one shows up."
       },
       "sentiment": {
         "name": "Sentiment",

@@ -158,6 +158,15 @@ export interface InsightsSummary {
   rankAvg: number | null;
   rankCount: number;
   rankDist: { r1: number; r2: number; r3: number; r4: number; r5: number; gt5: number };
+  /**
+   * Nota 0-100 da dimensão Posição do Score, RELATIVA ao número de
+   * concorrentes citados: `(rivais + 1 - posição) / rivais × 100` por
+   * resposta, somada e dividida pela amostra. Vem do mesmo RPC que o
+   * `rankAvg` — as duas telas leem o mesmo número, não duas contas parecidas.
+   */
+  posScore: number | null;
+  /** Quantas das ranqueadas não tinham concorrente citado (nota 100 sem adversário). */
+  posSemRival: number;
 }
 
 /**
@@ -197,6 +206,12 @@ interface InsightsAggregates {
   rank_4?: number;
   rank_5?: number;
   rank_gt5?: number;
+  /** Média pronta da ordem de aparição (migration 00046). */
+  rank_avg?: number | null;
+  /** Nota 0-100 da dimensão Posição, relativa ao campo (migration 00046). */
+  pos_score?: number | null;
+  /** Respostas ranqueadas em que nenhum concorrente foi citado. */
+  pos_sem_rival?: number;
   last_checked_at: string | null;
   by_model: Array<{
     model_used: string;
@@ -1099,6 +1114,8 @@ export async function getInsightsSummary(
       rankAvg: null,
       rankCount: 0,
       rankDist: { r1: 0, r2: 0, r3: 0, r4: 0, r5: 0, gt5: 0 },
+      posScore: null,
+      posSemRival: 0,
     };
   }
 
@@ -1202,7 +1219,11 @@ export async function getInsightsSummary(
   // Ultravis (resumo 19/ago): ranking médio = média da ordem de aparição
   // sobre as respostas ranqueadas; distribuição #1..#5/>#5 dos post-its P1.
   const rankCount = cur.rank_count ?? 0;
-  const rankAvg = rankCount > 0 ? roundTo1((cur.rank_sum ?? 0) / rankCount) : null;
+  // A média vem PRONTA do RPC (00046). Dividir aqui de novo reintroduziria a
+  // divergência que a migration existe pra fechar — o fallback só cobre um
+  // banco ainda sem a 00046 aplicada.
+  const rankAvg =
+    cur.rank_avg ?? (rankCount > 0 ? roundTo1((cur.rank_sum ?? 0) / rankCount) : null);
 
   return {
     avgVisibilityScore,
@@ -1223,6 +1244,8 @@ export async function getInsightsSummary(
     sentNeg: cur.sent_neg ?? 0,
     rankAvg,
     rankCount,
+    posScore: cur.pos_score ?? null,
+    posSemRival: cur.pos_sem_rival ?? 0,
     rankDist: {
       r1: cur.rank_1 ?? 0,
       r2: cur.rank_2 ?? 0,

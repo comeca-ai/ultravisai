@@ -123,14 +123,25 @@ export interface VisibilityIndexData {
     citation: number;
     presence: number;
     /**
-     * Posição por ordem de aparição (premissa 18/ago): distribuição de
-     * respostas em que a marca foi citada em 1º/2º/3º/4º+ lugar, e nota B
-     * (pódio ponderado: 1º=100 · 2º=60 · 3º=30 · 4º+=0). samples = respostas
-     * com rank calculado; null = nenhuma ainda.
+     * Posição por ordem de aparição (premissa 18/ago), agora RELATIVA ao
+     * campo: `(rivais + 1 - posição) / rivais × 100` por resposta.
+     *
+     * Tudo aqui vem do RPC `insights_aggregates` (migration 00046) — o MESMO
+     * que alimenta o "Ranking médio" da tela de Insights. Antes esta conta
+     * era refeita em memória, com pódio 100/60/30/0, sem os filtros do RPC e
+     * com teto de 50 mil linhas: duas contas parecidas que divergiam em uso
+     * normal. Agora é uma leitura, não uma segunda implementação.
+     *
+     * `avg` é o número que o cliente entende (#2,3) e `score` é o que entra
+     * na média das dimensões; a tela mostra os dois juntos.
      */
     position: {
       score: number | null;
+      /** Média da ordem de aparição — idêntica à do Insights, por construção. */
+      avg: number | null;
       samples: number;
+      /** Respostas ranqueadas sem nenhum concorrente citado (nota 100 sem adversário). */
+      semRival: number;
       dist: { p1: number; p2: number; p3: number; p4: number };
     };
     sentiment: {
@@ -330,6 +341,28 @@ export async function getVisibilityIndex(
       ? null
       : new Date(Date.now() - (preset === '7d' ? 7 : 30) * 24 * 3600 * 1000).toISOString();
 
+  // Posição vem do MESMO RPC que alimenta o "Ranking médio" do Insights
+  // (migration 00046). Não é uma segunda implementação da mesma conta — é a
+  // leitura do mesmo número, com os mesmos filtros, sem o teto de linhas que
+  // a varredura em memória tem. Degradar aqui não pode derrubar o Score: sem
+  // o RPC, a dimensão Posição fica `null` e as outras três seguem.
+  const { data: rankData } = await supabase.rpc('insights_aggregates', {
+    p_brand_id: brandId,
+    p_date_from: from,
+  });
+  const rank = (rankData ?? null) as {
+    rank_count?: number;
+    rank_avg?: number | null;
+    pos_score?: number | null;
+    pos_sem_rival?: number;
+    rank_1?: number;
+    rank_2?: number;
+    rank_3?: number;
+    rank_4?: number;
+    rank_5?: number;
+    rank_gt5?: number;
+  } | null;
+
   // Aggregation state. The window aggregates feed the scores; the weekly
   // aggregates (always over full history) feed the evolution chart.
   interface CatAgg {
@@ -364,7 +397,6 @@ export async function getVisibilityIndex(
   // Fontes pesquisadas do Sentimento: placar por motor (pedido de 19/ago).
   const sentByPlatform = new Map<string, { pos: number; neu: number; neg: number }>();
   const sentSources = new Map<string, { pos: number; neu: number; neg: number }>();
-  const posDist = { p1: 0, p2: 0, p3: 0, p4: 0 };
 
   interface WeekAgg {
     results: number;
@@ -479,16 +511,6 @@ export async function getVisibilityIndex(
         src[sentKey] += 1;
         sentSources.set(host, src);
       }
-
-      // rank >= 1 = calculado; 0 = não computável; null = pendente (o
-      // enriquecimento do server preenche em até 30 min).
-      const rank = r.appearance_rank;
-      if (typeof rank === 'number' && rank >= 1) {
-        if (rank === 1) posDist.p1 += 1;
-        else if (rank === 2) posDist.p2 += 1;
-        else if (rank === 3) posDist.p3 += 1;
-        else posDist.p4 += 1;
-      }
     }
 
     for (const g of touched) {
@@ -589,11 +611,24 @@ export async function getVisibilityIndex(
       citation: ownCitationScore(pctOwn),
       presence: winResults > 0 ? Math.round((mentioned / winResults) * 100) : 0,
       position: (() => {
-        const samples = posDist.p1 + posDist.p2 + posDist.p3 + posDist.p4;
-        if (samples === 0) return { score: null, samples: 0, dist: posDist };
-        // Nota B (decisão do dono, 18/ago): pódio ponderado por degrau.
-        const score = Math.round((posDist.p1 * 100 + posDist.p2 * 60 + posDist.p3 * 30) / samples);
-        return { score, samples, dist: posDist };
+        const samples = rank?.rank_count ?? 0;
+        const dist = {
+          p1: rank?.rank_1 ?? 0,
+          p2: rank?.rank_2 ?? 0,
+          p3: rank?.rank_3 ?? 0,
+          // O RPC separa 4º, 5º e >5º; a tela do Score agrupa em "4º+".
+          p4: (rank?.rank_4 ?? 0) + (rank?.rank_5 ?? 0) + (rank?.rank_gt5 ?? 0),
+        };
+        if (samples === 0) {
+          return { score: null, avg: null, samples: 0, semRival: 0, dist };
+        }
+        return {
+          score: rank?.pos_score ?? null,
+          avg: rank?.rank_avg ?? null,
+          samples,
+          semRival: rank?.pos_sem_rival ?? 0,
+          dist,
+        };
       })(),
       sentiment: (() => {
         const byPlatform = Array.from(sentByPlatform.entries())

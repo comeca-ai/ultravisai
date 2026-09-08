@@ -1,0 +1,117 @@
+# Cria contato@ultravis.ai via Email Routing da Cloudflare (grátis) —
+# é o canal LGPD referenciado nas páginas de Termos/Privacidade
+# (pendência nº 3 do STATUS.md).
+#
+# Ordem defensiva (mesmo espírito do cutover-api-dns.yml): (1) habilita
+# Email Routing na zona (idempotente — se já estiver habilitado, segue);
+# (2) lê os destinos já verificados; se o destino pedido não estiver lá,
+# CRIA e avisa que precisa clicar no e-mail de verificação da Cloudflare
+# antes da regra funcionar; (3) cria/atualiza a regra
+# contato@ultravis.ai → destino; (4) imprime o estado final.
+#
+# Não apaga nada existente. Roda no merge deste arquivo; depois fica inerte
+# (só re-roda se o arquivo mudar, ou via workflow_dispatch com input).
+name: criar-email-contato
+
+on:
+  workflow_dispatch:
+    inputs:
+      destino:
+        description: 'E-mail de destino do forward (padrão: jhonata.emerick@gmail.com)'
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths: ['.github/workflows/criar-email-contato.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  criar:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ZONE: 'ultravis.ai'
+      ENDERECO: 'contato@ultravis.ai'
+      DESTINO: ${{ inputs.destino || 'jhonata.emerick@gmail.com' }}
+    steps:
+      - name: Habilitar Email Routing + criar endereço e regra
+        run: |
+          CF="https://api.cloudflare.com/client/v4"
+          j() { python3 -c 'import json,sys;print(json.dumps(json.load(sys.stdin),indent=1)[:900])'; }
+          okof() { python3 -c 'import json,sys;print(1 if json.load(sys.stdin).get("success") else 0)'; }
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && { echo "::error::sem CLOUDFLARE_API_TOKEN"; exit 1; }
+
+          echo "== 1. zona =="
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$CF/zones?name=$ZONE" > /tmp/zone.json
+          j < /tmp/zone.json
+          ZID=$(python3 -c 'import json;r=json.load(open("/tmp/zone.json")).get("result") or [];print(r[0]["id"] if r else "")')
+          [ -z "$ZID" ] && { echo "::error::token não enxerga a zona $ZONE (falta Zone:Read) — nada foi alterado"; exit 1; }
+
+          echo "== 2. habilitar Email Routing (idempotente) =="
+          curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "$CF/zones/$ZID/email/routing/enable" > /tmp/enable.json
+          j < /tmp/enable.json
+          if [ "$(okof < /tmp/enable.json)" != "1" ]; then
+            JA_HABILITADO=$(python3 -c 'import json;d=json.load(open("/tmp/enable.json"));print(1 if any("already" in str(e.get("message","")).lower() or "enabled" in str(e.get("message","")).lower() for e in d.get("errors",[])) else 0)')
+            if [ "$JA_HABILITADO" != "1" ]; then
+              echo "::error::Email Routing não habilitou — falta a permissão 'Email Routing Rules: Edit' (ou 'Email Routing Addresses: Edit') no token. JSON acima."
+              exit 1
+            fi
+            echo "(já estava habilitado — seguindo)"
+          fi
+
+          echo "== 3. endereços de destino já verificados =="
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "$CF/zones/$ZID/email/routing/addresses" > /tmp/enderecos.json
+          j < /tmp/enderecos.json
+          JA_EXISTE=$(python3 -c "
+          import json
+          d = json.load(open('/tmp/enderecos.json'))
+          alvo = '$DESTINO'.lower()
+          for e in (d.get('result') or []):
+              if e.get('email','').lower() == alvo:
+                  print('verificado' if e.get('verified') else 'pendente')
+                  break
+          else:
+              print('ausente')
+          ")
+          echo "destino '$DESTINO': $JA_EXISTE"
+
+          if [ "$JA_EXISTE" = "ausente" ]; then
+            echo "== 3b. criando destino (dispara e-mail de verificação da Cloudflare) =="
+            curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+              "$CF/zones/$ZID/email/routing/addresses" \
+              --data "{\"email\":\"$DESTINO\"}" > /tmp/criar_dest.json
+            j < /tmp/criar_dest.json
+            echo "::warning::destino '$DESTINO' criado mas AINDA NÃO VERIFICADO — clique no link que a Cloudflare mandou pra essa caixa antes que o forward funcione de verdade."
+          fi
+
+          echo "== 4. criar/atualizar a regra $ENDERECO → $DESTINO =="
+          NOME_REGRA="contato para $DESTINO"
+          curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+            "$CF/zones/$ZID/email/routing/rules" \
+            --data "{\"matchers\":[{\"type\":\"literal\",\"field\":\"to\",\"value\":\"$ENDERECO\"}],\"actions\":[{\"type\":\"forward\",\"value\":[\"$DESTINO\"]}],\"enabled\":true,\"name\":\"$NOME_REGRA\"}" > /tmp/regra.json
+          j < /tmp/regra.json
+          if [ "$(okof < /tmp/regra.json)" != "1" ]; then
+            JA_EXISTE_REGRA=$(python3 -c 'import json;d=json.load(open("/tmp/regra.json"));print(1 if any("already" in str(e.get("message","")).lower() or "exist" in str(e.get("message","")).lower() for e in d.get("errors",[])) else 0)')
+            if [ "$JA_EXISTE_REGRA" != "1" ]; then
+              echo "::error::criação da regra falhou — JSON acima."
+              exit 1
+            fi
+            echo "(regra já existia — seguindo)"
+          fi
+
+          echo "== 5. estado final das regras =="
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "$CF/zones/$ZID/email/routing/rules" | j
+
+          {
+            echo "### Email Routing — $ENDERECO → $DESTINO"
+            echo "Destino '$DESTINO': **$JA_EXISTE**"
+            if [ "$JA_EXISTE" = "ausente" ]; then
+              echo ""
+              echo "⚠️ Falta clicar no e-mail de verificação da Cloudflare em **$DESTINO** — sem isso o forward não entrega."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

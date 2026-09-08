@@ -167,13 +167,10 @@ i18n nos dois idiomas + um campo a mais no retorno do índice.
 Somar `24h` e `90d` ao Score, ou tirar do Insights. Preferência: somar ao
 Score — `90d` é o período em que a evolução aparece.
 
-### P3 — Decidir se o truncamento no 4º fica
+### P3 — ~~Decidir se o truncamento no 4º fica~~ → **DECIDIDO: o pódio sai**
 
-O corte no pódio foi decisão explícita de 18/ago e tem lógica: em resposta de
-IA, o 5º lugar não é lido. Se ficar (recomendo que fique), a tela precisa
-**dizer** — "fora do pódio conta zero" —, porque hoje um cliente que sai de
-#12 para #4 vê o Insights melhorar e o Score parado, e conclui que o produto
-está quebrado.
+Ver "Definição do ranking" logo abaixo. O truncamento em 4º deixa de existir;
+a nota de Posição passa a derivar da média de posições.
 
 ---
 
@@ -278,5 +275,110 @@ do servidor — é tela e action, sobe pela Vercel.
 | 4   | Tooltips explicando média × nota de pódio   | barato, e evita a conversa "seu número está errado"          | 3          |
 | 5   | Igualar períodos (`24h`, `90d` no Score)    | fecha a comparação entre as duas telas                       | 3          |
 
-Nenhum dos cinco depende do deploy do servidor nem de credencial nova: são
+Nenhum dos seis depende do deploy do servidor nem de credencial nova: são
 tela e server action, sobem pela Vercel.
+
+---
+
+## Definição do ranking — decisão do dono (07/set)
+
+> "O ranking deve contabilizar o posicionamento da marca na quantidade de
+> vezes que ela aparece. O ranking seria o somatório de posicionamento versus
+> vezes que apareceu; se não aparece, não entra no count."
+
+Formalizando:
+
+```
+ranking = Σ(posição em cada resposta onde a marca aparece)
+          ─────────────────────────────────────────────────
+          nº de respostas em que a marca apareceu
+```
+
+Resposta sem menção **não entra em lugar nenhum** — nem no numerador nem no
+denominador. Nem "conta como último", nem "conta como zero": simplesmente não
+existe para este indicador.
+
+### O que isso muda em cada tela
+
+**Insights — nada.** O "Ranking médio" de hoje já é exatamente isto:
+
+```sql
+SUM(appearance_rank) FILTER (WHERE appearance_rank >= 1)
+  / COUNT(*)         FILTER (WHERE appearance_rank >= 1)
+```
+
+Ou seja, a métrica que o dono descreveu já está implementada e correta no
+Insights. O problema nunca esteve aqui.
+
+**Score — muda a fórmula.** A nota de Posição hoje é pódio ponderado
+(`1º=100 · 2º=60 · 3º=30 · 4º+=0`, `visibility-index.ts:595`), que **não** é
+"somatório de posicionamento ÷ vezes que apareceu". Precisa passar a derivar
+da média.
+
+### Como virar nota 0–100
+
+A média é ilimitada (pode dar #17) e "menor é melhor"; a nota precisa ser
+0–100 e "maior é melhor". A conversão mais simples e defensável:
+
+```
+nota = 100 / ranking_médio
+```
+
+| Ranking médio | Nota |
+| ------------- | ---- |
+| 1,0           | 100  |
+| 1,5           | 67   |
+| 2,0           | 50   |
+| 2,6           | 38   |
+| 3,8           | 26   |
+| 5,0           | 20   |
+
+Decai suave, nunca chega a zero (aparecer em #20 vale mais que não aparecer,
+o que está certo) e é a mesma curva que o mercado usa para posição em busca.
+
+**Um detalhe que não pode ser trocado:** a média é calculada **primeiro** e a
+nota depois — `100 / média(posições)`. Fazer o contrário (média das notas
+`100/posição` de cada resposta) dá número diferente e não é o que a definição
+diz. Exemplo com 2 respostas, #1 e #3: `100/média(1,3) = 100/2 = 50`, mas
+`média(100/1, 100/3) = média(100, 33) = 67`. **A ordem correta é a primeira.**
+
+### O que muda na prática
+
+Retomando os exemplos da Parte 1, agora sob a regra nova:
+
+**Exemplo A — a nota volta a se mexer.** 3×#1, 2×#2, 1×#3, 4×#7:
+
+```
+                    hoje (pódio)   com a regra nova
+média 3,8    →      nota 45        nota 26
+as de #7 vão pra #4:
+média 2,6    →      nota 45        nota 38   ← agora acompanha
+```
+
+Era exatamente o defeito relatado: a marca melhorava e o Score não se mexia.
+
+**Exemplo B — e o que se perde.** 5×#1 + 5×#3 versus 10×#2, ambos média 2,0:
+
+```
+                    hoje (pódio)   com a regra nova
+5×#1 + 5×#3  →      nota 65        nota 50
+10×#2        →      nota 60        nota 50   ← agora empatam
+```
+
+O pódio premiava a marca que às vezes é a primeira citada. A regra nova diz
+que os dois perfis valem o mesmo. É consequência direta da definição — média
+é média — e está registrada aqui para não virar surpresa depois.
+
+### Onde mexer
+
+| Arquivo                       | O quê                                                               |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `visibility-index.ts:487-490` | somar `rankSum` e `rankCount` em vez de distribuir em `p1..p4`      |
+| `visibility-index.ts:592-596` | nota = `100 / (rankSum / rankCount)`; `null` quando `rankCount = 0` |
+| Score (tela)                  | exibir a média junto da nota — é o número que o cliente entende     |
+| `messages/*.json`             | textos nos dois idiomas                                             |
+
+A distribuição `#1/#2/#3/#4+` **continua sendo exibida** (é ótima para leitura
+qualitativa); ela só deixa de ser a origem da nota.
+
+Nenhuma migration: `appearance_rank` já tem tudo o que a fórmula precisa.

@@ -11,6 +11,11 @@
 #
 # Não apaga nada existente. Roda no merge deste arquivo; depois fica inerte
 # (só re-roda se o arquivo mudar, ou via workflow_dispatch com input).
+#
+# Runs #1-#3 falharam em "habilitar Email Routing". O preflight do run #3
+# fechou o diagnóstico: faltava só `Zone → DNS: Edit` (habilitar Email
+# Routing provisiona os registros MX/TXT). Token atualizado no GitHub
+# Secrets; este comentário é o gatilho da 4ª tentativa.
 name: criar-email-contato
 
 on:

@@ -329,7 +329,20 @@ jobs:
             --data "{\"matchers\":[{\"type\":\"literal\",\"field\":\"to\",\"value\":\"$ENDERECO\"}],\"actions\":[{\"type\":\"forward\",\"value\":[\"$DESTINO\"]}],\"enabled\":true,\"name\":\"$NOME_REGRA\"}" > /tmp/regra.json
           j < /tmp/regra.json
           if [ "$(okof < /tmp/regra.json)" != "1" ]; then
-            JA_EXISTE_REGRA=$(python3 -c 'import json;d=json.load(open("/tmp/regra.json"));print(1 if any("already" in str(e.get("message","")).lower() or "exist" in str(e.get("message","")).lower() for e in d.get("errors",[])) else 0)')
+            # A Cloudflare responde "Duplicated Zone rule" (code 2014) quando a
+            # regra já existe — não contém "already" nem "exist", então a
+            # detecção antiga por texto não pegava e o run #8 abortou numa
+            # condição que é sucesso. Casa pelo CÓDIGO, que é estável, e deixa
+            # o texto só como rede de segurança.
+            JA_EXISTE_REGRA=$(python3 -c '
+          import json
+          d = json.load(open("/tmp/regra.json"))
+          erros = d.get("errors") or []
+          cods = [e.get("code") for e in erros]
+          msgs = " ".join(str(e.get("message","")).lower() for e in erros)
+          dup = 2014 in cods or any(t in msgs for t in ("duplicat", "already", "exist"))
+          print(1 if dup else 0)
+          ')
             if [ "$JA_EXISTE_REGRA" != "1" ]; then
               echo "::error::criação da regra falhou — JSON acima."
               exit 1

@@ -275,8 +275,8 @@ do servidor — é tela e action, sobe pela Vercel.
 | 4   | Tooltips explicando média × nota de pódio   | barato, e evita a conversa "seu número está errado"          | 3          |
 | 5   | Igualar períodos (`24h`, `90d` no Score)    | fecha a comparação entre as duas telas                       | 3          |
 
-Nenhum dos seis depende do deploy do servidor nem de credencial nova: são
-tela e server action, sobem pela Vercel.
+Os sete primeiros não dependem do deploy do servidor nem de credencial nova: são
+tela e server action, sobem pela Vercel. O item 8 toca o parser do servidor e só chega em produção quando o deploy destravar.
 
 ---
 
@@ -382,3 +382,181 @@ A distribuição `#1/#2/#3/#4+` **continua sendo exibida** (é ótima para leitu
 qualitativa); ela só deixa de ser a origem da nota.
 
 Nenhuma migration: `appearance_rank` já tem tudo o que a fórmula precisa.
+
+---
+
+## Definição de citação — decisão do dono (07/set)
+
+> "A citação é a quantidade de vezes que ele trouxe seu link nos prompts
+> avaliados. O link pode ser de outras fontes, mas tem que ter claramente o
+> produto."
+
+### O que o código faz hoje — e o buraco
+
+`countOwnDomainCitations` (`response-parser.js:53-73`) conta **só links cujo
+host é domínio da marca**. Qualquer outra fonte vale zero.
+
+Consequência concreta: uma resposta do Perplexity que entrega ao usuário
+
+```
+https://www.techtudo.com.br/review/polar-vantage-v3-analise
+```
+
+conta **0 citações** para a Polar — mesmo a IA tendo colocado na mão do
+cliente um link que fala do produto dela. Pela definição acima, isso é uma
+citação. Hoje some do número.
+
+Isso não é detalhe: citação é justamente onde a marca **não** controla a
+página, e é por isso que vale como sinal de autoridade.
+
+### A matéria-prima já existe
+
+Cada citação guarda `url` **e** `title` (`web/src/types/index.ts:110-115`).
+Ou seja, dá para decidir se o link "tem claramente o produto" **sem buscar a
+página** — sem custo externo, sem latência, e retroativo sobre o histórico
+inteiro, do mesmo jeito que o `appearance_rank` foi calculado para trás.
+
+### Regra proposta
+
+Uma citação conta para a marca quando **qualquer uma** for verdadeira:
+
+1. o host é domínio da marca (o que já vale hoje); **ou**
+2. um termo da marca aparece como palavra inteira no **título** da citação;
+   **ou**
+3. um termo da marca aparece no **caminho da URL** (slug), com os separadores
+   normalizados (`polar-vantage-v3` → `polar vantage v3`).
+
+Termos = nome + `aliases` (já existem na tabela `brands`) + nomes de produto.
+
+### O risco que essa regra traz — e a proteção
+
+"Polar" é palavra comum: _urso polar_, _região polar_, _vórtice polar_. A
+regra 2/3 aplicada de forma ingênua transformaria uma matéria sobre clima em
+citação da marca.
+
+Proteções, em ordem de esforço:
+
+- **Palavra inteira, sempre** (`\bpolar\b`) — já é o padrão do
+  `response-parser.js`, é só espelhar;
+- **Termo composto para marca de nome genérico**: exigir "Polar Electro",
+  "Polar Vantage", "Polar Grit" em vez de "Polar" sozinho. Isso pede um campo
+  novo por marca — algo como `citation_terms` — porque `aliases` hoje serve
+  ao matching de menção, que tem tolerância diferente;
+- **Amostragem manual antes de ligar**: rodar a regra sobre o histórico, listar
+  as 50 citações que passariam a contar e conferir a olho. É barato e evita
+  ligar um número inflado na frente do cliente.
+
+### Separar as duas contagens, não somar
+
+Citação no **próprio domínio** e citação em **fonte de terceiro** são coisas
+diferentes para quem vai agir:
+
+|                        | Significa                        | O que fazer                                       |
+| ---------------------- | -------------------------------- | ------------------------------------------------- |
+| Próprio domínio        | a IA foi buscar na sua página    | manter a página citável (é o kit de citabilidade) |
+| Terceiro com o produto | alguém falou de você e a IA usou | assessoria, review, presença em comparativos      |
+
+Somar as duas num número só apaga essa diferença. Recomendo `citation_count`
+(total, como o dono definiu) **mais** a quebra própria × terceiro na tela.
+
+### Dois efeitos colaterais que precisam de decisão
+
+**1. O `visibility_score` muda.** `citation_count` entra no cálculo
+(`response-parser.js:175-179`: `min(citationCount × 15, 30)` e mais um bônus
+proporcional). Contar mais citações **sobe** o score histórico. Duas saídas:
+
+- recalcular retroativamente e assumir o degrau no gráfico (com nota na tela
+  dizendo em que data a definição mudou); **ou**
+- valer só daqui pra frente, aceitando que a série fica com duas definições —
+  pior, na minha leitura: um gráfico com duas réguas engana mais do que um
+  degrau explicado.
+
+**2. Duas superfícies precisam concordar.** O próprio código avisa
+(`response-parser.js:27-32`): `citation_count` é gravado na escrita, mas a
+página de Citações reclassifica **na leitura**
+(`web/src/lib/citations/classify.ts`). Se a regra nova entrar só de um lado,
+a mesma métrica passa a mostrar números diferentes em telas diferentes — que
+é exatamente o problema da Parte 1 deste arquivo, repetido.
+
+### Onde mexer
+
+| Arquivo                                | O quê                                                                                |
+| -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `server/src/lib/response-parser.js:53` | `countOwnDomainCitations` → `countProductCitations` (host **ou** título **ou** slug) |
+| `web/src/lib/citations/classify.ts`    | mesma regra na leitura — as duas superfícies têm que bater                           |
+| `brands` (migration)                   | `citation_terms` para marca de nome genérico                                         |
+| Script de recálculo                    | reprocessar o histórico, no molde do `appearance-rank`                               |
+| Tela de Citações                       | quebra própria × terceiro                                                            |
+
+---
+
+## Pesos do Score de Visibilidade — decisão do dono (07/set)
+
+> "Os pesos passam a ser divididos por igual, cada um com 25% para o Score de
+> Visibilidade."
+
+São quatro dimensões — Citação, Presença, Posição e Sentimento — então
+4 × 25% = 100%.
+
+### O que está lá hoje
+
+`web/src/config/visibility-score.ts:35-40`:
+
+| Dimensão   | Peso bruto | Peso **efetivo** hoje |
+| ---------- | ---------- | --------------------- |
+| Citação    | 20         | 30,8%                 |
+| Presença   | 20         | 30,8%                 |
+| Posição    | 15         | 23,1%                 |
+| Sentimento | 10         | 15,4%                 |
+| **Soma**   | **65**     | 100%                  |
+
+Repare: **os pesos brutos somam 65, não 100.** A tela renormaliza na hora de
+calcular (`score/page.tsx:104` — `weight / totalWeight`), então o número
+exibido está certo, mas ninguém consegue ler os pesos do registro e prever o
+resultado. Sobra de um desenho que previa Autoridade e Acurácia, que nunca
+foram implementadas.
+
+Essa foi, aliás, a origem do bug corrigido em 29/ago: a fórmula impressa na
+tela usava os pesos brutos e não fechava com o valor exibido
+(`0,20×31 + 0,20×48 + 0,15×57 + 0,10×64 = 30,75 ≠ 47`).
+
+**Com 25% cada, o problema desaparece na origem:** os pesos somam 100 e a
+renormalização vira identidade.
+
+### O que muda no número
+
+Com as notas do exemplo acima (citação 31, presença 48, posição 57,
+sentimento 64):
+
+```
+hoje:          (20×31 + 20×48 + 15×57 + 10×64) / 65 = 47,3  → 47
+25% cada:      (31 + 48 + 57 + 64) / 4               = 50,0  → 50
+```
+
+A direção do efeito é sempre a mesma: **Sentimento sobe muito** (15,4% → 25%)
+e **Citação e Presença perdem** (30,8% → 25%). Marca com sentimento bom e
+citação fraca ganha; o inverso perde.
+
+Vale saber o que se está escolhendo: hoje o Score diz que ser citado importa
+o dobro de ser bem falado. Com pesos iguais, passam a valer o mesmo. É uma
+decisão de produto legítima — só não é neutra, e por isso fica escrita.
+
+### A renormalização continua existindo (e agora fica trivial)
+
+Quando a marca nunca apareceu, Posição e Sentimento vêm `null` e são
+excluídas do cálculo. Com pesos iguais isso vira simplesmente **a média
+aritmética das dimensões medidas** — 2 dimensões medidas = 50% cada, e assim
+por diante. Muito mais fácil de explicar ao cliente do que a conta de hoje.
+
+### Onde mexer
+
+| Arquivo                                    | O quê                                                                |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| `web/src/config/visibility-score.ts:35-40` | os quatro `weight` para `25`                                         |
+| `score/page.tsx` (fórmula impressa)        | continua correta; com soma 100 ela passa a bater sem o `≈`           |
+| Tela                                       | dizer "todas as dimensões pesam igual" onde hoje há a lista de pesos |
+
+Uma linha de configuração. Não há migration nem dependência do deploy do
+servidor — os pesos do **Score de Visibilidade** vivem em arquivo, não na
+tabela `index_weights` (essa é do Índice de Citabilidade, que tem seis
+dimensões e **não** é afetado por esta decisão).

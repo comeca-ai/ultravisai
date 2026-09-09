@@ -8,7 +8,10 @@ import { Link } from '@/i18n/navigation';
 const STORAGE_KEY = 'ultravis_job_site';
 
 function normalizeSite(raw: string): string {
-  return raw.trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+  return raw
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/.*$/, '');
 }
 
 export function HeroJobForm() {

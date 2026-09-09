@@ -1,0 +1,513 @@
+<title>Regras de Negócio Ultravis</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5; --mut:#B6B2A4;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --red:#C0492A; --redSoft:#FBEEEA;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* ---------- topo ---------- */
+.top{background:var(--card);border-bottom:1px solid var(--rule)}
+.top-in{max-width:1180px;margin:0 auto;padding:30px 28px 24px}
+.eyebrow{font-family:var(--mono);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-.02em;margin-top:11px;text-wrap:balance}
+.sub{color:var(--ink2);margin-top:8px;max-width:74ch}
+
+.bar{background:var(--sunk);border-bottom:1px solid var(--rule2);position:sticky;top:0;z-index:30}
+.bar-in{max-width:1180px;margin:0 auto;padding:9px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.68rem;color:var(--ink2)}
+.bar-in b{color:var(--ink)}
+.who{font-family:var(--mono);font-size:.68rem;background:var(--card);border:1px solid var(--rule2);
+  border-radius:5px;padding:4px 8px;color:var(--ink);min-width:190px}
+.who::placeholder{color:var(--mut)}
+.prog{flex:1;min-width:120px;height:5px;background:var(--rule);border-radius:3px;overflow:hidden;max-width:220px}
+.prog i{display:block;height:100%;background:var(--good);width:0;transition:width .25s}
+
+/* ---------- corpo ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:216px 1fr;gap:40px;align-items:start}
+nav{position:sticky;top:52px;padding:26px 0 40px}
+nav h2{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+nav a{display:flex;justify-content:space-between;align-items:baseline;gap:8px;text-decoration:none;
+  padding:6px 0;border-bottom:1px solid var(--rule);font-size:.85rem;color:var(--ink2)}
+nav a:hover{color:var(--ink)}
+nav a .n{font-family:var(--mono);font-size:.66rem;color:var(--faint);font-variant-numeric:tabular-nums}
+nav a.alerta{color:var(--red);font-weight:600}
+main{padding:26px 0 80px;min-width:0}
+
+section{scroll-margin-top:62px}
+section+section{margin-top:44px}
+h3{font-family:var(--serif);font-size:1.3rem;font-weight:500;letter-spacing:-.01em}
+.secnote{color:var(--ink2);font-size:.87rem;margin-top:5px;max-width:78ch}
+
+/* ---------- regra ---------- */
+.regra{border-top:1px solid var(--rule);padding:18px 0}
+.regra:last-child{border-bottom:1px solid var(--rule)}
+.rid{font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;color:var(--faint)}
+.rtit{font-family:var(--serif);font-size:1.02rem;font-weight:600;margin-top:3px}
+.rtxt{color:var(--ink2);margin-top:6px;max-width:80ch}
+.rtxt b{color:var(--ink);font-weight:600}
+.vals{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.val{font-family:var(--mono);font-size:.7rem;background:var(--sunk);border:1px solid var(--rule2);
+  border-radius:4px;padding:2px 7px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ev{margin-top:9px;font-family:var(--mono);font-size:.66rem;color:var(--faint);line-height:1.75;
+  overflow-x:auto;white-space:nowrap;padding-bottom:2px}
+.ev span{margin-right:14px}
+
+/* divergência: faixa, não card */
+.regra.div{border-left:3px solid var(--amber);padding-left:15px;background:linear-gradient(90deg,var(--amberSoft),transparent 60%)}
+.regra.div.grave{border-left-color:var(--red);background:linear-gradient(90deg,var(--redSoft),transparent 60%)}
+.tag{display:inline-block;font-family:var(--mono);font-size:.57rem;letter-spacing:.09em;text-transform:uppercase;
+  font-weight:700;padding:2px 7px;border-radius:20px;margin-left:8px;vertical-align:1px}
+.tag.d{background:var(--amberSoft);color:var(--amber);border:1px solid var(--amber)}
+.tag.g{background:var(--redSoft);color:var(--red);border:1px solid var(--red)}
+.tag.ausente{background:var(--sunk);color:var(--ink2);border:1px solid var(--rule2)}
+
+/* ---------- validação ---------- */
+.valida{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px}
+.btn{font-family:var(--mono);font-size:.68rem;padding:5px 11px;border-radius:5px;cursor:pointer;
+  border:1px solid var(--rule2);background:var(--card);color:var(--ink2);transition:.12s}
+.btn:hover{border-color:var(--ink2);color:var(--ink)}
+.btn[aria-pressed="true"]{font-weight:700}
+.btn.ok[aria-pressed="true"]{background:var(--goodSoft);border-color:var(--good);color:var(--good)}
+.btn.mud[aria-pressed="true"]{background:var(--amberSoft);border-color:var(--amber);color:var(--amber)}
+.btn.dun[aria-pressed="true"]{background:var(--sunk);border-color:var(--ink2);color:var(--ink)}
+.nota{flex:1;min-width:210px;font-family:var(--sans);font-size:.8rem;padding:5px 9px;border-radius:5px;
+  border:1px solid var(--rule2);background:var(--card);color:var(--ink)}
+.nota::placeholder{color:var(--mut)}
+.carimbo{font-family:var(--mono);font-size:.63rem;color:var(--faint)}
+.offline{font-family:var(--mono);font-size:.63rem;color:var(--amber)}
+
+/* ---------- rodapé ---------- */
+footer{border-top:1px solid var(--rule);margin-top:52px;padding-top:20px;
+  font-family:var(--mono);font-size:.67rem;color:var(--ink2);line-height:1.9}
+footer b{color:var(--ink)}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;gap:0}
+  nav{position:static;padding:20px 0 0;border-bottom:1px solid var(--rule)}
+  nav a{padding:5px 0}
+  h1{font-size:1.6rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="top-in">
+  <p class="eyebrow">Ultravis · regras de negócio · v1 · 09/set/2026</p>
+  <h1>O que o produto faz, segundo o código</h1>
+  <p class="sub">Cada regra abaixo foi extraída da implementação, não da documentação — e traz o arquivo
+     onde vive, pra você contestar com precisão. Marque o que confere e o que precisa mudar; o que você
+     marcar fica salvo e vira pauta.</p>
+</div></header>
+
+<div class="bar"><div class="bar-in">
+  <span><b id="pv">0</b> de <b id="pt">0</b> revisadas</span>
+  <span class="prog"><i id="pb"></i></span>
+  <span id="alerta" style="color:var(--red);font-weight:600"></span>
+  <input class="who" id="quem" placeholder="seu nome (assina as marcações)" autocomplete="off">
+  <span id="conn" class="offline"></span>
+</div></div>
+
+<div class="shell">
+  <nav id="nav"><h2>Domínios</h2></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+const REGRAS = [
+/* ---------------- MÉTRICAS ---------------- */
+{d:"metricas", id:"MET-01", t:"Índice de Citabilidade: 6 dimensões, pesos que somam 100",
+ x:"O IC é a média ponderada de 6 dimensões. Se uma dimensão não tem medição (só o D1 pode faltar, antes da primeira auditoria de site), ela <b>sai da conta e os pesos são renormalizados</b> — a nota nunca é penalizada por ausência de dado.",
+ v:["D1 site 15","D2 conteúdo 20","D3 social 12","D4 reviews 18","D5 mídia 22","D6 verticais 13"],
+ e:["web/src/config/visibility-index.ts:30-37","dashboard/citability/page.tsx:233-242"]},
+
+{d:"metricas", id:"MET-02", t:"Os pesos do IC são calibráveis sem deploy",
+ x:"Os pesos vivem numa tabela do banco (<b>index_weights</b>) com os mesmos valores do código como semente. Dá pra recalibrar pelo painel /ops sem subir versão — e o vigia alerta se a soma deixar de dar 100.",
+ e:["supabase/migrations/00039_index_weights.sql:29-36","lib/actions/visibility-index.ts:260-269"]},
+
+{d:"metricas", id:"MET-03", t:"D2 (conteúdo próprio): 10% de citações já vale nota máxima",
+ x:"A dimensão de conteúdo próprio satura em <b>10%</b>: se 10% das respostas citam um domínio seu, D2 = 100. O melhor caso real observado até hoje foi 7,4%.",
+ v:["teto 10% ⇒ 100"],
+ e:["web/src/config/visibility-index.ts:177, 193-195"]},
+
+{d:"metricas", id:"MET-04", t:"D4 (reviews): escada por perfis confirmados, com bônus e castigo de nota",
+ x:"Quando existe checagem direta de reviews, ela manda; sem ela, cai no gabarito de mercado. A escada é por <b>quantidade de perfis confirmados</b>, ajustada pela nota média.",
+ v:["0 perfis = 10","1 = 30","2–3 = 50","4+ = 65","≥4,5★ +20","≥4,2★ +10","<3,5★ −10"],
+ e:["web/src/config/visibility-index.ts:207-226","server/src/lib/review-check.js:321-338"]},
+
+{d:"metricas", id:"MET-05", t:"D3, D5 e D6 medem participação no gabarito do mercado",
+ x:"Estas três dimensões são <b>respostas que citam você ÷ respostas que citam alguém da categoria</b>. Se ninguém da categoria foi citado, a nota é 0 — não é ausência, é zero.",
+ e:["web/src/config/visibility-index.ts:180-185, 197-200"]},
+
+{d:"metricas", id:"MET-06", t:"Presença conta respostas, não prompts",
+ x:"Presença = respostas com pelo menos uma menção ÷ <b>total de respostas</b> da janela. Respostas do modo shopping ficam fora da conta.",
+ e:["web/src/config/visibility-index.ts:612, 549"]},
+
+{d:"metricas", id:"MET-07", t:"Sentimento: positivo 100, neutro 50, negativo 0 — só onde há menção",
+ x:"A nota de sentimento é calculada <b>apenas sobre respostas que mencionam a marca</b>. Resposta sem rótulo entra como neutro. Marca que nunca apareceu não recebe nota (fica nula, não zero).",
+ v:["positivo 100","neutro 50","negativo 0"],
+ e:["web/src/config/visibility-index.ts:646, 485"]},
+
+{d:"metricas", id:"MET-08", t:"Share of Voice soma menções, não respostas",
+ x:"SoV = soma das suas menções ÷ (suas + as dos concorrentes) × 100. É <b>volume de citação</b>, não quantas respostas te citaram — uma resposta que te cita 5 vezes pesa 5.",
+ e:["supabase/migrations/00012_shopping_mode.sql:314-398","web/src/lib/mcp/data.ts:1246"]},
+
+{d:"metricas", id:"MET-09", t:"Faixas de nota em quintis, iguais para IC e Score",
+ x:"Mesma régua de rótulos nos dois índices.",
+ v:["0–20 Indesejável","21–40 Regular","41–60 Bom","61–80 Ótimo","81–100 Excelente"],
+ e:["web/src/config/visibility-index.ts:49-62"]},
+
+{d:"metricas", id:"MET-10", t:"Menção = nome, apelido ou domínio, como palavra inteira, fora de links",
+ x:"O texto tem as URLs removidas antes da busca — link não conta como menção. A busca é por <b>palavra inteira</b>, sem diferenciar maiúsculas. Citação é coisa diferente: link cujo domínio é seu (host exato ou subdomínio, nunca pedaço de texto).",
+ e:["server/src/lib/response-parser.js:11-25, 103-115, 53-73","migrations/00036_brand_aliases.sql"]},
+
+{d:"metricas", id:"MET-11", t:"Amostra pequena vira selo, não penalidade",
+ x:"Abaixo de <b>10 citações</b> a leitura é marcada como direcional na tela. Isso é aviso visual — não altera a nota.",
+ v:["limiar 10 citações"],
+ e:["web/src/config/visibility-index.ts:42"]},
+
+/* ---------------- COMERCIAL ---------------- */
+{d:"comercial", id:"COM-01", t:"Dois planos vendidos por autosserviço; Enterprise é contato",
+ x:"Só <b>Starter</b> e <b>Growth</b> passam por checkout. Self-Hosted e Enterprise não têm preço no código.",
+ v:["Starter 49","Growth 249","ciclo: só mensal"],
+ e:["web/src/config/plans.ts:109, 146, 224"]},
+
+{d:"comercial", id:"COM-02", t:"A tabela de limites por plano",
+ x:"Os números que separam Starter de Growth. <b>−1 significa ilimitado.</b>",
+ v:["marcas 1 / 4","prompts 50 / 200","motores 2 / 8","domínios 3 / 10","análises de volume 4 / 10 mês",
+    "briefs 10 / 50 mês","auditorias 100 / 500 mês","runs manuais 3 / 10 dia","carência 15 / 5 min"],
+ e:["web/src/config/plans.ts:105-220","server/src/config/plans.js:37-137"]},
+
+{d:"comercial", id:"COM-03", t:"Starter só enxerga dois motores",
+ x:"O Starter é limitado a <b>ChatGPT web e Perplexity</b>. Não é só um teto numérico — é uma lista fixa de quais motores rodam.",
+ e:["server/src/config/plans.js:48"]},
+
+{d:"comercial", id:"COM-04", t:"Trial de 14 dias entrega o plano inteiro",
+ x:"Quem está em trial recebe os limites do <b>plano pago escolhido</b>, não os do Starter. O sistema trata trial e assinatura ativa como a mesma coisa. Não existe trial sem passar pelo checkout.",
+ v:["14 dias"],
+ e:["web/src/app/api/stripe/checkout/route.ts:84","server/src/config/plans.js:152-155"]},
+
+{d:"comercial", id:"COM-05", t:"Estourou a cota, bloqueia — não degrada",
+ x:"Não existe modo reduzido: ao bater o limite, a ação é recusada com erro. Sem assinatura ativa, nada roda. A janela de renovação é ancorada no <b>dia da cobrança do Stripe</b>, não no dia 1º.",
+ v:["sem assinatura 402","volume/briefs 403","auditoria 429","run manual 429"],
+ e:["server/src/lib/plan-guard.js:47-52, 148-152, 288-291, 204-219","server/src/lib/tracking-quota.js:78-110"]},
+
+{d:"comercial", id:"COM-06", t:"Cancelou, o produto encolhe sozinho",
+ x:"No cancelamento a organização volta para Starter e <b>os prompts são reescritos</b> para rodar só nos dois motores do Starter. É automático, via webhook do Stripe.",
+ e:["web/src/app/api/stripe/webhook/route.ts:173-182"]},
+
+{d:"comercial", id:"COM-07", t:"Rastreamento por API da Anthropic vem desligado em todos os planos",
+ x:"Nenhum plano libera modelos de API por padrão — é liberado caso a caso por exceção no banco (<b>plan_overrides</b>).",
+ e:["server/src/config/plans.js:81-82, 113-116"]},
+
+/* ---------------- COLETA ---------------- */
+{d:"coleta", id:"COL-01", t:"O censo roda semanalmente, segunda 06:00 UTC",
+ x:"Em produção o rastreamento completo acontece <b>uma vez por semana</b> (03:00 de Brasília). A decisão está registrada: diário queimaria os créditos sete vezes mais rápido.",
+ v:["0 6 * * 1","03:00 BRT"],
+ e:["cloudflare/server-container/wrangler.jsonc:21","DECISOES.md:18"]},
+
+{d:"coleta", id:"COL-02", t:"Oito motores de IA, via scraper de interface web",
+ x:"O produto lê a resposta que o usuário final veria na interface — não a API. Isso é o diferencial e também o custo.",
+ v:["chatgpt-web","chatgpt-shopping","google-aio","google-aimode","copilot-web","grok-web","perplexity-web","gemini-web"],
+ e:["server/src/lib/cloro-scraper.js:13-22"]},
+
+{d:"coleta", id:"COL-03", t:"Só entra no censo quem tem assinatura ativa, marca ativa e prompt ativo",
+ x:"As três condições valem juntas. Organização sem assinatura é <b>pulada em silêncio</b> — não gera erro nem aviso.",
+ e:["server/src/server.js:141-181"]},
+
+{d:"coleta", id:"COL-04", t:"A IA só é usada para sentimento — o resto é fórmula",
+ x:"Menção, citação e posição são medidas por regra determinística. O único julgamento de modelo no caminho do dado é o <b>sentimento</b>, e só quando a marca foi mencionada.",
+ v:["gpt-5-mini"],
+ e:["server/src/workers/tracking-worker.js:414-417","server/src/lib/openai-tracker.js:75"]},
+
+{d:"coleta", id:"COL-05", t:"Posição = ordem de aparição no texto",
+ x:"A posição da marca é <b>1 + quantos concorrentes aparecem antes dela</b> no texto da resposta. Não há juiz de relevância: quem é citado primeiro está na frente.",
+ v:["lote 200","a cada 30 min"],
+ e:["server/src/lib/appearance-rank.js:1-20, 52-60, 149"]},
+
+{d:"coleta", id:"COL-06", t:"Sub-consultas só são gravadas se o motor realmente as mostrou",
+ x:"O fan-out (as buscas que a IA fez por baixo) é registrado <b>apenas quando observado</b> — nunca sintetizado ou inferido.",
+ e:["server/src/lib/cloro-scraper.js:88-97"]},
+
+{d:"coleta", id:"COL-07", t:"Cada run tem dois orçamentos de tempo",
+ x:"Até 90 min esperando o primeiro resultado e mais 60 min de cauda a partir dele. Motor que falha <b>não derruba o run</b> — o resultado sai com o que chegou.",
+ v:["90 min 1º resultado","60 min de cauda","poll 15s"],
+ e:["server/src/workers/tracking-worker.js:287-288","server/src/lib/drain-helpers.js:38-47"]},
+
+{d:"coleta", id:"COL-08", t:"O retorno do scraper só é aceito com assinatura válida e recente",
+ x:"O webhook exige assinatura HMAC-SHA256 e <b>timestamp dentro de 5 minutos</b> — protege contra dado forjado e contra reprocessar entrega antiga.",
+ e:["server/src/lib/cloro-webhook-verify.js:3, 36-52"]},
+
+/* ---------------- GOVERNANÇA ---------------- */
+{d:"gov", id:"GOV-01", t:"Isolamento entre clientes é feito no banco, não na aplicação",
+ x:"O usuário só enxerga linhas cuja marca pertence à organização dele, por política do próprio Postgres (RLS). Mesmo um erro de código na aplicação não vaza dado entre clientes.",
+ e:["supabase/migrations/00016_enable_rls_exposed_tables.sql:55+"]},
+
+{d:"gov", id:"GOV-02", t:"Apagar uma marca nunca destrói o histórico",
+ x:"Um gatilho no banco empacota a marca e <b>tudo que aponta para ela</b> num arquivo-morto antes de apagar. Tabelas novas entram nesse pacote automaticamente, sem precisar lembrar.",
+ e:["supabase/migrations/00037_brand_archives.sql:1-60"]},
+
+{d:"gov", id:"GOV-03", t:"O vigia checa 17 invariantes a cada 15 minutos",
+ x:"Além de saúde operacional, ele caça <b>incoerência de dado</b>: concorrente duplicado somando em dobro, marcas irmãs dividindo os números, motor calado há 8 dias, pesos do IC que não somam 100, domínio cadastrado que nunca vai casar. A mesma condição só re-alerta a cada 6h.",
+ v:["17 invariantes","a cada 15 min","re-alerta 6h"],
+ e:["server/src/lib/watchdog.js:29, 394","server/src/lib/consistency.js:147-406"]},
+
+{d:"gov", id:"GOV-04", t:"Um auditor de IA revisa os números uma vez por semana",
+ x:"Segunda 09:00 UTC, uma única chamada de modelo procura o que regra fixa não pega: média escondendo extremo, rótulo que não bate com o que mede e — literalmente — <b>“100% de qualquer coisa sobre amostra real”</b>.",
+ v:["seg 09:00 UTC","máx. 10 achados"],
+ e:["server/src/lib/consistency-llm.js:40-49, 203-207"]},
+
+{d:"gov", id:"GOV-05", t:"O que consome crédito pago a cada run",
+ x:"Cada prompt × motor é uma tarefa paga no scraper. Somam-se as APIs de modelo (sentimento e prompts por API) e, fora do censo, DataForSEO e Scrape.do no check semanal de reviews.",
+ e:["server/src/lib/cloro-scraper.js","server/src/lib/review-check.js:82, 231"]},
+
+{d:"gov", id:"GOV-06", t:"Há confirmação explícita antes de gastar crédito à toa",
+ x:"O botão que dispara tudo exige confirmação, com o aviso de que <b>cada scrape consome crédito e não pode ser cancelado</b>. Nasceu de um despacho acidental que queimou 264 scrapes.",
+ e:["dashboard/insights/page.tsx:782-829","web/messages/pt-BR.json:337"]},
+
+/* ---------------- DIVERGÊNCIAS ---------------- */
+{d:"diverg", id:"DIV-01", grave:1, t:"A landing vende mais do que o produto entrega",
+ x:"O site anuncia <b>150 prompts e 4 motores</b> no Starter; o código entrega <b>50 prompts e 2 motores</b>. No Growth anuncia <b>1.000 prompts e 7 motores</b>; o código entrega <b>200 prompts e 8 motores</b>. Vender capacidade que o sistema não libera é risco de contrato, não só de marketing.",
+ v:["Starter 150→50","Starter 4→2 motores","Growth 1.000→200"],
+ e:["web/messages/pt-BR.json:2432, 2449","web/src/config/plans.ts:105-220"]},
+
+{d:"diverg", id:"DIV-02", grave:1, t:"Quatro preços diferentes, e nenhuma moeda no código",
+ x:"O código diz <b>49 e 249</b> sem unidade; a landing diz <b>R$ 390 e R$ 1.290</b>; o backlog propõe <b>R$ 690–990</b>; e há ainda a proposta de pacotes <b>R$ 15k / 20k / 30k</b>. A moeda real só existe dentro do Stripe — no produto, o cifrão é texto fixo numa tela.",
+ e:["web/src/config/plans.ts:109, 146","web/messages/pt-BR.json:2432","BACKLOG.md:74, 130, 206"]},
+
+{d:"diverg", id:"DIV-03", grave:1, t:"IS_CLOUD vem desligado por padrão — e desligado, nada é cobrado",
+ x:"Com <b>IS_CLOUD=false</b> (o default nos dois arquivos de exemplo) o produto se comporta como self-hosted: todo limite vira ilimitado, a checagem de assinatura sempre responde “ativa” e as cotas de rastreamento não rodam. Vale confirmar o valor real em produção antes de qualquer conversa sobre receita.",
+ e:["server/.env.example:39","web/.env.example:54","server/src/config/plans.js:141-155"]},
+
+{d:"diverg", id:"DIV-04", grave:1, t:"Três fórmulas de “Score de Visibilidade” convivendo",
+ x:"A tela usa uma régua, a linha gravada no banco usa outra (menções ×10 com teto, citações ×15, sentimento +15/+7) e o Daily Pulse/relatórios usam uma terceira (menção .60, citação .25, posição .15). Os três números são “corretos” pela própria régua — e diferentes entre si.",
+ e:["web/src/config/visibility-score.ts:48-53","server/src/lib/response-parser.js:168-187","server/src/config/visibility-score.js:12-49"]},
+
+{d:"diverg", id:"DIV-05", t:"O Score tem 4 dimensões no código e 6 na ata da reunião",
+ x:"A ata registra Citação 20 · Presença 20 · <b>Autoridade 20</b> · Posição 15 · <b>Acurácia 15</b> · Sentimento 10. Autoridade e Acurácia <b>não existem</b> — dependem de um juiz de IA que nunca foi construído. O código usa 4 dimensões a 25% cada, e o efeito colateral é que o Sentimento subiu de 15,4% para 25% de peso real em 07/set.",
+ v:["código: 25/25/25/25","ata: 20/20/20/15/15/10"],
+ e:["web/src/config/visibility-score.ts:48-53","estrategia/ata-decisoes-jhonata-igor.md:36"]},
+
+{d:"diverg", id:"DIV-06", t:"A regra de pódio não existe mais",
+ x:"A ata descreve posição como <b>1º=100 · 2º=60 · 3º=30 · 4º+=0</b>. Isso foi substituído: hoje a nota é relativa ao campo — <b>(rivais + 1 − posição) ÷ rivais</b> — e quem é citado sem nenhum rival na resposta recebe 100.",
+ e:["supabase/migrations/00046_ranking_unificado.sql:100-113"]},
+
+{d:"diverg", id:"DIV-07", t:"“Presente” tem dois significados no mesmo arquivo",
+ x:"A Presença conta só menção textual. As dimensões D3–D6 consideram presente <b>menção OU citação de domínio próprio</b>. Dois critérios de “apareceu” convivendo no mesmo cálculo de índice.",
+ e:["web/src/config/visibility-index.ts:612, 437"]},
+
+{d:"diverg", id:"diV-08", t:"As réguas 0–20 / 21–40 por dimensão são texto, não cálculo",
+ x:"O que a tela mostra como critério de cada dimensão vem dos arquivos de tradução — é <b>descritivo</b>. O cálculo real usa outras fórmulas. Só o D5 traz limiares numéricos, e mesmo eles não são aplicados.",
+ e:["web/messages/pt-BR.json → citability.dims.*.criteria","dashboard/citability/page.tsx:794-800"]},
+
+{d:"diverg", id:"DIV-09", t:"As cores das barras não seguem as faixas oficiais",
+ x:"Os rótulos usam quintis (0–20, 21–40, …), mas a cor da barra muda em <b>≥50 verde e ≥30 âmbar</b>. Uma nota 45 é “Bom” no texto e amarela no gráfico.",
+ e:["dashboard/citability/page.tsx:55-64","web/src/config/visibility-index.ts:49-62"]},
+
+{d:"diverg", id:"DIV-10", t:"Sem assinatura, o site e o servidor discordam",
+ x:"O guard do web <b>rebaixa para Starter</b> e deixa passar; o servidor devolve <b>402 e bloqueia</b>. O que acontece depende da porta de entrada.",
+ e:["web/src/lib/guards/plan-guard.ts:26-28","server/src/lib/plan-guard.js:47-52"]},
+
+{d:"diverg", id:"DIV-11", tipo:"ausente", t:"Limite de domínios por marca nunca é aplicado",
+ x:"<b>maxDomainsPerBrand</b> (3 no Starter, 10 no Growth) aparece nas duas configurações e nos textos de venda, mas nenhum código verifica. É número de vitrine.",
+ e:["web/src/config/plans.ts","server/src/config/plans.js"]},
+
+{d:"diverg", id:"DIV-12", tipo:"ausente", t:"Limite de assentos não existe na prática",
+ x:"<b>maxTeamMembers</b> é ilimitado em todos os planos, então o controle de convites nunca bloqueia. Não há como cobrar por usuário hoje.",
+ e:["server/src/config/plans.js","web/src/lib/actions/team.ts:90-91"]},
+
+{d:"diverg", id:"DIV-13", tipo:"ausente", t:"Frequência de rastreamento não é gate de plano",
+ x:"O backlog propõe pacotes por frequência (mensal / semanal / diária). No código, <b>daily_monitoring está em todos os planos</b> e o cron trata todas as marcas iguais. Não existe plano que rode mais vezes.",
+ e:["server/src/config/plans.js","server/src/server.js:118-192"]},
+
+{d:"diverg", id:"DIV-14", tipo:"ausente", t:"Não há regra de retenção para as respostas coletadas",
+ x:"Jobs somem após 7 dias, mas <b>prompt_results é mantido indefinidamente</b>. Sem política de expurgo, o custo de banco só cresce — e não há resposta pronta para um pedido de exclusão sob LGPD.",
+ e:["server/src/lib/job-manager.js:178"]},
+];
+
+const DOMINIOS = [
+  {k:"metricas", n:"Como medimos"},
+  {k:"comercial", n:"O que se vende"},
+  {k:"coleta",   n:"Como o dado entra"},
+  {k:"gov",      n:"Proteções"},
+  {k:"diverg",   n:"Divergências", alerta:true},
+];
+const SECNOTE = {
+  metricas:"As réguas que produzem as notas que o cliente vê. Se alguma estiver errada, todo relatório está errado junto.",
+  comercial:"O que cada plano libera de fato, no código que roda — independente do que a página de preços diz.",
+  coleta:"De onde vem o dado, com que frequência, e o que o produto se recusa a inventar.",
+  gov:"O que impede vazamento entre clientes, perda de histórico e gasto acidental de crédito.",
+  diverg:"Aqui não cabe validar — cabe decidir. Cada item é uma contradição entre o que está escrito, o que foi combinado e o que o código faz.",
+};
+
+let db = null, quem = "", vereditos = {};
+
+function el(tag, cls, html){ const n=document.createElement(tag); if(cls)n.className=cls; if(html!=null)n.innerHTML=html; return n; }
+
+function render(){
+  const nav = document.getElementById("nav");
+  const main = document.getElementById("main");
+  nav.innerHTML = '<h2>Domínios</h2>';
+  main.innerHTML = "";
+
+  DOMINIOS.forEach(dom => {
+    const itens = REGRAS.filter(r => r.d === dom.k);
+    const a = el("a", dom.alerta ? "alerta" : "");
+    a.href = "#" + dom.k;
+    a.innerHTML = `<span>${dom.n}</span><span class="n" id="c-${dom.k}">0/${itens.length}</span>`;
+    nav.appendChild(a);
+
+    const sec = el("section"); sec.id = dom.k;
+    sec.appendChild(el("h3", null, dom.n));
+    sec.appendChild(el("p", "secnote", SECNOTE[dom.k]));
+    itens.forEach(r => sec.appendChild(linha(r)));
+    main.appendChild(sec);
+  });
+
+  main.appendChild(rodape());
+  atualizaProgresso();
+}
+
+function linha(r){
+  const div = r.d === "diverg";
+  const n = el("div", "regra" + (div ? " div" : "") + (r.grave ? " grave" : ""));
+  let tag = "";
+  if (r.tipo === "ausente") tag = '<span class="tag ausente">não implementado</span>';
+  else if (r.grave) tag = '<span class="tag g">decisão urgente</span>';
+  else if (div) tag = '<span class="tag d">precisa decisão</span>';
+
+  n.appendChild(el("p", "rid", r.id));
+  n.appendChild(el("p", "rtit", r.t + tag));
+  n.appendChild(el("p", "rtxt", r.x));
+  if (r.v) {
+    const vs = el("div", "vals");
+    r.v.forEach(v => vs.appendChild(el("span", "val", v)));
+    n.appendChild(vs);
+  }
+  if (r.e) n.appendChild(el("div", "ev", r.e.map(e => `<span>${e}</span>`).join("")));
+
+  const val = el("div", "valida");
+  const opts = div
+    ? [["ok","decidido"],["mud","preciso pensar"],["dun","não é problema"]]
+    : [["ok","confere"],["mud","precisa mudar"],["dun","não sei"]];
+  opts.forEach(([k, rot]) => {
+    const b = el("button", "btn " + k, rot);
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.dataset.id = r.id; b.dataset.v = k;
+    b.addEventListener("click", () => marca(r.id, k));
+    val.appendChild(b);
+  });
+  const nota = el("input", "nota");
+  nota.placeholder = div ? "qual a decisão?" : "o que está errado?";
+  nota.id = "n-" + r.id;
+  nota.addEventListener("change", () => marca(r.id, null, nota.value));
+  val.appendChild(nota);
+  val.appendChild(el("span", "carimbo", "")).id = "s-" + r.id;
+  n.appendChild(val);
+  return n;
+}
+
+function rodape(){
+  const f = el("footer");
+  f.innerHTML = `
+    <h3 style="font-size:1.05rem;margin-bottom:8px">Método</h3>
+    <p><b>Origem</b> — cada regra foi lida da implementação em <code>comeca-ai/ultravisai</code> na
+       main de 09/set/2026, não da documentação. Onde documento e código divergem, a divergência
+       virou item próprio em vez de ser resolvida em favor de um dos dois.</p>
+    <p><b>Cobertura</b> — ${REGRAS.filter(r=>r.d!=="diverg").length} regras vigentes e
+       ${REGRAS.filter(r=>r.d==="diverg").length} divergências. Não cobre: regras de UI, i18n,
+       e o comportamento de telas que hoje respondem 401 (incidente aberto).</p>
+    <p><b>O que fica salvo</b> — suas marcações e notas são gravadas no próprio artefato e
+       ficam visíveis para quem mais abrir. Nada aqui altera o produto.</p>
+    <p>v1 · 09/set/2026</p>`;
+  return f;
+}
+
+function marca(id, v, nota){
+  const atual = vereditos[id] || {};
+  const novo = {
+    v: v !== null && v !== undefined ? v : (atual.v || ""),
+    nota: nota !== undefined ? nota : (atual.nota || ""),
+    quem: quem || atual.quem || "",
+    em: new Date().toISOString(),
+  };
+  vereditos[id] = novo;
+  pinta(id);
+  atualizaProgresso();
+  if (db) db.doc("validacoes/" + id).set(novo).catch(() => {});
+}
+
+function pinta(id){
+  const est = vereditos[id];
+  document.querySelectorAll(`.btn[data-id="${id}"]`).forEach(b => {
+    b.setAttribute("aria-pressed", String(!!est && est.v === b.dataset.v));
+  });
+  const nota = document.getElementById("n-" + id);
+  if (nota && est && est.nota != null && document.activeElement !== nota) nota.value = est.nota;
+  const s = document.getElementById("s-" + id);
+  if (s) {
+    if (est && (est.v || est.nota)) {
+      const d = est.em ? new Date(est.em) : null;
+      const q = est.quem ? est.quem + " · " : "";
+      s.textContent = d ? q + d.toLocaleDateString("pt-BR") : q;
+    } else s.textContent = "";
+  }
+}
+
+function atualizaProgresso(){
+  let feitas = 0;
+  DOMINIOS.forEach(dom => {
+    const itens = REGRAS.filter(r => r.d === dom.k);
+    const n = itens.filter(r => vereditos[r.id] && vereditos[r.id].v).length;
+    feitas += n;
+    const c = document.getElementById("c-" + dom.k);
+    if (c) c.textContent = `${n}/${itens.length}`;
+  });
+  document.getElementById("pv").textContent = feitas;
+  document.getElementById("pt").textContent = REGRAS.length;
+  document.getElementById("pb").style.width = (feitas / REGRAS.length * 100) + "%";
+  const graves = REGRAS.filter(r => r.grave && !(vereditos[r.id] && vereditos[r.id].v)).length;
+  document.getElementById("alerta").textContent = graves ? `${graves} decisões urgentes em aberto` : "";
+}
+
+render();
+
+const nomeSalvo = (() => { try { return localStorage.getItem("ultravis-quem") || ""; } catch { return ""; } })();
+const inQuem = document.getElementById("quem");
+inQuem.value = nomeSalvo; quem = nomeSalvo;
+inQuem.addEventListener("change", () => {
+  quem = inQuem.value.trim();
+  try { localStorage.setItem("ultravis-quem", quem); } catch {}
+});
+
+(async () => {
+  const conn = document.getElementById("conn");
+  const cap = await claude.use("db");
+  if (!cap) { conn.textContent = "marcações não estão sendo salvas"; return; }
+  db = cap;
+  db.collection("validacoes").onSnapshot(
+    snap => {
+      snap.docs.forEach(d => {
+        const b = d.data();
+        if (!b) return;
+        vereditos[d.id] = b;
+        pinta(d.id);
+      });
+      atualizaProgresso();
+      conn.textContent = "";
+    },
+    () => { conn.textContent = "sincronização caiu — recarregue a página"; }
+  );
+})();
+</script>

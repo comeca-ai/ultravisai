@@ -1,0 +1,146 @@
+# Recontagem das citações no histórico, com a definição de citação do dono
+# (07/set): domínio próprio MAIS link de terceiro que traga claramente o
+# produto. Levantamento e fórmula em `ajustar.md`, Parte 3.
+#
+# Por que aqui: o script precisa da SERVICE_ROLE do Supabase, e ela vive no
+# GitHub Secrets. A sandbox da IA não alcança o banco e o container da edge
+# não tem shell — o runner do Actions alcança os dois lados. É o mesmo
+# caminho do `verificar-censo`.
+#
+# NASCE EM SIMULAÇÃO. O padrão de `aplicar` é `nao`: o run mostra quanto o
+# total mudaria e lista uma amostra das citações que passariam a contar, sem
+# gravar nada. Só depois de conferir a amostra a olho é que se roda de novo
+# com `sim` — marca de nome comum ("Polar" também é vórtice polar) pode
+# inflar o número, e número inflado na frente do cliente é pior que número
+# conservador.
+name: recontar-citacoes
+
+on:
+  workflow_dispatch:
+    inputs:
+      aplicar:
+        description: 'Gravar de verdade? Digite "sim" para aplicar. Qualquer outra coisa = simulação.'
+        required: true
+        default: 'nao'
+      marca:
+        description: 'UUID de uma marca (opcional). Vazio = todas as marcas.'
+        required: false
+        default: ''
+      amostra:
+        description: 'Quantas citações novas listar por marca.'
+        required: false
+        default: '20'
+
+# Só lê o repositório: o script fala com o Supabase por HTTPS, com secret
+# próprio. Nada aqui escreve no git.
+permissions:
+  contents: read
+
+jobs:
+  recontar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Diagnóstico secreto a secreto, no mesmo molde do verificar-censo:
+      # nunca imprime valor, só presença e tamanho — o suficiente pra achar
+      # erro de cadastro (aba Variables em vez de Secrets, nível Environment,
+      # nome com espaço) sem vazar nada.
+      - name: Conferir credenciais (nomes e presença, nunca valores)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          faltando=0
+          if [ -n "$SUPABASE_URL" ]; then
+            echo "✓ SUPABASE_URL presente (${#SUPABASE_URL} caracteres)"
+          else
+            echo "✗ SUPABASE_URL AUSENTE"; faltando=1
+          fi
+          if [ -n "$KEY" ]; then
+            echo "✓ SUPABASE_SERVICE_ROLE_KEY presente (${#KEY} caracteres)"
+          else
+            echo "✗ SUPABASE_SERVICE_ROLE_KEY AUSENTE"; faltando=1
+          fi
+          if [ "$faltando" = "1" ]; then
+            {
+              echo "### Credenciais ausentes"
+              echo "Cadastrar em **Settings → Secrets and variables → Actions**, nível *Repository secrets*,"
+              echo "com os nomes exatos \`SUPABASE_URL\` e \`SUPABASE_SERVICE_ROLE_KEY\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::credencial ausente — ver o summary deste run"
+            exit 1
+          fi
+
+      # Trava de armamento: o passo de gravar só existe se alguém digitou
+      # "sim" na caixinha. O default é simulação, e um clique distraído em
+      # "Run workflow" não muda uma linha do banco.
+      - name: Trava de armamento
+        id: armar
+        run: |
+          if [ "${{ inputs.aplicar }}" = "sim" ]; then
+            echo "go=1" >> "$GITHUB_OUTPUT"
+            echo "⚠️  ARMADO — as linhas serão gravadas."
+          else
+            echo "go=0" >> "$GITHUB_OUTPUT"
+            echo "Simulação: nada será gravado (digite 'sim' em 'aplicar' para valer)."
+          fi
+
+      - name: Instalar dependências do server
+        working-directory: server
+        run: npm ci
+
+      # Roda SEMPRE em simulação primeiro, mesmo quando armado: o log do run
+      # que gravou tem que mostrar o que ele estava prestes a gravar, senão
+      # não dá pra auditar a decisão depois.
+      - name: Simular a recontagem
+        working-directory: server
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CITACOES_MARCA: ${{ inputs.marca }}
+          CITACOES_AMOSTRA: ${{ inputs.amostra }}
+        run: node src/scripts/recontar-citacoes-produto.js | tee /tmp/simulacao.txt
+
+      - name: Publicar a simulação no summary
+        run: |
+          {
+            echo "### Recontagem de citações — SIMULAÇÃO"
+            echo ""
+            echo "Confira a amostra abaixo antes de aplicar. Se aparecer link que não"
+            echo "fala do produto, cadastre \`citation_terms\` da marca com o termo"
+            echo "composto (ex.: \"Polar Vantage\" em vez de \"Polar\") e rode de novo."
+            echo ""
+            echo '```'
+            cat /tmp/simulacao.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Aplicar (só com "sim")
+        if: steps.armar.outputs.go == '1'
+        working-directory: server
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CITACOES_MARCA: ${{ inputs.marca }}
+          CITACOES_AMOSTRA: ${{ inputs.amostra }}
+          CITACOES_APLICAR: '1'
+        run: node src/scripts/recontar-citacoes-produto.js | tee /tmp/aplicado.txt
+
+      - name: Publicar o resultado da gravação
+        if: steps.armar.outputs.go == '1'
+        run: |
+          {
+            echo "### Recontagem de citações — APLICADA"
+            echo ""
+            echo '```'
+            cat /tmp/aplicado.txt
+            echo '```'
+            echo ""
+            echo "\`visibility_score\` NÃO foi recalculado (mesmo critério do"
+            echo "\`citation-recount.js\`): é heurística de um instante no tempo, e"
+            echo "reescrevê-la mudaria retroativamente os gráficos de tendência."
+          } >> "$GITHUB_STEP_SUMMARY"

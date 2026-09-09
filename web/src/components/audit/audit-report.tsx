@@ -136,9 +136,12 @@ function DraftBlock({ draft }: { draft: string }) {
 function SignalRow({
   signal,
   recommendation,
+  temPeca = false,
 }: {
   signal: AuditSignal;
   recommendation?: AuditRecommendation;
+  /** Existe peça pronta pra colar no kit que resolve este sinal. */
+  temPeca?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('audit');
@@ -157,6 +160,11 @@ function SignalRow({
       >
         <Icon className={cn('h-4 w-4 shrink-0', STATUS_COLOR[signal.status])} />
         <span className="flex-1 text-sm font-medium">{signal.label}</span>
+        {temPeca && (
+          <Badge variant="outline" className="border-primary/40 text-[10px] text-primary">
+            {t('temPeca')}
+          </Badge>
+        )}
         {signal.impactTier && (
           <Badge
             variant={signal.impactTier === 'high' ? 'default' : 'secondary'}
@@ -223,6 +231,28 @@ function SignalRow({
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 } as const;
 
+// ajustar.md Parte 4 (slide P3 do Igor): "o mais importante é que o cliente
+// tenha claro O QUÊ e ONDE ele deve começar atuando". O relatório abria com 49
+// sinais organizados por categoria técnica — boa organização pra quem audita,
+// errada pra quem vai agir: o cliente lê 49 linhas e não sabe por onde começar.
+//
+// Os dois blocos do slide, mapeados nas categorias da rubrica:
+//   LEGIBILIDADE = o que vive na SUA página e você muda hoje (structure, trust)
+//   CONTEÚDO     = o que depende do que você publica e de quem fala de você
+//                  (content, eeat, authority)
+const BLOCOS = [
+  { key: 'legibilidade', categorias: ['structure', 'trust'] },
+  { key: 'conteudo', categorias: ['content', 'eeat', 'authority'] },
+] as const;
+
+// Ordem por onde começar, não por categoria. `standard` e ausente caem no fim
+// junto de `low` — a rubrica usa os dois nomes.
+const IMPACTO_ORDEM: Record<string, number> = { high: 0, medium: 1, low: 2, standard: 2 };
+const ordemDoImpacto = (t: AuditSignal['impactTier']) => IMPACTO_ORDEM[t ?? 'standard'] ?? 3;
+
+/** Sinal que ainda não passou = ação. Sinal que passou desce pro diagnóstico. */
+const ehAcao = (s: AuditSignal) => s.status === 'fail' || s.status === 'warn';
+
 function RecommendationItem({ rec }: { rec: AuditRecommendation }) {
   return (
     <div className="space-y-2 border-b py-4 last:border-b-0">
@@ -241,6 +271,9 @@ function RecommendationItem({ rec }: { rec: AuditRecommendation }) {
 export function AuditReport({ audit }: { audit: AuditResult }) {
   const t = useTranslations('audit');
   const [onlyIssues, setOnlyIssues] = useState(false);
+  // Nasce fechado quando há o que fazer: o topo já respondeu "por onde começo".
+  // Sem nenhuma ação pendente, abre — aí o diagnóstico É o relatório.
+  const [diagnosticoAberto, setDiagnosticoAberto] = useState(() => !audit.signals.some(ehAcao));
   const recBySignal = new Map(audit.recommendations.map((r) => [r.signalKey, r]));
 
   const counts = audit.signals.reduce(
@@ -256,9 +289,22 @@ export function AuditReport({ audit }: { audit: AuditResult }) {
   const grade = gradeKey(audit.totalScore);
 
   const visibleSignals = (cat: string) =>
-    audit.signals.filter(
-      (s) => s.category === cat && (!onlyIssues || s.status === 'fail' || s.status === 'warn'),
-    );
+    audit.signals.filter((s) => s.category === cat && (!onlyIssues || ehAcao(s)));
+
+  // Sinais que alguma peça do kit já resolve — vira o selo "peça pronta" na
+  // linha da ação, que é a informação que muda o que a pessoa faz a seguir.
+  const sinaisComPeca = new Set((audit.citabilityKit ?? []).flatMap((p) => p.sinais));
+
+  const acoesDoBloco = (categorias: readonly string[]) =>
+    audit.signals
+      .filter((s) => ehAcao(s) && s.category && categorias.includes(s.category))
+      .sort((a, b) => {
+        const porImpacto = ordemDoImpacto(a.impactTier) - ordemDoImpacto(b.impactTier);
+        if (porImpacto !== 0) return porImpacto;
+        // Empatado no impacto, quem tem peça pronta vem antes: é o item que a
+        // pessoa resolve em dois minutos.
+        return Number(sinaisComPeca.has(b.key)) - Number(sinaisComPeca.has(a.key));
+      });
 
   return (
     <div className="space-y-6">
@@ -293,6 +339,49 @@ export function AuditReport({ audit }: { audit: AuditResult }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* O QUE FAZER — abre o relatório com o que falta, ordenado por impacto.
+          Só o que ainda não passou aparece aqui; o resto desce pro diagnóstico. */}
+      {hasIssues && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t('oQueFazer.titulo')}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t('oQueFazer.subtitulo')}</p>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-0">
+            {BLOCOS.map((bloco) => {
+              const acoes = acoesDoBloco(bloco.categorias);
+              if (acoes.length === 0) return null;
+              const comPeca = acoes.filter((s) => sinaisComPeca.has(s.key)).length;
+              return (
+                <div key={bloco.key}>
+                  <div className="mb-1 flex items-baseline gap-2">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide">
+                      {t(`oQueFazer.${bloco.key}`)}
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      {comPeca > 0
+                        ? t('oQueFazer.contagemComPeca', { total: acoes.length, comPeca })
+                        : t('oQueFazer.contagem', { total: acoes.length })}
+                    </span>
+                  </div>
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    {t(`oQueFazer.${bloco.key}Nota`)}
+                  </p>
+                  {acoes.map((s) => (
+                    <SignalRow
+                      key={s.key}
+                      signal={s}
+                      recommendation={recBySignal.get(s.key)}
+                      temPeca={sinaisComPeca.has(s.key)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {/* AI fix recommendations */}
       {audit.recommendations.length > 0 && (
@@ -347,37 +436,67 @@ export function AuditReport({ audit }: { audit: AuditResult }) {
         </CardContent>
       </Card>
 
-      {/* Signals header + issues-only filter */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">{t('signals')}</h2>
-        <Button variant="outline" size="sm" onClick={() => setOnlyIssues((v) => !v)}>
-          {onlyIssues ? t('allSignals') : t('onlyIssues')}
-        </Button>
+      {/* Diagnóstico completo — recolhido. Continua inteiro, por categoria
+          técnica, pra quem quiser conferir; só deixou de ser a porta de
+          entrada do relatório. */}
+      <div className="border-t pt-4">
+        <button
+          type="button"
+          onClick={() => setDiagnosticoAberto((v) => !v)}
+          className="flex w-full items-center gap-2 text-left"
+          aria-expanded={diagnosticoAberto}
+        >
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 text-muted-foreground transition-transform',
+              diagnosticoAberto && 'rotate-180',
+            )}
+          />
+          <h2 className="text-base font-semibold">{t('signals')}</h2>
+          <span className="text-xs text-muted-foreground">
+            {t('diagnostico.contagem', { total: audit.signals.length })}
+          </span>
+        </button>
       </div>
 
-      {onlyIssues && !hasIssues ? (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            {t('noIssues')}
-          </CardContent>
-        </Card>
-      ) : (
-        CATEGORY_META.map((cat) => {
-          const sigs = visibleSignals(cat.key);
-          if (sigs.length === 0) return null;
-          return (
-            <Card key={cat.key}>
-              <CardHeader>
-                <CardTitle className="text-base">{t(`categories.${cat.key}`)}</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                {sigs.map((s) => (
-                  <SignalRow key={s.key} signal={s} recommendation={recBySignal.get(s.key)} />
-                ))}
+      {diagnosticoAberto && (
+        <>
+          <div className="flex items-center justify-end">
+            <Button variant="outline" size="sm" onClick={() => setOnlyIssues((v) => !v)}>
+              {onlyIssues ? t('allSignals') : t('onlyIssues')}
+            </Button>
+          </div>
+
+          {onlyIssues && !hasIssues ? (
+            <Card>
+              <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                {t('noIssues')}
               </CardContent>
             </Card>
-          );
-        })
+          ) : (
+            CATEGORY_META.map((cat) => {
+              const sigs = visibleSignals(cat.key);
+              if (sigs.length === 0) return null;
+              return (
+                <Card key={cat.key}>
+                  <CardHeader>
+                    <CardTitle className="text-base">{t(`categories.${cat.key}`)}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {sigs.map((s) => (
+                      <SignalRow
+                        key={s.key}
+                        signal={s}
+                        recommendation={recBySignal.get(s.key)}
+                        temPeca={sinaisComPeca.has(s.key)}
+                      />
+                    ))}
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </>
       )}
     </div>
   );

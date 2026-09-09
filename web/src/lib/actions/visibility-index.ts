@@ -37,7 +37,23 @@ import { INDEX_DIMENSIONS, type IndexDimKey } from '@/config/visibility-index';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type VisibilityIndexPreset = '7d' | '30d' | 'all';
+/**
+ * ajustar.md Parte 1, P2: os períodos das duas telas tinham que ser os
+ * mesmos. O Insights oferece 24h/7d/30d/90d/Tudo e o Score só 7d/30d/Tudo —
+ * quem comparava "ranking médio" com "nota de Posição" comparava janelas
+ * diferentes sem perceber. `90d` é o período em que a evolução aparece com
+ * censo semanal; `24h` existe pra quem filtrou na mão no Insights e navegou
+ * pra cá.
+ */
+export type VisibilityIndexPreset = '24h' | '7d' | '30d' | '90d' | 'all';
+
+/** Dias de cada preset. `all` não tem recorte. */
+const DIAS_DO_PRESET: Record<Exclude<VisibilityIndexPreset, 'all'>, number> = {
+  '24h': 1,
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
 
 /** Category groups feeding dims 03–06 (classifier categories → dimension). */
 export type IndexCategoryKey = 'social' | 'reviews' | 'media' | 'verticals';
@@ -339,7 +355,7 @@ export async function getVisibilityIndex(
   const from =
     preset === 'all'
       ? null
-      : new Date(Date.now() - (preset === '7d' ? 7 : 30) * 24 * 3600 * 1000).toISOString();
+      : new Date(Date.now() - DIAS_DO_PRESET[preset] * 24 * 3600 * 1000).toISOString();
 
   // Posição vem do MESMO RPC que alimenta o "Ranking médio" do Insights
   // (migration 00046). Não é uma segunda implementação da mesma conta — é a

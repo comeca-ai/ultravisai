@@ -213,10 +213,9 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
     key** (`sk_live_...`, painel do Cloro) e o token Cloudflare mencionado
     antes. Gerar novo valor no painel de origem e colar só lá/no GitHub
     Secrets — nunca de volta aqui.
-0d. **Decidir os PRs em draft que ainda dependem de você**: #152/#153/#154
-    (mudanças de produto — pesos do Score, ranking unificado — aguardando
-    sua revisão) e os 6 PRs do Dependabot com bump major (#138, #139, #141,
-    #142, #145, e #146) — não mergear sem testar manualmente.
+0d. ✅ **PRs em draft — resolvido (09/set).** #152/#153/#154 e os 6 do
+    Dependabot foram todos fechados ou mergeados; o repositório está sem
+    nenhum PR aberto. Esta pendência ficou listada depois de resolvida.
 0e. ✅ **Token Cloudflare — saga fechada (08/set, run #38 sucesso).** Resumo:
     token custom criado (Workers Scripts + D1 + Workers Routes Edit) → vazou
     em chat → Roll pedido → 2 recolagens quebradas em GitHub Secrets (runs
@@ -249,6 +248,19 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
    Senha curta é escolha consciente pra um documento que circula por
    WhatsApp — se um dia valer mais, trocar o tipo de Variable pra Secret no
    mesmo lugar (o código lê igual) e usar valores sérios.
+
+8. **Decidir o recálculo retroativo das citações** (09/set) — a definição de
+   citação que você deu em 07/set virou código: agora conta link de terceiro
+   que traz o produto, não só o do seu domínio. Isso SOBE o `citation_count`
+   e, com ele, o `visibility_score`. Duas saídas, e a escolha é sua:
+   recalcular o histórico e assumir um degrau no gráfico (com nota na tela
+   dizendo em que data a definição mudou), ou valer só daqui pra frente e
+   conviver com uma série de duas réguas.
+   Antes de decidir, rode `node src/scripts/recontar-citacoes-produto.js` no
+   server: ele nasce em simulação, não grava nada, e lista uma amostra do que
+   passaria a contar. Se aparecer falso positivo (a Polar é nome comum —
+   "vórtice polar"), cadastre `citation_terms` da marca com o termo composto
+   e rode de novo. Só então `CITACOES_APLICAR=1`.
 
 ## Próximo trabalho de produto
 

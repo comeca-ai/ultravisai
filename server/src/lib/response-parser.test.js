@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { countBrandMentions, parseResponse } from './response-parser.js';
+import {
+  countBrandMentions,
+  parseResponse,
+  contarCitacoesDoProduto,
+  citacaoTrazOProduto,
+} from './response-parser.js';
 
 describe('response-parser', () => {
   describe('countBrandMentions', () => {
@@ -108,17 +113,14 @@ describe('response-parser', () => {
         expect(result.citationCount).toBe(1);
       });
 
-      it('should NOT count a brand domain appearing in another site path or query', () => {
+      it('não conta parâmetro de rastreamento que carrega o nome da marca', () => {
         const response = {
           text: 'Acme is referenced.',
-          citations: [
-            { url: 'https://other.com/acme-corp.com/info', title: 'Path lookalike' },
-            { url: 'https://other.com/?ref=acme.com', title: 'Query lookalike' },
-          ],
+          citations: [{ url: 'https://other.com/?ref=acme.com', title: 'Query lookalike' }],
         };
         const result = parseResponse(response, brand, 'neutral');
-        // The hostname is other.com in both — matches the Citations page's
-        // classification, which the stored count must agree with.
+        // O host é other.com e o termo só aparece na QUERY — `?ref=` é
+        // rastreamento, não link de produto. Só o caminho da URL conta.
         expect(result.citationCount).toBe(0);
       });
 
@@ -130,6 +132,94 @@ describe('response-parser', () => {
         const result = parseResponse(response, brand, 'neutral');
         // Only one citation exists, so citationCount should be at most 1
         expect(result.citationCount).toBe(1);
+      });
+    });
+
+    // ── Citação = link que traz o produto (decisão do dono, 07/set) ──────────
+    describe('citação em fonte de terceiro (ajustar.md Parte 3)', () => {
+      it('conta o link de terceiro que traz o produto no título', () => {
+        const response = {
+          text: 'A Acme aparece na imprensa.',
+          citations: [
+            { url: 'https://techtudo.com.br/review/x1-analise', title: 'Acme X1: análise' },
+          ],
+        };
+        // Antes desta regra isso valia ZERO — justamente o caso em que a marca
+        // NÃO controla a página, que é o que dá valor de autoridade ao sinal.
+        expect(parseResponse(response, brand, 'neutral').citationCount).toBe(1);
+      });
+
+      it('conta pelo slug, com os separadores normalizados', () => {
+        const cite = { url: 'https://techtudo.com.br/review/acme-x1-analise', title: 'Análise' };
+        expect(citacaoTrazOProduto(cite, ['Acme X1'])).toBe(true);
+      });
+
+      it('exige palavra inteira — "polarizado" não é a Polar', () => {
+        const cite = { url: 'https://exemplo.com/oculos-polarizado', title: 'Óculos polarizado' };
+        expect(citacaoTrazOProduto(cite, ['Polar'])).toBe(false);
+      });
+
+      it('termo composto protege marca de nome comum', () => {
+        const clima = { url: 'https://g1.com/clima/vortice-polar', title: 'O vórtice polar' };
+        // Com o nome sozinho, a matéria sobre clima entraria na conta.
+        expect(citacaoTrazOProduto(clima, ['Polar'])).toBe(true);
+        // É pra isso que existe `citation_terms`.
+        expect(citacaoTrazOProduto(clima, ['Polar Vantage'])).toBe(false);
+      });
+
+      it('separa própria de terceiro e nunca conta a mesma citação duas vezes', () => {
+        const citations = [
+          { url: 'https://acme.com/x1', title: 'Acme X1' }, // própria (e o título casa)
+          { url: 'https://techtudo.com.br/acme-x1', title: 'Análise' }, // terceiro
+          { url: 'https://outro.com/generico', title: 'Nada a ver' }, // nenhuma
+        ];
+        const r = contarCitacoesDoProduto(citations, {
+          domains: ['acme.com'],
+          termos: ['Acme X1'],
+        });
+        expect(r).toEqual({ total: 2, proprias: 1, terceiros: 1 });
+      });
+
+      it('sem termos, só o domínio próprio conta', () => {
+        const citations = [{ url: 'https://techtudo.com.br/acme-x1', title: 'Acme X1' }];
+        expect(contarCitacoesDoProduto(citations, { domains: ['acme.com'], termos: [] })).toEqual({
+          total: 0,
+          proprias: 0,
+          terceiros: 0,
+        });
+      });
+
+      it('ignora acento na comparação', () => {
+        const cite = { url: 'https://exemplo.com/analise', title: 'Análise do Cafés Grão' };
+        expect(citacaoTrazOProduto(cite, ['cafes grao'])).toBe(true);
+      });
+
+      it('citationTerms tem precedência sobre nome e aliases', () => {
+        const marcaGenerica = {
+          brandName: 'Polar',
+          domains: ['polar.com'],
+          aliases: ['Polar Electro'],
+          citationTerms: ['Polar Vantage'],
+        };
+        const response = {
+          text: 'Sobre o clima.',
+          citations: [{ url: 'https://g1.com/clima/vortice-polar', title: 'O vórtice polar' }],
+        };
+        expect(parseResponse(response, marcaGenerica, 'neutral').citationCount).toBe(0);
+      });
+
+      it('expõe a quebra própria × terceiro no retorno do parseResponse', () => {
+        const response = {
+          text: 'Acme.',
+          citations: [
+            { url: 'https://acme.com/x1', title: 'X1' },
+            { url: 'https://techtudo.com.br/acme-x1-analise', title: 'Análise' },
+          ],
+        };
+        const r = parseResponse(response, brand, 'neutral');
+        expect(r.citationOwnCount).toBe(1);
+        expect(r.citationThirdPartyCount).toBe(1);
+        expect(r.citationCount).toBe(2);
       });
     });
 

@@ -25,7 +25,11 @@ export async function backfillBrandMentions(brandId) {
   const { default: supabaseAdmin } = await import('../config/supabase.js');
 
   const [{ data: brand }, { data: domains }, { data: competitorRows }] = await Promise.all([
-    supabaseAdmin.from('brands').select('id, name, aliases').eq('id', brandId).single(),
+    supabaseAdmin
+      .from('brands')
+      .select('id, name, aliases, citation_terms')
+      .eq('id', brandId)
+      .single(),
     supabaseAdmin.from('brand_domains').select('domain').eq('brand_id', brandId),
     supabaseAdmin.from('competitors').select('id, name, domain').eq('brand_id', brandId),
   ]);
@@ -35,6 +39,10 @@ export async function backfillBrandMentions(brandId) {
     brandName: brand.name,
     domains: (domains || []).map((d) => d.domain),
     aliases: brand.aliases || [],
+    // Mesma escolha de termos do rastreamento ao vivo — este backfill grava
+    // citation_count junto das menções, e regra diferente aqui produziria um
+    // número que o censo nunca produziria.
+    citationTerms: brand.citation_terms || [],
   };
   const competitors = (competitorRows || []).map((c) => ({
     id: c.id,

@@ -46,6 +46,7 @@ export function normalizeUrl(raw) {
  * @property {number} wordCount      word count of `text`
  * @property {string|null} robotsTxt
  * @property {string|null} llmsTxt
+ * @property {string|null} sitemapXml
  * @property {string|null} query     optional target buyer query (later phases)
  */
 
@@ -73,9 +74,13 @@ export async function buildAuditContext(rawUrl, { query = null } = {}) {
   const text = $text('body').text().replace(/\s+/g, ' ').trim();
   const wordCount = text ? text.split(/\s+/).length : 0;
 
-  const [robotsTxt, llmsTxt] = await Promise.all([
+  // O sitemap entra pelo mesmo caminho barato do llms.txt (arquivo auxiliar na
+  // raiz, uma requisição), pedido do slide P3 do Igor: nenhum dos sinais
+  // olhava pro sitemap — nem se existe, nem se o robots.txt aponta pra ele.
+  const [robotsTxt, llmsTxt, sitemapXml] = await Promise.all([
     fetchText(`${origin}/robots.txt`),
     fetchText(`${origin}/llms.txt`),
+    fetchText(`${origin}/sitemap.xml`),
   ]);
 
   return {
@@ -90,6 +95,7 @@ export async function buildAuditContext(rawUrl, { query = null } = {}) {
     wordCount,
     robotsTxt,
     llmsTxt,
+    sitemapXml,
     query,
     now: Date.now(),
   };

@@ -1371,6 +1371,7 @@ export default function CitationsPage() {
   }, [sourceTab, activeBrandId, gapFilters]);
 
   const totals = data?.totals;
+  const marca = data?.brandCitations;
   const kpis = useMemo(
     () => [
       {
@@ -1378,6 +1379,19 @@ export default function CitationsPage() {
         value: totals ? totals.citations.toLocaleString() : '—',
         sub: t('kpiTotalCitationsSub', {
           results: totals?.results ?? 0,
+        }),
+        icon: Quote,
+      },
+      // Decisão do dono de 07/set: citação é o link que trouxe o seu produto,
+      // de qualquer fonte. As duas metades vêm separadas porque pedem ação
+      // diferente — própria é manter a página citável, terceiro é assessoria
+      // e presença em comparativos. Somadas, a diferença se perde.
+      {
+        title: t('kpiCitacoesDaMarca'),
+        value: marca ? marca.total.toLocaleString() : '—',
+        sub: t('kpiCitacoesDaMarcaSub', {
+          proprias: marca?.proprias ?? 0,
+          terceiros: marca?.terceiros ?? 0,
         }),
         icon: Quote,
       },
@@ -1396,7 +1410,7 @@ export default function CitationsPage() {
         icon: Layers,
       },
     ],
-    [totals, t],
+    [totals, marca, t],
   );
 
   const handleExportCsv = useCallback(() => {

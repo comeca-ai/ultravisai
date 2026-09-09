@@ -386,6 +386,132 @@ export function escaparAtributo(valor) {
  * }} opts
  * @returns {{ pecas: Array<object>, resumo: {total:number, deterministicas:number, comIa:number} }}
  */
+/**
+ * Sitemap — duas coisas numa peça só, porque uma sem a outra não resolve: o
+ * arquivo e a linha do robots.txt que aponta pra ele.
+ *
+ * As URLs saem dos links internos que a auditoria JÁ leu da página. Não é o
+ * sitemap completo do site — e a peça diz isso com todas as letras, pra
+ * ninguém publicar um sitemap de 8 páginas achando que cobriu 800.
+ */
+function pecaSitemap(ctx, porChave) {
+  const paginas = paginasInternas(ctx);
+  if (!paginas.length) return null; // sem link interno lido, não há o que listar
+
+  const urls = [ctx.origin + '/', ...paginas.map((p) => p.url)];
+  const corpo = urls
+    .map((u) => `  <url>\n    <loc>${escaparAtributo(u)}</loc>\n  </url>`)
+    .join('\n');
+  const xml =
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    corpo +
+    '\n</urlset>\n';
+
+  const sinal = porChave.get('sitemap-presence');
+  const soFaltaRobots = Boolean(sinal?.evidence?.existe && !sinal?.evidence?.declaradoNoRobots);
+
+  if (soFaltaRobots) {
+    return {
+      id: 'sitemap-robots',
+      titulo: 'Declarar o sitemap no robots.txt',
+      onde: `${ctx.origin}/robots.txt — acrescentar ao final do arquivo existente`,
+      linguagem: 'text',
+      conteudo: `Sitemap: ${ctx.origin}/sitemap.xml\n`,
+      porque:
+        'O sitemap existe, mas o robots.txt não aponta pra ele. Um bot que chega pelo robots — o caminho normal — não adivinha a URL do sitemap, então as páginas que só ele lista continuam invisíveis.',
+      sinais: ['sitemap-presence'],
+      origem: 'deterministico',
+    };
+  }
+
+  return {
+    id: 'sitemap',
+    titulo: 'sitemap.xml + a linha do robots.txt',
+    onde: `${ctx.origin}/sitemap.xml — arquivo novo na raiz; mais a linha "Sitemap:" no robots.txt`,
+    linguagem: 'xml',
+    conteudo: xml + `\n<!-- No robots.txt, acrescentar:\nSitemap: ${ctx.origin}/sitemap.xml\n-->\n`,
+    porque: `O site não publica sitemap. É por onde o rastreador acha o que nenhum link interno alcança. Este arquivo lista as ${urls.length} URLs que encontrei nesta página — se o site tem mais, gere o sitemap completo pelo seu CMS e mantenha a linha do robots.txt.`,
+    sinais: ['sitemap-presence'],
+    origem: 'deterministico',
+  };
+}
+
+/**
+ * JSON-LD de Product — montado do que a página TEM, nunca do que ela deveria
+ * ter. Preço e nota entram só quando existem no HTML (microdata, og:price);
+ * faltando, ficam de fora do bloco e o "porque" nomeia o que preencher.
+ *
+ * Inventar `price: 0` ou uma nota média seria pior que não entregar peça
+ * nenhuma: o cliente publicaria dado falso que o motor lê como verdade.
+ */
+function pecaProduct(ctx, marca) {
+  const nome =
+    ctx.$('[itemprop="name"]').first().text().trim() ||
+    ctx.$('meta[property="og:title"]').attr('content') ||
+    ctx.$('h1').first().text().replace(/\s+/g, ' ').trim();
+  if (!nome) return null;
+
+  const dados = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: nome,
+    url: ctx.url,
+  };
+
+  const descricao =
+    ctx.$('meta[name="description"]').attr('content') ||
+    ctx.$('meta[property="og:description"]').attr('content');
+  if (descricao) dados.description = descricao.replace(/\s+/g, ' ').trim();
+
+  const imagem = ctx.$('meta[property="og:image"]').attr('content');
+  if (imagem) {
+    try {
+      dados.image = new URL(imagem, ctx.url).toString();
+    } catch {
+      // imagem relativa inválida: omitir em vez de publicar link quebrado
+    }
+  }
+
+  if (marca?.name) dados.brand = { '@type': 'Brand', name: marca.name };
+
+  const preco =
+    ctx
+      .$('meta[property="product:price:amount"], meta[property="og:price:amount"]')
+      .attr('content') || ctx.$('[itemprop="price"]').attr('content');
+  const moeda =
+    ctx
+      .$('meta[property="product:price:currency"], meta[property="og:price:currency"]')
+      .attr('content') ||
+    ctx.$('[itemprop="priceCurrency"]').attr('content') ||
+    'BRL';
+  if (preco) {
+    dados.offers = {
+      '@type': 'Offer',
+      price: String(preco).trim(),
+      priceCurrency: String(moeda).trim(),
+      url: ctx.url,
+    };
+  }
+
+  const faltando = [];
+  if (!dados.offers) faltando.push('offers (preço, moeda e disponibilidade)');
+  faltando.push('aggregateRating (nota média e nº de avaliações)');
+
+  const json = JSON.stringify(dados, null, 2);
+
+  return {
+    id: 'jsonld-product',
+    titulo: 'JSON-LD de produto',
+    onde: 'Dentro do <head> da página de produto',
+    linguagem: 'html',
+    conteudo: `<script type="application/ld+json">\n${json}\n</script>\n`,
+    porque: `Sem schema de produto a IA sabe que o produto existe; com ele sabe o preço e a nota — e é isso que decide se você entra no comparativo que o motor monta. Montei o bloco com o que a página já publica. Preencha antes de colar: ${faltando.join(', ')}.`,
+    sinais: ['product-schema'],
+    origem: 'deterministico',
+  };
+}
+
 export function montarKitCitabilidade(
   ctx,
   { results = [], recommendations = [], marca = null } = {},
@@ -401,6 +527,14 @@ export function montarKitCitabilidade(
   if (falhou(porChave, 'faq-schema')) {
     const faq = pecaFaq(ctx, recommendations);
     if (faq) pecas.push(faq);
+  }
+  if (falhou(porChave, 'sitemap-presence')) {
+    const sitemap = pecaSitemap(ctx, porChave);
+    if (sitemap) pecas.push(sitemap);
+  }
+  if (falhou(porChave, 'product-schema')) {
+    const produto = pecaProduct(ctx, marca);
+    if (produto) pecas.push(produto);
   }
   if (
     falhou(porChave, 'meta-description') ||

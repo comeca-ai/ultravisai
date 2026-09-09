@@ -221,3 +221,57 @@ export function classifyDomain(domain: string, ctx: ClassifyContext): SourceCate
 
   return 'other';
 }
+
+/**
+ * Uma citação "traz claramente o produto"?
+ *
+ * Decisão do dono (07/set, ajustar.md Parte 3): citação é o link que a IA
+ * entregou trazendo o seu produto — o link pode ser de qualquer fonte. Até
+ * então só contava link no domínio próprio, o que zerava justamente o caso em
+ * que a marca NÃO controla a página, que é o que dá valor de autoridade ao
+ * sinal.
+ *
+ * ESPELHO de `citacaoTrazOProduto` em `server/src/lib/response-parser.js` —
+ * mantenha as duas em sincronia. O servidor grava `citation_count` na
+ * escrita e esta página reclassifica na leitura; regra diferente dos dois
+ * lados faz a MESMA métrica mostrar números diferentes em telas diferentes,
+ * que é exatamente o problema que a Parte 1 do ajustar.md documenta.
+ */
+export function normalizarParaBusca(texto: string): string {
+  return (texto || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-_+./]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function temTermoInteiro(textoNormalizado: string, termo: string): boolean {
+  const alvo = normalizarParaBusca(termo);
+  if (!alvo) return false;
+  const escapado = alvo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${escapado}\\b`).test(textoNormalizado);
+}
+
+export function citacaoTrazOProduto(
+  cite: { url?: string | null; title?: string | null },
+  termos: string[],
+): boolean {
+  const lista = (termos || []).filter(Boolean);
+  if (lista.length === 0) return false;
+
+  const titulo = normalizarParaBusca(cite?.title ?? '');
+  if (lista.some((t) => temTermoInteiro(titulo, t))) return true;
+
+  // Só o CAMINHO: nem o host (já decidido pelo domínio da marca) nem a query
+  // (`?ref=polar.com` é parâmetro de rastreamento, não link de produto).
+  let caminho = '';
+  try {
+    const u = new URL((cite?.url ?? '').trim());
+    caminho = u.pathname;
+  } catch {
+    caminho = (cite?.url ?? '').replace(/^[a-z]+:\/\/[^/]+/i, '').split('?')[0];
+  }
+  return lista.some((t) => temTermoInteiro(normalizarParaBusca(caminho), t));
+}

@@ -13,7 +13,7 @@
 - **Parte 4** — Apresentação da auditoria (slide P3 do Igor)
 - **Estado da implementação** — o que já está em código e o que ainda é só decisão (logo abaixo)
 
-## Estado da implementação (atualizado 08/set)
+## Estado da implementação (atualizado 09/set)
 
 Este arquivo mistura levantamento, decisão e implementação — nasceu de uma
 conversa ao vivo, não de um plano escrito do zero. Pra não obrigar quem lê a
@@ -22,19 +22,32 @@ adivinhar o que já existe, o resumo:
 | Decisão | Implementado? | Onde |
 | --- | --- | --- |
 | Ranking = Σ posições ÷ aparições | ✅ já era assim no Insights (nada mudou lá) | RPC `insights_aggregates` |
-| Nota de Posição relativa ao campo (`appearance_rivals`), pódio fora | ✅ código pronto | migration `00046`, `visibility-index.ts`, branch `ajustar-analise` (PR #154) |
-| Score e Insights lendo o mesmo RPC (resolve filtros/período/teto de 50k) | ✅ código pronto | `visibility-index.ts` chama `insights_aggregates` diretamente |
-| Pesos do Score 25% cada | ✅ código pronto | `web/src/config/visibility-score.ts` |
-| Citação = link que traz o produto, de qualquer fonte | ❌ só decisão, sem código ainda | Parte 3 → Definição de citação |
-| Resumo de Visibilidade cai pro último resultado + tarja | ❌ só decisão | Parte 2 |
-| Padrão do período `24h` → `30d` | ❌ pendente | Parte 2 |
-| Sinais de sitemap e Product schema (slide do Igor) | ❌ pendente | Parte 4 |
-| "O QUE FAZER" no topo da auditoria, diagnóstico recolhido | ❌ pendente | Parte 4 |
+| Nota de Posição relativa ao campo (`appearance_rivals`), pódio fora | ✅ em produção | migration `00046`, `visibility-index.ts` (PR #154, mergeado 08/set) |
+| Score e Insights lendo o mesmo RPC (resolve filtros/período/teto de 50k) | ✅ em produção | `visibility-index.ts` chama `insights_aggregates` diretamente |
+| Pesos do Score 25% cada | ✅ em produção | `web/src/config/visibility-score.ts` |
+| Padrão do período `24h` → `30d` | ✅ em produção | `insights/page.tsx:130` (PR #163, 08/set) |
+| Resumo de Visibilidade cai pro último resultado + tarja | ✅ em produção | `fallbackTo` na action + tarja `fallbackBanner` (PR #163, 08/set) |
+| Citação = link que traz o produto, de qualquer fonte | ✅ código pronto | migration `00049`, `response-parser.js`, `classify.ts`, script de recontagem |
+| Sinais de sitemap e Product schema (slide do Igor) | ✅ código pronto | `signals/structure.js`, `rubric.json` (47 → 49), peças no `citability-kit.js` |
+| "O QUE FAZER" no topo da auditoria, diagnóstico recolhido | ✅ código pronto | `audit-report.tsx` |
 
-O que já está em código está no PR **#154** (`ajustar-analise`), em draft —
-esperando você tirar do rascunho. Nenhum item marcado ✅ chegou em produção
-ainda: depende do deploy do Cloudflare, que segue travado por permissão do
-token.
+> Esta tabela ficou um dia inteira desatualizada (dizia ❌ pra dois itens que
+> o PR #163 já tinha entregue) e alguém contou o trabalho errado por causa
+> dela. Se você mexer em qualquer coisa deste arquivo, atualize a linha aqui
+> no MESMO commit.
+
+As 8 decisões estão implementadas. Cinco já rodam em produção; as três de
+09/set (citação, sinais novos, "O QUE FAZER") entram no próximo deploy — as
+de servidor pelo worker da Cloudflare, a da auditoria pela Vercel.
+
+**Falta uma decisão sua**, e é a única coisa que segura a citação nova de
+valer sobre o histórico: contar mais citações **sobe** o `visibility_score`.
+Ou se recalcula o histórico e se assume o degrau no gráfico (com nota na tela
+dizendo em que data a definição mudou), ou vale só daqui pra frente e a série
+fica com duas réguas. O script `server/src/scripts/recontar-citacoes-produto.js`
+nasce em SIMULAÇÃO: roda, mostra o que mudaria e lista uma amostra do que
+passaria a contar, sem gravar nada. Rode, confira a amostra e só então
+`CITACOES_APLICAR=1`.
 
 ---
 
@@ -317,11 +330,11 @@ do servidor — é tela e action, sobe pela Vercel.
 | 1 | Nota de Posição relativa ao campo, pódio fora | ✅ código pronto (PR #154) | corrige o teto artificial que a pergunta do dono expôs | nada |
 | 2 | Score lendo o mesmo RPC do Insights | ✅ código pronto (PR #154) | é o que faz "ranking médio" e "nota de Posição" pararem de divergir | 1 |
 | 3 | Pesos do Score 25% cada | ✅ código pronto (PR #154) | resolve de brinde a soma 65≠100 que ninguém conseguia ler | nada |
-| 4 | Padrão do período `24h` → `30d` | ⏳ pendente | uma linha, tira a tela vazia do caminho do cliente hoje | nada |
-| 5 | Fallback pro último resultado + tarja | ⏳ pendente | é o que faz o produto parar de parecer quebrado entre censos | nada |
-| 6 | Citação = link que traz o produto, de qualquer fonte | ⏳ pendente | hoje só conta domínio próprio; autoridade externa some do número | decisão sobre recálculo retroativo do `visibility_score` |
-| 7 | Tooltips explicando posição relativa ao campo | ⏳ pendente | evita a conversa "seu número está errado" | 1, 2 |
-| 8 | Igualar períodos (`24h`, `90d` no Score) | ⏳ pendente | fecha a comparação entre as duas telas | 2 |
+| 4 | Padrão do período `24h` → `30d` | ✅ em produção (PR #163) | uma linha, tira a tela vazia do caminho do cliente hoje | nada |
+| 5 | Fallback pro último resultado + tarja | ✅ em produção (PR #163) | é o que faz o produto parar de parecer quebrado entre censos | nada |
+| 6 | Citação = link que traz o produto, de qualquer fonte | ✅ código pronto (09/set) | hoje só conta domínio próprio; autoridade externa some do número | decisão sobre recálculo retroativo do `visibility_score` |
+| 7 | Tooltips explicando posição relativa ao campo | ✅ código pronto (09/set) | evita a conversa "seu número está errado" | 1, 2 |
+| 8 | Igualar períodos (`24h`, `90d` no Score) | ✅ código pronto (09/set) | fecha a comparação entre as duas telas | 2 |
 
 Os itens 1-2-3 já estão implementados na branch `ajustar-analise` (PR #154,
 draft) — faltam merge e o deploy do Cloudflare destravar pra chegarem em

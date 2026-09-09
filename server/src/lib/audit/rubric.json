@@ -1,14 +1,14 @@
 {
   "version": "v1",
   "description": "47-signal AEO/GEO scoring rubric for measuring whether a page will get cited by AI answer engines.",
-  "totalSignals": 47,
+  "totalSignals": 49,
   "categories": [
     {
       "key": "structure",
       "label": "Structure",
       "weight": 0.25,
       "description": "How parseable your page is to an AI engine. Schema, headings, lists, tables, alt-text, OG meta. The substrate that makes everything else legible.",
-      "signalCount": 13
+      "signalCount": 15
     },
     {
       "key": "authority",
@@ -169,6 +169,26 @@
       "howToFix": "Add the 4 OG tags. Use 1200×630 og:image. Our /tools/og-checker validates them.",
       "source": "Open Graph Protocol",
       "impactTier": "medium"
+    },
+    {
+      "key": "sitemap-presence",
+      "category": "structure",
+      "label": "Sitemap",
+      "what": "Se /sitemap.xml existe e se o robots.txt aponta pra ele.",
+      "why": "É por onde um bot de IA descobre as páginas que nenhum link interno alcança. Sitemap ausente deixa conteúdo bom invisível; sitemap não declarado no robots.txt só é achado por quem já adivinha a URL.",
+      "howToFix": "Publicar /sitemap.xml com as páginas que você quer que a IA leia e adicionar a linha `Sitemap: https://seusite.com/sitemap.xml` no robots.txt.",
+      "source": "sitemaps.org 0.9 · slide P3 (Igor, 07/set)",
+      "impactTier": "high"
+    },
+    {
+      "key": "product-schema",
+      "category": "structure",
+      "label": "Schema de produto",
+      "what": "JSON-LD do tipo Product com name, offers e aggregateRating na página de produto.",
+      "why": "É o schema que os motores usam pra montar comparativo. Sem ele a IA sabe que o produto existe; com ele sabe o preço e a nota — e é isso que decide se a marca entra na tabela que o usuário vê.",
+      "howToFix": "Adicionar bloco Product com name, offers (price + priceCurrency + availability) e aggregateRating (ratingValue + reviewCount). Páginas que não são de produto não são cobradas por este sinal.",
+      "source": "schema.org/Product · slide P3 (Igor, 07/set)",
+      "impactTier": "high"
     },
     {
       "key": "outbound-authority-links",

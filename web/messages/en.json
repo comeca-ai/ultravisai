@@ -160,6 +160,20 @@
       "download": "Download file",
       "originSite": "built from your site",
       "originAi": "AI draft"
+    },
+    "temPeca": "ready to paste",
+    "oQueFazer": {
+      "titulo": "What to do",
+      "subtitulo": "Ordered by impact, starting with what moves your visibility the most. Whatever already passes moved down to the diagnostics.",
+      "legibilidade": "Readability",
+      "legibilidadeNota": "What lives on your own page and you can change today, without depending on anyone.",
+      "conteudo": "Content",
+      "conteudoNota": "What depends on the content you publish and on who talks about you.",
+      "contagem": "{total, plural, one {# item} other {# items}}",
+      "contagemComPeca": "{total, plural, one {# item} other {# items}} · {comPeca, plural, one {# with a ready-to-paste file} other {# with a ready-to-paste file}}"
+    },
+    "diagnostico": {
+      "contagem": "{total, plural, one {# signal} other {# signals}}"
     }
   },
   "auth": {
@@ -380,7 +394,7 @@
     "presenceTitle": "Presence",
     "presenceSub": "{visible} of {total} prompts with the brand in at least one answer",
     "rankingTitle": "Average ranking",
-    "rankingTooltip": "Average position where your brand appears in the text of the answers that cite it (1st = cited before every competitor). Full detail in the Visibility Score.",
+    "rankingTooltip": "Average position where your brand appears in the text of the answers that cite it (1st = cited ahead of every competitor). This is NOT the Score’s Ranking grade: there the maths compares against the field — how many competitors were cited in the same answer — so the same 3.3rd is worth a very different grade in a field of 3 or of 20.",
     "rankingValue": "#{avg, number}",
     "rankingSub": "1st ×{r1} · 2nd ×{r2} · 3rd ×{r3} · 4th+ ×{r4plus}",
     "rankingEmpty": "No ranked answers in this window (ranking is computed up to 30 min after tracking).",
@@ -1274,7 +1288,9 @@
     "tabGaps": "Competitor Gaps",
     "exportCsv": "Export CSV",
     "exporting": "Exporting...",
-    "exportFailed": "Failed to export CSV"
+    "exportFailed": "Failed to export CSV",
+    "kpiCitacoesDaMarca": "Brand citations",
+    "kpiCitacoesDaMarcaSub": "{proprias} on your domain · {terceiros} on third-party sources"
   },
   "visibilityScore": {
     "title": "Visibility Score",
@@ -1282,8 +1298,10 @@
     "twoIndexNote": "Two indexes, different roles: the Visibility Score measures the RESULT in AI answers; the Citability Index measures the LEVER (your assets). They are never added together — one drives the other.",
     "twoIndexLink": "See the Citability Index",
     "period": {
+      "24h": "24 hours",
       "7d": "7 days",
       "30d": "30 days",
+      "90d": "90 days",
       "all": "All"
     },
     "bands": {
@@ -1346,8 +1364,10 @@
     "title": "Citability Index",
     "subtitle": "Your 0–100 citability score — what you have already built to be cited by AIs. It is the lever that drives the Visibility Score (the outcome): here you ACT; there you MEASURE. The math is always open.",
     "period": {
+      "24h": "24 hours",
       "7d": "7 days",
       "30d": "30 days",
+      "90d": "90 days",
       "all": "All time"
     },
     "bands": {

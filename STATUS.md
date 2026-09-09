@@ -237,17 +237,14 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
    se produção subiu com a variável); e existem 3 fórmulas diferentes de
    "Visibility Score", então o número depende da tela que o cliente abre.
 
-7. **Ligar o `api.ultravis.ai/rules`** (09/set) — a rota já está no código e
-   sobe no próximo deploy do server, mas nasce FECHADA (503) até existir a
-   variável que diz quem pode entrar. No painel do worker `ultravis-server`
-   (Settings -> Variables and Secrets), criar `REGRAS_ACESSOS` com a lista de
-   acessos no formato `usuario` + dois pontos + `senha`, pares separados por
-   vírgula (os dois pares combinados nesta sessão estão no chat, fora do
-   repositório de propósito). O `keep_vars: true` faz o valor sobreviver aos
-   deploys. Esse mesmo login abre a página e assina as marcações.
-   Senha curta é escolha consciente pra um documento que circula por
-   WhatsApp — se um dia valer mais, trocar o tipo de Variable pra Secret no
-   mesmo lugar (o código lê igual) e usar valores sérios.
+7. ✅ **`api.ultravis.ai/rules` — no ar (09/set).** Rota entregue no deploy
+   run #41 e `REGRAS_ACESSOS` criada no painel do worker por você. O mesmo
+   login abre a página e assina as marcações; `keep_vars: true` faz o valor
+   sobreviver aos deploys seguintes.
+   Não deu pra confirmar daqui (o proxy da sandbox bloqueia
+   `api.ultravis.ai`) — quem viu a página abrir foi você.
+   Se um dia a senha precisar valer mais, é trocar o tipo de Variable pra
+   Secret no mesmo campo: o código lê igual.
 
 8. **Decidir o recálculo retroativo das citações** (09/set) — a definição de
    citação que você deu em 07/set virou código: agora conta link de terceiro
@@ -256,11 +253,15 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
    recalcular o histórico e assumir um degrau no gráfico (com nota na tela
    dizendo em que data a definição mudou), ou valer só daqui pra frente e
    conviver com uma série de duas réguas.
-   Antes de decidir, rode `node src/scripts/recontar-citacoes-produto.js` no
-   server: ele nasce em simulação, não grava nada, e lista uma amostra do que
-   passaria a contar. Se aparecer falso positivo (a Polar é nome comum —
-   "vórtice polar"), cadastre `citation_terms` da marca com o termo composto
-   e rode de novo. Só então `CITACOES_APLICAR=1`.
+   **Onde rodar:** Actions → **recontar-citacoes** → *Run workflow*. O script
+   precisa da SERVICE_ROLE, que vive no GitHub Secrets — a sandbox não alcança
+   o banco e o container da edge não tem shell, então o runner do Actions é o
+   único lugar que fala com os dois lados (mesmo caminho do `verificar-censo`).
+   Deixe `aplicar` em `nao` na primeira vez: o run mostra quanto o total
+   mudaria e lista uma amostra do que passaria a contar, sem gravar nada. Se
+   aparecer falso positivo (a Polar é nome comum — "vórtice polar"), cadastre
+   `citation_terms` da marca com o termo composto e rode de novo. Só então
+   `aplicar` = `sim`.
 
 ## Próximo trabalho de produto
 

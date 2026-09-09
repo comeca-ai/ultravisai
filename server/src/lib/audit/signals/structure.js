@@ -1,5 +1,5 @@
 /**
- * Structure-category signal evaluators (13 signals).
+ * Structure-category signal evaluators (15 signals).
  *
  * Each evaluator is `{ key, evaluate(ctx) => { status, score, evidence } }`:
  *   - status: 'pass' | 'warn' | 'fail' | 'na'
@@ -299,6 +299,114 @@ export const openGraph = {
   },
 };
 
+/**
+ * `sitemap-presence` — item 5 dos 9 do slide P3 do Igor, e o único que
+ * nenhum dos 47 sinais olhava.
+ *
+ * Duas metades, porque uma sem a outra não resolve: o arquivo tem que existir
+ * E o robots.txt tem que apontar pra ele. Crawler que chega pelo robots (o
+ * caminho normal de um bot de IA) não adivinha a URL do sitemap; sitemap
+ * declarado mas ausente é pior ainda, manda o bot pra um 404.
+ */
+export const sitemapPresence = {
+  key: 'sitemap-presence',
+  evaluate(ctx) {
+    const xml = (ctx.sitemapXml || '').trim();
+    // Um 404 costuma voltar como página HTML, não como erro de rede — sem
+    // esta conferência o sinal daria "existe" pra qualquer site.
+    const existe = xml.length > 0 && /<(urlset|sitemapindex)\b/i.test(xml);
+    const declarado = /^\s*sitemap:\s*\S+/im.test(ctx.robotsTxt || '');
+
+    // Só conta URL de <loc> dentro de <url>: num sitemapindex os <loc>
+    // apontam pra outros sitemaps, e contá-los como páginas mentiria.
+    let urls = 0;
+    if (existe) {
+      const blocos = xml.match(/<url\b[\s\S]*?<\/url>/gi) || [];
+      urls = blocos.length;
+    }
+
+    let status = 'fail';
+    let score = 0;
+    if (existe && declarado) {
+      status = 'pass';
+      score = 1;
+    } else if (existe || declarado) {
+      status = 'warn';
+      score = 0.5;
+    }
+    return { status, score, evidence: { existe, declaradoNoRobots: declarado, urls } };
+  },
+};
+
+/**
+ * `product-schema` — item 4 dos 9 do slide. Separa "a IA sabe que o produto
+ * existe" de "a IA sabe o preço e a nota", que é o que decide se a marca
+ * entra num comparativo montado pelo motor.
+ *
+ * Página que não é de produto recebe `na` em vez de zero: o scorer
+ * renormaliza e a nota não é punida por uma home não ser uma ficha de
+ * produto. A conferência de "é página de produto?" usa os sinais que o
+ * próprio HTML dá (og:type, microdata de oferta), nunca adivinhação.
+ */
+export const productSchema = {
+  key: 'product-schema',
+  evaluate(ctx) {
+    const { nodes } = jsonLd(ctx);
+    const produtos = nodes.filter((n) => typesOf(n).includes('product'));
+
+    if (produtos.length === 0) {
+      const ogType = (metaContent(ctx, 'og:type') || '').toLowerCase();
+      const pareceProduto =
+        ogType.includes('product') ||
+        ctx.$('[itemtype*="schema.org/Product" i], [itemprop="offers"]').length > 0;
+      if (!pareceProduto) {
+        return { status: 'na', score: null, evidence: { reason: 'não é página de produto' } };
+      }
+      return {
+        status: 'fail',
+        score: 0,
+        evidence: { produtos: 0, pareceProduto: true },
+      };
+    }
+
+    // Basta um bloco completo: uma página de listagem traz vários produtos e
+    // cobrar os três campos de TODOS reprovaria a página inteira por causa do
+    // item mais pobre da lista.
+    const completude = produtos.map((n) => ({
+      name: Boolean(n.name),
+      offers: Boolean(n.offers),
+      aggregateRating: Boolean(n.aggregateRating),
+    }));
+    const melhor = completude.reduce(
+      (a, c) => {
+        const n = Number(c.name) + Number(c.offers) + Number(c.aggregateRating);
+        return n > a.n ? { n, c } : a;
+      },
+      { n: -1, c: completude[0] },
+    );
+
+    let status = 'warn';
+    let score = 0.5;
+    if (melhor.n === 3) {
+      status = 'pass';
+      score = 1;
+    } else if (melhor.n <= 1) {
+      score = 0.3;
+    }
+    return {
+      status,
+      score,
+      evidence: {
+        produtos: produtos.length,
+        campos: melhor.c,
+        faltando: Object.entries(melhor.c)
+          .filter(([, v]) => !v)
+          .map(([k]) => k),
+      },
+    };
+  },
+};
+
 export const structureSignals = [
   structuralDepth,
   internalLinking,
@@ -313,4 +421,6 @@ export const structureSignals = [
   tables,
   altText,
   openGraph,
+  sitemapPresence,
+  productSchema,
 ];

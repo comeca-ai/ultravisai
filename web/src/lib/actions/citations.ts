@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { expandDateToEndOfDay } from '@/lib/dates';
 import type { Citation, CompetitorMention } from '@/types';
 import {
+  citacaoTrazOProduto,
   classifyDomain,
   extractHostname,
   normalizeDomain,
@@ -74,6 +75,19 @@ export interface CitationsOverview {
     avgCitationsPerResult: number;
   };
   sourceTypeBreakdown: CitationsSourceBreakdown[];
+  /**
+   * A quebra que a decisão de 07/set pede: citação no domínio próprio e
+   * citação em fonte de terceiro que traz o produto são coisas diferentes
+   * pra quem vai agir — própria significa "a IA foi buscar na sua página"
+   * (mantenha-a citável), terceiro significa "alguém falou de você e a IA
+   * usou" (assessoria, review, comparativo). Somar num número só apaga a
+   * diferença; por isso vêm separadas.
+   */
+  brandCitations: {
+    total: number;
+    proprias: number;
+    terceiros: number;
+  };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -235,6 +249,24 @@ export async function getCitationsOverview(
 
   const classifyCtx = { brandDomains, competitorDomains };
 
+  // Termos que fazem um link de terceiro contar como citação da marca. Mesma
+  // escolha do parser no servidor: `citation_terms` quando a marca cadastrou
+  // (marca de nome comum precisa de termo composto), nome + aliases quando não.
+  const { data: brandRow } = await supabase
+    .from('brands')
+    .select('name, aliases, citation_terms')
+    .eq('id', brandId)
+    .maybeSingle();
+  const marca = brandRow as {
+    name: string;
+    aliases: string[] | null;
+    citation_terms: string[] | null;
+  } | null;
+  const termosDeCitacao =
+    marca?.citation_terms && marca.citation_terms.length > 0
+      ? marca.citation_terms
+      : [marca?.name, ...(marca?.aliases ?? [])].filter((t): t is string => Boolean(t));
+
   // 3+4. Page through the filtered window (see scanFilteredResults) and
   // aggregate in memory batch by batch.
   interface OverviewResultRow {
@@ -272,6 +304,8 @@ export async function getCitationsOverview(
   const articleTypeCache = new Map<string, ArticleType | null>();
 
   let totalCitations = 0;
+  let citacoesProprias = 0;
+  let citacoesTerceiros = 0;
 
   const aggregateResult = (result: OverviewResultRow) => {
     const citations = Array.isArray(result.citations) ? result.citations : [];
@@ -293,6 +327,11 @@ export async function getCitationsOverview(
       if (filters.ownOnly && category !== 'you') continue;
 
       totalCitations += 1;
+      if (category === 'you') {
+        citacoesProprias += 1;
+      } else if (citacaoTrazOProduto(cite, termosDeCitacao)) {
+        citacoesTerceiros += 1;
+      }
 
       // Domain aggregation.
       const existingDomain = domainMap.get(host) ?? {
@@ -426,6 +465,11 @@ export async function getCitationsOverview(
         totalResults > 0 ? Math.round((totalCitations / totalResults) * 10) / 10 : 0,
     },
     sourceTypeBreakdown,
+    brandCitations: {
+      total: citacoesProprias + citacoesTerceiros,
+      proprias: citacoesProprias,
+      terceiros: citacoesTerceiros,
+    },
   };
 }
 

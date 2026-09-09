@@ -73,6 +73,104 @@ export function countOwnDomainCitations(citations, brandDomains) {
 }
 
 /**
+ * Normaliza texto pra comparação de termo de marca: minúsculas, sem acento e
+ * com os separadores de slug virando espaço, pra que `polar-vantage-v3` e
+ * "Polar Vantage V3" fiquem comparáveis.
+ */
+export function normalizarParaBusca(texto) {
+  return String(texto || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-_+./]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Termo aparece como PALAVRA INTEIRA no texto normalizado. */
+function temTermoInteiro(textoNormalizado, termo) {
+  const alvo = normalizarParaBusca(termo);
+  if (!alvo) return false;
+  const escapado = alvo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${escapado}\\b`).test(textoNormalizado);
+}
+
+/**
+ * A citação "traz claramente o produto"? — definição do dono (07/set):
+ *
+ *   "A citação é a quantidade de vezes que ele trouxe seu link nos prompts
+ *    avaliados. O link pode ser de outras fontes, mas tem que ter claramente
+ *    o produto."
+ *
+ * Decide sem buscar a página: `url` e `title` já vêm gravados em cada citação,
+ * então a regra é barata, determinística e retroativa sobre o histórico
+ * inteiro — do mesmo jeito que o `appearance_rank` foi calculado pra trás.
+ *
+ * O risco é marca de nome comum: "Polar" também é urso polar e vórtice polar.
+ * Duas proteções: palavra inteira SEMPRE, e `citation_terms` por marca — quem
+ * tem nome genérico cadastra "Polar Vantage", "Polar Grit" e a regra passa a
+ * exigir o termo composto. Sem `citation_terms`, cai no nome + aliases.
+ */
+export function citacaoTrazOProduto(cite, termos) {
+  const lista = (termos || []).filter(Boolean);
+  if (lista.length === 0) return false;
+
+  const titulo = normalizarParaBusca(cite?.title || '');
+  if (lista.some((t) => temTermoInteiro(titulo, t))) return true;
+
+  // Só o CAMINHO da URL: nem o host, nem a query.
+  //  - host: já é decidido pelo domínio da marca; olhar duas vezes faria
+  //    "polar.com" contar em dobro;
+  //  - query: `?ref=polar.com` e `?utm_source=polar` são parâmetro de
+  //    rastreamento, não link de produto — contá-los infla o número com
+  //    exatamente o tipo de falso positivo que a regra tenta evitar.
+  let caminho = '';
+  try {
+    const u = new URL(String(cite?.url || '').trim());
+    caminho = u.pathname;
+  } catch {
+    caminho = String(cite?.url || '')
+      .replace(/^[a-z]+:\/\/[^/]+/i, '')
+      .split('?')[0];
+  }
+  const slug = normalizarParaBusca(caminho);
+  return lista.some((t) => temTermoInteiro(slug, t));
+}
+
+/**
+ * Conta as citações que valem pra marca, separadas por origem.
+ *
+ * Separadas, e não somadas num número só, porque as duas pedem ação
+ * diferente: no domínio próprio a IA foi buscar na SUA página (mantenha-a
+ * citável); em fonte de terceiro alguém falou de você e a IA usou
+ * (assessoria, review, comparativo). `total` é o número que o dono definiu
+ * como "citação"; a quebra é o que diz o que fazer com ele.
+ */
+export function contarCitacoesDoProduto(citations, { domains = [], termos = [] } = {}) {
+  const proprias = countOwnDomainCitations(citations, domains);
+
+  const normalizados = (domains || [])
+    .map(
+      (d) =>
+        extractHostname(d) ??
+        String(d ?? '')
+          .trim()
+          .toLowerCase(),
+    )
+    .filter(Boolean);
+
+  let terceiros = 0;
+  for (const cite of citations || []) {
+    const host = extractHostname(cite?.url || '');
+    const ehPropria = host && normalizados.some((d) => host === d || host.endsWith(`.${d}`));
+    if (ehPropria) continue; // já contada em `proprias`, não conta duas vezes
+    if (citacaoTrazOProduto(cite, termos)) terceiros++;
+  }
+
+  return { total: proprias + terceiros, proprias, terceiros };
+}
+
+/**
  * Count how many times the brand (name or any of its domains) is mentioned
  * in an AI response. URL-stripped to avoid double-counting citations.
  * Used to short-circuit sentiment analysis when the brand isn't mentioned.
@@ -95,10 +193,10 @@ export function countBrandMentions(text, brand) {
  * Parse the AI response and compute visibility metrics for a brand.
  * Sentiment must be provided externally (from AI analysis).
  * @param {{ text: string, citations: Array<{ url: string, title: string, startIndex: number, endIndex: number }> }} response
- * @param {{ brandName: string, domains: string[] }} brand
+ * @param {{ brandName: string, domains: string[], aliases?: string[], citationTerms?: string[] }} brand
  * @param {'positive'|'neutral'|'negative'} sentiment - AI-analyzed sentiment
  * @param {Array<{ id: string, name: string, domain: string }>} [competitors] - Optional competitor list
- * @returns {{ mentionCount: number, citationCount: number, sentiment: string, visibilityScore: number, competitorMentions: Array }}
+ * @returns {{ mentionCount: number, citationCount: number, citationOwnCount: number, citationThirdPartyCount: number, sentiment: string, visibilityScore: number, competitorMentions: Array }}
  */
 export function parseResponse(response, brand, sentiment = 'neutral', competitors = []) {
   const { text, citations } = response;
@@ -114,8 +212,19 @@ export function parseResponse(response, brand, sentiment = 'neutral', competitor
     mentionCount += countOccurrences(cleanText, alias);
   }
 
-  // --- Brand citation count (hostname-based, see countOwnDomainCitations) ---
-  const citationCount = countOwnDomainCitations(citations, brand.domains);
+  // --- Citações da marca (ajustar.md Parte 3, decisão do dono de 07/set) ---
+  // Conta domínio próprio E link de terceiro que traga claramente o produto.
+  // `citationTerms` só existe pra marca de nome genérico; sem ele, nome +
+  // aliases, que é o que a marca já cadastrou.
+  const termosDeCitacao =
+    brand.citationTerms && brand.citationTerms.length > 0
+      ? brand.citationTerms
+      : [brand.brandName, ...(brand.aliases || [])];
+  const citacoes = contarCitacoesDoProduto(citations, {
+    domains: brand.domains,
+    termos: termosDeCitacao,
+  });
+  const citationCount = citacoes.total;
 
   // --- Visibility Score (0-100) ---
   const visibilityScore = computeVisibilityScore({
@@ -159,7 +268,19 @@ export function parseResponse(response, brand, sentiment = 'neutral', competitor
     };
   });
 
-  return { mentionCount, citationCount, sentiment, visibilityScore, competitorMentions };
+  return {
+    mentionCount,
+    citationCount,
+    // A quebra não vai pro banco: a página de Citações recalcula na leitura a
+    // partir do JSONB `citations`, que já guarda url e title. Coluna nova só
+    // pra isso seria um segundo lugar pra desalinhar — que é exatamente o
+    // problema que a Parte 1 do ajustar.md documenta.
+    citationOwnCount: citacoes.proprias,
+    citationThirdPartyCount: citacoes.terceiros,
+    sentiment,
+    visibilityScore,
+    competitorMentions,
+  };
 }
 
 /**

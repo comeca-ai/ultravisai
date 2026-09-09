@@ -339,7 +339,7 @@ export default function CitabilityPage() {
           <p className="text-muted-foreground mt-1 max-w-2xl text-sm">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-1 rounded-lg border p-1">
-          {(['7d', '30d', 'all'] as VisibilityIndexPreset[]).map((p) => (
+          {(['24h', '7d', '30d', '90d', 'all'] as VisibilityIndexPreset[]).map((p) => (
             <button
               key={p}
               type="button"

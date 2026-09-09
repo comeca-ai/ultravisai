@@ -45,7 +45,7 @@ export interface CitabilityKitPiece {
   id: string;
   titulo: string;
   onde: string;
-  linguagem: 'markdown' | 'html' | 'json' | 'text';
+  linguagem: 'markdown' | 'html' | 'json' | 'text' | 'xml';
   conteudo: string;
   porque: string;
   sinais: string[];

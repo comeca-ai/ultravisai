@@ -48,7 +48,7 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
   // 1. Fetch brand info with domains
   const { data: brand, error: brandErr } = await supabaseAdmin
     .from('brands')
-    .select('id, name, organization_id, shopping_mode_enabled, aliases')
+    .select('id, name, organization_id, shopping_mode_enabled, aliases, citation_terms')
     .eq('id', brandId)
     .single();
   if (brandErr || !brand) throw new Error(`Brand not found: ${brandId}`);
@@ -62,6 +62,9 @@ export async function processTrackingJob({ brandId, promptId, promptIds, job }) 
     brandName: brand.name,
     domains: (domains || []).map((d) => d.domain),
     aliases: brand.aliases || [],
+    // Termos que fazem link de terceiro contar como citação (ajustar.md
+    // Parte 3). Vazio é o normal — aí o parser usa nome + aliases.
+    citationTerms: brand.citation_terms || [],
   };
 
   // 2. Fetch active prompts

@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import * as cheerio from 'cheerio';
 import { scoreAudit } from './scorer.js';
+import { categories } from './rubric.js';
 import { fleschReadingEase, classifyLinks, jsonLd, countPhrases } from './signals/helpers.js';
-import { jsonLdPresence, h1Quality } from './signals/structure.js';
+import { jsonLdPresence, h1Quality, sitemapPresence, productSchema } from './signals/structure.js';
 import { https, metaDescription } from './signals/trust.js';
 import { length } from './signals/content.js';
 import { withRetry } from '../retry.js';
@@ -38,7 +39,13 @@ describe('scoreAudit', () => {
 
     expect(categoryScores.structure.score).toBeCloseTo(0.5, 5);
     expect(categoryScores.structure.evaluated).toBe(2);
-    expect(categoryScores.structure.total).toBe(13);
+    // Lido da rubrica em vez de fixo: este teste é sobre a média dentro da
+    // categoria e a renormalização entre categorias, não sobre quantos sinais
+    // existem. Fixar o número fazia o teste quebrar toda vez que a rubrica
+    // crescia — foi o que aconteceu ao entrarem `sitemap-presence` e
+    // `product-schema` (13 → 15) em 09/set.
+    const totalEstrutura = categories.find((c) => c.key === 'structure').signalCount;
+    expect(categoryScores.structure.total).toBe(totalEstrutura);
     expect(categoryScores.trust.score).toBe(1);
     // (0.25*0.5 + 0.10*1) / (0.25 + 0.10) = 0.643
     expect(totalScore).toBeCloseTo(0.6428, 3);
@@ -145,6 +152,90 @@ describe('deterministic signals', () => {
       ctxFromHtml('<script type="application/ld+json">{"@type":"Article"}</script>'),
     );
     expect(r.status).toBe('pass');
+  });
+
+  it('sitemap-presence: pass só com arquivo E declaração no robots', () => {
+    const xml =
+      '<?xml version="1.0"?><urlset><url><loc>https://example.com/a</loc></url>' +
+      '<url><loc>https://example.com/b</loc></url></urlset>';
+    const completo = sitemapPresence.evaluate(
+      ctxFromHtml('<p>x</p>', {
+        sitemapXml: xml,
+        robotsTxt: 'Sitemap: https://example.com/sitemap.xml',
+      }),
+    );
+    expect(completo.status).toBe('pass');
+    expect(completo.evidence.urls).toBe(2);
+
+    // Existe mas ninguém aponta pra ele: meio caminho.
+    expect(sitemapPresence.evaluate(ctxFromHtml('<p>x</p>', { sitemapXml: xml })).status).toBe(
+      'warn',
+    );
+    // Nada dos dois lados.
+    expect(sitemapPresence.evaluate(ctxFromHtml('<p>x</p>')).status).toBe('fail');
+  });
+
+  it('sitemap-presence: 404 que responde HTML não conta como sitemap', () => {
+    const r = sitemapPresence.evaluate(
+      ctxFromHtml('<p>x</p>', { sitemapXml: '<!doctype html><html><body>Not found</body></html>' }),
+    );
+    expect(r.evidence.existe).toBe(false);
+    expect(r.status).toBe('fail');
+  });
+
+  it('sitemap-presence: sitemapindex conta como existente, sem inflar a contagem de páginas', () => {
+    const indice =
+      '<?xml version="1.0"?><sitemapindex><sitemap><loc>https://example.com/s1.xml</loc></sitemap></sitemapindex>';
+    const r = sitemapPresence.evaluate(ctxFromHtml('<p>x</p>', { sitemapXml: indice }));
+    expect(r.evidence.existe).toBe(true);
+    expect(r.evidence.urls).toBe(0);
+  });
+
+  it('product-schema: na fora de página de produto, fail quando parece produto e falta bloco', () => {
+    expect(productSchema.evaluate(ctxFromHtml('<h1>Sobre nós</h1>')).status).toBe('na');
+
+    const parece = productSchema.evaluate(
+      ctxFromHtml(
+        '<html><head><meta property="og:type" content="product"></head><body></body></html>',
+      ),
+    );
+    expect(parece.status).toBe('fail');
+  });
+
+  it('product-schema: pass com os três campos, warn quando falta algum', () => {
+    const bloco = (extra) =>
+      `<script type="application/ld+json">${JSON.stringify({
+        '@type': 'Product',
+        name: 'Polar Vantage V3',
+        ...extra,
+      })}</script>`;
+
+    const completo = productSchema.evaluate(
+      ctxFromHtml(bloco({ offers: { price: '4999' }, aggregateRating: { ratingValue: 4.7 } })),
+    );
+    expect(completo.status).toBe('pass');
+
+    const parcial = productSchema.evaluate(ctxFromHtml(bloco({ offers: { price: '4999' } })));
+    expect(parcial.status).toBe('warn');
+    expect(parcial.evidence.faltando).toEqual(['aggregateRating']);
+  });
+
+  it('product-schema: numa listagem, o bloco mais completo é que vale', () => {
+    const html =
+      '<script type="application/ld+json">' +
+      JSON.stringify([
+        { '@type': 'Product', name: 'Pobre' },
+        {
+          '@type': 'Product',
+          name: 'Completo',
+          offers: { price: '1' },
+          aggregateRating: { ratingValue: 5 },
+        },
+      ]) +
+      '</script>';
+    const r = productSchema.evaluate(ctxFromHtml(html));
+    expect(r.status).toBe('pass');
+    expect(r.evidence.produtos).toBe(2);
   });
 
   it('https: pass over TLS without mixed content, warn with an http asset', () => {

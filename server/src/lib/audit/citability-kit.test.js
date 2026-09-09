@@ -245,6 +245,80 @@ describe('montarKitCitabilidade', () => {
     expect(escaparAtributo('<b>')).toBe('&lt;b&gt;');
   });
 
+  it('sitemap: entrega o arquivo com as URLs lidas e a linha do robots', () => {
+    const kit = montarKitCitabilidade(ctxFromHtml(PAGINA), {
+      results: [{ key: 'sitemap-presence', status: 'fail', evidence: { existe: false } }],
+    });
+    const peca = kit.pecas.find((p) => p.id === 'sitemap');
+    expect(peca.conteudo).toContain('<urlset');
+    expect(peca.conteudo).toContain('https://polar.com/br/sobre');
+    expect(peca.conteudo).toContain('Sitemap: https://polar.com/sitemap.xml');
+    // A home entra sempre; link externo e âncora, nunca.
+    expect(peca.conteudo).toContain('<loc>https://polar.com/</loc>');
+    expect(peca.conteudo).not.toContain('loja.exemplo.com');
+  });
+
+  it('sitemap: quando o arquivo já existe, entrega só a linha do robots', () => {
+    const kit = montarKitCitabilidade(ctxFromHtml(PAGINA), {
+      results: [
+        {
+          key: 'sitemap-presence',
+          status: 'warn',
+          evidence: { existe: true, declaradoNoRobots: false },
+        },
+      ],
+    });
+    const peca = kit.pecas.find((p) => p.id === 'sitemap-robots');
+    expect(peca.conteudo.trim()).toBe('Sitemap: https://polar.com/sitemap.xml');
+    expect(kit.pecas.find((p) => p.id === 'sitemap')).toBeUndefined();
+  });
+
+  it('product: monta o bloco com o que a página tem e não inventa preço', () => {
+    const html = `<html><head>
+      <meta property="og:title" content="Polar Vantage V3">
+      <meta name="description" content="Relógio com GPS duplo.">
+      <meta property="og:type" content="product">
+    </head><body><h1>Polar Vantage V3</h1></body></html>`;
+    const kit = montarKitCitabilidade(ctxFromHtml(html), {
+      results: [falha('product-schema')],
+      marca: { name: 'Polar' },
+    });
+    const peca = kit.pecas.find((p) => p.id === 'jsonld-product');
+    const dados = JSON.parse(peca.conteudo.replace(/<\/?script[^>]*>/g, '').trim());
+
+    expect(dados['@type']).toBe('Product');
+    expect(dados.name).toBe('Polar Vantage V3');
+    expect(dados.brand).toEqual({ '@type': 'Brand', name: 'Polar' });
+    // Sem preço na página, `offers` NÃO é inventado — vira instrução no texto.
+    expect(dados.offers).toBeUndefined();
+    expect(peca.porque).toContain('offers');
+    expect(peca.porque).toContain('aggregateRating');
+  });
+
+  it('product: usa o preço real quando a página publica', () => {
+    const html = `<html><head>
+      <meta property="og:title" content="Polar Grit X2">
+      <meta property="product:price:amount" content="4999.00">
+      <meta property="product:price:currency" content="BRL">
+    </head><body></body></html>`;
+    const kit = montarKitCitabilidade(ctxFromHtml(html), { results: [falha('product-schema')] });
+    const peca = kit.pecas.find((p) => p.id === 'jsonld-product');
+    const dados = JSON.parse(peca.conteudo.replace(/<\/?script[^>]*>/g, '').trim());
+    expect(dados.offers).toEqual({
+      '@type': 'Offer',
+      price: '4999.00',
+      priceCurrency: 'BRL',
+      url: 'https://polar.com/br/produtos',
+    });
+  });
+
+  it('product: sem nome na página, não emite peça', () => {
+    const kit = montarKitCitabilidade(ctxFromHtml('<html><head></head><body></body></html>'), {
+      results: [falha('product-schema')],
+    });
+    expect(kit.pecas.find((p) => p.id === 'jsonld-product')).toBeUndefined();
+  });
+
   it('conta as peças por origem no resumo', () => {
     const kit = montarKitCitabilidade(ctxFromHtml(PAGINA), {
       results: [falha('llms-txt-presence'), falha('ai-bot-access'), falha('faq-schema')],

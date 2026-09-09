@@ -7,6 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-09
+
+Primeira versão cortada pelo fork Ultravis. A `0.1.7` era do upstream
+(Ansvisor, 25/jul); daqui em diante a numeração é nossa.
+
+Esta entrada resume as mudanças por tema. O registro decisão a decisão — com
+data, motivo e arquivo — está em `DECISOES.md`, que é a fonte da verdade da
+rastreabilidade; o `CHANGELOG` é o recorte legível de release.
+
+### Added
+
+- **Índice de Citabilidade (alavanca) e Score de Visibilidade (resultado)
+  como dois índices que não se somam** — páginas separadas, nota de
+  reconciliação nas duas, faixas em quintis compartilhadas. Somar seria
+  contar causa e efeito na mesma conta.
+- **A auditoria passa a ENTREGAR, não só diagnosticar** — kit de citabilidade
+  com as peças prontas pra publicar (`llms.txt`, liberação dos bots de IA no
+  `robots.txt`, JSON-LD de organização e de FAQ, meta tags, sitemap, JSON-LD
+  de produto), montadas do que a página já tem. Nada é inventado: peça sem
+  matéria-prima real não é emitida.
+- **Auditoria abre por "O QUE FAZER"** — só o que falta, em dois blocos
+  (sua página · o que você publica), ordenado por impacto e com selo em quem
+  já tem peça pronta. Os 49 sinais viram diagnóstico recolhido.
+- **Coletor direto de reviews** (Trustpilot, G2, Capterra, Reclame Aqui) com
+  checagem semanal — a dimensão D4 deixa de ser estimativa e vira medição.
+- **Varredura multi-página do site**: o D1 mede o site, não só a home.
+- **Vigia de consistência** (camada 1, determinística): 10 invariantes a cada
+  15 min, com os achados no `/ops` e nos canais de alerta.
+- **Espelho D1 de leitura** (`/espelho*`) e **documento de regras de negócio
+  na edge** (`/rules`), os dois atendidos pelo worker, atrás de Basic auth.
+- **i18n completo** pt-BR/en em todas as telas do produto.
+
+### Changed
+
+- **Ranking = ordem de aparição, não volume**, e a nota de posição passa a ser
+  **relativa ao campo** (`(rivais + 1 − posição) ÷ rivais`) em vez do pódio
+  fixo 100/60/30/0: ficar em 3,3º entre 20 concorrentes não vale o mesmo que
+  entre 3.
+- **Score e Insights leem o mesmo RPC** (`insights_aggregates`) — o Score
+  refazia a conta em memória, sem os filtros do RPC e com teto de 50 mil
+  linhas. Duas implementações da mesma conta é divergência esperando
+  acontecer.
+- **Pesos do Score 25% cada** — os antigos somavam 65, não 100, e a tela
+  renormalizava escondido.
+- **Citação = link que traz o produto, de qualquer fonte** — domínio próprio
+  ou termo da marca no título ou no caminho da URL. Antes, um review de
+  terceiro sobre o produto valia zero, que é justamente onde o sinal tem
+  valor de autoridade. `brands.citation_terms` protege marca de nome comum.
+- **Autoridade e Acurácia saem do Score** até existir medição por juiz LLM.
+- **Períodos iguais entre as telas** (24h/7d/30d/90d/Tudo) e padrão `30d`,
+  a janela em que sempre há pelo menos uma coleta do censo semanal.
+- Rubrica da auditoria de **47 para 49 sinais** (`sitemap-presence` e
+  `product-schema`).
+
+### Fixed
+
+- **Resumo de Visibilidade não mostra mais tela vazia entre censos** — cai
+  para a última coleta disponível, com tarja dizendo de quando é e sem exibir
+  comparações que não significam nada no modo retroativo.
+- **Open redirect em `/auth/confirm`** fechado nos dois arquivos.
+- **`GRANT ALL` residual** revogado de `anon`/`authenticated` em tabelas
+  server-only (migration `00048`).
+- **Container do server roda non-root** (`USER node` + `setcap`).
+- **`fetchViaScrapeDo` com timeout** de 30s.
+- **`verificar-censo` falha de verdade** quando não há coleta há 8 dias — até
+  então gritava "rastreamento silencioso" e saía com sucesso, e foi por isso
+  que 13 dias de silêncio passaram batido em 06/set.
+- Marca sem usuário ativo por trás deixa de existir (regra + invariante no
+  vigia).
+
+### Infrastructure
+
+- **A aplicação inteira migrou para o Cloudflare** (06–07/set): o Express sai
+  do Railway e roda como Container na edge, com `api.ultravis.ai` preservado.
+  Regra do dono: **1 produto = 1 worker** — superfície nova é rota nova
+  dentro do `ultravis-server`, nunca worker novo.
+- **Deploy 100% auditável**: sai por GitHub Actions, com log; segredo nunca
+  passa por chat nem por commit.
+- **AI Gateway** na frente de toda chamada de LLM.
+- **`contato@ultravis.ai`** no ar via Cloudflare Email Routing.
+
+
 ## [0.1.7] - 2026-07-25
 
 ### Added

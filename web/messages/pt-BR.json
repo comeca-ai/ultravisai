@@ -160,6 +160,20 @@
       "download": "Baixar arquivo",
       "originSite": "montado do seu site",
       "originAi": "rascunho da IA"
+    },
+    "temPeca": "peça pronta",
+    "oQueFazer": {
+      "titulo": "O que fazer",
+      "subtitulo": "Em ordem de impacto, começando pelo que mais move a sua visibilidade. O que já está certo desceu para o diagnóstico.",
+      "legibilidade": "Legibilidade",
+      "legibilidadeNota": "O que vive na sua página e você muda hoje, sem depender de ninguém.",
+      "conteudo": "Conteúdo",
+      "conteudoNota": "O que depende do que você publica e de quem fala de você.",
+      "contagem": "{total, plural, one {# item} other {# itens}}",
+      "contagemComPeca": "{total, plural, one {# item} other {# itens}} · {comPeca, plural, one {# com peça pronta pra colar} other {# com peça pronta pra colar}}"
+    },
+    "diagnostico": {
+      "contagem": "{total, plural, one {# sinal} other {# sinais}}"
     }
   },
   "auth": {
@@ -380,7 +394,7 @@
     "presenceTitle": "Presença",
     "presenceSub": "{visible} de {total} prompts com a marca em pelo menos uma resposta",
     "rankingTitle": "Ranking médio",
-    "rankingTooltip": "Posição média em que sua marca aparece no texto das respostas em que é citada (1º = citada antes de todos os concorrentes). Detalhe completo no Score de Visibilidade.",
+    "rankingTooltip": "Posição média em que sua marca aparece no texto das respostas em que é citada (1º = citada antes de todos os concorrentes). NÃO é a nota de Ranking do Score: lá o cálculo compara com o campo — quantos concorrentes foram citados na mesma resposta —, então o mesmo 3,3º vale nota bem diferente num campo de 3 ou de 20.",
     "rankingValue": "#{avg, number}",
     "rankingSub": "1º ×{r1} · 2º ×{r2} · 3º ×{r3} · 4º+ ×{r4plus}",
     "rankingEmpty": "Sem respostas ranqueadas na janela (o cálculo leva até 30 min após o rastreamento).",
@@ -1274,7 +1288,9 @@
     "tabGaps": "Lacunas de Concorrentes",
     "exportCsv": "Exportar CSV",
     "exporting": "Exportando...",
-    "exportFailed": "Falha ao exportar CSV"
+    "exportFailed": "Falha ao exportar CSV",
+    "kpiCitacoesDaMarca": "Citações da marca",
+    "kpiCitacoesDaMarcaSub": "{proprias} no seu domínio · {terceiros} em fonte de terceiro"
   },
   "visibilityScore": {
     "title": "Score de Visibilidade",
@@ -1282,8 +1298,10 @@
     "twoIndexNote": "Dois índices, papéis diferentes: o Score de Visibilidade mede o RESULTADO nas respostas de IA; o Índice de Citabilidade mede a ALAVANCA (seus ativos). Eles não se somam — um dirige o outro.",
     "twoIndexLink": "Ver o Índice de Citabilidade",
     "period": {
+      "24h": "24 horas",
       "7d": "7 dias",
       "30d": "30 dias",
+      "90d": "90 dias",
       "all": "Tudo"
     },
     "bands": {
@@ -1346,8 +1364,10 @@
     "title": "Índice de Citabilidade",
     "subtitle": "Sua nota 0–100 de citabilidade — o que você já construiu para ser citado pelas IAs. É a alavanca que dirige o Score de Visibilidade (resultado): aqui você AGE; lá você MEDE. A conta está sempre aberta.",
     "period": {
+      "24h": "24 horas",
       "7d": "7 dias",
       "30d": "30 dias",
+      "90d": "90 dias",
       "all": "Tudo"
     },
     "bands": {

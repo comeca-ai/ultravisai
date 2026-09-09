@@ -1,13 +1,13 @@
 {
-  "name": "ansvisor",
+  "name": "ultravis",
   "version": "0.1.7",
   "private": true,
-  "description": "Open source AI Engine Optimization platform",
+  "description": "Ultravis — visibilidade de marcas em IA (AEO/GEO) para o mercado brasileiro",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ansvisor/ansvisor.git"
+    "url": "https://github.com/comeca-ai/ultravisai.git"
   },
-  "homepage": "https://github.com/ansvisor/ansvisor",
+  "homepage": "https://ultravis.ai",
   "type": "module",
   "license": "MIT",
   "scripts": {

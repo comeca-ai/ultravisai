@@ -140,8 +140,38 @@ async function lerPagina(env, tabela, colunas, filtro, offset) {
   const resp = await fetch(url, {
     headers: { apikey: chave, authorization: `Bearer ${chave}`, accept: 'application/json' },
   });
-  if (!resp.ok) throw new Error(`supabase ${resp.status} em ${tabela}`);
+  if (!resp.ok) {
+    // O corpo do PostgREST diz QUAL coluna não existe; sem ele o erro vira
+    // "supabase 400" e não se aprende nada. Foi o que aconteceu no primeiro
+    // run desta ponte (09/set): três tabelas falharam e o motivo — colunas do
+    // fork ausentes no projeto apontado — só apareceu depois desta mudança.
+    // Nunca inclui a chave: só status, tabela e a mensagem do banco.
+    let detalhe = '';
+    try {
+      detalhe = (await resp.text()).slice(0, 300);
+    } catch {
+      detalhe = '(corpo ilegível)';
+    }
+    throw new Error(`supabase ${resp.status} em ${tabela}: ${detalhe}`);
+  }
   return resp.json();
+}
+
+/**
+ * O HOST do Supabase que este worker está usando — só o host, nunca a chave.
+ *
+ * Existe porque `SUPABASE_URL` é Secret e não aparece em log nem em diff, e
+ * a pergunta "com qual projeto o worker está falando?" ficou dias sem
+ * resposta enquanto cinco telas devolviam 401. O host é público (vai em toda
+ * requisição do navegador), então expô-lo numa rota já autenticada não conta
+ * como vazamento — e responde a pergunta de uma vez.
+ */
+export function projetoSupabase(env) {
+  try {
+    return new URL(String(env.SUPABASE_URL || '')).host;
+  } catch {
+    return '(SUPABASE_URL ausente ou inválida)';
+  }
 }
 
 /**
@@ -210,6 +240,9 @@ export async function sincronizarTabelas(env, dias = JANELA_DIAS) {
 
   return {
     atualizado_em: new Date().toISOString(),
+    // Qual projeto respondeu: sem isto, "0 linhas" é ambíguo entre "banco
+    // vazio" e "banco errado".
+    projeto: projetoSupabase(env),
     janela_dias: dias,
     tabelas: resultados,
     total_linhas: resultados.reduce((s, r) => s + (r.linhas || 0), 0),

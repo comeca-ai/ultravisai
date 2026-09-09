@@ -388,6 +388,10 @@ const SECNOTE = {
 };
 
 let db = null, quem = "", vereditos = {};
+// Onde a marcação é gravada muda conforme o lugar em que a página está aberta:
+// no Artifact é a capability `db`; em api.ultravis.ai/regras é a API do worker.
+// O resto do documento não sabe a diferença — só chama salvar().
+let salvar = null;
 
 function el(tag, cls, html){ const n=document.createElement(tag); if(cls)n.className=cls; if(html!=null)n.innerHTML=html; return n; }
 
@@ -482,7 +486,7 @@ function marca(id, v, nota){
   vereditos[id] = novo;
   pinta(id);
   atualizaProgresso();
-  if (db) db.doc("validacoes/" + id).set(novo).catch(() => {});
+  if (salvar) salvar(id, novo);
 }
 
 function pinta(id){
@@ -538,8 +542,17 @@ function entra(nome, lembrar){
   if (lembrar) { try { localStorage.setItem("ultravis-quem", nome); } catch {} }
 }
 
-const nomeSalvo = (() => { try { return localStorage.getItem("ultravis-quem") || ""; } catch { return ""; } })();
-if (nomeSalvo) entra(nomeSalvo, false);
+// Servida pela edge, a identidade já veio do login que abriu a página — um
+// login só, sem pedir de novo aqui. Só a cópia publicada como Artifact, que
+// não tem porta na frente, precisa perguntar.
+const jaIdentificado = (typeof window !== "undefined" && window.ULTRAVIS_QUEM) || "";
+if (jaIdentificado) {
+  entra(jaIdentificado, false);
+  document.getElementById("sair").hidden = true;
+} else {
+  const nomeSalvo = (() => { try { return localStorage.getItem("ultravis-quem") || ""; } catch { return ""; } })();
+  if (nomeSalvo) entra(nomeSalvo, false);
+}
 
 document.getElementById("gateForm").addEventListener("submit", ev => {
   ev.preventDefault();
@@ -563,20 +576,59 @@ document.getElementById("sair").addEventListener("click", () => {
   document.getElementById("gu").focus();
 });
 
+function aplica(itens){
+  Object.keys(itens || {}).forEach(id => {
+    const b = itens[id];
+    if (!b) return;
+    vereditos[id] = b;
+    pinta(id);
+  });
+  atualizaProgresso();
+}
+
 (async () => {
   const conn = document.getElementById("conn");
+
+  // Servida pela edge (api.ultravis.ai/regras): o worker grava no D1.
+  const API = typeof window !== "undefined" ? window.ULTRAVIS_API : null;
+  if (API) {
+    salvar = (id, novo) => fetch(API + "/" + id, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      // `quem` não vai no corpo de propósito: quem assina é o login que
+      // abriu a página, decidido no servidor.
+      body: JSON.stringify({ v: novo.v, nota: novo.nota }),
+    }).catch(() => { conn.textContent = "a última marcação não foi salva"; });
+
+    // Sem canal ao vivo aqui: uma releitura periódica basta pra quem valida
+    // junto ver o que o outro marcou, sem recarregar a página.
+    const puxa = async () => {
+      try {
+        const r = await fetch(API, { headers: { accept: "application/json" } });
+        if (!r.ok) throw new Error(r.status);
+        aplica((await r.json()).itens);
+        conn.textContent = "";
+      } catch { conn.textContent = "sincronização caiu — recarregue a página"; }
+    };
+    await puxa();
+    setInterval(puxa, 30000);
+    return;
+  }
+
+  // Publicada como Artifact: a capability `db` cuida da persistência.
+  if (typeof claude === "undefined") {
+    conn.textContent = "cópia solta — marcações não estão sendo salvas";
+    return;
+  }
   const cap = await claude.use("db");
   if (!cap) { conn.textContent = "marcações não estão sendo salvas"; return; }
   db = cap;
+  salvar = (id, novo) => db.doc("validacoes/" + id).set(novo).catch(() => {});
   db.collection("validacoes").onSnapshot(
     snap => {
-      snap.docs.forEach(d => {
-        const b = d.data();
-        if (!b) return;
-        vereditos[d.id] = b;
-        pinta(d.id);
-      });
-      atualizaProgresso();
+      const itens = {};
+      snap.docs.forEach(d => { itens[d.id] = d.data(); });
+      aplica(itens);
       conn.textContent = "";
     },
     () => { conn.textContent = "sincronização caiu — recarregue a página"; }

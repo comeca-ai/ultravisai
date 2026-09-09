@@ -238,6 +238,18 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
    se produção subiu com a variável); e existem 3 fórmulas diferentes de
    "Visibility Score", então o número depende da tela que o cliente abre.
 
+7. **Ligar o `api.ultravis.ai/regras`** (09/set) — a rota já está no código e
+   sobe no próximo deploy do server, mas nasce FECHADA (503) até existir a
+   variável que diz quem pode entrar. No painel do worker `ultravis-server`
+   (Settings -> Variables and Secrets), criar `REGRAS_ACESSOS` com a lista de
+   acessos no formato `usuario` + dois pontos + `senha`, pares separados por
+   vírgula (os dois pares combinados nesta sessão estão no chat, fora do
+   repositório de propósito). O `keep_vars: true` faz o valor sobreviver aos
+   deploys. Esse mesmo login abre a página e assina as marcações.
+   Senha curta é escolha consciente pra um documento que circula por
+   WhatsApp — se um dia valer mais, trocar o tipo de Variable pra Secret no
+   mesmo lugar (o código lê igual) e usar valores sérios.
+
 ## Próximo trabalho de produto
 
 **Citabilidade v2** — recomendações com código pronto pra copiar (llms.txt, schema, FAQ, metatags). O pedido ⭐ do cliente. Depois: histórico do IC (#10) e UI de aliases.

@@ -806,3 +806,19 @@ CREATE TABLE IF NOT EXISTS censo_agregados (
 CREATE INDEX IF NOT EXISTS idx_censo_agregados_dia ON censo_agregados (dia);
 
 -- fim — 37 tabelas. brand_archives ficou FORA (ver README.md, "Não migradas").
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- validacoes_regras — marcações do documento /regras (09/set)
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ÚNICA tabela deste banco que NÃO é espelho do Supabase: aqui o worker
+-- ESCREVE. É estado de validação humana (quem marcou o quê nas regras de
+-- negócio), não dado de cliente — o Supabase segue sendo a fonte da verdade
+-- do produto. `src/regras.js` também cria a tabela sob demanda, porque a
+-- aplicação deste schema é tolerante e pode ter falhado no deploy.
+CREATE TABLE IF NOT EXISTS validacoes_regras (
+  regra_id TEXT PRIMARY KEY,
+  veredito TEXT NOT NULL DEFAULT '',
+  nota     TEXT NOT NULL DEFAULT '',
+  quem     TEXT NOT NULL DEFAULT '',
+  em       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ'))
+);

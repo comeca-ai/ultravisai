@@ -6,15 +6,18 @@
  * frente dele:
  *  - fetch `/espelho*`: visualizador do espelho D1 (binding DB, somente
  *    leitura) — atendido NA EDGE, nunca chega ao container;
+ *  - fetch `/regras*`: documento de regras de negócio pra validação executiva
+ *    (Basic auth PRÓPRIA, `REGRAS_ACESSOS` — o usuário que entra é o que
+ *    assina as marcações) — também na edge;
  *  - fetch (qualquer outro caminho): vai pro container (API, /cloro/callback,
  *    /ops, tudo) — comportamento inalterado;
  *  - scheduled (cron a cada 10 min): keepalive — mantém o container acordado
  *    para o node-cron INTERNO continuar agendando censo/vigia/reviews.
  *
- * ATENÇÃO — `/espelho` é prefixo RESERVADO da edge: o Express monta dois
+ * ATENÇÃO — `/espelho` e `/regras` são prefixos RESERVADOS da edge: o Express monta dois
  * routers na raiz (app.use('/', ...)), então uma rota `/espelho` criada lá no
  * futuro ficaria silenciosamente inalcançável. Conferido em 07/set: o Express
- * não usa nenhum caminho com esse prefixo.
+ * não usa nenhum caminho com esses prefixos (reconferido em 09/set).
  *
  * Env/segredos: setados NO WORKER (painel ou sync-cf-secrets) e injetados no
  * container NO MOMENTO DO START via startOptions.envVars — na lib 0.0.28 o
@@ -32,6 +35,7 @@
  */
 import { Container, getContainer } from '@cloudflare/containers';
 import { sincronizarAgregados, lerAgregados } from './censo-espelho.js';
+import { servirRegras } from './regras.js';
 
 export class UltravisServer extends Container {
   defaultPort = 80; // o Dockerfile expõe 80 (PORT default do server.js)
@@ -278,12 +282,52 @@ function autorizado(request, env) {
   return okUser && okPass;
 }
 
-function pedirCredencial(motivo) {
+/**
+ * Auth do /regras. Diferente do espelho em dois pontos que importam:
+ *
+ *  1. Vários pares, não um só — `REGRAS_ACESSOS` traz "usuario:senha" separados
+ *     por vírgula. O documento é de validação executiva: precisa saber QUEM
+ *     marcou cada regra, e um par compartilhado não distingue ninguém.
+ *  2. Devolve o NOME de quem entrou, não um booleano — é esse nome que assina
+ *     as marcações. Um login só serve às duas coisas.
+ *
+ * Todos os pares são comparados sempre, sem short-circuit no primeiro que bate:
+ * sair mais cedo pro usuário certo entregaria, pelo tempo de resposta, quais
+ * usuários existem.
+ */
+function quemEntrou(request, env) {
+  const bruto = String(env.REGRAS_ACESSOS || '').trim();
+  if (!bruto) return 'sem-credencial-configurada';
+  const header = request.headers.get('authorization') || '';
+  if (!header.toLowerCase().startsWith('basic ')) return false;
+  let decodificado = '';
+  try {
+    decodificado = atob(header.slice(6).trim());
+  } catch {
+    return false;
+  }
+  const corte = decodificado.indexOf(':');
+  if (corte < 0) return false;
+  const usuario = decodificado.slice(0, corte);
+  const senha = decodificado.slice(corte + 1);
+
+  let achado = '';
+  for (const par of bruto.split(',')) {
+    const meio = par.indexOf(':');
+    if (meio < 0) continue;
+    const u = par.slice(0, meio).trim();
+    const p = par.slice(meio + 1).trim();
+    if (igualSeguro(usuario, u) && igualSeguro(senha, p)) achado = u;
+  }
+  return achado || false;
+}
+
+function pedirCredencial(motivo, realm = 'espelho') {
   return new Response(JSON.stringify({ erro: motivo }, null, 2), {
     status: 401,
     headers: {
       ...JSON_HEADERS,
-      'www-authenticate': 'Basic realm="espelho", charset="UTF-8"',
+      'www-authenticate': `Basic realm="${realm}", charset="UTF-8"`,
     },
   });
 }
@@ -405,6 +449,24 @@ export default {
       const path = url.pathname.replace(/\/+$/, '') || '/';
       if (path === '/espelho' || path.startsWith('/espelho/')) {
         return await servirEspelho(request, env, url, path);
+      }
+      // Porta PRÓPRIA, separada da do /ops: aqui o login não é só a
+      // fechadura, é a assinatura — quem entra como `igor` marca como Igor.
+      // Um login só, o mesmo pra abrir e pra assinar.
+      if (path === '/regras' || path.startsWith('/regras/')) {
+        const quem = quemEntrou(request, env);
+        if (quem === 'sem-credencial-configurada') {
+          return json(
+            {
+              erro: 'regras indisponíveis',
+              remedio:
+                'definir REGRAS_ACESSOS (formato "usuario:senha,usuario:senha") nas vars do worker ultravis-server',
+            },
+            503
+          );
+        }
+        if (!quem) return pedirCredencial('autenticação necessária', 'regras ultravis');
+        return await servirRegras(request, env, path, quem);
       }
     } catch (err) {
       console.error('roteamento do espelho falhou — seguindo pro container', err && err.message);

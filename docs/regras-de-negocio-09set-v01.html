@@ -34,6 +34,28 @@ h1{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-.02em
 .prog{flex:1;min-width:120px;height:5px;background:var(--rule);border-radius:3px;overflow:hidden;max-width:220px}
 .prog i{display:block;height:100%;background:var(--good);width:0;transition:width .25s}
 
+/* ---------- porta de entrada ---------- */
+.eu{font-family:var(--mono);font-size:.68rem;color:var(--ink2);display:flex;align-items:center;gap:8px}
+.eu b{color:var(--ink)}
+.sair{font-family:var(--mono);font-size:.62rem;background:none;border:1px solid var(--rule2);
+  border-radius:5px;padding:3px 7px;color:var(--faint);cursor:pointer}
+.sair:hover{color:var(--ink);border-color:var(--mut)}
+
+.gate{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gate[hidden]{display:none!important}
+.gate-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:34px 32px;width:100%;max-width:392px}
+.gate-card .eyebrow{margin-bottom:12px}
+.gate-card h2{font-family:var(--serif);font-weight:500;font-size:1.42rem;letter-spacing:-.02em;text-wrap:balance}
+.gate-card p{color:var(--ink2);font-size:.87rem;margin-top:8px}
+.gate-campo{display:block;margin-top:16px}
+.gate-campo span{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.gate-campo input{display:block;width:100%;margin-top:5px;font-family:var(--mono);font-size:.82rem;
+  background:var(--sunk);border:1px solid var(--rule2);border-radius:6px;padding:9px 11px;color:var(--ink)}
+.gate-card button[type=submit]{margin-top:20px;width:100%;font-family:var(--sans);font-size:.87rem;font-weight:600;
+  background:var(--ink);color:var(--bg);border:0;border-radius:6px;padding:11px;cursor:pointer}
+.gate-card button[type=submit]:hover{background:var(--ink2)}
+.gate-erro{color:var(--red);font-size:.8rem;margin-top:12px;min-height:1.2em}
+
 /* ---------- corpo ---------- */
 .shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:216px 1fr;gap:40px;align-items:start}
 nav{position:sticky;top:52px;padding:26px 0 40px}
@@ -114,9 +136,24 @@ footer b{color:var(--ink)}
   <span><b id="pv">0</b> de <b id="pt">0</b> revisadas</span>
   <span class="prog"><i id="pb"></i></span>
   <span id="alerta" style="color:var(--red);font-weight:600"></span>
-  <input class="who" id="quem" placeholder="seu nome (assina as marcações)" autocomplete="off">
+  <span class="eu" id="eu" hidden>validando como <b id="euNome"></b> <button class="sair" id="sair" type="button">trocar</button></span>
   <span id="conn" class="offline"></span>
 </div></div>
+
+<div class="gate" id="gate">
+  <form class="gate-card" id="gateForm">
+    <p class="eyebrow">Ultravis · regras de negócio</p>
+    <h2>Quem está validando?</h2>
+    <p>Suas marcações ficam assinadas com o seu nome, para que cada decisão tenha dono
+       quando estas regras virarem pauta.</p>
+    <label class="gate-campo"><span>Usuário</span>
+      <input id="gu" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+    <label class="gate-campo"><span>Senha</span>
+      <input id="gs" type="password" autocomplete="current-password" required></label>
+    <button type="submit">Entrar</button>
+    <p class="gate-erro" id="gateErro"></p>
+  </form>
+</div>
 
 <div class="shell">
   <nav id="nav"><h2>Domínios</h2></nav>
@@ -483,12 +520,47 @@ function atualizaProgresso(){
 
 render();
 
+// Porta de entrada. Identifica quem marcou o quê — não protege o conteúdo:
+// a página inteira chega ao navegador antes deste formulário aparecer, então
+// quem tem o link e abre o código-fonte lê tudo. O controle de quem PODE abrir
+// é o compartilhamento do artefato, não isto aqui.
+const PESSOAS = { igor: { senha: "igor", nome: "Igor" }, jhon: { senha: "jhon", nome: "Jhon" } };
+
+const gate = document.getElementById("gate");
+const elEu = document.getElementById("eu");
+const elEuNome = document.getElementById("euNome");
+
+function entra(nome, lembrar){
+  quem = nome;
+  elEuNome.textContent = nome;
+  elEu.hidden = false;
+  gate.hidden = true;
+  if (lembrar) { try { localStorage.setItem("ultravis-quem", nome); } catch {} }
+}
+
 const nomeSalvo = (() => { try { return localStorage.getItem("ultravis-quem") || ""; } catch { return ""; } })();
-const inQuem = document.getElementById("quem");
-inQuem.value = nomeSalvo; quem = nomeSalvo;
-inQuem.addEventListener("change", () => {
-  quem = inQuem.value.trim();
-  try { localStorage.setItem("ultravis-quem", quem); } catch {}
+if (nomeSalvo) entra(nomeSalvo, false);
+
+document.getElementById("gateForm").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const u = document.getElementById("gu").value.trim().toLowerCase();
+  const p = document.getElementById("gs").value;
+  const pessoa = PESSOAS[u];
+  if (pessoa && pessoa.senha === p) { entra(pessoa.nome, true); return; }
+  document.getElementById("gateErro").textContent = "Usuário ou senha não confere.";
+  document.getElementById("gs").value = "";
+  document.getElementById("gs").focus();
+});
+
+document.getElementById("sair").addEventListener("click", () => {
+  quem = "";
+  try { localStorage.removeItem("ultravis-quem"); } catch {}
+  elEu.hidden = true;
+  gate.hidden = false;
+  document.getElementById("gateErro").textContent = "";
+  document.getElementById("gu").value = "";
+  document.getElementById("gs").value = "";
+  document.getElementById("gu").focus();
 });
 
 (async () => {

@@ -228,6 +228,16 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 5. **Comparar `SUPABASE_URL` do worker com o cookie de login do site** — ver
    o incidente de 401 acima; é o único jeito de confirmar a causa.
 
+6. **Validar as regras de negócio no artefato** (09/set) — todas as regras
+   que o código realmente aplica estão navegáveis em
+   `docs/regras-de-negocio-09set-v01.html` (versão publicada com botões de
+   validação por regra). São 4 divergências GRAVES esperando decisão sua:
+   a landing vende 150 prompts × 4 motores e o código entrega 50 × 2;
+   4 preços coexistem no repositório sem moeda declarada; `IS_CLOUD` nasce
+   `false` (nesse estado tudo é ilimitado e a cobrança é ignorada — conferir
+   se produção subiu com a variável); e existem 3 fórmulas diferentes de
+   "Visibility Score", então o número depende da tela que o cliente abre.
+
 ## Próximo trabalho de produto
 
 **Citabilidade v2** — recomendações com código pronto pra copiar (llms.txt, schema, FAQ, metatags). O pedido ⭐ do cliente. Depois: histórico do IC (#10) e UI de aliases.

@@ -54,7 +54,6 @@ h1{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-.02em
 .gate-card button[type=submit]{margin-top:20px;width:100%;font-family:var(--sans);font-size:.87rem;font-weight:600;
   background:var(--ink);color:var(--bg);border:0;border-radius:6px;padding:11px;cursor:pointer}
 .gate-card button[type=submit]:hover{background:var(--ink2)}
-.gate-erro{color:var(--red);font-size:.8rem;margin-top:12px;min-height:1.2em}
 
 /* ---------- corpo ---------- */
 .shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:216px 1fr;gap:40px;align-items:start}
@@ -146,12 +145,9 @@ footer b{color:var(--ink)}
     <h2>Quem está validando?</h2>
     <p>Suas marcações ficam assinadas com o seu nome, para que cada decisão tenha dono
        quando estas regras virarem pauta.</p>
-    <label class="gate-campo"><span>Usuário</span>
-      <input id="gu" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
-    <label class="gate-campo"><span>Senha</span>
-      <input id="gs" type="password" autocomplete="current-password" required></label>
-    <button type="submit">Entrar</button>
-    <p class="gate-erro" id="gateErro"></p>
+    <label class="gate-campo"><span>Seu nome</span>
+      <input id="gu" autocomplete="name" spellcheck="false" required></label>
+    <button type="submit">Começar</button>
   </form>
 </div>
 
@@ -524,12 +520,18 @@ function atualizaProgresso(){
 
 render();
 
-// Porta de entrada. Identifica quem marcou o quê — não protege o conteúdo:
-// a página inteira chega ao navegador antes deste formulário aparecer, então
-// quem tem o link e abre o código-fonte lê tudo. O controle de quem PODE abrir
-// é o compartilhamento do artefato, não isto aqui.
-const PESSOAS = { igor: { senha: "igor", nome: "Igor" }, jhon: { senha: "jhon", nome: "Jhon" } };
-
+// Identificação, não autenticação. Este arquivo é servido em dois lugares e
+// só um deles tem porta de verdade:
+//
+//   api.ultravis.ai/regras — a Basic auth do worker já disse quem entrou, e o
+//     nome chega em window.ULTRAVIS_QUEM. Um login só: o mesmo que abriu a
+//     página assina as marcações. Nada a perguntar aqui.
+//
+//   publicado como Artifact — quem pode abrir é decidido pelo compartilhamento
+//     do Claude, antes desta página existir. Aqui só falta saber COMO chamar
+//     quem está marcando, então o campo pede um nome e mais nada. Senha
+//     escrita neste arquivo seria teatro: ele inteiro chega ao navegador antes
+//     de qualquer formulário aparecer.
 const gate = document.getElementById("gate");
 const elEu = document.getElementById("eu");
 const elEuNome = document.getElementById("euNome");
@@ -542,9 +544,6 @@ function entra(nome, lembrar){
   if (lembrar) { try { localStorage.setItem("ultravis-quem", nome); } catch {} }
 }
 
-// Servida pela edge, a identidade já veio do login que abriu a página — um
-// login só, sem pedir de novo aqui. Só a cópia publicada como Artifact, que
-// não tem porta na frente, precisa perguntar.
 const jaIdentificado = (typeof window !== "undefined" && window.ULTRAVIS_QUEM) || "";
 if (jaIdentificado) {
   entra(jaIdentificado, false);
@@ -552,29 +551,23 @@ if (jaIdentificado) {
 } else {
   const nomeSalvo = (() => { try { return localStorage.getItem("ultravis-quem") || ""; } catch { return ""; } })();
   if (nomeSalvo) entra(nomeSalvo, false);
+
+  document.getElementById("gateForm").addEventListener("submit", ev => {
+    ev.preventDefault();
+    const nome = document.getElementById("gu").value.trim();
+    if (!nome) return;
+    entra(nome, true);
+  });
+
+  document.getElementById("sair").addEventListener("click", () => {
+    quem = "";
+    try { localStorage.removeItem("ultravis-quem"); } catch {}
+    elEu.hidden = true;
+    gate.hidden = false;
+    document.getElementById("gu").value = "";
+    document.getElementById("gu").focus();
+  });
 }
-
-document.getElementById("gateForm").addEventListener("submit", ev => {
-  ev.preventDefault();
-  const u = document.getElementById("gu").value.trim().toLowerCase();
-  const p = document.getElementById("gs").value;
-  const pessoa = PESSOAS[u];
-  if (pessoa && pessoa.senha === p) { entra(pessoa.nome, true); return; }
-  document.getElementById("gateErro").textContent = "Usuário ou senha não confere.";
-  document.getElementById("gs").value = "";
-  document.getElementById("gs").focus();
-});
-
-document.getElementById("sair").addEventListener("click", () => {
-  quem = "";
-  try { localStorage.removeItem("ultravis-quem"); } catch {}
-  elEu.hidden = true;
-  gate.hidden = false;
-  document.getElementById("gateErro").textContent = "";
-  document.getElementById("gu").value = "";
-  document.getElementById("gs").value = "";
-  document.getElementById("gu").focus();
-});
 
 function aplica(itens){
   Object.keys(itens || {}).forEach(id => {

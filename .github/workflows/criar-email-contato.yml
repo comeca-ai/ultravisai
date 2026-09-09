@@ -50,13 +50,34 @@ jobs:
       ZONE: 'ultravis.ai'
       ENDERECO: 'contato@ultravis.ai'
       DESTINO: ${{ inputs.destino || 'jhonata.emerick@gmail.com' }}
-      # GUARD da remoção dos MX. 'sim' = pode apagar; qualquer outro
-      # valor = só imprime o que faria e segue. Armado em 08/set com
-      # confirmação explícita do dono de que não há e-mail em uso no
-      # domínio. Se um dia voltar a existir caixa em @ultravis.ai,
-      # voltar isto pra 'nao' ANTES de qualquer re-run.
-      ARMADO: 'sim'
+      # TRAVA DE ARMAMENTO — mesma semântica do limpar-workers-orfaos.yml:
+      # editar/mergear este arquivo com 'nao' NÃO apaga nada. Para executar
+      # de fato: PR só desta linha trocando para 'sim', ou "Run workflow"
+      # pelo painel do Actions.
+      #
+      # Ficou em 'sim' commitado entre 08/set 22h e a auditoria da mesma
+      # noite — com gatilho por push, isso significava que QUALQUER edição
+      # futura deste arquivo re-disparava a remoção de DNS sozinha. Achado
+      # da auditoria; corrigido aqui. A execução de 08/set já aconteceu e
+      # não precisa se repetir.
+      ARMADO: 'nao'
     steps:
+      # Porteiro: dispatch manual sempre executa; push só executa com
+      # ARMADO=sim. Sem este passo o ARMADO era só um comentário — o job
+      # inteiro rodava em todo push que tocasse o arquivo.
+      - name: Trava de armamento
+        id: armar
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$ARMADO" = "sim" ]; then
+            echo "go=1" >> "$GITHUB_OUTPUT"
+            echo "armado — o job vai executar"
+          else
+            echo "go=0" >> "$GITHUB_OUTPUT"
+            echo "### Email Routing NÃO tocado (trava de armamento)" >> "$GITHUB_STEP_SUMMARY"
+            echo "Run disparado por push com \`ARMADO: 'nao'\`. Para executar: PR trocando essa linha para \`'sim'\`, ou \"Run workflow\" no painel do Actions." >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::job pulado — trava de armamento em 'nao' (nenhum DNS foi tocado)"
+          fi
+
       # Sonda CADA permissão que os passos abaixo precisam e imprime qual
       # falta — antes de tentar mutação nenhuma. Existe porque os runs #1 e #2
       # morreram os dois em "Authentication error [10000]" genérico, que não
@@ -65,6 +86,7 @@ jobs:
       # as sondas de escrita usam alvo inexistente (a API checa permissão
       # ANTES de existência, então 10000 = sem permissão e "not found" = tem).
       - name: Preflight — o que este token pode de verdade
+        if: steps.armar.outputs.go == '1'
         continue-on-error: true
         run: |
           CF="https://api.cloudflare.com/client/v4"
@@ -123,6 +145,7 @@ jobs:
           echo "Se alguma linha de ESCRITA disser NAO, é essa a permissão que falta no token."
 
       - name: Habilitar Email Routing + criar endereço e regra
+        if: steps.armar.outputs.go == '1'
         run: |
           CF="https://api.cloudflare.com/client/v4"
           j() { python3 -c 'import json,sys;print(json.dumps(json.load(sys.stdin),indent=1)[:900])'; }
@@ -300,17 +323,23 @@ jobs:
           curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "$CF/accounts/$ACC/email/routing/addresses" > /tmp/enderecos.json
           j < /tmp/enderecos.json
-          JA_EXISTE=$(python3 -c "
-          import json
+          # $DESTINO vem de input de workflow_dispatch. Interpolar isso DENTRO
+          # do source do python (era `alvo = '$DESTINO'`) é execução de código
+          # arbitrário num job que carrega o CLOUDFLARE_API_TOKEN — mesma
+          # classe do bug que o 9efad0c corrigiu no sync de segredos. Vai por
+          # sys.argv, que é dado, não código.
+          JA_EXISTE=$(python3 - "$DESTINO" <<'PY'
+          import json, sys
           d = json.load(open('/tmp/enderecos.json'))
-          alvo = '$DESTINO'.lower()
+          alvo = sys.argv[1].lower()
           for e in (d.get('result') or []):
               if e.get('email','').lower() == alvo:
                   print('verificado' if e.get('verified') else 'pendente')
                   break
           else:
               print('ausente')
-          ")
+          PY
+          )
           echo "destino '$DESTINO': $JA_EXISTE"
 
           if [ "$JA_EXISTE" = "ausente" ]; then

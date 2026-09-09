@@ -15,6 +15,7 @@ O server Express de `server/` roda **intacto** num Cloudflare Container
 | Caminho | Quem atende | O quê |
 |---|---|---|
 | `/espelho`, `/espelho/tabela/<nome>` | **o Worker, na edge** | visualizador somente-leitura do espelho D1 (binding `DB`) — nunca chega ao container |
+| `/espelho/sincronizar` · `/espelho/sincronizar-tabelas` | **o Worker, na edge** | pontes Supabase → D1: agregados do censo e a espinha analítica (marcas, prompts, resultados) |
 | `/rules` (apelido: `/regras`) | **o Worker, na edge** | documento de regras de negócio pra validação executiva, com as marcações gravadas no D1 |
 | **qualquer outro caminho** | o **container** (Express intacto) | API `/api/*`, `/cloro/callback`, `/ops`, `/t.js`, `/track/*`, `/` … |
 | `scheduled` (cron a cada 10 min) | o Worker | keepalive: mantém o container vivo pro `node-cron` interno seguir agendando censo/vigia/reviews |
@@ -112,6 +113,34 @@ apontar para um host novo.
 ---
 
 # Espelho D1 — schema Ultravis em SQLite/Cloudflare D1
+
+## O que o espelho NÃO é
+
+Não é o banco. O Supabase segue com auth, RLS e os RPCs; o D1 não tem nenhum
+dos três. Aqui é leitura e experimento — escrita de produto nunca entra por
+este caminho.
+
+Duas pontes enchem o espelho, as duas no cron de segunda 06:30 UTC e as duas
+disponíveis sob demanda:
+
+| Ponte | Rota | O que copia |
+|---|---|---|
+| Agregados do censo | `/espelho/sincronizar` | contagens por dia × marca × motor |
+| Espinha analítica | `/espelho/sincronizar-tabelas` | `organizations`, `brands`, `brand_domains`, `competitors`, `topics`, `prompt_sets`, `prompts`, `prompt_results` (janela de 90 dias, `?dias=N` ajusta) |
+
+**A regra que não pode ser afrouxada:** cada tabela declara a lista explícita
+de colunas em `src/espelho-tabelas.js`. Nunca `select=*`. `organizations`
+guarda `anthropic_api_key_encrypted` e os ids do Stripe — um `select=*`
+copiaria credencial de cliente pra um banco **sem RLS**, onde a única
+proteção é a senha da rota. Pelo mesmo motivo ficam fora, inteiras,
+`profiles`, `invitations`, `api_keys`, `webhook_configs`,
+`agent_conversations`, `agent_messages` e `ai_traffic_logs`.
+
+`prompt_results.response` (o texto da resposta da IA) também fica fora, por
+volume — é a maior coluna do banco e nenhuma análise que o espelho serve
+precisa dela. `citations` entra, porque é dela que sai toda a conta de
+citação.
+
 
 **Experimento aprovado pelo dono (07/set/2026). Produção INTOCADA** — o banco
 de verdade continua no Supabase (`twhqjfbealruvcbvkegc`); este espelho é uma

@@ -6,15 +6,15 @@
  * frente dele:
  *  - fetch `/espelho*`: visualizador do espelho D1 (binding DB, somente
  *    leitura) — atendido NA EDGE, nunca chega ao container;
- *  - fetch `/regras*`: documento de regras de negócio pra validação executiva
- *    (Basic auth PRÓPRIA, `REGRAS_ACESSOS` — o usuário que entra é o que
- *    assina as marcações) — também na edge;
+ *  - fetch `/rules*` (e o apelido `/regras*`): documento de regras de negócio
+ *    pra validação executiva (Basic auth PRÓPRIA, `REGRAS_ACESSOS` — o
+ *    usuário que entra é o que assina as marcações) — também na edge;
  *  - fetch (qualquer outro caminho): vai pro container (API, /cloro/callback,
  *    /ops, tudo) — comportamento inalterado;
  *  - scheduled (cron a cada 10 min): keepalive — mantém o container acordado
  *    para o node-cron INTERNO continuar agendando censo/vigia/reviews.
  *
- * ATENÇÃO — `/espelho` e `/regras` são prefixos RESERVADOS da edge: o Express monta dois
+ * ATENÇÃO — `/espelho`, `/rules` e `/regras` são prefixos RESERVADOS da edge: o Express monta dois
  * routers na raiz (app.use('/', ...)), então uma rota `/espelho` criada lá no
  * futuro ficaria silenciosamente inalcançável. Conferido em 07/set: o Express
  * não usa nenhum caminho com esses prefixos (reconferido em 09/set).
@@ -453,7 +453,10 @@ export default {
       // Porta PRÓPRIA, separada da do /ops: aqui o login não é só a
       // fechadura, é a assinatura — quem entra como `igor` marca como Igor.
       // Um login só, o mesmo pra abrir e pra assinar.
-      if (path === '/regras' || path.startsWith('/regras/')) {
+      const baseRegras = ['/rules', '/regras'].find(
+        (b) => path === b || path.startsWith(b + '/')
+      );
+      if (baseRegras) {
         const quem = quemEntrou(request, env);
         if (quem === 'sem-credencial-configurada') {
           return json(
@@ -466,7 +469,7 @@ export default {
           );
         }
         if (!quem) return pedirCredencial('autenticação necessária', 'regras ultravis');
-        return await servirRegras(request, env, path, quem);
+        return await servirRegras(request, env, baseRegras, path.slice(baseRegras.length), quem);
       }
     } catch (err) {
       console.error('roteamento do espelho falhou — seguindo pro container', err && err.message);

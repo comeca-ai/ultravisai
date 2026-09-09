@@ -238,7 +238,7 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
    se produção subiu com a variável); e existem 3 fórmulas diferentes de
    "Visibility Score", então o número depende da tela que o cliente abre.
 
-7. **Ligar o `api.ultravis.ai/regras`** (09/set) — a rota já está no código e
+7. **Ligar o `api.ultravis.ai/rules`** (09/set) — a rota já está no código e
    sobe no próximo deploy do server, mas nasce FECHADA (503) até existir a
    variável que diz quem pode entrar. No painel do worker `ultravis-server`
    (Settings -> Variables and Secrets), criar `REGRAS_ACESSOS` com a lista de

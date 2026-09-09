@@ -1,15 +1,17 @@
 /**
- * `/regras` — o documento de regras de negócio servido pela edge.
+ * `/rules` — o documento de regras de negócio servido pela edge.
+ * (`/regras` responde igual: é o caminho com que a rota nasceu, mantido pra
+ * não quebrar link já mandado.)
  *
  * Por que aqui e não num site estático: o documento é interno (traz as
  * divergências entre o que a landing promete e o que o código faz), então
  * precisa da mesma porta do /ops e do /espelho — Basic auth com OPS_USER/
  * OPS_PASS, conferida em index.js ANTES de chegar neste módulo.
  *
- * `/regras` é prefixo RESERVADO da edge, pelo mesmo motivo do `/espelho`: o
- * Express monta routers na raiz, então uma rota `/regras` criada em server/
- * ficaria silenciosamente inalcançável. Conferido em 09/set: o Express não
- * usa nenhum caminho com esse prefixo.
+ * `/rules` e `/regras` são prefixos RESERVADOS da edge, pelo mesmo motivo do
+ * `/espelho`: o Express monta routers na raiz, então uma rota com esses nomes
+ * criada em server/ ficaria silenciosamente inalcançável. Conferido em 09/set:
+ * o Express não usa nenhum dos dois (só `/t.js`, `/track/*`, `/ops*`).
  *
  * O HTML é o MESMO arquivo publicado como Artifact — importado de docs/ como
  * módulo de texto, sem cópia. Uma cópia aqui dentro ia divergir da outra na
@@ -44,14 +46,16 @@ function exibir(usuario) {
  *
  * `window.ULTRAVIS_API` é o que diz à página em que mundo ela está: definido,
  * ela grava as marcações por fetch aqui; ausente (no Artifact), ela usa a
- * capability `db`. Mesmo arquivo, dois back-ends.
+ * capability `db`. Mesmo arquivo, dois back-ends. O valor sai do caminho pelo
+ * qual a pessoa entrou, senão quem abrisse por `/regras` gravaria em `/rules`
+ * — mesma rota, mas um redirecionamento a mais e a Basic auth pedida de novo.
  *
  * `window.ULTRAVIS_QUEM` carrega o nome de quem já passou pela Basic auth —
  * com ele a página pula a própria porta de entrada. É o que torna o login
  * único: uma senha abre e assina. No Artifact, onde não há Basic auth, a
  * variável não existe e a porta da página volta a aparecer.
  */
-function documento(corpo, quem) {
+function documento(corpo, quem, base) {
   return `<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -65,7 +69,7 @@ function documento(corpo, quem) {
   [hidden]{display:none!important}
 </style>
 <script>
-window.ULTRAVIS_API="/regras/validacoes";
+window.ULTRAVIS_API=${JSON.stringify(base + "/validacoes")};
 window.ULTRAVIS_QUEM=${JSON.stringify(quem)};
 </script>
 </head>
@@ -103,12 +107,12 @@ async function garantirTabela(db) {
     .run();
 }
 
-export async function servirRegras(request, env, path, quem) {
-  if (path === '/regras') {
+export async function servirRegras(request, env, base, resto, quem) {
+  if (resto === '' || resto === '/') {
     if (request.method !== 'GET') {
       return jsonRegras({ erro: 'método não suportado — use GET' }, 405);
     }
-    return new Response(documento(HTML, exibir(quem)), {
+    return new Response(documento(HTML, exibir(quem), base), {
       headers: {
         'content-type': 'text/html; charset=utf-8',
         // Documento interno: nada de cache compartilhado, e fora do índice.
@@ -129,7 +133,7 @@ export async function servirRegras(request, env, path, quem) {
     );
   }
 
-  if (path === '/regras/validacoes' && request.method === 'GET') {
+  if (resto === '/validacoes' && request.method === 'GET') {
     await garantirTabela(env.DB);
     const { results } = await env.DB.prepare(
       'SELECT regra_id, veredito, nota, quem, em FROM validacoes_regras'
@@ -141,8 +145,8 @@ export async function servirRegras(request, env, path, quem) {
     return jsonRegras({ itens });
   }
 
-  if (path.startsWith('/regras/validacoes/') && request.method === 'PUT') {
-    const id = path.slice('/regras/validacoes/'.length);
+  if (resto.startsWith('/validacoes/') && request.method === 'PUT') {
+    const id = resto.slice('/validacoes/'.length);
     if (!ID_VALIDO.test(id)) return jsonRegras({ erro: 'id de regra inválido' }, 400);
 
     let corpo;
@@ -179,7 +183,7 @@ export async function servirRegras(request, env, path, quem) {
   return jsonRegras(
     {
       erro: 'rota não encontrada',
-      rotas: ['GET /regras', 'GET /regras/validacoes', 'PUT /regras/validacoes/<ID>'],
+      rotas: [`GET ${base}`, `GET ${base}/validacoes`, `PUT ${base}/validacoes/<ID>`],
     },
     404
   );

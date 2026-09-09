@@ -22,6 +22,11 @@
     "CLORO_WEBHOOK_URL": "https://api.ultravis.ai/cloro/callback",
     "PUBLIC_APP_URL": "https://ultravis.ai"
   },
+  // O documento de /regras é o arquivo de docs/ importado como módulo de
+  // texto (src/regras.js). Explícito de propósito: o default do wrangler já
+  // trata .html como Text, mas isso é detalhe de versão — se mudar, a rota
+  // /regras quebra no build e não em produção.
+  "rules": [{ "type": "Text", "globs": ["**/*.html"] }],
   "observability": { "enabled": true },
   // PRODUÇÃO — não remover. O run #19 mostrou o wrangler planejando APAGAR
   // esta rota ("Uploading the Worker will override the remote configuration

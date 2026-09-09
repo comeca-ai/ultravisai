@@ -15,13 +15,41 @@ O server Express de `server/` roda **intacto** num Cloudflare Container
 | Caminho | Quem atende | O quê |
 |---|---|---|
 | `/espelho`, `/espelho/tabela/<nome>` | **o Worker, na edge** | visualizador somente-leitura do espelho D1 (binding `DB`) — nunca chega ao container |
+| `/rules` (apelido: `/regras`) | **o Worker, na edge** | documento de regras de negócio pra validação executiva, com as marcações gravadas no D1 |
 | **qualquer outro caminho** | o **container** (Express intacto) | API `/api/*`, `/cloro/callback`, `/ops`, `/t.js`, `/track/*`, `/` … |
 | `scheduled` (cron a cada 10 min) | o Worker | keepalive: mantém o container vivo pro `node-cron` interno seguir agendando censo/vigia/reviews |
 
-`/espelho` é **prefixo reservado da edge**. O Express monta dois routers na
-raiz (`app.use('/', ...)`), então uma rota `/espelho` criada lá no futuro
-ficaria silenciosamente inalcançável. Conferido em 07/set: nenhuma rota do
-Express usa esse prefixo (inventário completo no PR da consolidação).
+`/espelho`, `/rules` e `/regras` são **prefixos reservados da edge**. O Express
+monta dois routers na raiz (`app.use('/', ...)`), então uma rota com esses
+nomes criada lá no futuro ficaria silenciosamente inalcançável. Conferido em
+07/set e reconferido em 09/set: o Express ocupa `/t.js`, `/track/*` e `/ops*`,
+nenhum conflito (inventário completo no PR da consolidação).
+
+### `/rules` — o documento de regras de negócio
+
+Serve o MESMO arquivo `docs/regras-de-negocio-09set-v01.html` publicado como
+Artifact, importado como módulo de texto (regra `Text` no `wrangler.jsonc`).
+Não existe cópia: uma segunda divergiria da outra na primeira correção.
+
+**Um login só.** A Basic auth aqui é própria — a lista de pares usuário/senha
+vem de `REGRAS_ACESSOS` (formato `usuario:senha,usuario:senha`), variável do
+worker que **não** vive no repositório. O login não é só a fechadura, é a
+assinatura: o usuário que entra é o nome que aparece na marcação, e essa
+assinatura sai da autenticação, nunca do corpo do `PUT` — senão um validador
+poderia gravar em nome do outro.
+
+Sem `REGRAS_ACESSOS` a rota responde **503** dizendo o que falta. Nunca abre
+por omissão.
+
+| Caminho | Método | O quê |
+|---|---|---|
+| `/rules` | GET | o documento |
+| `/rules/validacoes` | GET | todas as marcações |
+| `/rules/validacoes/<ID>` | PUT | grava uma marcação (`{v, nota}`) |
+
+As marcações vivem em `validacoes_regras` no D1 — a **única** tabela desse
+banco que o worker escreve. É estado de validação humana, não dado de
+cliente: o Supabase segue sendo a fonte da verdade do produto.
 
 v2 (depois): destilar as agendas em Cron Triggers nativos chamando
 `/api/internal/*` com `CRON_SECRET` — aí o container dorme entre execuções.

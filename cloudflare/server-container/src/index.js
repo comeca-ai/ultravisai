@@ -4,8 +4,9 @@
  * Um produto = um worker (decisão do dono, 07/set): o Express de server/ roda
  * INTACTO dentro do container (mesmo Dockerfile do Railway) e este Worker é a
  * frente dele:
- *  - fetch `/espelho*`: visualizador do espelho D1 (binding DB, somente
- *    leitura) — atendido NA EDGE, nunca chega ao container;
+ *  - fetch `/espelho*`: visualizador do espelho D1 (binding DB) e as duas
+ *    pontes Supabase → D1 (agregados do censo e tabelas do produto) —
+ *    atendido NA EDGE, nunca chega ao container;
  *  - fetch `/rules*` (e o apelido `/regras*`): documento de regras de negócio
  *    pra validação executiva (Basic auth PRÓPRIA, `REGRAS_ACESSOS` — o
  *    usuário que entra é o que assina as marcações) — também na edge;
@@ -35,6 +36,7 @@
  */
 import { Container, getContainer } from '@cloudflare/containers';
 import { sincronizarAgregados, lerAgregados } from './censo-espelho.js';
+import { sincronizarTabelas } from './espelho-tabelas.js';
 import { servirRegras } from './regras.js';
 
 export class UltravisServer extends Container {
@@ -396,6 +398,15 @@ async function servirEspelho(request, env, url, path) {
       return json({ agregados: linhas, total: linhas.length });
     }
 
+    // Enche o espelho com as tabelas do produto (marcas, prompts, resultados).
+    // Sob demanda; o cron semanal roda junto com a ponte do censo.
+    // `?dias=N` recorta a janela de prompt_results (padrão 90).
+    if (path === '/espelho/sincronizar-tabelas') {
+      const dias = Number.parseInt(url.searchParams.get('dias') || '', 10);
+      const resumo = await sincronizarTabelas(env, Number.isFinite(dias) ? dias : undefined);
+      return json(resumo, resumo.falhas ? 207 : 200);
+    }
+
     // Dispara a sincronização sob demanda (o cron faz sozinho depois do censo).
     if (path === '/espelho/sincronizar') {
       const resumo = await sincronizarAgregados(env);
@@ -482,9 +493,14 @@ export default {
     // (Supabase → D1); os demais são o keepalive que mantém o node-cron do
     // container vivo. A ponte nunca pode derrubar o keepalive — daí o catch.
     if (controller && controller.cron === '30 6 * * 1') {
+      // As duas pontes no mesmo cron: os agregados (baratos) e as tabelas do
+      // produto. Encadeadas, não em paralelo — o Supabase é o mesmo, e dois
+      // varredores simultâneos só disputam a mesma conexão.
       const sincronizar = sincronizarAgregados(env)
         .then((r) => console.log(JSON.stringify({ ponte_censo: r })))
-        .catch((err) => console.error('ponte do censo falhou', err && err.message));
+        .then(() => sincronizarTabelas(env))
+        .then((r) => console.log(JSON.stringify({ ponte_tabelas: r })))
+        .catch((err) => console.error('ponte do espelho falhou', err && err.message));
       if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(sincronizar);
       else await sincronizar;
     }

@@ -9,12 +9,20 @@ Leia primeiro: **`STATUS.md`** (1 página) · **`BACKLOG.md`** (fila viva) ·
    Não migrar banco. Não abrir PR de sync/cutover/Hyperdrive/worker novo/
    “fase B/C”. D1 `ultravis-espelho` é espelho de ops, vazio de propósito
    até o dono pedir número de censo na edge.
-2. **Trabalho desta sessão = zerar o `BACKLOG.md`.** Só o que está aberto
-   em **P0** e **P1**. Item novo só entra com linha em `DECISOES.md` no
-   mesmo PR. Não reabrir o funil do Ansvisor nem a Fase 2 do ADR-9.
-3. **Melhorar o backlog, não inflar.** Feito → `[x]` na hora. Morto /
-   superado → some (não fica 80 linhas de história). Dono decide prioridade;
-   a IA não inventa fila “enquanto isso”.
+2. **Trabalho desta sessão (pedido do dono):**
+   (a) **Finalizar os ajustes que os diretores pediram nas reuniões** —
+   fonte: `estrategia/ata-decisoes-jhonata-igor.md` (o que ainda está
+   🔨/📋 e é código), `ajustar.md`, `docs/pauta-reuniao-igor-07set-v01.html`,
+   `docs/revisao-geral-29ago-v1.html`. Não inventar pedido. Não reabrir o
+   que a ata marca ✅.
+   (b) **Validar todas as métricas criadas e desenvolvidas** — fonte:
+   `docs/regras-de-negocio-09set-v01.html` (MET-01…MET-11) + `ajustar.md`.
+   Provar **SQL → action → tela** com Polar Electro. Entregar um
+   relatório no repo (`docs/validacao-metricas-10set.html` ou sucessor)
+   com passa / falha / divergência. Onde HTML e código brigam, o código
+   + `DECISOES.md` ganham — o HTML é o que se corrige.
+3. **Fora disto não entra.** Sem funil Ansvisor, sem ADR-9 fase 2, sem
+   item novo sem linha em `DECISOES.md`. Feito → `[x]` no `BACKLOG.md`.
 4. Segredo **nunca** em chat/commit. Token Cloudflare não se cola aqui.
 
 ## O que é este repo

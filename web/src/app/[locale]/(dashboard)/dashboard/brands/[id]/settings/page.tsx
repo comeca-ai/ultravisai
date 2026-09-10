@@ -15,6 +15,7 @@ import { getCompetitors, addCompetitor, deleteCompetitor } from '@/lib/actions/c
 import { getFaviconUrl } from '@/lib/favicon';
 import type { Competitor } from '@/types';
 import { INDUSTRIES, type Brand, type BrandDomain } from '@/types';
+import { suggestedBrandAlias } from '@/lib/brand-aliases';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -148,7 +149,24 @@ function GeneralTab({
   const [name, setName] = useState(brand.name);
   const [industry, setIndustry] = useState(brand.industry ?? '');
   const [description, setDescription] = useState(brand.description ?? '');
+  const [aliases, setAliases] = useState<string[]>(brand.aliases ?? []);
+  const [aliasDraft, setAliasDraft] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  const suggestion = suggestedBrandAlias(name);
+  const showSuggestion =
+    !!suggestion &&
+    !aliases.some((a) => a.toLowerCase() === suggestion.toLowerCase()) &&
+    suggestion.toLowerCase() !== name.trim().toLowerCase();
+
+  const addAlias = (value: string) => {
+    const trimmed = value.trim().replace(/\s+/g, ' ');
+    if (!trimmed) return;
+    if (trimmed.toLowerCase() === name.trim().toLowerCase()) return;
+    if (aliases.some((a) => a.toLowerCase() === trimmed.toLowerCase())) return;
+    setAliases([...aliases, trimmed]);
+    setAliasDraft('');
+  };
 
   const handleSave = async () => {
     if (!name.trim()) return;
@@ -158,14 +176,17 @@ function GeneralTab({
         name: name.trim(),
         industry: industry || null,
         description: description || null,
+        aliases,
       });
       onUpdate({
         name: updated.name,
         slug: updated.slug,
         industry: updated.industry,
         description: updated.description,
+        aliases: updated.aliases,
         updatedAt: updated.updatedAt,
       });
+      setAliases(updated.aliases);
       toast.success(t('settings.saved'));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save changes.');
@@ -216,6 +237,63 @@ function GeneralTab({
             placeholder={t('descriptionPlaceholder')}
             rows={3}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="alias-draft">{t('settings.aliasesLabel')}</Label>
+          <p className="text-muted-foreground text-xs">{t('settings.aliasesHint')}</p>
+          {aliases.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {aliases.map((alias) => (
+                <Badge key={alias} variant="secondary" className="gap-1 pr-1">
+                  {alias}
+                  <button
+                    type="button"
+                    className="rounded-sm p-0.5 hover:bg-muted"
+                    onClick={() => setAliases(aliases.filter((a) => a !== alias))}
+                    aria-label={t('settings.aliasesRemove', { alias })}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Input
+              id="alias-draft"
+              value={aliasDraft}
+              onChange={(e) => setAliasDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addAlias(aliasDraft);
+                }
+              }}
+              placeholder={t('settings.aliasesPlaceholder')}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => addAlias(aliasDraft)}
+              disabled={!aliasDraft.trim()}
+              aria-label={t('settings.aliasesAdd')}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          {showSuggestion && suggestion && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-auto px-0 text-xs"
+              onClick={() => addAlias(suggestion)}
+            >
+              {t('settings.aliasesSuggested', { alias: suggestion })}
+            </Button>
+          )}
         </div>
 
         <Button onClick={handleSave} disabled={isSaving || !name.trim()} className="gap-2">

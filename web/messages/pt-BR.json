@@ -2459,8 +2459,8 @@
           "per": "/mês",
           "body": "Para começar a medir e entender o retrato atual.",
           "items": [
-            "150 prompts monitorados",
-            "4 motores de resposta",
+            "50 prompts monitorados",
+            "2 motores: ChatGPT e Perplexity",
             "Relatório semanal",
             "1 usuário"
           ],
@@ -2474,8 +2474,8 @@
           "per": "/mês",
           "body": "Para times que já disputam a resposta todo dia.",
           "items": [
-            "1.000 prompts monitorados",
-            "7 motores + Query Fan-Out",
+            "200 prompts monitorados",
+            "8 motores + Query Fan-Out",
             "Briefings de conteúdo com IA",
             "Benchmark de 10 concorrentes",
             "Usuários ilimitados"

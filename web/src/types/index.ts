@@ -24,6 +24,7 @@ export interface Brand {
   trackingCode?: string;
   shoppingModeEnabled: boolean;
   isActive: boolean;
+  aliases: string[];
   domains: BrandDomain[];
   createdAt: string;
   updatedAt: string;

@@ -121,7 +121,8 @@
 - [x] **Alertas de variação** — **resolvido pelo Daily Pulse portado (13/ago)**: anomalias (queda brusca, surto de concorrente, prompt perdendo citação) + destaques, com cooldown de 7 dias. Falta só ligar o transporte de e-mail (decisão do e-mail dedicado) e a UI de Notificações.
 
 ### P1 — Próximo
-- [x] **UI de aliases de marca** — **feito (10/set)**: campo em Settings, sugestão quando o nome tem 2+ palavras, seed no createBrand, recount de citações no save (mesmo caminho do domínio, PR #189). Polar Electro.
+- [ ] **Validar métricas MET-01…11 com Polar** — estático feito 10/set (`docs/validacao-metricas-10set.html`). Coluna Polar pendente: secrets do `verificar-censo` **ou** colar `supabase/scripts/validar-metricas-polar.sql` no SQL Editor. `P` · dono destrava
+- [ ] **UI de aliases de marca** — campo em Settings/onboarding pros apelidos (backend pronto: migration 00036 + parser + backfill; hoje configura-se via banco). Sugerir alias automaticamente quando o nome tiver 2+ palavras. `P` · caso Polar Electro
 - [ ] **Grader grátis sem login** — "qual sua citabilidade?" (reusa `describe-from-site` + 1 run enxuto + IC parcial). Funil de topo. `M` · `D3` · Onda 0
 - [x] **Citabilidade v2 → Índice de Visibilidade (fase 1 entregue 15/ago)** — 6 dimensões sempre com nota, fórmula aberta, fontes pesquisadas visíveis, share de resposta com conferência, copiar llms.txt. Fase 2: blend cobertura de tópicos no D2, checagem direta de reviews (motor por segmento), prompts de marca (share direto), "o que a IA sabe/não sabe", fonte congelada. `M` · `D2` · Onda 1
 - [ ] **Grounding de prompts em perguntas reais** — Semrush `phrase_questions` no onboarding/adicionar-marca (volume + intenção). `P` · `D4` · Onda 1

@@ -32,7 +32,7 @@ Fontes, nesta ordem: ata · `ajustar.md` · regras MET-* · revisão 29/ago.
 | ~~A3~~ ✅ | Vigia: **100% em 1º lugar** (amostra ≥10) = olhar o motor | ata 4.7 | Feito 10/set — quebra por marca × motor, `severity: warning` |
 | ~~A4~~ ✅ | Auditoria: **rendering** (HTML cru vs renderizado) e **idioma/país** (`lang`/`hreflang`) | ata 4.10, checklist Igor | Feito 10/set — 8/8; rubrica 49 → 51 |
 | A5 | Citabilidade v2: **tela entrega o kit** (llms.txt, JSON-LD, FAQ) pra copiar | pedido ⭐ Polar, kit já no server | UI, não motor novo |
-| A6 | Landing **não vender** 150 prompts × 4 motores se o código entrega 50 × 2 | DIV-01 | Copy ou gate — os dois têm que bater |
+| ~~A6~~ ✅* | Landing **não vender** 150 prompts × 4 motores se o código entrega 50 × 2 | DIV-01 | Feito 10/set (copy desceu até o código, 2 idiomas). *Falta só o **preço** — dono mandou não mexer em 10/set; ver DECISOES |
 
 Não é desta sessão (⏳ sócio, não código): nome “citabilidade” (4.15),
 acesso ADM do Igor (4.8), 9º motor (2.10), onboarding matriz (4.12 — dono

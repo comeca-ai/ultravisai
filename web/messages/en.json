@@ -2459,8 +2459,8 @@
           "per": "/mo",
           "body": "To start measuring and understanding the current picture.",
           "items": [
-            "150 monitored prompts",
-            "4 answer engines",
+            "50 monitored prompts",
+            "2 engines: ChatGPT and Perplexity",
             "Weekly report",
             "1 user"
           ],
@@ -2474,8 +2474,8 @@
           "per": "/mo",
           "body": "For teams already fighting for the answer every day.",
           "items": [
-            "1,000 monitored prompts",
-            "7 engines + Query Fan-Out",
+            "200 monitored prompts",
+            "8 engines + Query Fan-Out",
             "AI content briefs",
             "10-competitor benchmark",
             "Unlimited users"

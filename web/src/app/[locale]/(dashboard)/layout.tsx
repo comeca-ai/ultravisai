@@ -101,7 +101,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <div className="flex h-16 items-center border-b bg-card px-4 gap-3 md:hidden">
                 <MobileNav />
               </div>
-              <main className="flex-1 overflow-y-auto bg-background p-6">
+              <main className="flex-1 overflow-y-auto bg-background p-4 md:p-6">
                 <BrandGuard>{children}</BrandGuard>
               </main>
             </div>

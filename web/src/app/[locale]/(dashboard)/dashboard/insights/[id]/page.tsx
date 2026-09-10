@@ -135,7 +135,9 @@ export default function ResultDetailPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Um por linha no telefone: três cards de ~110px espremem o número
+          (text-2xl) contra o ícone e o rótulo quebra em duas linhas. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
             <MessageSquareText className="h-5 w-5 text-muted-foreground" />

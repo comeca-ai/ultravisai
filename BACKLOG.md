@@ -38,6 +38,24 @@ Não é desta sessão (⏳ sócio, não código): nome “citabilidade” (4.15)
 acesso ADM do Igor (4.8), 9º motor (2.10), onboarding matriz (4.12 — dono
 adiou), e-mail do Daily Pulse (2.8).
 
+### A7. Responsividade das telas (pedido do dono, 10/set)
+
+1ª fatia entregue: `grid-cols-3` sem breakpoint no `insights/[id]`,
+`overflow-hidden` clipando a tabela do breakdown, e `p-6` fixo no `<main>`.
+
+A auditoria estática **não** achou o retrofit que o pedido sugeria — o
+layout já esconde a sidebar abaixo de `md`, o `<Table>` compartilhado já
+rola no eixo x, e os grids já sobem de 2 colunas. Falta o que só aparece
+renderizando, e a sessão não consegue: sem segredo do Supabase a app não
+sobe, e a política de rede bloqueia `ultravis.ai:443`.
+
+- [ ] **Dono: dizer QUAIS telas quebram e em que aparelho** (print ajuda).
+      Sem isso o próximo passo é adivinhação em 28 telas.
+- [ ] Conferir no aparelho as telas mais densas: `shopping`, `traffic`,
+      `reports/[id]`, `prompts`, `citations` — são as de mais colunas.
+
+---
+
 ### B. Validar todas as métricas (prova, não opinião)
 
 Para **cada** MET-01…MET-11 em `docs/regras-de-negocio-09set-v01.html`:

@@ -272,7 +272,9 @@ describe('deterministic signals', () => {
   });
 
   it('language-country: fail sem lang, warn com lang genérico, pass com região ou hreflang', () => {
-    expect(languageCountry.evaluate(ctxFromHtml('<html><body>x</body></html>')).status).toBe('fail');
+    expect(languageCountry.evaluate(ctxFromHtml('<html><body>x</body></html>')).status).toBe(
+      'fail',
+    );
 
     const generico = languageCountry.evaluate(ctxFromHtml('<html lang="pt"><body>x</body></html>'));
     expect(generico.status).toBe('warn');

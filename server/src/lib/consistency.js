@@ -38,6 +38,12 @@ const RECOUNT_MIN_ROWS = 3;
 const RECOUNT_MIN_SHARE = 0.1;
 /** Sentiment values the pipeline is allowed to write. */
 const VALID_SENTIMENTS = new Set(['positive', 'neutral', 'negative']);
+/**
+ * Amostra mínima antes de julgar "100% em 1º lugar" (ata 4.7, Igor 51:45).
+ * Abaixo disso, 100% é coincidência de três respostas — não sinal de motor
+ * com problema.
+ */
+const PERFECT_RANK_MIN_ROWS = 10;
 
 /**
  * Espelho de resolveModelPlatform (tracking-worker.js): motores de API são
@@ -378,6 +384,55 @@ export function evaluateConsistency(snap, _now) {
         key: 'consistency-unknown-platform',
         severity: 'warning',
         message: `Resultados com plataforma que nenhum prompt configura (entram no total, somem das quebras por motor): ${detail}.`,
+      });
+    }
+  }
+
+  // Marca em 1º lugar em 100% das respostas de um motor — decisão da ata 4.7
+  // (Igor, 19/ago, 51:45): "só de alguém aparecer 100% das vezes em primeiro
+  // lugar, tem que dar uma olhada no motor".
+  //
+  // Não é um erro provado, é um cheiro: liderança absoluta e sem exceção numa
+  // amostra grande costuma sair de coleta degenerada (prompt que cita a marca
+  // no enunciado, motor devolvendo sempre a mesma resposta, parser achando só
+  // a nossa grafia) — e não de domínio real do mercado. Daí severidade `info`:
+  // manda olhar, não acusa.
+  //
+  // A quebra é por marca × MOTOR porque é o motor que o Igor mandou olhar:
+  // agregado por marca, um motor degenerado se dilui nos outros e some.
+  {
+    const porMarcaMotor = new Map();
+    for (const r of snap.recentResults) {
+      const rank = r.appearanceRank ?? 0;
+      if (rank < 1) continue; // sem posição calculada não entra na conta
+      const chave = `${r.brandId}|${r.platform ?? '(sem motor)'}`;
+      let a = porMarcaMotor.get(chave);
+      if (!a) {
+        a = { brandId: r.brandId, platform: r.platform ?? '(sem motor)', total: 0, primeiro: 0 };
+        porMarcaMotor.set(chave, a);
+      }
+      a.total += 1;
+      if (rank === 1) a.primeiro += 1;
+    }
+
+    const nomePorMarca = new Map((snap.brands ?? []).map((b) => [b.id, b.name]));
+    const suspeitos = [...porMarcaMotor.values()]
+      .filter((a) => a.total >= PERFECT_RANK_MIN_ROWS && a.primeiro === a.total)
+      .map((a) => `${nomePorMarca.get(a.brandId) ?? String(a.brandId).slice(0, 8)} × ${a.platform} (${a.total} respostas)`);
+
+    if (suspeitos.length > 0) {
+      alerts.push({
+        key: 'consistency-perfect-rank',
+        // 'warning' e não 'info': o vigia só conhece 'critical' e 'warning'
+        // (watchdog.js) — a tela do /ops renderiza qualquer outra coisa como
+        // ATENÇÃO de qualquer jeito, e o e-mail sairia com um rótulo que não
+        // bate com a cor do chip. É atenção mesmo: manda olhar o motor, não
+        // interrompe nada.
+        severity: 'warning',
+        message:
+          `1º lugar em 100% das respostas, sem uma única exceção: ${suspeitos.slice(0, 5).join(' · ')}` +
+          (suspeitos.length > 5 ? ` · +${suspeitos.length - 5}` : '') +
+          ` — conferir o motor (amostra mínima ${PERFECT_RANK_MIN_ROWS}).`,
       });
     }
   }

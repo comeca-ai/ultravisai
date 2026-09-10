@@ -29,8 +29,8 @@ Fontes, nesta ordem: ata · `ajustar.md` · regras MET-* · revisão 29/ago.
 |---|---|---|---|
 | A1 | **Uma conta de Score, não três** | DIV-04, ata 4.1/4.5, `ajustar.md` | Insights, Score e hero têm que contar a mesma coisa ou a tela tem que dizer por que não. Código, não slide novo. |
 | A2 | Clique `#2,3` (Ranking médio) **não pode cair numa nota 45 sem explicação** | `ajustar.md` parte 1 | São escalas diferentes (média vs pódio). Texto na tela + destino do clique. |
-| A3 | Vigia: **100% em 1º lugar** (amostra ≥10) = olhar o motor | ata 4.7 | Check em `consistency.js` |
-| A4 | Auditoria: **rendering** (HTML cru vs renderizado) e **idioma/país** (`lang`/`hreflang`) | ata 4.10, checklist Igor | Completar 6/8 → 8/8 sinais |
+| ~~A3~~ ✅ | Vigia: **100% em 1º lugar** (amostra ≥10) = olhar o motor | ata 4.7 | Feito 10/set — quebra por marca × motor, `severity: warning` |
+| ~~A4~~ ✅ | Auditoria: **rendering** (HTML cru vs renderizado) e **idioma/país** (`lang`/`hreflang`) | ata 4.10, checklist Igor | Feito 10/set — 8/8; rubrica 49 → 51 |
 | A5 | Citabilidade v2: **tela entrega o kit** (llms.txt, JSON-LD, FAQ) pra copiar | pedido ⭐ Polar, kit já no server | UI, não motor novo |
 | A6 | Landing **não vender** 150 prompts × 4 motores se o código entrega 50 × 2 | DIV-01 | Copy ou gate — os dois têm que bater |
 
@@ -74,7 +74,7 @@ não trocar sozinho.
 - [x] **Faixas de nota** — DECIDIDO 17/ago (registro): quintis 0-20/21-40/41-60/61-80/81-100 (feito).
 
 ### Réguas do IC por ATIVOS (planilha "Critérios de Nota" — exigem coleta nova)
-- [ ] **D1 — sinais faltantes da lista do dono (18/ago)**: (a) **Rendering** — medir dependência de JavaScript comparando HTML cru vs renderizado (2 fetches; diz o que um bot de IA sem JS enxerga) `M`; (b) **Idioma/país** — sinal de `html lang` + `hreflang` + segmentação de país `P`; (c) **`<title>` descritivo** — presença/qualidade do title da aba por página (complementa H1 e meta description) `P`. Já cobertos: JSON-LD (3 sinais), FAQ/editorial, llms.txt, meta tags sociais (OG+Twitter), trust on-site + reputação externa via D4.
+- [ ] **D1 — sinais faltantes da lista do dono (18/ago)** — (a) e (b) entregues em 10/set; falta só o (c): (a) ~~**Rendering** — medir dependência de JavaScript comparando HTML cru vs renderizado (2 fetches; diz o que um bot de IA sem JS enxerga) `M`~~; (b) ~~**Idioma/país** — sinal de `html lang` + `hreflang` + segmentação de país `P`~~; (c) **`<title>` descritivo** — presença/qualidade do title da aba por página (complementa H1 e meta description) `P`. Já cobertos: JSON-LD (3 sinais), FAQ/editorial, llms.txt, meta tags sociais (OG+Twitter), trust on-site + reputação externa via D4.
 - [ ] **D1 estendida**: crawl de schema/llms.txt/sitemap + entidade (Wikidata/Wikipedia) + consistência nome/aliases — hoje o site audit cobre parte; mapear pros critérios da régua. `M`
 - [ ] **D2 cobertura × qualidade GEO**: % dos tópicos com página própria × front-load/estatística com fonte/tabelas/blocos 50-150p/frescor <12m (LLM judge sobre o crawl). `M`
 - [ ] **D3 checagem de canais sociais**: nº de plataformas ativas (satura em 5), cadência/recência, bônus YouTube. Exige leitura dos perfis (declarar o que não lemos). `M`

@@ -68,28 +68,45 @@ relação com a quebra. Também achado no mesmo lote: `schema.sql` e 2 arquivos
 sem `prettier` ficaram defasados por um merge de PR antigo baseado em `main`
 desatualizado (mesma causa-raiz do achado do `STATUS.md` — ver `DECISOES.md`).
 
-## 🔴 INCIDENTE ABERTO (08/set): 401 em 5 telas (auditoria, citabilidade,
-conteúdo, tópicos, prompts) — hipótese forte, precisa do dono pra confirmar
+## ✅ CAUSA-RAIZ ENCONTRADA (09/set): 401 em 5 telas — o worker falava com o
+banco errado
 
-Investigação nesta sessão chegou a uma hipótese concreta mas não conseguiu
-confirmar: a conta Supabase que este ambiente enxerga (via MCP) tem **3
-projetos distintos**, e nenhum deles bate com a produção documentada
-(`twhqjfbealruvcbvkegc`, inacessível daqui). Dois projetos visíveis: um
-pausado, e um projeto vazio/upstream sem uso (`kepunaqlwhpbmtrcoscx` — 44
-migrations aplicadas mas **sem** a coluna `appearance_rivals` nem as tabelas
-`index_weights`/`brand_archives` do fork, ou seja, é uma instalação Ansvisor
-upstream nunca customizada, não a Ultravis). Hipótese: o `SUPABASE_URL`
-configurado no painel do worker Cloudflare (`ultravis-server` → Settings →
-Variables and Secrets) pode estar apontando pra um projeto errado — o que
-explicaria 401 em telas que dependem de RPC/tabelas específicas do fork.
+**O que era.** O worker `ultravis-server` estava com `SUPABASE_URL` apontando
+para `kepunaqlwhpbmtrcoscx.supabase.co` — um projeto de OUTRA conta Supabase,
+com o schema Ansvisor upstream e **vazio**. Provado com número, não por
+hipótese:
 
-**O que só o dono consegue fazer:** abrir `ultravis.ai` logado, DevTools →
-Application → Cookies, achar o cookie `sb-<ref>-auth-token` (o `<ref>` é o id
-do projeto Supabase que o **navegador** está usando pra login) e comparar
-esse `<ref>` com o valor de `SUPABASE_URL` nas vars do worker no painel
-Cloudflare. Se forem diferentes, achamos a causa-raiz. Não dá pra ler o
-valor de `SUPABASE_URL` do worker por nenhum caminho disponível nesta sessão
-(é Secret, não aparece em log/diff).
+| | `kepunaqlwhpbmtrcoscx` (o que o worker usava) |
+| --- | --- |
+| organizações · marcas · resultados | **0 · 0 · 0** |
+| `brands.aliases` (migration 00036) | não existe |
+| `prompt_results.appearance_rank` (00043) | não existe |
+| `brand_archives`, `index_weights` | não existem |
+| tabelas | 35 (o fork tem 37+) |
+
+**Como apareceu.** A ponte de tabelas do espelho (09/set) tentou copiar oito
+tabelas: cinco vieram com zero linhas e três falharam com `42703 column ...
+does not exist` — justamente as que pedem colunas do fork. O campo `projeto`
+no resumo da ponte nomeou o host, que era o dado que faltava desde 08/set
+(`SUPABASE_URL` é Secret e não aparece em log nem em diff).
+
+**Consequências prováveis** — a confirmar com os dados na mão: os 401 nas
+cinco telas (auditoria, citabilidade, conteúdo, tópicos, prompts), todas
+dependentes de tabelas e RPCs do fork; e o rastreamento que parecia rodar sem
+produzir número, já que o worker lê `brands` antes de coletar e encontrava
+zero. Falta medir desde quando — a data do resultado mais recente em
+`prompt_results` no banco certo diz.
+
+**Correção aplicada pelo dono em 09/set:** `SUPABASE_URL` e
+`SUPABASE_SERVICE_ROLE_KEY` do worker trocados para o projeto de produção
+`twhqjfbealruvcbvkegc`. **Pendente de confirmação:** rodar
+`/espelho/sincronizar-tabelas` e ver `projeto` com o ref novo, tabelas com
+linhas e nenhum erro de coluna; e conferir se os 401 sumiram.
+
+**Nota que vale guardar:** o projeto de produção vive numa conta Supabase
+diferente da que o conector MCP desta sessão enxerga (que só tem
+`kepunaqlwhpbmtrcoscx` e `ltbwfjsufjmfkiuhpxac`, os dois vazios). Foi essa
+divergência de contas que fez o diagnóstico levar dois dias.
 
 ## ✅ RESOLVIDO (08/set, fim da tarde): deploy do server destravado — run #38 sucesso
 

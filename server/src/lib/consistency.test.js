@@ -46,7 +46,10 @@ const healthy = {
     platform: i % 2 === 0 ? 'chatgpt-web' : 'gemini-web',
     mentionCount: 1,
     citationCount: 0,
-    appearanceRank: 1,
+    // Posições variadas de propósito: desde a ata 4.7, aparecer em 1º em 100%
+    // das respostas é justamente o que o vigia acusa — um fixture assim não
+    // seria "saudável", seria o caso suspeito.
+    appearanceRank: (i % 4) + 1,
     sentiment: 'neutral',
   })),
   stalledRankRows: 0,
@@ -325,6 +328,85 @@ describe('evaluateConsistency', () => {
     );
     const hit = alerts.find((a) => a.key === 'consistency-unknown-platform');
     expect(hit?.message).toContain('perplexity-web: 1 linha(s)');
+  });
+
+  it('flags 100% em 1º lugar num motor (ata 4.7 — "olhar o motor")', () => {
+    const alerts = evaluateConsistency(
+      {
+        ...healthy,
+        recentResults: Array.from({ length: 12 }, () => ({
+          brandId: 'b1',
+          platform: 'chatgpt-web',
+          mentionCount: 1,
+          citationCount: 0,
+          appearanceRank: 1,
+          sentiment: 'neutral',
+        })),
+      },
+      NOW,
+    );
+    const hit = alerts.find((a) => a.key === 'consistency-perfect-rank');
+    expect(hit?.severity).toBe('warning');
+    expect(hit?.message).toContain('Polar');
+    expect(hit?.message).toContain('chatgpt-web');
+    expect(hit?.message).toContain('12 respostas');
+  });
+
+  it('não julga 100% em 1º com amostra pequena — 9 respostas é coincidência', () => {
+    const alerts = evaluateConsistency(
+      {
+        ...healthy,
+        recentResults: Array.from({ length: 9 }, () => ({
+          brandId: 'b1',
+          platform: 'chatgpt-web',
+          mentionCount: 1,
+          citationCount: 0,
+          appearanceRank: 1,
+          sentiment: 'neutral',
+        })),
+      },
+      NOW,
+    );
+    expect(alerts.find((a) => a.key === 'consistency-perfect-rank')).toBeUndefined();
+  });
+
+  it('uma única resposta fora do 1º lugar já desarma o alerta', () => {
+    const linhas = Array.from({ length: 12 }, (_, i) => ({
+      brandId: 'b1',
+      platform: 'chatgpt-web',
+      mentionCount: 1,
+      citationCount: 0,
+      appearanceRank: i === 11 ? 2 : 1,
+      sentiment: 'neutral',
+    }));
+    const alerts = evaluateConsistency({ ...healthy, recentResults: linhas }, NOW);
+    expect(alerts.find((a) => a.key === 'consistency-perfect-rank')).toBeUndefined();
+  });
+
+  it('linhas sem posição calculada não entram na conta do 100%', () => {
+    // 12 com rank 1 e 5 ainda sem enriquecimento: o alerta olha só o que tem
+    // posição, senão o sweep atrasado mascararia o caso suspeito.
+    const linhas = [
+      ...Array.from({ length: 12 }, () => ({
+        brandId: 'b1',
+        platform: 'chatgpt-web',
+        mentionCount: 1,
+        citationCount: 0,
+        appearanceRank: 1,
+        sentiment: 'neutral',
+      })),
+      ...Array.from({ length: 5 }, () => ({
+        brandId: 'b1',
+        platform: 'chatgpt-web',
+        mentionCount: 1,
+        citationCount: 0,
+        appearanceRank: null,
+        sentiment: 'neutral',
+      })),
+    ];
+    const alerts = evaluateConsistency({ ...healthy, recentResults: linhas }, NOW);
+    const hit = alerts.find((a) => a.key === 'consistency-perfect-rank');
+    expect(hit?.message).toContain('12 respostas');
   });
 
   it('flags a stalled appearance-rank backlog', () => {

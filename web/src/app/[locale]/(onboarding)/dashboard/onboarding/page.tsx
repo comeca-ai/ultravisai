@@ -385,6 +385,11 @@ export default function OnboardingPage() {
 
           if (brands?.length) {
             const b = brands[0];
+            // `aliases` entrou pela migration 00048 e os tipos gerados do
+            // Supabase ainda não a conhecem. Lida uma vez, como opcional: o
+            // cast direto pra `{ aliases: string[] }` não sobrepõe o tipo de
+            // `b` e o build quebra.
+            const aliasesDaMarca = (b as { aliases?: string[] | null }).aliases;
             const mapped: Brand = {
               id: b.id,
               organizationId: b.organization_id,
@@ -397,9 +402,7 @@ export default function OnboardingPage() {
               language: b.language ?? undefined,
               shoppingModeEnabled: !!b.shopping_mode_enabled,
               isActive: (b as { is_active?: boolean }).is_active ?? true,
-              aliases: Array.isArray((b as { aliases?: string[] }).aliases)
-                ? ((b as { aliases: string[] }).aliases)
-                : [],
+              aliases: Array.isArray(aliasesDaMarca) ? aliasesDaMarca : [],
               domains: (b.brand_domains || []).map((d: Record<string, unknown>) => ({
                 id: d.id as string,
                 brandId: d.brand_id as string,

@@ -1,17 +1,29 @@
 # CLAUDE.md — instruções para sessões de IA neste repo
 
-Leia primeiro: **`CONTEXTO.md`** (estado atual completo) e
-**`ARQUITETURA-POCS.md`** (regras do fork).
+Leia primeiro: **`STATUS.md`** (1 página) · **`BACKLOG.md`** (fila viva) ·
+**`CONTEXTO.md`** (história) · **`ARQUITETURA-POCS.md`** (regras do fork).
 
-**`STATUS.md`** é a visão de 1 página pro dono — mantenha-o atualizado ao
-fim de cada sessão com mudanças relevantes (estado, números, pendências).
+## Ordem vigente (10/set) — NÃO negociar
+
+1. **A base é o Supabase** (`twhqjfbealruvcbvkegc`). Etapa D1 **encerrada**.
+   Não migrar banco. Não abrir PR de sync/cutover/Hyperdrive/worker novo/
+   “fase B/C”. D1 `ultravis-espelho` é espelho de ops, vazio de propósito
+   até o dono pedir número de censo na edge.
+2. **Trabalho desta sessão = zerar o `BACKLOG.md`.** Só o que está aberto
+   em **P0** e **P1**. Item novo só entra com linha em `DECISOES.md` no
+   mesmo PR. Não reabrir o funil do Ansvisor nem a Fase 2 do ADR-9.
+3. **Melhorar o backlog, não inflar.** Feito → `[x]` na hora. Morto /
+   superado → some (não fica 80 linhas de história). Dono decide prioridade;
+   a IA não inventa fila “enquanto isso”.
+4. Segredo **nunca** em chat/commit. Token Cloudflare não se cola aqui.
 
 ## O que é este repo
 
 Fork do [Ansvisor](https://github.com/ansvisor/ansvisor) operando como
 **Ultravis** (ultravis.ai) — visibilidade de marcas em IA, mercado BR.
 Monorepo: `web/` (Next.js 16 + next-intl, deploy Vercel), `server/`
-(Express ESM, deploy Railway), `supabase/` (migrations).
+(Express ESM, **Cloudflare Container** `ultravis-server` em
+`api.ultravis.ai`), `supabase/` (migrations). Railway **apagado**.
 
 ## Regras do fork (anti-drift) — IMPORTANTES
 
@@ -56,7 +68,7 @@ Após adicionar migration: `bash supabase/build-schema.sh` (regenera
 ## Git/PR
 
 - Branch de trabalho da sessão → PR draft para `main` (template em
-  `.github/`); `main` deploya automático (Vercel web + Railway server).
+  `.github/`); `main` deploya automático (Vercel web + worker Cloudflare).
 - Branch já mergeada = reiniciar de `origin/main`
   (`git checkout -B <branch> origin/main`), nunca empilhar sobre histórico
   mergeado.
@@ -65,18 +77,9 @@ Após adicionar migration: `bash supabase/build-schema.sh` (regenera
 
 ## Infra (sem segredos aqui — valores só nos painéis)
 
-- Vercel `ultravis/utravisaiclaude` · Railway `ultravis/ultravis-server` ·
-  Supabase `twhqjfbealruvcbvkegc` · DNS Cloudflare (nuvem cinza).
+- Vercel `ultravis` · Cloudflare Worker `ultravis-server` (`api.ultravis.ai`) ·
+  Supabase `twhqjfbealruvcbvkegc`.
 - Env vars de modelo por função: `*_SUGGESTION_MODEL`, `AUDIT_LLM_MODEL`
   (formato `provider/modelo`). Cron: `DAILY_CRON_SCHEDULE`.
-- Nunca colar segredos em chat/commits; configurar direto no painel.
-
-## Cloudflare (migração em fases — desde 06/set)
-
-- Qualquer tarefa Cloudflare (worker, deploy, fila, e-mail, AI Gateway, token):
-  usar a skill **`cloudflare`** (`.claude/skills/cloudflare/`) e/ou delegar ao
-  agente **`cloudflare-ops`** (`.claude/agents/`). Eles carregam as sintaxes
-  validadas e as lições dos runs #2–#8 — não redescobrir na tentativa e erro.
-- Deploy de worker sai pelo GitHub Actions (sandbox não alcança
-  api.cloudflare.com); banco permanece no Supabase; e-mail transacional via
-  Email Service (binding `send_email`), não Email Routing.
+- Qualquer tarefa Cloudflare: skill **`cloudflare`** e/ou agente
+  **`cloudflare-ops`**. **Não** usar isso pra retomar migração de banco.

@@ -25,6 +25,8 @@ Pedido do dono: *“eu mantenho a base no Supabase”*. Etapa fechada.
 - Token colado em chat em 10/set: **inválido** (`Invalid API Token`).
   Recriar no painel, colar só no GitHub Secret, **nunca no chat**. O token
   em vigor vence **13/set/2026**.
+- **Prompt da sessão** (`CLAUDE.md`) e **backlog** reescritos: parar
+  migração; zerar P0/P1. Colar o bloco no fim de `BACKLOG.md` em sessão nova.
 
 ## ✅ 08/set: auditoria de segurança completa — 7 de 9 P0/P1 corrigidos
 

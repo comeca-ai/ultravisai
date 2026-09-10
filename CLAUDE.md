@@ -60,7 +60,7 @@ Monorepo: `web/` (Next.js 16 + next-intl, deploy Vercel), `server/`
 
 ```bash
 cd web && yarn typecheck && yarn lint && yarn format   # zero erros E zero warnings
-cd server && npm run lint && npm test                  # 124+ testes verdes
+cd server && npm run lint && npm run format:check && npm test   # 302 testes verdes
 ```
 
 Após adicionar migration: `bash supabase/build-schema.sh` (regenera

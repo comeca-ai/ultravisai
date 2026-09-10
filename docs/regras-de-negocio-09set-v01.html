@@ -201,8 +201,9 @@ const REGRAS = [
  e:["web/src/config/visibility-index.ts:49-62"]},
 
 {d:"metricas", id:"MET-10", t:"Menção = nome, apelido ou domínio, como palavra inteira, fora de links",
- x:"O texto tem as URLs removidas antes da busca — link não conta como menção. A busca é por <b>palavra inteira</b>, sem diferenciar maiúsculas. Citação é coisa diferente: link cujo domínio é seu (host exato ou subdomínio, nunca pedaço de texto).",
- e:["server/src/lib/response-parser.js:11-25, 103-115, 53-73","migrations/00036_brand_aliases.sql"]},
+ x:"O texto tem as URLs removidas antes da busca — link não conta como menção. A busca é por <b>palavra inteira</b>, sem diferenciar maiúsculas. Citação é coisa diferente: é o link que a IA entregou trazendo o seu produto — <b>de qualquer fonte</b>. Conta quando o domínio é seu (host exato ou subdomínio), ou quando um termo da marca aparece como palavra inteira no <b>título</b> da citação ou no <b>caminho</b> da URL. A query fica de fora: <code>?ref=suamarca.com</code> é rastreamento, não link de produto. Marca de nome comum se protege cadastrando <code>brands.citation_terms</code> — \"Polar\" sozinho casaria com vórtice polar, \"Polar Vantage\" não.",
+ v:["regra nova desde 09/set (#189) — a anterior contava só domínio próprio"],
+ e:["server/src/lib/response-parser.js:114-147 (citacaoTrazOProduto), 149-176 (contarCitacoesDoProduto)","web/src/lib/citations/classify.ts (espelho da regra no front)","migrations/00036_brand_aliases.sql","migrations/00049_citation_terms.sql"]},
 
 {d:"metricas", id:"MET-11", t:"Amostra pequena vira selo, não penalidade",
  x:"Abaixo de <b>10 citações</b> a leitura é marcada como direcional na tela. Isso é aviso visual — não altera a nota.",

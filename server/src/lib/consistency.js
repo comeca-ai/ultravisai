@@ -418,7 +418,10 @@ export function evaluateConsistency(snap, _now) {
     const nomePorMarca = new Map((snap.brands ?? []).map((b) => [b.id, b.name]));
     const suspeitos = [...porMarcaMotor.values()]
       .filter((a) => a.total >= PERFECT_RANK_MIN_ROWS && a.primeiro === a.total)
-      .map((a) => `${nomePorMarca.get(a.brandId) ?? String(a.brandId).slice(0, 8)} × ${a.platform} (${a.total} respostas)`);
+      .map(
+        (a) =>
+          `${nomePorMarca.get(a.brandId) ?? String(a.brandId).slice(0, 8)} × ${a.platform} (${a.total} respostas)`,
+      );
 
     if (suspeitos.length > 0) {
       alerts.push({

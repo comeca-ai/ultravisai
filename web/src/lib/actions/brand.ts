@@ -4,6 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { enforceLimit } from '@/lib/guards/plan-guard';
 import type { Brand, BrandDomain } from '@/types';
+import {
+  aliasesChanged,
+  normalizeBrandAliases,
+  suggestedBrandAlias,
+} from '@/lib/brand-aliases';
+import { scheduleCitationRecount } from '@/lib/citation-recount';
 
 function slugify(text: string): string {
   return text
@@ -39,6 +45,7 @@ function mapBrandRow(brand: Record<string, unknown>, domains: Record<string, unk
     trackingCode: (brand.tracking_code as string | null) ?? undefined,
     shoppingModeEnabled: !!brand.shopping_mode_enabled,
     isActive: brand.is_active === undefined ? true : !!brand.is_active,
+    aliases: Array.isArray(brand.aliases) ? (brand.aliases as string[]) : [],
     domains: domains.map(mapDomainRow),
     createdAt: brand.created_at as string,
     updatedAt: brand.updated_at as string,
@@ -100,6 +107,8 @@ export async function createBrand(input: CreateBrandInput): Promise<Brand> {
   await enforceLimit(input.organizationId, 'maxBrands', count ?? 0);
 
   const slug = slugify(input.name) || `brand-${Date.now()}`;
+  const seeded = suggestedBrandAlias(input.name);
+  const aliases = normalizeBrandAliases(seeded ? [seeded] : [], input.name);
 
   const { data: brand, error } = await supabase
     .from('brands')
@@ -112,6 +121,7 @@ export async function createBrand(input: CreateBrandInput): Promise<Brand> {
       description: input.description || null,
       region: input.region || 'US',
       language: input.language || 'en',
+      aliases,
     })
     .select()
     .single();
@@ -148,10 +158,14 @@ interface UpdateBrandInput {
   description?: string | null;
   region?: string;
   language?: string;
+  aliases?: string[];
 }
 
 export async function updateBrand(id: string, updates: UpdateBrandInput): Promise<Brand> {
   const supabase = await createClient();
+
+  const previous =
+    updates.aliases !== undefined ? await getBrandById(id) : null;
 
   const payload: Record<string, unknown> = {};
   if (updates.name !== undefined) {
@@ -163,6 +177,11 @@ export async function updateBrand(id: string, updates: UpdateBrandInput): Promis
   if ('description' in updates) payload.description = updates.description ?? null;
   if (updates.region !== undefined) payload.region = updates.region;
   if (updates.language !== undefined) payload.language = updates.language;
+  if (updates.aliases !== undefined) {
+    const official =
+      (typeof payload.name === 'string' ? payload.name : previous?.name) ?? '';
+    payload.aliases = normalizeBrandAliases(updates.aliases, official);
+  }
 
   const { data, error } = await supabase
     .from('brands')
@@ -173,11 +192,20 @@ export async function updateBrand(id: string, updates: UpdateBrandInput): Promis
 
   if (error || !data) throw new Error(error?.message ?? 'Failed to update brand');
 
-  revalidatePath('/dashboard/brands');
-  return mapBrandRow(
+  const mapped = mapBrandRow(
     data as Record<string, unknown>,
     (data.brand_domains as Record<string, unknown>[]) ?? [],
   );
+
+  if (
+    updates.aliases !== undefined &&
+    aliasesChanged(previous?.aliases ?? [], mapped.aliases)
+  ) {
+    scheduleCitationRecount(id);
+  }
+
+  revalidatePath('/dashboard/brands');
+  return mapped;
 }
 
 export async function deleteBrand(id: string): Promise<void> {

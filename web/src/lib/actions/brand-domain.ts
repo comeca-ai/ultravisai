@@ -2,36 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { after } from 'next/server';
 import type { BrandDomain } from '@/types';
-import { API_BASE_URL } from '@/config/api';
-
-/**
- * `prompt_results.citation_count` is computed at tracking time against the
- * brand's domain list of that moment and frozen into the row. When the list
- * changes, the stored tallies silently diverge from what the Citations page
- * classifies live — the same "own citations" metric then shows different
- * numbers on different surfaces. Kick the server-side recount after the
- * response is sent; a failed recount self-heals on the next domain change.
- */
-function scheduleCitationRecount(brandId: string) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) return;
-  after(async () => {
-    try {
-      await fetch(`${API_BASE_URL}/api/internal/recount-citations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cronSecret}`,
-        },
-        body: JSON.stringify({ brandId }),
-      });
-    } catch (err) {
-      console.error('[brand-domain] citation recount failed', err);
-    }
-  });
-}
+import { scheduleCitationRecount } from '@/lib/citation-recount';
 
 function mapDomainRow(d: Record<string, unknown>): BrandDomain {
   return {

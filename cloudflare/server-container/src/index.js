@@ -161,10 +161,10 @@ function paginaIndice(contagens) {
     contagens.length === 0
       ? 'Banco ainda sem schema — ele é aplicado pelo deploy (<code>wrangler d1 execute</code> com <code>d1/schema.d1.sql</code>).'
       : contagens.length + ' tabelas · ' + total +
-        ' linhas no total — schema traduzido do Supabase; dados entram na fase B. Clique numa tabela para amostra.';
+        ' linhas no total — espelho de ops; a produção é o Supabase. Clique numa tabela para amostra.';
   return pagina(
     'Espelho D1 — ultravis-espelho',
-    '<div class="eyebrow">Ultravis · espelho D1 · fase A</div>' +
+    '<div class="eyebrow">Ultravis · espelho D1 · somente leitura</div>' +
       '<h1>Banco <code>ultravis-espelho</code> no Cloudflare</h1>' +
       '<div class="sub">' + sub + '</div>' +
       '<div class="card"><table><thead><tr><th>tabela</th><th style="text-align:right">linhas</th></tr></thead>' +
@@ -176,7 +176,7 @@ function paginaIndice(contagens) {
 function paginaTabela(nome, results) {
   let corpo;
   if (results.length === 0) {
-    corpo = '<div class="card" style="padding:18px">Tabela vazia — dados entram na fase B do espelho.</div>';
+    corpo = '<div class="card" style="padding:18px">Tabela vazia — sync em /espelho/sincronizar-tabelas (ops). A produção não lê daqui.</div>';
   } else {
     const cols = Object.keys(results[0]);
     const head = cols.map((c) => '<th>' + escapeHtml(c) + '</th>').join('');

@@ -2,7 +2,7 @@
 
 > Backlog operacional vivo, priorizado. Destila `estrategia/roadmap-produto-e-valuation.md`,
 > o benchmarking e as pendências do `CONTEXTO.md` em itens acionáveis.
-> Atualizar conforme entrega/decisão. **Última atualização:** 07/set/2026 (pós-migração Cloudflare — envs agora vivem no worker `ultravis-server`, não mais no Railway).
+> Atualizar conforme entrega/decisão. **Última atualização:** 10/set/2026 (etapa D1 encerrada — base permanece no Supabase).
 
 ## Como ler
 
@@ -179,7 +179,7 @@
 - [x] **Token Cloudflare definitivo** — **feito (08/set)**: token custom recriado (Workers Scripts + D1 + Workers Routes, todas Edit, escopado à conta/zona). Passou por um Roll no meio do caminho (valor vazou em chat) e por 2 tentativas de recolagem quebrada em GitHub Secrets antes de validar — histórico completo em `STATUS.md`. Deploy confirmado funcionando (run #38).
 - [ ] **Fase 2 do ADR-9** (ordem sugerida): Cron Triggers nativos chamando `/api/internal/*` com `CRON_SECRET` (mata o keepalive; container dorme entre execuções) → fila (Queues) no caminho do Cloro **como binding do worker único** (o edge-gateway foi apagado na consolidação de 07/set — superfície nova = rota nova no `ultravis-server`) → alertas do vigia/Daily Pulse por **Email Service** (`send_email` binding, sem SMTP) → web via OpenNext (por último). `M`
 - [x] **Proteger `/espelho` antes da fase B do espelho D1** — **feito**: a rota exige Basic auth (`OPS_USER`/`OPS_PASS`), com comparação em tempo constante e fechada por omissão (503 sem credencial configurada). Era o que bloqueava a fase B.
-- [x] **Fase B do espelho D1 — encher as tabelas** — **feito (09/set)**: ponte `/espelho/sincronizar-tabelas` copia a espinha analítica (organizations, brands, brand_domains, competitors, topics, prompt_sets, prompts, prompt_results em janela de 90 dias) e roda também no cron semanal. Lista explícita de colunas por tabela — nunca `select=*` —, e as tabelas de pessoa/credencial ficam inteiras de fora. Detalhe em `DECISOES.md` 09/set e no README do worker.
+- [x] **Fase B do espelho D1 — encher as tabelas** — **código feito (09/set)**; **etapa como banco ENCERRADA (10/set)**. Ponte `/espelho/sincronizar-tabelas` existe; D1 segue vazio até sync no projeto `twhqjfbealruvcbvkegc`. Sem cutover. Dono: a base fica no Supabase.
 - [ ] **AI Gateway `ultravis`**: dono cria no painel + `AI_GATEWAY_ACCOUNT_ID` no worker — código já roteia (PR #95). `P` · depende do dono
 - [x] **Container non-root + 6 achados P2 da auditoria de 08/set** — **feito (08/set, PR #164)**: `server/Dockerfile` roda `USER node` (setcap `cap_net_bind_service` mantém a porta 80 sem root); 7 workflows sem `permissions:` ganharam `contents: read`; `verificar-censo.yml` falha de verdade em silêncio de 8 dias; open redirect fechado em `/auth/confirm` (2 arquivos); `fetchViaScrapeDo` com timeout de 30s; `npm audit fix` (22→4 vulns, as 4 restantes exigem bump major de pm2/uuid, não forçado); `GRANT ALL` residual revogado (migration 00048). Detalhe em `DECISOES.md` 08/set.
 

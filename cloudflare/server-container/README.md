@@ -185,18 +185,19 @@ cobre isto; o worker intercepta antes do container. O smoke do deploy exige
 
 ## Fases
 
-- **Fase A — espelho estrutural (atual)**: schema traduzido + visualizador +
-  aplicação automática do schema no deploy. Banco vazio; prova que a tradução
-  é válida e aplicável.
-- **Fase B — carga de dados**: export do Supabase (CSV/JSON via service role)
-  → transformação (UUID como texto, timestamps ISO, arrays/jsonb como JSON)
-  → import via `wrangler d1 execute`/API. Antes da carga: (a) proteger
-  `/espelho` (acima) e (b) conferir o DDL reconstruído de `sent_pulses`
-  contra a produção (nota abaixo).
-- **Fase C — leitura real**: apontar uma superfície de LEITURA (dashboard
-  interno, relatório, read replication do D1) pro espelho e medir latência/
-  custo vs. Supabase. Qualquer passo além disso (escrita, cutover) é decisão
-  nova do dono — não está aprovada aqui.
+**10/set — etapa encerrada pelo dono.** A base do produto fica no Supabase.
+D1 não é destino. O que existe abaixo é o histórico do experimento e o
+contrato do espelho de ops.
+
+- **Fase A — espelho estrutural (feita):** schema traduzido + visualizador +
+  schema no deploy. Prova que a tradução aplica.
+- **Fase B — carga (código pronto, dado vazio em 10/set):** pontes
+  `/espelho/sincronizar` (agregados) e `/espelho/sincronizar-tabelas`
+  (espinha, 90 dias). Cron segunda 06:30 UTC. **Não é migração.** Só dispara
+  se o campo `projeto` for o host de produção. Sem `select=*`.
+- **Fase C — leitura de produto no D1: NÃO.** Dashboard, relatório e app
+  continuam no Supabase. Qualquer escrita/cutover exigiria decisão nova —
+  e a de 10/set foi o contrário.
 
 ## O que NÃO existe em D1 (perdido na tradução — não emulado, de propósito)
 

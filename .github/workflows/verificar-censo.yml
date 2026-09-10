@@ -142,6 +142,61 @@ jobs:
             exit 1
           fi
 
+      - name: Agregados MET Polar Electro (30d)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          H1="apikey: $KEY"; H2="Authorization: Bearer $KEY"
+          SINCE=$(date -u -d '30 days ago' +%Y-%m-%dT00:00:00Z)
+          curl -sS -H "$H1" -H "$H2" \
+            "$SUPABASE_URL/rest/v1/brands?select=id,name,aliases,citation_terms,is_active&name=ilike.*Polar%20Electro*" \
+            > /tmp/polar.json
+          python3 - <<'PY' | tee /tmp/polar-met.txt
+          import json, os, urllib.request
+          brands = json.load(open("/tmp/polar.json"))
+          if not isinstance(brands, list) or not brands:
+              print("Polar Electro não encontrada ou API recusou:")
+              print(json.dumps(brands, ensure_ascii=False)[:500])
+              raise SystemExit(0)
+          b = brands[0]
+          print(f"marca: {b.get('name')} · id {b.get('id')}")
+          print(f"aliases: {b.get('aliases')}")
+          print(f"citation_terms: {b.get('citation_terms')}")
+          url = os.environ["SUPABASE_URL"].rstrip("/")
+          key = os.environ["KEY"]
+          since = os.popen("date -u -d '30 days ago' +%Y-%m-%dT00:00:00Z").read().strip()
+          req = urllib.request.Request(
+              f"{url}/rest/v1/prompt_results?select=mention_count,citation_count,sentiment,appearance_rank,platform&brand_id=eq.{b['id']}&platform=neq.chatgpt-shopping&created_at=gte.{since}&limit=10000",
+              headers={"apikey": key, "Authorization": f"Bearer {key}"},
+          )
+          rows = json.load(urllib.request.urlopen(req))
+          n = len(rows)
+          com = sum(1 for r in rows if (r.get("mention_count") or 0) > 0)
+          menc = sum(r.get("mention_count") or 0 for r in rows)
+          cit = sum(r.get("citation_count") or 0 for r in rows)
+          ranks = [r["appearance_rank"] for r in rows if (r.get("appearance_rank") or 0) >= 1]
+          sent = [r for r in rows if (r.get("mention_count") or 0) > 0]
+          pos = sum(1 for r in sent if r.get("sentiment") == "positive")
+          neu = sum(1 for r in sent if r.get("sentiment") == "neutral")
+          neg = sum(1 for r in sent if r.get("sentiment") == "negative")
+          st = pos + neu + neg
+          print(f"janela 30d: {n} respostas · {com} com menção · presença {round(100*com/n,1) if n else 0}%")
+          print(f"menções {menc} · citações (coluna gravada) {cit}")
+          print(f"ranking médio {round(sum(ranks)/len(ranks),2) if ranks else 'n/a'} · n={len(ranks)}")
+          nota = round((pos*100 + neu*50)/st, 1) if st else None
+          print(f"sentimento só com menção: +{pos} ~{neu} -{neg} · nota {nota}")
+          print("citações gravadas usam a regra da hora do censo; a tela de Citações pode divergir até o recount.")
+          PY
+          {
+            echo "### MET Polar Electro — janela 30d"
+            echo '```'
+            cat /tmp/polar-met.txt
+            echo '```'
+            echo ""
+            echo "Preencher a coluna Polar em \`docs/validacao-metricas-10set.html\` com estes números."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   # Caminho ALTERNATIVO de leitura, sem depender dos secrets do Supabase: o
   # worker (que tem a SERVICE_ROLE) agrega o censo no D1 pelo cron semanal, e
   # aqui a gente lê o D1 com o token da Cloudflare que já existe. Se a ponte

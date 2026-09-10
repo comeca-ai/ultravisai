@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<title>Validação das métricas · 10/set/2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --red:#C0492A; --redSoft:#FBEEEA;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:48px 0 38px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2.05rem;letter-spacing:-.02em;margin-top:13px}
+.covsub{color:var(--ink2);margin-top:9px;max-width:78ch}
+.verdict{display:flex;gap:14px;flex-wrap:wrap;margin-top:24px}
+.vd{flex:1;min-width:220px;border-radius:11px;padding:15px 18px;border:1px solid}
+.vd.ok{background:var(--goodSoft);border-color:var(--good)}
+.vd.warn{background:var(--amberSoft);border-color:var(--amber)}
+.vd.bad{background:var(--redSoft);border-color:var(--red)}
+.vd .vl{font-family:var(--mono);font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.vd.ok .vl{color:var(--good)} .vd.warn .vl{color:var(--amber)} .vd.bad .vl{color:var(--red)}
+.vd .vt{font-weight:700;font-size:1rem;margin-top:6px}
+.vd .vv{font-size:.85rem;color:var(--ink2);margin-top:4px}
+.page{padding:28px 0 60px}
+h2{font-family:var(--serif);font-size:1.3rem;font-weight:500;margin-top:36px}
+.note{color:var(--ink2);font-size:.88rem;margin-top:6px;max-width:82ch}
+table{width:100%;border-collapse:collapse;margin-top:13px;background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+th{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;text-align:left;padding:10px 13px;background:var(--sunk);border-bottom:1px solid var(--rule2)}
+td{padding:10px 13px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:top;color:var(--ink2)}
+td:first-child{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:.78rem;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.ok{color:var(--good);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.no{color:var(--red);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.pend{color:var(--amber);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:18px 22px;margin-top:14px}
+.box.amber{border-color:var(--amber);background:var(--amberSoft)}
+.box.red{border-color:var(--red);background:var(--redSoft)}
+.box .bl{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.box.amber .bl{color:var(--amber)} .box.red .bl{color:var(--red)}
+.box .bt{font-weight:700;font-size:1rem;margin-top:6px}
+.box p{font-size:.87rem;color:var(--ink2);margin-top:7px}
+.box b{color:var(--ink)}
+pre{background:#26251F;color:#EDEBE4;border-radius:9px;padding:13px 15px;font-family:var(--mono);font-size:.72rem;overflow-x:auto;margin-top:10px;line-height:1.75;white-space:pre-wrap}
+.foot{font-family:var(--mono);font-size:.68rem;color:var(--ink2);line-height:1.9;border-top:1px solid var(--rule);padding-top:20px;margin-top:40px}
+@media (max-width:780px){.wrap{padding:0 18px}h1{font-size:1.65rem}}
+</style>
+
+<div class="cover">
+  <div class="wrap">
+    <div class="eyebrow">Validação de métricas · 10/set/2026</div>
+    <h1>Fórmulas conferidas no código. Números da Polar ainda não — a sandbox não alcança o banco.</h1>
+    <p class="covsub">Pedido do dono: validar MET-01…11 (SQL → action → tela) com Polar Electro.
+    Camada de fórmula, renormalização e rótulo: feita. Camada de produção: pendente
+    de um dos dois caminhos abaixo. Não inventei número.</p>
+    <div class="verdict">
+      <div class="vd ok">
+        <div class="vl">Estático</div>
+        <div class="vt">9 passam · 1 HTML defasado · 1 divergência de desenho</div>
+        <div class="vv">MET-10 no HTML das regras ainda fala “domínio próprio”. O código, desde 09/set, conta link de produto de qualquer fonte.</div>
+      </div>
+      <div class="vd warn">
+        <div class="vl">Polar</div>
+        <div class="vt">Pendentes de conferência</div>
+        <div class="vv">Sem <code>SUPABASE_URL</code> + <code>SERVICE_ROLE</code> no Actions, ou o resultado do SQL Editor, não há número honesto pra preencher.</div>
+      </div>
+      <div class="vd bad">
+        <div class="vl">Grave</div>
+        <div class="vt">DIV-04 — três Scores</div>
+        <div class="vv">Insights, Score e hero ainda podem imprimir contas diferentes. É o A1 do BACKLOG, não desta página.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page"><div class="wrap">
+
+<h2>Como ler</h2>
+<p class="note">Fonte da régua: <code>docs/regras-de-negocio-09set-v01.html</code> MET-*.
+Onde HTML e código brigam, ganham código + <code>DECISOES.md</code>. Polar = janela 30d, sem <code>chatgpt-shopping</code>.</p>
+
+<h2>MET-01…11</h2>
+<table>
+  <thead><tr><th>id</th><th>estático</th><th>Polar</th><th>o que o código faz</th></tr></thead>
+  <tbody>
+    <tr><td>MET-01</td><td class="ok">PASSA</td><td class="pend">—</td><td>IC 6 dims, pesos 15/20/12/18/22/13 = 100. Dim sem dado sai e renormaliza (<code>INDEX_DIMENSIONS</code>).</td></tr>
+    <tr><td>MET-02</td><td class="ok">PASSA</td><td class="pend">—</td><td>Pesos em <code>index_weights</code>, semente no código, /ops calibra, vigia se soma ≠ 100.</td></tr>
+    <tr><td>MET-03</td><td class="ok">PASSA</td><td class="pend">—</td><td>D2: teto 10% ⇒ 100. <code>ownCitationScore</code> = min(100, round(pctOwn/10×100)).</td></tr>
+    <tr><td>MET-04</td><td class="ok">PASSA</td><td class="pend">—</td><td>D4: escada 0/1/2–3/4+ perfis + bônus/castigo de nota. Espelho em <code>review-check.js</code> e <code>reviewScoreFrom</code>.</td></tr>
+    <tr><td>MET-05</td><td class="ok">PASSA</td><td class="pend">—</td><td>D3/D5/D6: answersWithBrand ÷ answersCiting. Denominador 0 ⇒ nota 0 (<code>gabaritoScore</code>).</td></tr>
+    <tr><td>MET-06</td><td class="ok">PASSA</td><td class="pend">—</td><td>Presença = respostas com menção ÷ total da janela. Shopping fora. <code>mentioned / winResults</code>.</td></tr>
+    <tr><td>MET-07</td><td class="ok">PASSA</td><td class="pend">—</td><td>Sentimento só onde há menção: (pos×100 + neu×50) / total. Sem menção ⇒ nota nula, não zero. Régua 100/50/0 ainda provisória (ata 4.6) — não troquei.</td></tr>
+    <tr><td>MET-08</td><td class="ok">PASSA</td><td class="pend">—</td><td>SoV = soma das menções suas ÷ (suas + concorrentes). Volume, não “em quantas respostas”.</td></tr>
+    <tr><td>MET-09</td><td class="ok">PASSA</td><td class="pend">—</td><td>Quintis 0–20 / 21–40 / 41–60 / 61–80 / 81–100, IC e Score (<code>INDEX_SCORE_BANDS</code>).</td></tr>
+    <tr><td>MET-10</td><td class="no">HTML VELHO</td><td class="pend">—</td><td>O HTML das regras ainda diz “citação = domínio próprio”. Código 09/set: <code>contarCitacoesDoProduto</code> = próprio + terceiro com termo da marca no título ou no caminho. Menção = palavra inteira, URLs stripadas, nome + alias + domínio.</td></tr>
+    <tr><td>MET-11</td><td class="ok">PASSA</td><td class="pend">—</td><td>Amostra < 10 citações = selo direcional. Não altera a nota. <code>INDEX_LOW_SAMPLE_THRESHOLD</code>.</td></tr>
+  </tbody>
+</table>
+
+<div class="box amber">
+  <div class="bl">O que falta pra fechar Polar</div>
+  <div class="bt">Um dos dois. Não os dois.</div>
+  <p><b>A.</b> GitHub → Settings → Secrets → Actions: <code>SUPABASE_URL</code> e <code>SUPABASE_SERVICE_ROLE_KEY</code> do projeto <code>twhqjfbealruvcbvkegc</code>. Depois Actions → <code>verificar-censo</code> → Run workflow. O passo novo imprime os agregados MET no summary.</p>
+  <p><b>B.</b> Colar <code>supabase/scripts/validar-metricas-polar.sql</code> no SQL Editor desse projeto e mandar o resultado nesta conversa. Eu completo a coluna Polar no mesmo HTML.</p>
+</div>
+
+<h2>Divergências que não são bug de fórmula</h2>
+<table>
+  <thead><tr><th>id</th><th>veredito</th><th>por quê</th></tr></thead>
+  <tbody>
+    <tr><td>DIV-04</td><td class="no">GRAVE</td><td>Três fórmulas de “Score de Visibilidade” ainda convivem. Insights (3 números, sem nota — ata 4.5), Score (4 dims × 25%, decisão 07/set), hero/outras telas. Código não unifica. BACKLOG P0-A1.</td></tr>
+    <tr><td>DIV-05</td><td class="ok">POR DESENHO</td><td>Ata 4.1: Autoridade e Acurácia saem até o juiz LLM. 4 dims no código, 6 no PPT. Não recolocar.</td></tr>
+    <tr><td>Score 25%</td><td class="ok">POR DESENHO</td><td>07/set: 25/25/25/25 pra a fórmula impressa somar 100. Ata 2.2 era 20/20/15/10 (renormalizado). O HTML das regras ainda cita a ata antiga em DIV-05 — conferir com o dono, não “consertar” sozinho.</td></tr>
+    <tr><td>Ranking × Posição</td><td class="pend">ESCALAS</td><td><code>ajustar.md</code>: média (#2,3) vs pódio 0–100. Não são convertíveis. Clique do card ainda pode cair na nota sem texto — BACKLOG P0-A2.</td></tr>
+  </tbody>
+</table>
+
+<h2>Queries (caminho B)</h2>
+<p class="note">Arquivo versionado: <code>supabase/scripts/validar-metricas-polar.sql</code>. Recorte:</p>
+<pre>select b.id, b.name, b.aliases
+from brands b
+where b.name ilike '%polar electro%'
+  and coalesce(b.is_active, true) = true;
+
+-- janela 30d, sem shopping
+select
+  count(*) as respostas,
+  count(*) filter (where mention_count > 0) as com_mencao,
+  round(100.0 * count(*) filter (where mention_count > 0) / nullif(count(*),0), 1) as presenca_pct,
+  coalesce(sum(mention_count),0) as mencoes,
+  coalesce(sum(citation_count),0) as citacoes,
+  avg(appearance_rank) filter (where appearance_rank >= 1) as ranking_medio,
+  count(*) filter (where sentiment = 'positive' and mention_count > 0) as sent_pos,
+  count(*) filter (where sentiment = 'neutral'  and mention_count > 0) as sent_neu,
+  count(*) filter (where sentiment = 'negative' and mention_count > 0) as sent_neg
+from prompt_results
+where brand_id = :brand_id
+  and platform <> 'chatgpt-shopping'
+  and created_at >= now() - interval '30 days';</pre>
+
+<div class="foot">
+  Fontes: <code>visibility-index.ts</code> · <code>visibility-score.ts</code> · <code>response-parser.js</code> ·
+  <code>classify.ts</code> · ata Jhonata×Igor · <code>ajustar.md</code> · regras 09/set.<br>
+  Números Polar: não preenchidos. Preencher só com resultado do SQL Editor ou do run <code>verificar-censo</code>.
+</div>
+
+</div></div>
+</html>

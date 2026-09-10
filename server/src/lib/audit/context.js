@@ -47,6 +47,7 @@ export function normalizeUrl(raw) {
  * @property {string|null} robotsTxt
  * @property {string|null} llmsTxt
  * @property {string|null} sitemapXml
+ * @property {string|null} htmlCru
  * @property {string|null} query     optional target buyer query (later phases)
  */
 
@@ -63,6 +64,21 @@ export async function buildAuditContext(rawUrl, { query = null } = {}) {
   const page = await fetchViaScrapeDo(url, { render: true });
   if (!page.ok || !page.html) {
     throw Object.assign(new Error(`Failed to fetch page (status ${page.status})`), { status: 502 });
+  }
+
+  // Segunda busca SEM renderizar JavaScript — é o que um bot de IA que não
+  // executa script enxerga da página (ata 4.10, checklist do Igor). Comparar
+  // as duas é a única forma de medir dependência de JS sem adivinhar.
+  //
+  // Best-effort de propósito: custa uma requisição a mais no Scrape.do, e um
+  // crédito esgotado (incidente de 18/ago) não pode derrubar a auditoria
+  // inteira. Falhou, o sinal `rendering` fica `na` e o resto segue.
+  let htmlCru = null;
+  try {
+    const cru = await fetchViaScrapeDo(url, { render: false, retries: 0 });
+    if (cru.ok && cru.html) htmlCru = cru.html;
+  } catch {
+    /* sem HTML cru: o sinal se declara não medido, nunca reprova por isso */
   }
 
   const $ = cheerio.load(page.html);
@@ -96,6 +112,7 @@ export async function buildAuditContext(rawUrl, { query = null } = {}) {
     robotsTxt,
     llmsTxt,
     sitemapXml,
+    htmlCru,
     query,
     now: Date.now(),
   };

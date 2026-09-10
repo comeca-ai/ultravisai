@@ -3,7 +3,14 @@ import * as cheerio from 'cheerio';
 import { scoreAudit } from './scorer.js';
 import { categories } from './rubric.js';
 import { fleschReadingEase, classifyLinks, jsonLd, countPhrases } from './signals/helpers.js';
-import { jsonLdPresence, h1Quality, sitemapPresence, productSchema } from './signals/structure.js';
+import {
+  jsonLdPresence,
+  h1Quality,
+  sitemapPresence,
+  productSchema,
+  rendering,
+  languageCountry,
+} from './signals/structure.js';
 import { https, metaDescription } from './signals/trust.js';
 import { length } from './signals/content.js';
 import { withRetry } from '../retry.js';
@@ -236,6 +243,53 @@ describe('deterministic signals', () => {
     const r = productSchema.evaluate(ctxFromHtml(html));
     expect(r.status).toBe('pass');
     expect(r.evidence.produtos).toBe(2);
+  });
+
+  it('rendering: na sem HTML cru, pass quando o texto já vem sem JS', () => {
+    // O \n entre os blocos não é enfeite: cheerio concatena o texto dos nós
+    // sem separador, então '<p>a</p><p>b</p>' vira a palavra única "ab" e a
+    // página passaria por curta demais. HTML de verdade vem com quebra.
+    const corpo = '<body>' + '<p>palavra</p>\n'.repeat(120) + '</body>';
+    // Sem a segunda busca, o sinal se declara não medido — nunca reprova.
+    expect(rendering.evaluate(ctxFromHtml(corpo)).status).toBe('na');
+
+    const igual = rendering.evaluate(ctxFromHtml(corpo, { htmlCru: corpo }));
+    expect(igual.status).toBe('pass');
+    expect(igual.evidence.percentualVisivelSemJs).toBe(100);
+  });
+
+  it('rendering: fail quando o conteúdo só existe depois do JS', () => {
+    const comJs = '<body>' + '<p>palavra</p>\n'.repeat(200) + '</body>';
+    const semJs = '<body><div id="root"></div></body>';
+    const r = rendering.evaluate(ctxFromHtml(comJs, { htmlCru: semJs }));
+    expect(r.status).toBe('fail');
+    expect(r.evidence.palavrasSemJs).toBe(0);
+  });
+
+  it('rendering: página curta demais não vira veredito', () => {
+    const curta = '<body><p>oi</p></body>';
+    expect(rendering.evaluate(ctxFromHtml(curta, { htmlCru: curta })).status).toBe('na');
+  });
+
+  it('language-country: fail sem lang, warn com lang genérico, pass com região ou hreflang', () => {
+    expect(languageCountry.evaluate(ctxFromHtml('<html><body>x</body></html>')).status).toBe('fail');
+
+    const generico = languageCountry.evaluate(ctxFromHtml('<html lang="pt"><body>x</body></html>'));
+    expect(generico.status).toBe('warn');
+
+    // `pt-BR` já carrega o país.
+    expect(
+      languageCountry.evaluate(ctxFromHtml('<html lang="pt-BR"><body>x</body></html>')).status,
+    ).toBe('pass');
+
+    const comAlternates = languageCountry.evaluate(
+      ctxFromHtml(
+        '<html lang="pt"><head><link rel="alternate" hreflang="en" href="/en">' +
+          '<link rel="alternate" hreflang="es" href="/es"></head><body>x</body></html>',
+      ),
+    );
+    expect(comAlternates.status).toBe('pass');
+    expect(comAlternates.evidence.hreflang).toEqual(['en', 'es']);
   });
 
   it('https: pass over TLS without mixed content, warn with an http asset', () => {

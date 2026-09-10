@@ -1,5 +1,5 @@
 /**
- * Structure-category signal evaluators (15 signals).
+ * Structure-category signal evaluators (17 signals).
  *
  * Each evaluator is `{ key, evaluate(ctx) => { status, score, evidence } }`:
  *   - status: 'pass' | 'warn' | 'fail' | 'na'
@@ -9,6 +9,8 @@
  * Rubric copy (label/what/why/howToFix) is merged in from rubric.js at
  * response-assembly time, so evaluators stay purely about measurement.
  */
+
+import * as cheerio from 'cheerio';
 
 import { jsonLd, typesOf, classifyLinks, metaContent } from './helpers.js';
 
@@ -407,6 +409,102 @@ export const productSchema = {
   },
 };
 
+/**
+ * `rendering` — o que um bot de IA que NÃO executa JavaScript enxerga.
+ *
+ * Item do checklist do Igor (ata 4.10). Compara o texto do HTML cru com o do
+ * HTML renderizado: se o conteúdo só existe depois do JS rodar, o motor que
+ * não renderiza vê uma casca — e não cita o que não leu.
+ *
+ * Sem o HTML cru (a segunda busca é best-effort, ver context.js) o sinal se
+ * declara NÃO MEDIDO em vez de reprovar: crédito de scraping esgotado não
+ * pode virar nota baixa pro cliente.
+ */
+export const rendering = {
+  key: 'rendering',
+  evaluate(ctx) {
+    if (!ctx.htmlCru) {
+      return { status: 'na', score: null, evidence: { reason: 'HTML sem JS não foi obtido' } };
+    }
+
+    const $cru = cheerio.load(ctx.htmlCru);
+    $cru('script, style, noscript, template, svg').remove();
+    const textoCru = $cru('body').text().replace(/\s+/g, ' ').trim();
+    const palavrasCru = textoCru ? textoCru.split(/\s+/).length : 0;
+    const palavrasRender = ctx.wordCount || 0;
+
+    // Página renderizada quase vazia não diz nada sobre dependência de JS.
+    if (palavrasRender < 50) {
+      return {
+        status: 'na',
+        score: null,
+        evidence: { reason: 'página curta demais para comparar', palavrasRender },
+      };
+    }
+
+    const share = palavrasCru / palavrasRender;
+    let status = 'fail';
+    let score = 0.2;
+    if (share >= 0.8) {
+      status = 'pass';
+      score = 1;
+    } else if (share >= 0.5) {
+      status = 'warn';
+      score = 0.6;
+    }
+    return {
+      status,
+      score,
+      evidence: {
+        palavrasSemJs: palavrasCru,
+        palavrasComJs: palavrasRender,
+        percentualVisivelSemJs: Math.round(share * 100),
+      },
+    };
+  },
+};
+
+/**
+ * `language-country` — a página declara em que idioma está e para quem.
+ *
+ * Outro item do checklist do Igor (ata 4.10). Sem `lang`, o motor adivinha o
+ * idioma pelo texto e erra em página curta ou bilíngue; sem `hreflang` (ou ao
+ * menos uma variante de região no próprio `lang`), ele não sabe que existe
+ * versão para outro país — e a marca aparece na resposta errada, ou não
+ * aparece na certa. É o caso `polar.com` × `polar.com/br` que o Q&A #2 pegou.
+ */
+export const languageCountry = {
+  key: 'language-country',
+  evaluate(ctx) {
+    const lang = (ctx.$('html').attr('lang') || '').trim();
+    const alternates = ctx
+      .$('link[rel="alternate"][hreflang]')
+      .map((_, el) => (ctx.$(el).attr('hreflang') || '').trim())
+      .get()
+      .filter(Boolean);
+    // `pt-BR` já carrega o país; `pt` sozinho, não.
+    const temRegiaoNoLang = /^[a-z]{2,3}-[a-z0-9]{2,}$/i.test(lang);
+
+    let status = 'fail';
+    let score = 0;
+    if (lang && alternates.length > 0) {
+      status = 'pass';
+      score = 1;
+    } else if (lang && temRegiaoNoLang) {
+      status = 'pass';
+      score = 0.9;
+    } else if (lang) {
+      status = 'warn';
+      score = 0.5;
+    }
+    return {
+      status,
+      score,
+      evidence: { lang: lang || null, hreflang: alternates.slice(0, 10), temRegiaoNoLang },
+    };
+  },
+};
+
 export const structureSignals = [
   structuralDepth,
   internalLinking,
@@ -423,4 +521,6 @@ export const structureSignals = [
   openGraph,
   sitemapPresence,
   productSchema,
+  rendering,
+  languageCountry,
 ];

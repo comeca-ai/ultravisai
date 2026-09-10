@@ -1,14 +1,14 @@
 {
   "version": "v1",
-  "description": "47-signal AEO/GEO scoring rubric for measuring whether a page will get cited by AI answer engines.",
-  "totalSignals": 49,
+  "description": "AEO/GEO scoring rubric for measuring whether a page will get cited by AI answer engines. Cresceu de 47 para 51 sinais ao fechar o checklist do Igor (ata 4.10): sitemap e Product em 09/set, rendering e idioma/país em 10/set.",
+  "totalSignals": 51,
   "categories": [
     {
       "key": "structure",
       "label": "Structure",
       "weight": 0.25,
-      "description": "How parseable your page is to an AI engine. Schema, headings, lists, tables, alt-text, OG meta. The substrate that makes everything else legible.",
-      "signalCount": 15
+      "description": "How parseable your page is to an AI engine. Schema, headings, lists, tables, alt-text, OG meta, sitemap, rendering and language. The substrate that makes everything else legible.",
+      "signalCount": 17
     },
     {
       "key": "authority",
@@ -189,6 +189,26 @@
       "howToFix": "Adicionar bloco Product com name, offers (price + priceCurrency + availability) e aggregateRating (ratingValue + reviewCount). Páginas que não são de produto não são cobradas por este sinal.",
       "source": "schema.org/Product · slide P3 (Igor, 07/set)",
       "impactTier": "high"
+    },
+    {
+      "key": "rendering",
+      "category": "structure",
+      "label": "Dependência de JavaScript",
+      "what": "Quanto do conteúdo aparece sem executar JavaScript, comparando o HTML cru com o renderizado.",
+      "why": "Boa parte dos rastreadores de IA não executa script. O que só existe depois do JS rodar é conteúdo que esses motores nunca leem — e o que eles não leem, não citam.",
+      "howToFix": "Entregar o conteúdo principal já no HTML do servidor (SSR, geração estática ou hidratação progressiva). Se o site é SPA, ao menos o texto que você quer citado precisa vir no HTML inicial.",
+      "source": "checklist do Igor (ata 4.10)",
+      "impactTier": "high"
+    },
+    {
+      "key": "language-country",
+      "category": "structure",
+      "label": "Idioma e país",
+      "what": "Se a página declara `lang` e aponta as versões de outros idiomas/países com `hreflang`.",
+      "why": "Sem `lang` o motor adivinha o idioma pelo texto e erra em página curta ou bilíngue. Sem `hreflang` ele não sabe que existe versão para outro país — e a marca aparece na resposta errada, ou não aparece na certa.",
+      "howToFix": "Declarar `<html lang=\"pt-BR\">` com a região quando ela importa, e adicionar `<link rel=\"alternate\" hreflang=\"...\">` para cada versão de idioma ou país.",
+      "source": "checklist do Igor (ata 4.10)",
+      "impactTier": "medium"
     },
     {
       "key": "outbound-authority-links",

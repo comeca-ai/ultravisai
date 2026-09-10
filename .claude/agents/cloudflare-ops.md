@@ -17,9 +17,12 @@ skill — eles carregam a sintaxe validada e as lições pagas caro. Regras:
   `cloudflare/server-container/`. Rotas: `/espelho*` respondem no worker
   (espelho D1, binding `DB`); **todo o resto vai pro container** com o Express
   intacto. Superfície nova = **rota nova nesse worker**, nunca worker novo.
-- Apagados em 07/set: `ultravis-edge-gateway` (encaminhava pro Railway, que
-  morreu em 06/set) e `ultravis-d1-espelho` (virou `/espelho`). O banco D1
-  `ultravis-espelho` continua vivo — script e banco são recursos separados.
+- Apagados em 07/set (código): `ultravis-edge-gateway` (encaminhava pro Railway)
+  e `ultravis-d1-espelho` (virou `/espelho`). Em 10/set o **script**
+  `ultravis-d1-espelho` ainda respondia sem senha — apagar via workflow
+  `limpar-workers-orfaos` (dispatch). O banco D1 `ultravis-espelho` é recurso
+  separado e **sobrevive**. **10/set: D1 não substitui o Supabase** — espelho
+  de ops, sem cutover.
 - AI Gateway: nome `ultravis` (server roteia via `AI_GATEWAY_ACCOUNT_ID`/`AI_GATEWAY_NAME`).
 - Subdomínio workers.dev da conta: `jhonata-emerick`.
 
@@ -49,8 +52,9 @@ skill — eles carregam a sintaxe validada e as lições pagas caro. Regras:
 ## Doutrina de arquitetura (decidida com o dono)
 
 - Compute migra pro Cloudflare em fases; **banco fica no Supabase** (auth/RLS/
-  RPCs) — D1 não substitui (o `ultravis-espelho` é experimento de LEITURA);
-  Hyperdrive é a ponte se precisar de SQL cru.
+  RPCs) — D1 não substitui. Confirmado pelo dono em 10/set: etapa D1 como
+  destino **encerrada**. `ultravis-espelho` é espelho de LEITURA/ops.
+  Hyperdrive é a ponte se precisar de SQL cru no worker, não cópia do banco.
 - Orquestração-alvo: Cron Triggers (agenda) + Queues (fan-out com retry/DLQ,
   1 msg por prompt×motor) + Workflows (processos longos) + Durable Objects
   (estado). Containers (GA abr/2026) é ponte válida pro server Express inteiro.

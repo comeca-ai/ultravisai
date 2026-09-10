@@ -1,39 +1,63 @@
 # BACKLOG — Ultravis
 
-> Backlog operacional vivo, priorizado. Destila `estrategia/roadmap-produto-e-valuation.md`,
-> o benchmarking e as pendências do `CONTEXTO.md` em itens acionáveis.
-> Atualizar conforme entrega/decisão. **Última atualização:** 07/set/2026 (pós-migração Cloudflare — envs agora vivem no worker `ultravis-server`, não mais no Railway).
+> Fila viva. **Atualizado: 10/set/2026.**
+> Sessão = ajustes dos diretores + validar métricas. Sem migração D1.
 
 ## Como ler
 
-- **Prioridade:** `P0` agora · `P1` próximo · `P2` depois · `P3` algum dia
-- **Esforço:** `P` pequeno (horas–1 dia) · `M` médio (dias) · `G` grande (semanas)
-- **Driver:** de valuation — `D2` diferenciação · `D3` tração · `D4` dados · `D5` ROI
-  (ver `estrategia/roadmap-produto-e-valuation.md` §2)
-- **Onda:** a qual onda do roadmap pertence
+- `P0` agora · `P1` próximo · `P2` estoque (não abrir)
+- `[x]` some da P0/P1 na sessão seguinte
 
 ---
 
-## 🧲 Funil (novidades de concorrentes — priorizar JUNTOS, sem prioridade até decidirmos)
+## ⛔ Não fazer
 
-> Alimentado pelo vigia do upstream (card no `/ops`, varre site + GitHub a cada
-> 3 dias) + varreduras manuais. Cada item leva a tag da origem. Nada aqui entra
-> em desenvolvimento sem decisão conjunta registrada no `DECISOES.md`.
-> **Última varredura:** 13/ago/2026 — release 0.2.0 do upstream (09/ago) + commits até 13/ago.
+- Migrar Supabase → D1, dual-write, Hyperdrive, worker novo, “fase B/C”
+- Fase 2 do ADR-9 · portar Ansvisor sem `DECISOES.md` · colar segredo em chat
+- Reabrir item da ata marcado ✅
+- Recolocar Autoridade/Acurácia no Score (4.1: saem até existir juiz LLM)
 
-- [x] **Watchdog: check de drift de deploy do web** (feito 17/ago; falta só configurar VERCEL_TOKEN/PROJECT_ID no worker Cloudflare) — comparar o commit do último deploy de produção da Vercel com o HEAD da `main` (API Vercel pelo server, que tem egress aberto); alertar se divergir por mais de 1h. Motivo: web ficou 9 dias congelado sem ninguém notar (incidente 17/ago). `P1`
-- [x] `[ansvisor]` **Daily Pulse** — **lado servidor PORTADO (13/ago)**: engine+metrics+email+webhook-dispatch com todos os fixes (#654 catch-up adaptado pra tabela `jobs`, #690 drain do pulse, #701 dedupe por janela — migration 00038 aplicada). E-mail sai por Resend OU pelo SMTP do watchdog (self-host incluído); sem transporte configurado, dispara só o webhook `daily_pulse.created`. **Follow-ups:** tela Configurações→Notificações (frequência/destinatários) e tradução do e-mail pra pt-BR **antes de ligar o envio**.
-- [ ] `[ansvisor]` **AI Visibility Score** — nova métrica central 0-100 (60% menção · 25% citação · 15% posição da menção), idêntica em todas as superfícies; cobertura vira linha secundária. *Nosso ângulo: responde exatamente a confusão do cliente com a nota; mas muda migrations/core (00041-00042) — sync grande.*
-- [ ] `[ansvisor]` **Integração Google Search Console** — sugestões de prompt alimentadas por demanda real de busca (queries que a marca ranqueia e não rastreia), via Composio. *Nosso ângulo: casa com "grounding de prompts" do P1; nós usaríamos Semrush ou GSC direto.*
-- [ ] `[ansvisor]` **Integração GA4** (pós-0.2.0, #695/#703) — conexão GA por marca. *Nosso ângulo: alimenta a "atribuição citação→visita→lead" (P2, a grande lacuna).*
-- [x] `[ansvisor]` **Leva de confiabilidade do tracking** — **PORTADO (13/ago)** após estudo do código deles: fantasmas do Cloro (#690), dois orçamentos de drain (#710), leitura paginada (#716), stall 10→25min configurável (#649), TRACKING_CONCURRENCY. Não aplicável ao fork: guarda de run parcial/#583 (exigem o ledger tracking_runs que não temos). 6 envs novas documentadas no .env.example.
-- [ ] `[ansvisor]` **Citações: página de detalhe por URL** — cada URL citada abre as respostas que a citaram + breakdown por prompt. *Nosso ângulo: aprofunda a página de Citações que já reformulamos.*
-- [ ] `[ansvisor]` **Fan-out coverage por prompt** — mostra quantas respostas dispararam busca viva (`12/500 · 2%`). *Nosso ângulo: item #16 do feedback (falhas visíveis por prompt) tangencia isso.*
-- [ ] `[ansvisor]` **OpenRouter como provider / sentimento provider-agnostic** (#708). *Nosso ângulo: reduziria dependência da chave OpenAI (causa do incidente de domingo).*
-- [ ] `[ansvisor]` **Range selector 7/30/90d + sort padrão por visibilidade em Prompts** (#697/#714). *Nosso ângulo: quick-win de UX, cherry-pick fácil.*
-- [ ] `[ansvisor]` **robots.txt com allowances explícitas pra AI crawlers + sitemap** (#634). *Nosso ângulo: já fizemos o nosso; comparar abordagens.*
+---
 
-*Contexto de distância do fork: upstream está na migration 00052; nossa base upstream para na 00033 (+ nossas 00034-00037 próprias). Atenção: os números 00034+ deles colidem com os nossos — sync exige renumeração.*
+## P0 — sessão: diretores + métricas
+
+Fontes, nesta ordem: ata · `ajustar.md` · regras MET-* · revisão 29/ago.
+
+### A. Ajustes ainda abertos que os diretores pediram (código)
+
+| # | Pedido | Fonte | O que fazer |
+|---|---|---|---|
+| A1 | **Uma conta de Score, não três** | DIV-04, ata 4.1/4.5, `ajustar.md` | Insights, Score e hero têm que contar a mesma coisa ou a tela tem que dizer por que não. Código, não slide novo. |
+| A2 | Clique `#2,3` (Ranking médio) **não pode cair numa nota 45 sem explicação** | `ajustar.md` parte 1 | São escalas diferentes (média vs pódio). Texto na tela + destino do clique. |
+| A3 | Vigia: **100% em 1º lugar** (amostra ≥10) = olhar o motor | ata 4.7 | Check em `consistency.js` |
+| A4 | Auditoria: **rendering** (HTML cru vs renderizado) e **idioma/país** (`lang`/`hreflang`) | ata 4.10, checklist Igor | Completar 6/8 → 8/8 sinais |
+| A5 | Citabilidade v2: **tela entrega o kit** (llms.txt, JSON-LD, FAQ) pra copiar | pedido ⭐ Polar, kit já no server | UI, não motor novo |
+| A6 | Landing **não vender** 150 prompts × 4 motores se o código entrega 50 × 2 | DIV-01 | Copy ou gate — os dois têm que bater |
+
+Não é desta sessão (⏳ sócio, não código): nome “citabilidade” (4.15),
+acesso ADM do Igor (4.8), 9º motor (2.10), onboarding matriz (4.12 — dono
+adiou), e-mail do Daily Pulse (2.8).
+
+### B. Validar todas as métricas (prova, não opinião)
+
+Para **cada** MET-01…MET-11 em `docs/regras-de-negocio-09set-v01.html`:
+
+1. Ler a regra e o arquivo citado em `e:`.
+2. Recalcular no SQL com Polar Electro (janela 30d, sem shopping).
+3. Conferir o número na action e na tela.
+4. Marcar **passa / falha / divergência** (ata diz X, código faz Y).
+
+Entregar `docs/validacao-metricas-10set.html` (mesmo espírito de
+`docs/verificacao-26ago.html`). Corrigir falha no mesmo PR quando for
+bug. Divergência de desenho (DIV-05…14) vai pra tabela do relatório —
+não “conserta” a ata.
+
+Cuidado: **MET-10 está defasada.** Citação desde 09/set = link que traz
+o produto, de qualquer fonte (`contarCitacoesDoProduto`, 00049) — não
+“domínio próprio”. Validar o código + `DECISOES.md` 09/set.
+
+Régua de sentimento 100/50/0 (ata 4.6) = **medir com Polar e reportar**,
+não trocar sozinho.
 
 ---
 
@@ -145,76 +169,46 @@
 
 ---
 
-## 🐞 Bugs & qualidade
+## P1 — depois de A+B verde
 
-### P0 — Achados do Q&A do site público (crítico)
-- [x] **Landing bloqueada pra buscadores/bots de IA** (`robots Disallow: /` + `noindex` global, herdado do upstream) — **corrigido**: landing indexável, app noindex escopado, robots + sitemap.
-- [x] **Termos & Privacidade → 404 (risco LGPD)** — **resolvido (11/ago)**: páginas publicadas em versão preliminar genérica (sem razão social, com aviso de revisão interna), pt-BR + en, indexáveis e no sitemap. Pendência futura: texto final aprovado internamente + revisão jurídica.
-- [x] **Rodapé com links mortos** — **resolvido (11/ago)**: colunas mortas removidas da landing; Termos/Privacidade apontam pras páginas reais; link do GitHub upstream removido. Colunas voltam conforme as páginas existirem.
-
-### P1 — Achados do Q&A #2 (11/ago, reprodução do onboarding)
-- [x] **"Preencher com IA" lia a home errada** — o path digitado era descartado (`polar.com/br` → lia `polar.com` global), gerando descrição genérica. **Corrigido**: path preservado no describe-from-site. Nota: o mecanismo SEMPRE leu o site real (cheerio: title/meta/headings/parágrafos) — não era "conhecimento do modelo".
-- [ ] **Monitorar operação por subpath** — a aba Domínios só aceita domínio raiz; não dá pra monitorar `polar.com/br` especificamente (citações contam por hostname). Requer decisão de produto (domínio+path nas citações). `M`
-- [ ] **Região → idioma no wizard** — default vem `US/en`; escolher Brazil deveria puxar `pt` automaticamente. `P`
-- [ ] **Sugerir tópicos sem feedback de progresso** — ~55s com 3 mensagens sequenciais, sem barra/ETA; parece travado (provável causa da percepção de bug no onboarding do cliente, além da janela do 401). Adicionar progresso/ETA e investigar timeout. `P/M`
-- [ ] **Marca criada no 1º "Continuar"** — o wizard persiste a marca antes de terminar; teste abandonado deixa marca ativa órfã (risco de crédito no censo). Criar como rascunho ou limpar ao abandonar. `M`
-- [ ] **Insumo pro Citabilidade v2**: o próprio polar.com/br não tem `llms.txt` (404) nem JSON-LD — evidência perfeita do valor dos snippets prontos (#15). `—`
-
-### P1
-- [x] **i18n páginas restantes** — **feito (13/ago)**: mutirão de 9 agentes cobriu Tráfego, detalhe de Prompt, Fan-out, Tópicos, gestão de marca (990 linhas), breakdown do Insights, componentes de Configurações, PDF do relatório (via labels) e resquícios em 10 páginas (incl. o "Product Tour"). ~570 chaves novas por locale; 1.821 chaves espelhadas pt-BR/en. Resta: resquícios internos da tabela All Prompts (aria/empty states) e strings geradas no servidor (rootCause, briefs) — anotar como P2.
-- [ ] **Cache da landing no CDN** — HTML servido por SSR serverless a cada visita (TTFB ~0,6s, custo e latência à toa numa página estática). Avaliar `revalidate`/headers de cache. `P` · perf (Q&A)
-- [ ] **4 bugs do docx:**
-  - [x] Login sem mensagem "conta já existe" — **feito** (PR #38)
-  - [x] "Rodando como Ansvisor" (#28) — **feito (12/ago)**: agente do produto se apresentava como Ansvisor, arquivos exportados chamavam `ansvisor_*.csv/pdf`, `/pricing` redirecionava pro site do UPSTREAM, mailto sales@ansvisor.com, links pro repo upstream — tudo trocado por Ultravis. Restam os templates de e-mail do Supabase (painel — verificar com o dono).
-  - [x] Tela de login travando (#29) — causa mais provável (OAuth Site URL=localhost) já corrigida; **melhorias (12/ago)**: form honra `?redirectTo` do middleware (destino pós-login não se perde). Reverificar com o cliente.
-  - [x] Relatório não gerado (#30) — **feito (12/ago)**: o resumo executivo por IA abortava o relatório inteiro se falhasse (tabela `reports` tinha ZERO linhas na história; a tentativa do cliente caiu na janela da chave morta). Resumo agora é não-fatal: relatório salva sem prosa e as telas/PDF escondem a seção vazia.
-  - [ ] #14 gráfico com escala errada — aguarda print do cliente
-- ✅ ~~Site URL = localhost:3000~~ — **resolvido** nesta sessão (config de OAuth do Google)
+1. UI de aliases (00036). Polar Electro.
+2. Onboarding: Brazil → `pt`; ETA em tópicos; marca rascunho até o fim.
+3. Gráfico escala (#14) — print do Igor.
+4. MCP `tools/list` com key real.
 
 ---
 
-## 🔧 Operacional & infra
+## P2 — estoque
 
-### P0 — pós-migração Cloudflare (ADR-9, 06/set)
-- [ ] **Consolidação Polar** — script pronto (`supabase/scripts/consolidar-polar.sql`, decisão 29/ago); **bloqueado só em acesso**: conector Supabase precisa alcançar o projeto de produção (`twhqjfbealruvcbvkegc`) OU dono roda no SQL Editor. Backfill: `BACKFILL_MENTIONS_BRAND_ID` agora se seta no worker Cloudflare. `P` · depende do dono
-- [x] **Token Cloudflare definitivo** — **feito (08/set)**: token custom recriado (Workers Scripts + D1 + Workers Routes, todas Edit, escopado à conta/zona). Passou por um Roll no meio do caminho (valor vazou em chat) e por 2 tentativas de recolagem quebrada em GitHub Secrets antes de validar — histórico completo em `STATUS.md`. Deploy confirmado funcionando (run #38).
-- [ ] **Fase 2 do ADR-9** (ordem sugerida): Cron Triggers nativos chamando `/api/internal/*` com `CRON_SECRET` (mata o keepalive; container dorme entre execuções) → fila (Queues) no caminho do Cloro **como binding do worker único** (o edge-gateway foi apagado na consolidação de 07/set — superfície nova = rota nova no `ultravis-server`) → alertas do vigia/Daily Pulse por **Email Service** (`send_email` binding, sem SMTP) → web via OpenNext (por último). `M`
-- [x] **Proteger `/espelho` antes da fase B do espelho D1** — **feito**: a rota exige Basic auth (`OPS_USER`/`OPS_PASS`), com comparação em tempo constante e fechada por omissão (503 sem credencial configurada). Era o que bloqueava a fase B.
-- [x] **Fase B do espelho D1 — encher as tabelas** — **feito (09/set)**: ponte `/espelho/sincronizar-tabelas` copia a espinha analítica (organizations, brands, brand_domains, competitors, topics, prompt_sets, prompts, prompt_results em janela de 90 dias) e roda também no cron semanal. Lista explícita de colunas por tabela — nunca `select=*` —, e as tabelas de pessoa/credencial ficam inteiras de fora. Detalhe em `DECISOES.md` 09/set e no README do worker.
-- [ ] **AI Gateway `ultravis`**: dono cria no painel + `AI_GATEWAY_ACCOUNT_ID` no worker — código já roteia (PR #95). `P` · depende do dono
-- [x] **Container non-root + 6 achados P2 da auditoria de 08/set** — **feito (08/set, PR #164)**: `server/Dockerfile` roda `USER node` (setcap `cap_net_bind_service` mantém a porta 80 sem root); 7 workflows sem `permissions:` ganharam `contents: read`; `verificar-censo.yml` falha de verdade em silêncio de 8 dias; open redirect fechado em `/auth/confirm` (2 arquivos); `fetchViaScrapeDo` com timeout de 30s; `npm audit fix` (22→4 vulns, as 4 restantes exigem bump major de pm2/uuid, não forçado); `GRANT ALL` residual revogado (migration 00048). Detalhe em `DECISOES.md` 08/set.
-
-### P1
-- [x] **Vigia de consistência — camada 1 (determinística)** — **feito (19/ago)**: 10 invariantes (duplicatas de concorrente, marcas irmãs na org, domínios malformados, pesos do IC, motor silencioso, linhas impossíveis, plataforma desconhecida, backlog de posição travado, recontagem de menções, prompt de marca sem grafia conhecida) dentro do watchdog de 15 min; achados aparecem no card Saúde do /ops e nos canais de alerta. `server/src/lib/consistency.js`.
-- [ ] **Revisão 19/ago — 3 achados adiados**: (a) ramo "mentions" do detalhamento do Insights virou código morto (cards de Menções/Citações saíram do resumo) — remover ou dar novo gatilho; (b) /ops roda a varredura de consistência completa a cada render — servir o resultado do último ciclo do cron (cache); (c) `topSources` do sentimento re-extrai hostnames já computados no mesmo aggregate — deduplicar. `P`
-- [ ] **Vigia: invariante "100% em 1º lugar"** — marca com ranking 1º em 100% das respostas (amostra ≥10) = suspeito, "tem que dar uma olhada no motor" (Igor 51:45, 19/ago). Check novo em `consistency.js`. `P`
-- [ ] **Validar a régua do sentimento** — nota 100/50/0 é provisória ("uma nota depois a gente valida", Igor 51:05, 19/ago); revisitar quando houver mais censos. `P` · decisão com o Igor
-- [ ] **Vigia de consistência — camada 2 (agente LLM semanal)** — lê os números consolidados das telas pós-censo e caça o que regra fixa não pega (rótulo que não bate com o que o número mede, média escondendo extremos, incoerência IC × Score × Insights). ~1 dia; **desbloqueado em 06/set** — a `ANTHROPIC_API_KEY` nova está no worker Cloudflare. `M` · depende do dono
-- [x] **Rotacionar chaves que passaram por chat** — **feito (confirmado pelo dono em 11/ago)**.
-- [ ] **Ativar alertas do watchdog por e-mail** — código pronto (PR #40); aguarda o dono criar um **e-mail dedicado** (decisão 11/ago: não usar o Gmail pessoal) e setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` no worker Cloudflare (ou migrar pro Email Service nativo — fase 2 do ADR-9). Até lá o watchdog só loga. `P` · depende do dono
-- [ ] **Backfill de sentimento** — script (padrão `scripts/backfill-shopping-cards.js`) pra re-analisar resultados com sentimento de fallback (ex.: os 795 "neutral" do censo de 10/ago, gravados durante o 401 da OpenAI). Nota: coluna `sentiment` é NOT NULL — não dá pra anular; o script re-analisa in-place. `P`
-- [ ] **Modelo de custo completo no painel de Custos** — valor do crédito Cloro (pendente) + quota Ahrefs/Semrush. `P`
-
-### P2
-- [x] **Limpar dados de teste E2E** — **feito (11/ago)**: org e marca apagadas, snapshot no arquivo-morto.
-- [ ] **SMTP custom no Supabase** — decisão 11/ago: **manter o padrão por ora**; revisitar quando houver e-mail dedicado (limite baixo do padrão + templates com marca — item #28 do feedback). `P`
-- [ ] **Preencher business case** com resultado do censo Datarisk quando terminar. `P`
+Insights v3, IC sinais extra, pacotes 15/20/30k, GSC/GA4, ADR-9 fase 2,
+recontar citações (`aplicar=nao` primeiro).
 
 ---
 
-## 🧭 Decisões pendentes (precisam de você)
+## Decisões do dono (não inventar)
 
-- [ ] **Por qual item da Onda 0 começar** — alertas vs grader grátis
-- [ ] **Pricing final** — faixa R$690–990? alinhar código × landing antes de Stripe
-- [ ] **Quando ligar `IS_CLOUD=true`** — só ao monetizar (degrada a POC antes disso; ver conversa)
-- [x] **GitHub login** — decidido: removido (só Google + e-mail)
-- [x] **AlsoAsked** — decidido: não assinar (Semrush/Ahrefs cobrem o grounding)
+- Recalcular citações no histórico ou só daqui pra frente
+- Pricing / `IS_CLOUD=true`
+- DIV-02, DIV-03 e as 4 graves em `regras-de-negocio-09set-v01.html`
+- Nota composta 0–100 na página Score (ata §pendência 6)
 
 ---
 
-## Legenda de origem
+## Prompt pra colar no início da sessão
 
-Roadmap e drivers: `estrategia/roadmap-produto-e-valuation.md` · Benchmark:
-`estrategia/benchmarking-competitivo.md` · Fontes externas:
-`estrategia/fontes-externas-e-grounding.md` · Framework:
-`estrategia/indice-citabilidade.md` · Estado geral: `CONTEXTO.md`.
+```
+Leia CLAUDE.md, BACKLOG.md e estrategia/ata-decisoes-jhonata-igor.md.
+
+Não migrar nada pra D1. Banco = Supabase.
+
+Sessão:
+1) Finalizar os ajustes que os diretores pediram nas reuniões
+   (BACKLOG P0-A). Fonte = ata + ajustar.md. Não inventar pedido.
+2) Validar todas as métricas criadas (MET-01…11): SQL → action → tela,
+   Polar Electro. Entregar docs/validacao-metricas-10set.html.
+   Falha de código = corrige no mesmo PR. Divergência de desenho = reporta.
+
+Um PR por entrega. Feito → [x] no BACKLOG + linha no DECISOES.md.
+Não reabrir ADR-9 fase 2. Não portar Ansvisor. Não recolocar
+Autoridade/Acurácia no Score.
+```

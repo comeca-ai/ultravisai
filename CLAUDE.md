@@ -1,17 +1,37 @@
 # CLAUDE.md — instruções para sessões de IA neste repo
 
-Leia primeiro: **`CONTEXTO.md`** (estado atual completo) e
-**`ARQUITETURA-POCS.md`** (regras do fork).
+Leia primeiro: **`STATUS.md`** (1 página) · **`BACKLOG.md`** (fila viva) ·
+**`CONTEXTO.md`** (história) · **`ARQUITETURA-POCS.md`** (regras do fork).
 
-**`STATUS.md`** é a visão de 1 página pro dono — mantenha-o atualizado ao
-fim de cada sessão com mudanças relevantes (estado, números, pendências).
+## Ordem vigente (10/set) — NÃO negociar
+
+1. **A base é o Supabase** (`twhqjfbealruvcbvkegc`). Etapa D1 **encerrada**.
+   Não migrar banco. Não abrir PR de sync/cutover/Hyperdrive/worker novo/
+   “fase B/C”. D1 `ultravis-espelho` é espelho de ops, vazio de propósito
+   até o dono pedir número de censo na edge.
+2. **Trabalho desta sessão (pedido do dono):**
+   (a) **Finalizar os ajustes que os diretores pediram nas reuniões** —
+   fonte: `estrategia/ata-decisoes-jhonata-igor.md` (o que ainda está
+   🔨/📋 e é código), `ajustar.md`, `docs/pauta-reuniao-igor-07set-v01.html`,
+   `docs/revisao-geral-29ago-v1.html`. Não inventar pedido. Não reabrir o
+   que a ata marca ✅.
+   (b) **Validar todas as métricas criadas e desenvolvidas** — fonte:
+   `docs/regras-de-negocio-09set-v01.html` (MET-01…MET-11) + `ajustar.md`.
+   Provar **SQL → action → tela** com Polar Electro. Entregar um
+   relatório no repo (`docs/validacao-metricas-10set.html` ou sucessor)
+   com passa / falha / divergência. Onde HTML e código brigam, o código
+   + `DECISOES.md` ganham — o HTML é o que se corrige.
+3. **Fora disto não entra.** Sem funil Ansvisor, sem ADR-9 fase 2, sem
+   item novo sem linha em `DECISOES.md`. Feito → `[x]` no `BACKLOG.md`.
+4. Segredo **nunca** em chat/commit. Token Cloudflare não se cola aqui.
 
 ## O que é este repo
 
 Fork do [Ansvisor](https://github.com/ansvisor/ansvisor) operando como
 **Ultravis** (ultravis.ai) — visibilidade de marcas em IA, mercado BR.
 Monorepo: `web/` (Next.js 16 + next-intl, deploy Vercel), `server/`
-(Express ESM, deploy Railway), `supabase/` (migrations).
+(Express ESM, **Cloudflare Container** `ultravis-server` em
+`api.ultravis.ai`), `supabase/` (migrations). Railway **apagado**.
 
 ## Regras do fork (anti-drift) — IMPORTANTES
 
@@ -56,7 +76,7 @@ Após adicionar migration: `bash supabase/build-schema.sh` (regenera
 ## Git/PR
 
 - Branch de trabalho da sessão → PR draft para `main` (template em
-  `.github/`); `main` deploya automático (Vercel web + Railway server).
+  `.github/`); `main` deploya automático (Vercel web + worker Cloudflare).
 - Branch já mergeada = reiniciar de `origin/main`
   (`git checkout -B <branch> origin/main`), nunca empilhar sobre histórico
   mergeado.
@@ -65,18 +85,9 @@ Após adicionar migration: `bash supabase/build-schema.sh` (regenera
 
 ## Infra (sem segredos aqui — valores só nos painéis)
 
-- Vercel `ultravis/utravisaiclaude` · Railway `ultravis/ultravis-server` ·
-  Supabase `twhqjfbealruvcbvkegc` · DNS Cloudflare (nuvem cinza).
+- Vercel `ultravis` · Cloudflare Worker `ultravis-server` (`api.ultravis.ai`) ·
+  Supabase `twhqjfbealruvcbvkegc`.
 - Env vars de modelo por função: `*_SUGGESTION_MODEL`, `AUDIT_LLM_MODEL`
   (formato `provider/modelo`). Cron: `DAILY_CRON_SCHEDULE`.
-- Nunca colar segredos em chat/commits; configurar direto no painel.
-
-## Cloudflare (migração em fases — desde 06/set)
-
-- Qualquer tarefa Cloudflare (worker, deploy, fila, e-mail, AI Gateway, token):
-  usar a skill **`cloudflare`** (`.claude/skills/cloudflare/`) e/ou delegar ao
-  agente **`cloudflare-ops`** (`.claude/agents/`). Eles carregam as sintaxes
-  validadas e as lições dos runs #2–#8 — não redescobrir na tentativa e erro.
-- Deploy de worker sai pelo GitHub Actions (sandbox não alcança
-  api.cloudflare.com); banco permanece no Supabase; e-mail transacional via
-  Email Service (binding `send_email`), não Email Routing.
+- Qualquer tarefa Cloudflare: skill **`cloudflare`** e/ou agente
+  **`cloudflare-ops`**. **Não** usar isso pra retomar migração de banco.

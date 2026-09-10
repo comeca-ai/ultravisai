@@ -3,7 +3,31 @@
 > **Pra que serve:** quando estiver perdido, olhe SÓ este arquivo. Resumo do
 > estado da aplicação, atualizado a cada sessão de trabalho relevante.
 > Detalhes: `CONTEXTO.md` (história completa) · `DECISOES.md` (toda decisão) ·
-> `BACKLOG.md` (o que vem). **Atualizado: 08/set/2026.**
+> `BACKLOG.md` (o que vem). **Atualizado: 10/set/2026.**
+
+## ✅ 10/set: etapa D1 ENCERRADA — a base fica no Supabase
+
+Pedido do dono: *“eu mantenho a base no Supabase”*. Etapa fechada.
+
+- **Produto (Polar, app, censo, auth, RLS, RPCs) = só Postgres.** Projeto
+  `twhqjfbealruvcbvkegc`. Se o D1 cair, o cliente não sente.
+- **D1 `ultravis-espelho` = espelho de ops, não destino.** Schema + pontes
+  `/espelho/sincronizar` e `/espelho/sincronizar-tabelas` ficam. Não entra
+  tabela nova, não há cutover, não há dual-write. Carga só depois de
+  confirmar que o host em `/espelho/sincronizar-tabelas` → `projeto` é
+  `twhqjfbealruvcbvkegc.supabase.co`. Hoje o D1 está **vazio** (0 linhas) —
+  a ponte de tabelas nasceu em 09/set e o cron só roda segunda 06:30 UTC.
+- **Proibido:** tratar D1 como segundo banco; `select=*`; copiar
+  `api_keys`/profiles/Stripe/texto da resposta da IA.
+- `api.ultravis.ai` no ar (200). `app.ultravis.ai` **não resolve** (o app
+  vive em `ultravis.ai`). `ultravis-d1-espelho` ainda respondia sem senha
+  em 10/set — apagar via Actions → `limpar-workers-orfaos` (dispatch).
+- Token colado em chat em 10/set: **inválido** (`Invalid API Token`).
+  Recriar no painel, colar só no GitHub Secret, **nunca no chat**. O token
+  em vigor vence **13/set/2026**.
+- **Prompt da sessão** (`CLAUDE.md`) e **backlog**: parar D1; **finalizar
+  ajustes dos diretores** (ata 🔨/📋 de código) **e validar MET-01…11**
+  (SQL→action→tela, Polar). Relatório: `docs/validacao-metricas-10set.html`.
 
 ## ✅ 08/set: auditoria de segurança completa — 7 de 9 P0/P1 corrigidos
 
@@ -140,9 +164,9 @@ desligado é a pendência nº 1 e este incidente é o argumento definitivo.
 |---|---|
 | Site + app (Vercel, ultravis.ai) | ✅ No ar, deploy automático a cada merge em `main` — inclui a leva de 08/set (fix de open redirect em `/auth/confirm`, i18n e o que mais tocou `web/`). A linha anterior dizia "código de 19/ago", defasada desde então (achado da auditoria de 08/set) |
 | Server de rastreamento (Railway) | ⬛ **APAGADO em 06/set à noite** (trial expirado; dono removeu após o corte) |
-| **Server no Cloudflare (Container)** | ✅ **Destravado 08/set (run #38)** — `api.ultravis.ai` rodando o código de hoje (leva de segurança P2 + container non-root). Deploy volta a ser automático em todo merge tocando `server/**`/`cloudflare/server-container/**`. Ainda não confirmado: se a ponte do censo pro D1 já publicou os números do censo de 07-08/set (depende de rodar depois do deploy) |
-| **Workers na conta** | ✅ **UM só desde 07/set** (`ultravis-server`) e **um pipeline** (`deploy-server-container`): o espelho D1 virou a rota `/espelho` do mesmo worker. `/espelho` **já exige HTTP Basic** e responde 503 se as credenciais faltarem (fechado por omissão) — o smoke do deploy exige 401 no anônimo. ⏳ Os dois órfãos (`ultravis-edge-gateway`, `ultravis-d1-espelho`) ainda **não** foram apagados: o workflow `limpar-workers-orfaos` existe mas está travado (`ARMADO: 'nao'`) |
-| Banco (Supabase) | ✅ Ok — 47 migrations (numeradas até 00048; a 00007 não existe), RLS ativo, **arquivo-morto de marcas** ligado. GRANT ALL residual revogado em 3 tabelas server-only (migration 00048, 08/set) |
+| **Server no Cloudflare (Container)** | ✅ **Destravado 08/set (run #38)** — `api.ultravis.ai` 200 em 10/set. Deploy automático em merge tocando `server/**`/`cloudflare/server-container/**`. |
+| **Workers na conta** | ✅ Worker único `ultravis-server`. `/espelho` exige Basic (401 anônimo). ⏳ Órfão `ultravis-d1-espelho` ainda vivo e **sem senha** em 10/set — apagar com Actions → `limpar-workers-orfaos` (Run workflow). `ultravis-edge-gateway` já 404. `*.workers.dev` do server devolve 1042; produção é o custom domain. |
+| Banco (Supabase) | ✅ **Fonte da verdade — etapa D1 fechada 10/set.** 47 migrations (até 00048; a 00007 não existe), RLS ativo. D1 é só espelho de ops, vazio até sync no projeto certo. |
 | Watchdog (vigia interno, 15 em 15 min) | ✅ Rodando, 6 checks de saúde **+ 11 invariantes de consistência** (19/ago + 26/ago: duplicatas, marcas irmãs, motor silencioso, contas que não fecham, domínios quebrados/com caminho) — 2 alertas que gritavam em falso corrigidos em 26/ago (**na branch, sobem com o PR #95**); alertas por e-mail **desligados** até você configurar um e-mail dedicado. **Camada 2 pronta na branch `vigia-camada2-llm`** (agente LLM semanal pós-censo, 1 chamada/rodada; liga com `CONSISTENCY_LLM_MODEL` ou `AUDIT_LLM_MODEL` no worker) |
 | Auditoria diária de código (GitHub, 09:00 UTC) | ✅ Corrigida em 11/ago (etiqueta faltante); 1ª issue esperada em 12/ago ~06:00 BRT. Custo: ~R$ 0 (agente Claude desligado até a `ANTHROPIC_API_KEY`) |
 
@@ -200,6 +224,9 @@ business case), Polar (567), Accenture (488), Polar Brasil, org E2E.
 
 0. ✅ **`Workers Scripts` Edit no token** — resolvido, ver item 0e abaixo (token recriado do zero com as 3 permissões, saga fechada no run #38).
 0b. 🔒 **Trocar `OPS_USER`/`OPS_PASS`**: apagar as duas **vars de texto** no painel do worker, cadastrar em GitHub → Secrets → Actions com valor novo e forte, rodar `sync-cf-secrets` (grava como Secret, some do diff e do log).
+0f. 🔒 **Token Cloudflare (10/set):** o valor colado em chat foi rejeitado pela API. Recriar pelo template Edit Cloudflare Workers + D1:Edit **antes de 13/set** (vencimento). Colar só em GitHub → Secrets → `CLOUDFLARE_API_TOKEN`. Revogar o anterior.
+0g. 🧹 **Apagar órfão `ultravis-d1-espelho`:** Actions → `limpar-workers-orfaos` → Run workflow. Não mexe no worker de produção nem no banco D1.
+0h. ✅ **Etapa D1 como banco — ENCERRADA (10/set).** Não migrar. Sync do espelho é opcional e só no host `twhqjfbealruvcbvkegc`.
 1. **E-mail dedicado de operação** → depois setar `ALERT_EMAIL_TO` + `SMTP_USER`/`SMTP_PASS` **no worker Cloudflare** (liga os avisos do watchdog). *Dizia "no Railway" — que foi apagado em 06/set; corrigido na auditoria de 08/set.*
 2. **`ANTHROPIC_API_KEY`** em GitHub → Settings → Secrets → Actions (liga o agente da auditoria; ~R$ 3–10/mês).
 3. ✅ **`contato@ultravis.ai` NO AR (08/set)** — canal LGPD das páginas de Termos/Privacidade, resolvido via Cloudflare Email Routing. Estado final: MX `route1/2/3.mx.cloudflare.net`, SPF `v=spf1 include:_spf.mx.cloudflare.net ~all`, Email Routing com status **`ready`**, regra `contato@ → jhonata.emerick@gmail.com` + **catch-all** (qualquer endereço `@ultravis.ai` cai no mesmo Gmail, prioridade mínima, então regra específica sempre ganha). Destino já era verificado desde 25/jul — nada a clicar. Automação em `.github/workflows/criar-email-contato.yml`, idempotente (re-run não quebra nada).

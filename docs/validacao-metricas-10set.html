@@ -66,8 +66,8 @@ pre{background:#26251F;color:#EDEBE4;border-radius:9px;padding:13px 15px;font-fa
     <div class="verdict">
       <div class="vd ok">
         <div class="vl">Estático</div>
-        <div class="vt">9 passam · 1 HTML defasado · 1 divergência de desenho</div>
-        <div class="vv">MET-10 no HTML das regras ainda fala “domínio próprio”. O código, desde 09/set, conta link de produto de qualquer fonte.</div>
+        <div class="vt">11 de 11 passam</div>
+        <div class="vv">A única divergência estática era o MET-10, que ainda dizia “domínio próprio” no HTML das regras. Corrigido em 10/set para a regra que o código aplica desde 09/set — link de produto de qualquer fonte. A DIV-04 (ao lado) é de desenho, não de fórmula.</div>
       </div>
       <div class="vd warn">
         <div class="vl">Polar</div>
@@ -102,7 +102,7 @@ Onde HTML e código brigam, ganham código + <code>DECISOES.md</code>. Polar = j
     <tr><td>MET-07</td><td class="ok">PASSA</td><td class="pend">—</td><td>Sentimento só onde há menção: (pos×100 + neu×50) / total. Sem menção ⇒ nota nula, não zero. Régua 100/50/0 ainda provisória (ata 4.6) — não troquei.</td></tr>
     <tr><td>MET-08</td><td class="ok">PASSA</td><td class="pend">—</td><td>SoV = soma das menções suas ÷ (suas + concorrentes). Volume, não “em quantas respostas”.</td></tr>
     <tr><td>MET-09</td><td class="ok">PASSA</td><td class="pend">—</td><td>Quintis 0–20 / 21–40 / 41–60 / 61–80 / 81–100, IC e Score (<code>INDEX_SCORE_BANDS</code>).</td></tr>
-    <tr><td>MET-10</td><td class="no">HTML VELHO</td><td class="pend">—</td><td>O HTML das regras ainda diz “citação = domínio próprio”. Código 09/set: <code>contarCitacoesDoProduto</code> = próprio + terceiro com termo da marca no título ou no caminho. Menção = palavra inteira, URLs stripadas, nome + alias + domínio.</td></tr>
+    <tr><td>MET-10</td><td class="ok">PASSA</td><td class="pend">—</td><td>Divergência fechada em 10/set: o HTML das regras foi corrigido para a regra vigente. Código 09/set: <code>contarCitacoesDoProduto</code> = domínio próprio + terceiro com termo da marca no título ou no caminho da URL (query fora). Menção = palavra inteira, URLs stripadas, nome + alias + domínio.</td></tr>
     <tr><td>MET-11</td><td class="ok">PASSA</td><td class="pend">—</td><td>Amostra < 10 citações = selo direcional. Não altera a nota. <code>INDEX_LOW_SAMPLE_THRESHOLD</code>.</td></tr>
   </tbody>
 </table>

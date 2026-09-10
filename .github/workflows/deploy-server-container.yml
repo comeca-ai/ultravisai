@@ -31,6 +31,11 @@ on:
       - 'cloudflare/server-container/**'
       - 'server/**'
       - '.github/workflows/deploy-server-container.yml'
+      # `src/regras.js` importa este HTML como Text module — ele é código do
+      # worker, não documentação solta. Sem esta linha, corrigir uma regra
+      # deixava api.ultravis.ai/rules servindo o texto velho até o próximo
+      # deploy por outro motivo (foi o que aconteceu com o MET-10).
+      - 'docs/regras-de-negocio-09set-v01.html'
 
 # Achado P2 da auditoria de 08/set: default do workflow. O job check-ci já
 # escopa o próprio `actions: read` (precisa disso, não de contents); deploy

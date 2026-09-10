@@ -52,9 +52,9 @@ Entregar `docs/validacao-metricas-10set.html` (mesmo espírito de
 bug. Divergência de desenho (DIV-05…14) vai pra tabela do relatório —
 não “conserta” a ata.
 
-Cuidado: **MET-10 está defasada.** Citação desde 09/set = link que traz
-o produto, de qualquer fonte (`contarCitacoesDoProduto`, 00049) — não
-“domínio próprio”. Validar o código + `DECISOES.md` 09/set.
+~~Cuidado: **MET-10 está defasada.**~~ ✅ Corrigido em 10/set: o HTML das
+regras agora diz o que o código faz desde 09/set — citação = link que traz
+o produto, de qualquer fonte (`contarCitacoesDoProduto`, 00049).
 
 Régua de sentimento 100/50/0 (ata 4.6) = **medir com Polar e reportar**,
 não trocar sozinho.

@@ -4,11 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { enforceLimit } from '@/lib/guards/plan-guard';
 import type { Brand, BrandDomain } from '@/types';
-import {
-  aliasesChanged,
-  normalizeBrandAliases,
-  suggestedBrandAlias,
-} from '@/lib/brand-aliases';
+import { aliasesChanged, normalizeBrandAliases, suggestedBrandAlias } from '@/lib/brand-aliases';
 import { scheduleCitationRecount } from '@/lib/citation-recount';
 
 function slugify(text: string): string {
@@ -164,8 +160,7 @@ interface UpdateBrandInput {
 export async function updateBrand(id: string, updates: UpdateBrandInput): Promise<Brand> {
   const supabase = await createClient();
 
-  const previous =
-    updates.aliases !== undefined ? await getBrandById(id) : null;
+  const previous = updates.aliases !== undefined ? await getBrandById(id) : null;
 
   const payload: Record<string, unknown> = {};
   if (updates.name !== undefined) {
@@ -178,8 +173,7 @@ export async function updateBrand(id: string, updates: UpdateBrandInput): Promis
   if (updates.region !== undefined) payload.region = updates.region;
   if (updates.language !== undefined) payload.language = updates.language;
   if (updates.aliases !== undefined) {
-    const official =
-      (typeof payload.name === 'string' ? payload.name : previous?.name) ?? '';
+    const official = (typeof payload.name === 'string' ? payload.name : previous?.name) ?? '';
     payload.aliases = normalizeBrandAliases(updates.aliases, official);
   }
 
@@ -197,10 +191,7 @@ export async function updateBrand(id: string, updates: UpdateBrandInput): Promis
     (data.brand_domains as Record<string, unknown>[]) ?? [],
   );
 
-  if (
-    updates.aliases !== undefined &&
-    aliasesChanged(previous?.aliases ?? [], mapped.aliases)
-  ) {
+  if (updates.aliases !== undefined && aliasesChanged(previous?.aliases ?? [], mapped.aliases)) {
     scheduleCitationRecount(id);
   }
 

@@ -505,6 +505,54 @@ export const languageCountry = {
   },
 };
 
+/**
+ * `descriptive-title` — a aba tem um título que descreve a página.
+ *
+ * O oitavo item do checklist do Igor (ata 4.10), nomeado na planilha de
+ * pacotes como "Página de produto sem título descritivo". Fechava 7/8 sem
+ * ele: `h1-quality` olha o H1, que é o que o LEITOR vê; o `<title>` é o que
+ * o motor lê primeiro e o que ele repete ao citar a página. Título genérico
+ * ("Home", "Produtos", só a marca) faz a IA citar sem dizer do que se trata,
+ * e o clique não acontece.
+ *
+ * Reprovar exige razão: título ausente, curto demais para descrever algo, ou
+ * só o nome da marca. O corte de 60 caracteres não é SEO de SERP — é o
+ * tamanho a partir do qual o título costuma carregar mais que o nome.
+ */
+export const descriptiveTitle = {
+  key: 'descriptive-title',
+  evaluate(ctx) {
+    const title = (ctx.$('head > title').first().text() || '').replace(/\s+/g, ' ').trim();
+    const length = title.length;
+
+    // O nome da marca sozinho, ou com um separador e nada mais, não descreve.
+    // Ex.: "Polar", "Polar | ", "Polar - Polar" — tudo isso é título vazio.
+    const partes = title
+      .split(/\s*[|\u2013\u2014\-\u00b7:]\s*/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const soUmaParte = partes.length <= 1;
+
+    let status = 'fail';
+    let score = 0;
+    if (length >= 30 && length <= 65 && !soUmaParte) {
+      status = 'pass';
+      score = 1;
+    } else if (length >= 30 && length <= 80) {
+      status = 'pass';
+      score = 0.9;
+    } else if (length >= 15) {
+      status = 'warn';
+      score = 0.5;
+    }
+    return {
+      status,
+      score,
+      evidence: { title: title.slice(0, 120) || null, length, partes: partes.length },
+    };
+  },
+};
+
 export const structureSignals = [
   structuralDepth,
   internalLinking,
@@ -523,4 +571,5 @@ export const structureSignals = [
   productSchema,
   rendering,
   languageCountry,
+  descriptiveTitle,
 ];

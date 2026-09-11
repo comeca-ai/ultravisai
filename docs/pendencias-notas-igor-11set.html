@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<title>Pendências das notas do Igor · 11/set/2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F6F2; --card:#FFFFFF; --sunk:#EEEBE1;
+  --ink:#26251F; --ink2:#4C4940; --faint:#8C8878;
+  --rule:#DFDCD2; --rule2:#C6C2B5;
+  --good:#1F7A4D; --goodSoft:#EBF4EF;
+  --amber:#B8741C; --amberSoft:#FBF1DF;
+  --red:#C0492A; --redSoft:#FBEEEA;
+  --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
+.cover{background:var(--card);border-bottom:1px solid var(--rule);padding:48px 0 38px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--serif);font-weight:500;font-size:2.05rem;letter-spacing:-.02em;margin-top:13px}
+.covsub{color:var(--ink2);margin-top:9px;max-width:78ch}
+.verdict{display:flex;gap:14px;flex-wrap:wrap;margin-top:24px}
+.vd{flex:1;min-width:220px;border-radius:11px;padding:15px 18px;border:1px solid}
+.vd.ok{background:var(--goodSoft);border-color:var(--good)}
+.vd.warn{background:var(--amberSoft);border-color:var(--amber)}
+.vd.bad{background:var(--redSoft);border-color:var(--red)}
+.vd .vl{font-family:var(--mono);font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.vd.ok .vl{color:var(--good)} .vd.warn .vl{color:var(--amber)} .vd.bad .vl{color:var(--red)}
+.vd .vt{font-weight:700;font-size:1rem;margin-top:6px}
+.vd .vv{font-size:.85rem;color:var(--ink2);margin-top:4px}
+.page{padding:28px 0 60px}
+h2{font-family:var(--serif);font-size:1.3rem;font-weight:500;margin-top:36px}
+.note{color:var(--ink2);font-size:.88rem;margin-top:6px;max-width:82ch}
+table{width:100%;border-collapse:collapse;margin-top:13px;background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+th{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;text-align:left;padding:10px 13px;background:var(--sunk);border-bottom:1px solid var(--rule2)}
+td{padding:10px 13px;border-bottom:1px solid var(--rule);font-size:.85rem;vertical-align:top;color:var(--ink2)}
+td:first-child{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:.78rem;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.ok{color:var(--good);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.no{color:var(--red);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.pend{color:var(--amber);font-weight:700;font-family:var(--mono);font-size:.78rem}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:18px 22px;margin-top:14px}
+.box.amber{border-color:var(--amber);background:var(--amberSoft)}
+.box.red{border-color:var(--red);background:var(--redSoft)}
+.box .bl{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.box.amber .bl{color:var(--amber)} .box.red .bl{color:var(--red)}
+.box .bt{font-weight:700;font-size:1rem;margin-top:6px}
+.box p{font-size:.87rem;color:var(--ink2);margin-top:7px}
+.box b{color:var(--ink)}
+pre{background:#26251F;color:#EDEBE4;border-radius:9px;padding:13px 15px;font-family:var(--mono);font-size:.72rem;overflow-x:auto;margin-top:10px;line-height:1.75;white-space:pre-wrap}
+.foot{font-family:var(--mono);font-size:.68rem;color:var(--ink2);line-height:1.9;border-top:1px solid var(--rule);padding-top:20px;margin-top:40px}
+@media (max-width:780px){.wrap{padding:0 18px}h1{font-size:1.65rem}}
+</style>
+
+<div class="cover">
+  <div class="wrap">
+    <div class="eyebrow">Pendências · notas do Igor · 11/set/2026</div>
+    <h1>O que os três anexos pedem e o código ainda não faz.</h1>
+    <p class="covsub">Fontes: <b>Notas_Ultravis_20260910.docx</b> (feedback item a item sobre as
+    regras), <b>NewCo_Visao_Preliminar_Produto_e_Pacotes_v260817.xlsx</b> (4 abas) e
+    <b>Ultravis_IndicesScore_Reconciliacao_v20260908.pptx</b> (15 slides com post-its).
+    Cada linha foi conferida contra o código — onde diz "feito", o arquivo está citado.</p>
+    <div class="verdict">
+      <div class="vd ok">
+        <div class="vl">Fechado nesta leva</div>
+        <div class="vt">4 itens</div>
+        <div class="vv">Título descritivo (checklist 8/8 de verdade), teto de 10% explícito no MET-03, rótulo de monitoramento e a armadilha da flag documentada.</div>
+      </div>
+      <div class="vd warn">
+        <div class="vl">Fila</div>
+        <div class="vt">Decidido, falta código</div>
+        <div class="vv">Retenção e comparação de relatórios (DIV-14), limite por prompts e não por usuário (DIV-12), onde publicar conteúdo (ata 4.11).</div>
+      </div>
+      <div class="vd bad">
+        <div class="vl">Trava</div>
+        <div class="vt">Precisa do martelo dos sócios</div>
+        <div class="vv">Nome do índice, "Citação" × "Leitura", limites dos planos e qual das três histórias de preço vale.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page"><div class="wrap">
+
+<div class="box red">
+  <div class="bl">Correção de registro</div>
+  <div class="bt">O checklist da ata 4.10 estava 7/8, não 8/8</div>
+  <p>Em 10/set eu declarei o checklist fechado ao entregar <code>rendering</code> e
+  <code>language-country</code>. Estava errado: <b>"descritivo de produto"</b> tinha sido lido como o
+  schema de <code>Product</code>, e o oitavo item da planilha é outro — <b>"Página de produto sem
+  título descritivo"</b>, ou seja, o <code>&lt;title&gt;</code> da aba. Existia
+  <code>h1-quality</code>, que olha o H1; o título não tinha sinal nenhum. Fechado agora com
+  <code>descriptive-title</code> (rubrica 51 → 52, Structure 17 → 18). Wikidata e llms.txt já
+  estavam cobertos, em E-E-A-T e Trust.</p>
+</div>
+
+<h2>1 · Ele decidiu, e o código já acompanha</h2>
+<p class="note">Isto aqui é para você responder ao Igor: três coisas que ele cobrou já existem.</p>
+<table>
+  <thead><tr><th>item</th><th>estado</th><th>onde</th></tr></thead>
+  <tbody>
+    <tr><td>DIV-05</td><td class="ok">FEITO</td><td>Score com 4 dimensões a 25% cada — Presença, Citação, Ranking, Sentimento. Desde 07/set em <code>visibility-score.ts</code>.</td></tr>
+    <tr><td>DIV-06</td><td class="ok">FEITO</td><td>Ranking = <code>SUM(posições)/COUNT(eventos)</code>, a conta exata do 51/10 = 5,1 que ele escreveu. Migration <code>00046_ranking_unificado.sql</code>, campo <code>rank_avg</code>.</td></tr>
+    <tr><td>MET-03</td><td class="ok">FEITO 11/set</td><td>O texto agora diz explicitamente que <b>10% é a nota máxima</b>, e por que se chama "Citação" e não varredura de conteúdo próprio.</td></tr>
+    <tr><td>4.10</td><td class="ok">FEITO 11/set</td><td>Oitavo sinal do checklist: <code>descriptive-title</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>2 · Decidido por ele, ainda sem código</h2>
+<table>
+  <thead><tr><th>item</th><th>o que ele pediu</th><th>o que existe hoje</th></tr></thead>
+  <tbody>
+    <tr><td>DIV-14</td><td>Comparar relatório antigo com o atual; a partir de 6 meses guardar só o resultado ou a curva de evolução.</td><td>Não existe comparação nem política de retenção. É feature + decisão de dado — não cabe em ajuste de texto.</td></tr>
+    <tr><td>DIV-12</td><td>"O tema não é usuário, mas sim o somatório de prompts e consultas."</td><td>O limite é <code>maxTeamMembers</code> + <code>maxPrompts</code>, e a landing vendia "1 usuário" no Starter. Mexer aqui é mexer no gate de plano.</td></tr>
+    <tr><td>4.11</td><td>Conteúdo: "está ok, apenas recomendar <b>onde publicar</b>" (canais e revistas de referência).</td><td>📋 desde 19/ago. A auditoria diz o que escrever, não onde publicar.</td></tr>
+    <tr><td>slide 11</td><td>"O mais importante é que o cliente tenha claro <b>o quê</b> e <b>onde</b> começar a atuar, em função dos prompts a otimizar." Marcado por ele como "próximo passo muito importante".</td><td>A auditoria já abre por "O QUE FAZER" (09/set), mas não liga a recomendação ao prompt que ela destrava. É maior que o A5.</td></tr>
+  </tbody>
+</table>
+
+<h2>3 · Ele perguntou — espera resposta, não código</h2>
+<table>
+  <thead><tr><th>item</th><th>a pergunta</th></tr></thead>
+  <tbody>
+    <tr><td>MET-04</td><td>"A escala de Customer Reviews está estranha e <b>diferente da que já estava alinhada</b>. O que mudou?" — é uma divergência que ninguém explicou.</td></tr>
+    <tr><td>MET-07</td><td>"3 positivas, 1 neutra e 2 negativas dá que nota?" — pede exemplo numérico da régua de sentimento (a 100/50/0 ainda é provisória, ata 4.6).</td></tr>
+    <tr><td>MET-11</td><td>Ele repetiu a MESMA pergunta do MET-07 aqui. Só que MET-11 é sobre amostra pequena, não sentimento — ou ele leu errado, ou o texto está confuso o bastante para induzir o erro. Vale reescrever.</td></tr>
+    <tr><td>COM-01</td><td>"O que quer dizer 49 e 249? e a alternativa de ciclo: só mensal?" — são os valores em dólar do <code>plans.ts</code>. Ele nunca soube desses números.</td></tr>
+    <tr><td>COL-07</td><td>"Poderíamos encurtar para ter os resultados em menos de 60 min? Qual a implicação?"</td></tr>
+    <tr><td>GOV-03</td><td>Dois concorrentes viram clientes e um roda a marca do outro para comparar. É política de produto, não código.</td></tr>
+    <tr><td>MET-05 · COM-06 · COL-03 · COL-05 · DIV-03 · DIV-08</td><td>"Me dá um exemplo pfv." Seis itens onde o texto da regra não convenceu.</td></tr>
+  </tbody>
+</table>
+
+<h2>4 · Trava até os dois baterem o martelo</h2>
+<table>
+  <thead><tr><th>tema</th><th>o conflito</th></tr></thead>
+  <tbody>
+    <tr><td>Nome do índice</td><td>O deck carimba <b>"Rever o nome citabilidade → ÍNDICE DE INFLUÊNCIA"</b> (slide 5); a nota do MET-01 diz "depois, quando tudo estiver pronto, validamos". No código há 11 ocorrências de "Citabilidade" e zero de "Influência".</td></tr>
+    <tr><td>"Citação" × "Leitura"</td><td>A ata 4.2 decidiu Citação → <b>Leitura</b> e está ✅ na UI. O MET-03 agora pede "chamar de <b>Citação</b> mesmo". Conflito direto com item já marcado como fechado.</td></tr>
+    <tr><td>Limites dos planos</td><td>COM-02: prompts 10/100, análise de 1×/semana para 10×/mês, auditorias 10/50. E "o que é carência?".</td></tr>
+    <tr><td>Motores por plano</td><td>COM-03: "por que Perplexity e não Gemini/AIO?" · COL-02: "por que GPT Shopping? e o Claude?"</td></tr>
+    <tr><td>Preço</td><td>COM-04 e DIV-02. Três histórias vivas ao mesmo tempo: planilha <b>R$ 15/20/30 mil</b> (Sinal/Alcance/Domínio), código <b>49/249</b> impresso como <code>$49/month</code>, landing <b>R$ 390/1.290</b>. Registrado em 10/set; ordem do dono foi não mexer até decidir.</td></tr>
+  </tbody>
+</table>
+
+<h2>5 · A planilha vende o que o produto não tem</h2>
+<p class="note">Conferido por busca no código. É a mesma família da DIV-01, mas na planilha comercial em vez da landing.</p>
+<table>
+  <thead><tr><th>vendido</th><th>realidade</th></tr></thead>
+  <tbody>
+    <tr><td>Fale com o Orin</td><td class="no">Não existe "Orin". Existe <code>ai_agent</code>, e é BYOK — o cliente cola a própria chave Anthropic. Prometido nos três pacotes.</td></tr>
+    <tr><td>Alertas por WhatsApp</td><td class="no">Zero ocorrência de whatsapp no código. Só e-mail — e o e-mail do Daily Pulse ainda está ⏳ desde a ata 2.8.</td></tr>
+    <tr><td>Rede de Conhecimento</td><td class="no">Mapa visual de por onde as IAs passam: não existe.</td></tr>
+    <tr><td>Kit Press Release</td><td class="no">Não existe.</td></tr>
+    <tr><td>Estimativa de retorno em vendas</td><td class="no">Não existe.</td></tr>
+    <tr><td>9 motores (Domínio)</td><td class="pend">O catálogo tem 8 raspadores. O 9º é a ata 2.10, ⏳ validação técnica de DeepMind/Minimax.</td></tr>
+    <tr><td>Diagnóstico diário (Domínio)</td><td class="pend">Contradiz a própria DIV-13, que manda tirar o daily monitoring. A planilha e a nota do mesmo autor discordam.</td></tr>
+  </tbody>
+</table>
+
+<div class="box amber">
+  <div class="bl">Armadilha registrada no código</div>
+  <div class="bt">Não apague a flag <code>daily_monitoring</code> para cumprir a DIV-13</div>
+  <p>Apesar do nome, ela é o <b>portão do censo</b>: <code>server/src/server.js</code> pula a marca
+  inteira quando ela falta. Removê-la dos planos pararia a coleta de <b>todos</b> os clientes.
+  O que a DIV-13 pede já está feito onde importa — o cron é semanal
+  (<code>0 6 * * 1</code>) e os rótulos deixaram de vender "diário". Renomear a chave é migration
+  de plano, e está na fila. O aviso ficou em <code>plans.ts</code> e <code>plans.js</code> para a
+  próxima sessão não repetir o erro.</p>
+</div>
+
+<div class="foot">
+  Fontes conferidas contra o código em 11/set/2026 · rubrica 52 sinais · Score 4 dimensões × 25%<br>
+  Regras: docs/regras-de-negocio-09set-v01.html · Validação: docs/validacao-metricas-10set.html · Fila: BACKLOG.md
+</div>
+
+</div></div>

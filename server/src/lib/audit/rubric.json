@@ -1,14 +1,14 @@
 {
   "version": "v1",
-  "description": "AEO/GEO scoring rubric for measuring whether a page will get cited by AI answer engines. Cresceu de 47 para 51 sinais ao fechar o checklist do Igor (ata 4.10): sitemap e Product em 09/set, rendering e idioma/país em 10/set.",
-  "totalSignals": 51,
+  "description": "AEO/GEO scoring rubric for measuring whether a page will get cited by AI answer engines. Cresceu de 47 para 52 sinais ao fechar o checklist do Igor (ata 4.10): sitemap e Product em 09/set, rendering e idioma/país em 10/set, título descritivo em 11/set.",
+  "totalSignals": 52,
   "categories": [
     {
       "key": "structure",
       "label": "Structure",
       "weight": 0.25,
-      "description": "How parseable your page is to an AI engine. Schema, headings, lists, tables, alt-text, OG meta, sitemap, rendering and language. The substrate that makes everything else legible.",
-      "signalCount": 17
+      "description": "How parseable your page is to an AI engine. Schema, headings, lists, tables, alt-text, OG meta, title, sitemap, rendering and language. The substrate that makes everything else legible.",
+      "signalCount": 18
     },
     {
       "key": "authority",
@@ -209,6 +209,16 @@
       "howToFix": "Declarar `<html lang=\"pt-BR\">` com a região quando ela importa, e adicionar `<link rel=\"alternate\" hreflang=\"...\">` para cada versão de idioma ou país.",
       "source": "checklist do Igor (ata 4.10)",
       "impactTier": "medium"
+    },
+    {
+      "key": "descriptive-title",
+      "category": "structure",
+      "label": "Título descritivo da página",
+      "what": "Se o `<title>` da aba descreve a página, em vez de repetir só o nome da marca ou um rótulo genérico.",
+      "why": "O `<title>` é o primeiro texto que o motor lê e o que ele repete ao citar a página. \"Home\" ou só a marca fazem a IA citar sem dizer do que se trata — e aí a citação não vira clique. O H1 é o que o leitor vê; o title é o que a máquina lê.",
+      "howToFix": "Escrever um título entre 30 e 65 caracteres que diga o que a página entrega e para quem, com o nome da marca depois de um separador. Ex.: \"Relógio esportivo com GPS e mapa | Polar Vantage\".",
+      "source": "checklist do Igor (ata 4.10) · planilha de pacotes, auditoria em 8 dimensões",
+      "impactTier": "high"
     },
     {
       "key": "outbound-authority-links",

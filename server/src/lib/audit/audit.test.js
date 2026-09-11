@@ -10,6 +10,7 @@ import {
   productSchema,
   rendering,
   languageCountry,
+  descriptiveTitle,
 } from './signals/structure.js';
 import { https, metaDescription } from './signals/trust.js';
 import { length } from './signals/content.js';
@@ -292,6 +293,38 @@ describe('deterministic signals', () => {
     );
     expect(comAlternates.status).toBe('pass');
     expect(comAlternates.evidence.hreflang).toEqual(['en', 'es']);
+  });
+
+  it('descriptive-title: fail sem title e com marca sozinha, pass quando descreve', () => {
+    const t = (html) => descriptiveTitle.evaluate(ctxFromHtml(html));
+
+    // Sem <title> nenhum.
+    expect(t('<html><head></head><body>x</body></html>').status).toBe('fail');
+
+    // Só o nome da marca — é o caso que o checklist do Igor nomeia.
+    expect(t('<html><head><title>Polar</title></head><body>x</body></html>').status).toBe('fail');
+
+    // Marca repetida com separador continua não descrevendo nada.
+    const soMarca = t('<html><head><title>Polar | Polar</title></head><body>x</body></html>');
+    expect(soMarca.status).toBe('fail');
+
+    // Título magro mas que ao menos diz do que se trata: avisa, não reprova.
+    // "Produtos Polar" (14) cai abaixo do corte e reprova — rótulo genérico
+    // curto não descreve página nenhuma.
+    expect(
+      t('<html><head><title>Relógios esportivos</title></head><body>x</body></html>').status,
+    ).toBe('warn');
+    expect(t('<html><head><title>Produtos Polar</title></head><body>x</body></html>').status).toBe(
+      'fail',
+    );
+
+    const bom = t(
+      '<html><head><title>Relógio esportivo com GPS e mapa | Polar Vantage</title></head>' +
+        '<body>x</body></html>',
+    );
+    expect(bom.status).toBe('pass');
+    expect(bom.score).toBe(1);
+    expect(bom.evidence.partes).toBe(2);
   });
 
   it('https: pass over TLS without mixed content, warn with an http asset', () => {

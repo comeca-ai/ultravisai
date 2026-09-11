@@ -169,7 +169,7 @@ const REGRAS = [
  e:["supabase/migrations/00039_index_weights.sql:29-36","lib/actions/visibility-index.ts:260-269"]},
 
 {d:"metricas", id:"MET-03", t:"D2 (conteúdo próprio): 10% de citações já vale nota máxima",
- x:"A dimensão de conteúdo próprio satura em <b>10%</b>: se 10% das respostas citam um domínio seu, D2 = 100. O melhor caso real observado até hoje foi 7,4%.",
+ x:"A dimensão de conteúdo próprio satura em <b>10%</b>: se 10% das respostas citam um domínio seu, D2 = 100 — <b>10% É A NOTA MÁXIMA</b>, não 100% das respostas. O melhor caso real observado até hoje foi 7,4%, ou seja: ninguém encostou no teto ainda. Chama-se <b>Citação</b> de propósito, para não confundir com a varredura do conteúdo próprio, que é uma das 6 dimensões que a marca controla no Índice de Citabilidade.",
  v:["teto 10% ⇒ 100"],
  e:["web/src/config/visibility-index.ts:177, 193-195"]},
 

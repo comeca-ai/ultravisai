@@ -3,6 +3,19 @@
  * Self-hosted instances bypass all limits (IS_CLOUD !== "true").
  */
 
+/**
+ * ATENÇÃO ao mexer em `daily_monitoring`: apesar do nome, esta flag é o
+ * PORTÃO DO CENSO, não uma opção de frequência. `server/src/server.js`
+ * pula a marca inteira quando ela falta (`if (!hasFeature(plan,
+ * 'daily_monitoring')) continue;`), então removê-la dos planos para
+ * cumprir a DIV-13 ("não deveria ter daily monitoring") pararia a coleta
+ * de TODOS os clientes.
+ *
+ * O que a DIV-13 pede já está feito onde importa: o cron é semanal
+ * (`DAILY_CRON_SCHEDULE = 0 6 * * 1`) e os rótulos deixaram de vender
+ * "diário". Renomear a chave é migration de plano — fila do BACKLOG.
+ */
+
 export const PLANS = {
   self_hosted: {
     id: 'self_hosted',

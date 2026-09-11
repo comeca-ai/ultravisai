@@ -38,6 +38,60 @@ Não é desta sessão (⏳ sócio, não código): nome “citabilidade” (4.15)
 acesso ADM do Igor (4.8), 9º motor (2.10), onboarding matriz (4.12 — dono
 adiou), e-mail do Daily Pulse (2.8).
 
+### A8. Notas do Igor (10/set) — o que sobrou
+
+Levantamento completo em `docs/pendencias-notas-igor-11set.html`. Fontes:
+`Notas_Ultravis_20260910.docx`, a planilha de pacotes e o PPT de
+reconciliação com os post-its.
+
+Fechado em 11/set: 8º sinal do checklist (`descriptive-title`), teto de 10%
+explícito no MET-03, rótulo de monitoramento semanal.
+
+**Decidido por ele, falta código:**
+- [ ] **DIV-14** — comparar relatório antigo x atual; após 6 meses guardar só
+      o resultado/curva. Feature + política de retenção. `M`
+- [ ] **DIV-12** — limite pelo somatório de prompts + consultas, não por
+      usuário. Mexe no gate de plano. `M`
+- [ ] **ata 4.11** — Conteúdo: indicar **onde publicar** (canais/revistas). `M`
+- [ ] **slide 11** — ligar a recomendação ao **prompt** que ela destrava
+      ("o quê e onde começar"). Ele marcou como "próximo passo muito
+      importante". Maior que o A5. `L`
+- [ ] Renomear a chave `daily_monitoring` (hoje é o portão do censo, não
+      frequência — ver aviso em `plans.ts`). Migration de plano. `P`
+
+**Espera resposta do dono, não código:** MET-04 (escala de reviews mudou sem
+explicação), MET-07 e MET-11 (exemplo numérico da régua de sentimento — e o
+MET-11 induziu ele ao erro, vale reescrever), COM-01, COL-07, GOV-03, e seis
+"me dá um exemplo" (MET-05, COM-06, COL-03, COL-05, DIV-03, DIV-08).
+
+**Trava até os sócios decidirem:** nome do índice (Citabilidade x Influência),
+"Citação" x "Leitura" (conflito com a ata 4.2 ✅), limites COM-02, motores por
+plano (COM-03/COL-02), e qual das três histórias de preço vale.
+
+**A planilha vende o que não existe:** Orin, alertas por WhatsApp, Rede de
+Conhecimento, Kit Press Release, estimativa de retorno em vendas, 9 motores
+(há 8) e diagnóstico diário (que a própria DIV-13 manda tirar).
+
+---
+
+### A7. Responsividade das telas (pedido do dono, 10/set)
+
+1ª fatia entregue: `grid-cols-3` sem breakpoint no `insights/[id]`,
+`overflow-hidden` clipando a tabela do breakdown, e `p-6` fixo no `<main>`.
+
+A auditoria estática **não** achou o retrofit que o pedido sugeria — o
+layout já esconde a sidebar abaixo de `md`, o `<Table>` compartilhado já
+rola no eixo x, e os grids já sobem de 2 colunas. Falta o que só aparece
+renderizando, e a sessão não consegue: sem segredo do Supabase a app não
+sobe, e a política de rede bloqueia `ultravis.ai:443`.
+
+- [ ] **Dono: dizer QUAIS telas quebram e em que aparelho** (print ajuda).
+      Sem isso o próximo passo é adivinhação em 28 telas.
+- [ ] Conferir no aparelho as telas mais densas: `shopping`, `traffic`,
+      `reports/[id]`, `prompts`, `citations` — são as de mais colunas.
+
+---
+
 ### B. Validar todas as métricas (prova, não opinião)
 
 Para **cada** MET-01…MET-11 em `docs/regras-de-negocio-09set-v01.html`:

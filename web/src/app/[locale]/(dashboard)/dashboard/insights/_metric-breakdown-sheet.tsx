@@ -250,8 +250,10 @@ function BreakdownTable({
     );
   }
 
+  // `overflow-hidden` sozinho CLIPA: numa sheet estreita a última coluna some
+  // e não há como alcançá-la. `overflow-x-auto` deixa rolar.
   return (
-    <div className="overflow-hidden rounded-md border">
+    <div className="overflow-x-auto rounded-md border">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/40 text-[11px] uppercase tracking-wide text-muted-foreground">

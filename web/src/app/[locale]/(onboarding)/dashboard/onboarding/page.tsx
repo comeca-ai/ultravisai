@@ -1651,11 +1651,12 @@ export default function OnboardingPage() {
                     </strong>{' '}
                     {t('plan.teamMembers')}
                   </PlanFeatureItem>
-                  <PlanFeatureItem>
-                    {plan.limits.features.includes('daily_monitoring')
-                      ? t('plan.dailyMonitoring')
-                      : t('plan.weeklyMonitoring')}
-                  </PlanFeatureItem>
+                  {/* O censo roda `DAILY_CRON_SCHEDULE`, hoje `0 6 * * 1` —
+                      segunda-feira. Os quatro planos carregam a flag
+                      `daily_monitoring`, então este ternário sempre caía no
+                      rótulo "diário" e vendia uma frequência que o cron não
+                      entrega (DIV-13, notas do Igor de 10/set). */}
+                  <PlanFeatureItem>{t('plan.weeklyMonitoring')}</PlanFeatureItem>
                   {plan.limits.features.includes('competitor_tracking') && (
                     <PlanFeatureItem>{t('plan.competitorTracking')}</PlanFeatureItem>
                   )}
